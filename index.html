@@ -366,8 +366,8 @@ select{appearance:none; -webkit-appearance:none}
     <section class="card">
       <div class="card-head"><div class="label">Photo</div><div class="badge" id="photoCount">0 / 3</div></div>
       <div class="photos" id="photos"></div>
-      <input type="file" id="file" accept="image/*" capture="environment" hidden>
-      <p class="hint">Photographiez la fenêtre avec le mètre en place. La photo part avec le bon.</p>
+      <input type="file" id="file" accept="image/*" multiple hidden>
+      <p class="hint">Prenez la photo ou choisissez la dans la galerie du téléphone. Elle part avec le bon.</p>
     </section>
 
     <!-- RECAP -->
@@ -668,7 +668,7 @@ function renderPhotos(){
   if (S.photos.length < 3){
     const b = document.createElement("button");
     b.type = "button"; b.className = "shoot"; b.id = "shoot";
-    b.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h3l2-3h8l2 3h3v12H3z"/><circle cx="12" cy="13" r="3.6"/></svg><small>Ajouter<br>une photo</small>';
+    b.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h10"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M3 16l4.5-4.5L13 17"/><path d="M18 14v7M14.5 17.5h7"/></svg><small>Ajouter<br>une photo</small>';
     b.addEventListener("click", () => $("file").click());
     photosEl.appendChild(b);
   }
@@ -800,20 +800,32 @@ $("addRow").addEventListener("click", () => {
 });
 
 $("file").addEventListener("change", e => {
-  const f = e.target.files && e.target.files[0];
-  if (!f) return;
-  const img = new Image();
-  const rd = new FileReader();
-  rd.onload = () => { img.onload = () => {
-    const max = 1000, sc = Math.min(1, max / Math.max(img.width, img.height));
-    const c = document.createElement("canvas");
-    c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
-    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-    S.photos.push(c.toDataURL("image/jpeg", 0.72));
-    renderPhotos();
-  }; img.src = rd.result; };
-  rd.readAsDataURL(f);
+  const files = [...(e.target.files || [])];
   e.target.value = "";
+  if (!files.length) return;
+  const free = 3 - S.photos.length;
+  if (files.length > free) toast("3 photos maximum par bon");
+  const keep = files.slice(0, Math.max(free, 0));
+  let pending = keep.length;
+  keep.forEach(f => {
+    if (!/^image\//.test(f.type)){ if (--pending === 0) renderPhotos(); return; }
+    const rd = new FileReader();
+    rd.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 1000, sc = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement("canvas");
+        c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        if (S.photos.length < 3) S.photos.push(c.toDataURL("image/jpeg", 0.72));
+        if (--pending === 0) renderPhotos();
+      };
+      img.onerror = () => { if (--pending === 0) renderPhotos(); };
+      img.src = rd.result;
+    };
+    rd.onerror = () => { if (--pending === 0) renderPhotos(); };
+    rd.readAsDataURL(f);
+  });
 });
 photosEl.addEventListener("click", e => {
   const b = e.target.closest("button[data-photo]");
