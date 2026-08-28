@@ -549,6 +549,7 @@ function validDims(){
     .filter(d => d.l > 0 && d.h > 0);
 }
 const MINCM = 100;   /* minimum facturé par côté */
+const MAXH  = 500;   /* hauteur maximale fabricable, en cm */
 function billed(d){ return (Math.max(d.l, MINCM) * Math.max(d.h, MINCM)) / 10000; }
 
 function totals(){
@@ -557,14 +558,15 @@ function totals(){
     nb: v.length,
     m2: v.reduce((s,d) => s + (d.l * d.h) / 10000, 0),          /* surface réelle */
     m2f: v.reduce((s,d) => s + billed(d), 0),                    /* surface facturée */
-    ml: v.reduce((s,d) => s + d.l / 100, 0),
+    ml:     v.reduce((s,d) => s + d.l / 100, 0),   /* tube : la largeur */
+    mlTissu:v.reduce((s,d) => s + d.h / 100, 0),   /* tissu : la hauteur, la largeur tient dans la laize */
     mini: v.filter(d => d.l < MINCM || d.h < MINCM).length       /* lignes ramenées au minimum */
   };
 }
 /* ml consommés par référence */
 function mlByRef(){
   const m = {};
-  validDims().forEach(d => { m[d.ref] = (m[d.ref] || 0) + d.l / 100; });
+  validDims().forEach(d => { m[d.ref] = (m[d.ref] || 0) + d.h / 100; });
   return m;
 }
 
@@ -608,11 +610,14 @@ function updateNote(i){
   const d = S.dims[i], f = rowFab(i);
   const l = parseFloat(d.l), h = parseFloat(d.h);
   if (!(l > 0 && h > 0)){ note.textContent = ""; note.className = "row-note"; return; }
-  const over = f && h > f.laize;
-  note.className = "row-note" + (over ? " alert" : "");
-  note.textContent = over
-    ? "Hauteur " + h + " cm au-delà de la laize " + f.laize + " cm : raccord nécessaire"
-    : fr(l*h/10000) + " m²";
+  const wide = f && l > f.laize;
+  const tall = h > MAXH;
+  note.className = "row-note" + (wide || tall ? " alert" : "");
+  note.textContent = tall
+    ? "Hauteur " + h + " cm au-delà du maximum " + MAXH + " cm"
+    : wide
+      ? "Largeur " + l + " cm au-delà de la laize " + f.laize + " cm : raccord nécessaire"
+      : fr(l*h/10000) + " m²";
 }
 
 function updateAllNotes(){ S.dims.forEach((d, i) => updateNote(i)); }
@@ -729,12 +734,16 @@ function renderRecap(){
     else if (f.dispo < ml) warn("<b>" + f.ref + "</b> : stock " + fr(f.dispo) + " ml insuffisant pour " + fr(ml) + " ml demandés. Manque <b>" + fr(ml - f.dispo) + " ml</b>.", true);
     else if (f.dispo - ml < 10) warn("Après ce bon il ne restera que <b>" + fr(f.dispo - ml) + " ml</b> de " + f.ref + ".");
   });
-  const over = validDims().filter(d => { const g = fab(d.ref); return g && d.h > g.laize; });
-  if (over.length) warn(over.length > 1
-    ? over.length + " stores dépassent la laize de leur tissu : raccord ou changement de tissu."
+  const wide = validDims().filter(d => { const g = fab(d.ref); return g && d.l > g.laize; });
+  if (wide.length) warn(wide.length > 1
+    ? wide.length + " stores dépassent la laize de leur tissu : raccord ou changement de tissu."
     : "1 store dépasse la laize de son tissu : raccord ou changement de tissu.", true);
+  const tall = validDims().filter(d => d.h > MAXH);
+  if (tall.length) warn(tall.length > 1
+    ? tall.length + " stores dépassent la hauteur maximale de " + MAXH + " cm."
+    : "1 store dépasse la hauteur maximale de " + MAXH + " cm.", true);
   if (t.mini) warn("Facturation au minimum de 1,00 m par côté : " + t.mini + (t.mini > 1 ? " stores comptés" : " store compté") + " sur <b>" + fr(t.m2f) + " m²</b> au lieu de " + fr(t.m2) + " m².");
-  if (t.ml > 0) warn("Consommation nette, hors chutes de coupe et ourlets.");
+  if (t.ml > 0) warn("Tube <b>" + fr(t.ml) + " ml</b> (largeurs) · tissu <b>" + fr(t.mlTissu) + " ml</b> (hauteurs), net hors chutes et ourlets.");
 }
 
 function renderProgress(){
