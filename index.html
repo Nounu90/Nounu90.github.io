@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#D5001F">
+<meta name="description" content="Saisie des bons de commande de stores MSTORECASA sur le terrain.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MSTORECASA">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Bon de commande MSTORECASA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --ground:#F1EEEE; --card:#FFFFFF; --card2:#F7F4F4; --ink:#191315; --muted:#6F6569;
+  --line:#E4DDDE; --line-strong:#D3C9CB; --accent:#D5001F; --accent-ink:#FFFFFF; --accent-soft:#FCEAEC;
+  --ok:#0F7A46; --ok-soft:#E6F3EB; --warn:#8F5400; --warn-soft:#FAEFDD;
+  --shadow:0 1px 2px rgba(25,19,21,.05), 0 10px 26px rgba(25,19,21,.06);
+  --r:14px;
+}
+:root:not([data-theme="light"]){ color-scheme:light; }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#141011; --card:#201A1C; --card2:#2A2224; --ink:#F4EFF0; --muted:#A3979A;
+    --line:#332B2D; --line-strong:#463C3F; --accent:#FF4257; --accent-ink:#2A0509; --accent-soft:#3A1419;
+    --ok:#4ADE80; --ok-soft:#132D1E; --warn:#F0B15A; --warn-soft:#332510;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#141011; --card:#201A1C; --card2:#2A2224; --ink:#F4EFF0; --muted:#A3979A;
+  --line:#332B2D; --line-strong:#463C3F; --accent:#FF4257; --accent-ink:#2A0509; --accent-soft:#3A1419;
+  --ok:#4ADE80; --ok-soft:#132D1E; --warn:#F0B15A; --warn-soft:#332510;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing:antialiased; overscroll-behavior-y:none;
+}
+button,input,select,textarea{font:inherit; color:inherit}
+button{cursor:pointer; border:0; background:none}
+
+.app{max-width:520px; margin:0 auto; min-height:100vh; background:var(--ground); display:flex; flex-direction:column; position:relative}
+
+/* ---------- header ---------- */
+.top{position:sticky; top:0; z-index:20; background:var(--card); border-bottom:1px solid var(--line)}
+.topbar{display:flex; align-items:center; gap:12px; padding:14px 16px}
+.topbar h1{
+  font-family:"Archivo", sans-serif; font-weight:600; font-size:18px; margin:0; flex:1; text-align:center;
+  letter-spacing:-.01em;
+}
+.icon-btn{
+  width:38px; height:38px; border-radius:11px; display:grid; place-items:center; color:var(--ink);
+  border:1px solid transparent;
+}
+.icon-btn:hover{background:var(--card2)}
+.icon-btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.avatar{
+  width:38px; height:38px; border-radius:50%; background:var(--accent-soft); color:var(--accent);
+  display:grid; place-items:center; font-family:"Archivo",sans-serif; font-weight:700; font-size:13px;
+  border:1px solid var(--line);
+}
+.progress{display:flex; align-items:center; gap:12px; padding:0 16px 12px}
+.track{flex:1; height:7px; border-radius:99px; background:var(--card2); overflow:hidden; border:1px solid var(--line)}
+.fill{height:100%; width:0%; background:var(--accent); border-radius:99px; transition:width .35s cubic-bezier(.4,0,.2,1)}
+.pct{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:42px; text-align:right}
+
+/* ---------- cards ---------- */
+main{padding:14px 16px 190px; display:flex; flex-direction:column; gap:14px}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:16px; box-shadow:var(--shadow)}
+.card-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:10px}
+.label{
+  font-family:"Archivo",sans-serif; font-weight:600; font-size:11.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted);
+}
+.badge{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600; padding:4px 9px; border-radius:99px;
+  background:var(--card2); color:var(--muted); border:1px solid var(--line); white-space:nowrap;
+}
+.badge.ok{background:var(--ok-soft); color:var(--ok); border-color:transparent}
+.badge.warn{background:var(--warn-soft); color:var(--warn); border-color:transparent}
+.badge.bad{background:var(--accent-soft); color:var(--accent); border-color:transparent}
+
+.field{display:flex; align-items:center; gap:10px; background:var(--card2); border:1px solid var(--line); border-radius:11px; padding:0 12px; margin-bottom:9px}
+.field:last-child{margin-bottom:0}
+.field svg{flex:none; color:var(--muted)}
+.field input, .field select{
+  flex:1; border:0; background:none; padding:13px 0; width:100%; font-size:15.5px; min-width:0;
+}
+.field input::placeholder{color:var(--muted); opacity:.75}
+.field:focus-within{border-color:var(--accent); background:var(--card)}
+select{appearance:none; -webkit-appearance:none}
+.sel{position:relative}
+.sel .chev{position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; color:var(--muted)}
+.sel select{padding-right:26px}
+.hint{font-size:12.5px; color:var(--muted); margin:8px 2px 0; line-height:1.5}
+
+/* ---------- type toggle ---------- */
+.seg{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.seg button{
+  padding:13px 10px; border-radius:11px; border:1px solid var(--line); background:var(--card2);
+  font-family:"Archivo",sans-serif; font-weight:600; font-size:14.5px; color:var(--muted); text-align:center;
+  transition:background .15s, color .15s, border-color .15s;
+}
+.seg button .sub{display:block; font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:500; letter-spacing:.06em; margin-top:3px; opacity:.8}
+.seg button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+
+/* ---------- dimensions ---------- */
+.dim-head{display:grid; grid-template-columns:26px 1fr 14px 1fr 34px; gap:8px; align-items:center; padding:0 2px 6px}
+.dim-head span{font-family:"Archivo",sans-serif; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.row{display:grid; grid-template-columns:26px 1fr 14px 1fr 34px; gap:8px; align-items:center; margin-bottom:8px}
+.idx{
+  width:26px; height:26px; border-radius:50%; background:var(--card2); border:1px solid var(--line);
+  display:grid; place-items:center; font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; color:var(--muted);
+}
+.row input{
+  width:100%; border:1px solid var(--line); background:var(--card2); border-radius:11px; padding:12px 12px;
+  font-family:"IBM Plex Mono",monospace; font-size:16px; font-weight:600; text-align:center; font-variant-numeric:tabular-nums;
+}
+.row input:focus{border-color:var(--accent); background:var(--card); outline:none}
+.row input.miss{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.times{text-align:center; color:var(--muted); font-size:13px}
+.del{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; color:var(--muted)}
+.del:hover{background:var(--accent-soft); color:var(--accent)}
+.row-note{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted); padding:0 0 6px 34px; margin-top:-4px; font-variant-numeric:tabular-nums}
+.row-note:empty{display:none}
+.row-note.alert{color:var(--accent); font-family:"IBM Plex Sans",sans-serif; font-weight:500}
+.add{
+  width:100%; padding:13px; border:1.5px dashed var(--line-strong); border-radius:11px; color:var(--muted);
+  font-family:"Archivo",sans-serif; font-weight:600; font-size:14px; display:flex; align-items:center; justify-content:center; gap:8px;
+  margin-top:2px;
+}
+.add:hover{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+
+.total-bar{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:12px;
+  padding:12px 14px; border-radius:11px; background:var(--accent-soft);
+}
+.total-bar span{font-family:"Archivo",sans-serif; font-weight:600; font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent)}
+.total-bar b{font-family:"IBM Plex Mono",monospace; font-size:19px; font-weight:600; color:var(--accent); font-variant-numeric:tabular-nums}
+
+/* ---------- row extras ---------- */
+.rem{display:flex; align-items:center; gap:8px; margin:0 0 10px 34px; padding:0 11px;
+  background:var(--card2); border:1px solid var(--line); border-radius:10px}
+.rem:focus-within{border-color:var(--accent); background:var(--card)}
+.rem input{flex:1; border:0; background:none; padding:10px 0; font-size:13.5px; min-width:0}
+.rem svg{flex:none; color:var(--muted)}
+.assign{display:flex; gap:6px; overflow-x:auto; padding:0 0 10px 34px; margin-top:-2px; scrollbar-width:none}
+.assign::-webkit-scrollbar{display:none}
+.assign button{
+  flex:none; padding:6px 11px; border-radius:8px; border:1px solid var(--line); background:var(--card2);
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600; color:var(--muted);
+}
+.assign button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+
+/* ---------- fabric ---------- */
+.chip{
+  display:flex; align-items:center; gap:11px; padding:12px 12px; border:1px solid var(--line);
+  border-radius:12px; background:var(--card2); margin-bottom:9px;
+}
+.chip .ci{flex:1; min-width:0}
+.chip .cref{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:15px}
+.chip .csub{display:block; font-size:12.5px; color:var(--muted); margin-top:3px}
+.chip .cx{width:30px; height:30px; border-radius:9px; display:grid; place-items:center; color:var(--muted); flex:none}
+.chip .cx:hover{background:var(--accent-soft); color:var(--accent)}
+.chip.short{border-color:var(--accent)}
+.chip.short .csub{color:var(--accent)}
+.grp{
+  font-family:"Archivo",sans-serif; font-weight:600; font-size:11px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--muted); margin:18px 2px 9px;
+}
+.grp:first-child{margin-top:2px}
+.opt{
+  display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:13px 14px; margin-bottom:8px;
+  background:var(--card); border:1px solid var(--line); border-radius:12px;
+}
+.opt:hover{border-color:var(--line-strong)}
+.opt[aria-selected="true"]{border-color:var(--accent); background:var(--accent-soft)}
+.opt .oref{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:15.5px; flex:1}
+.opt .osub{display:block; font-family:"IBM Plex Sans",sans-serif; font-weight:400; font-size:12.5px; color:var(--muted); margin-top:3px}
+.opt.out .oref{color:var(--muted)}
+.check{color:var(--accent); flex:none}
+
+/* ---------- recap ---------- */
+.recap{background:var(--card); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow)}
+.recap .rh{padding:14px 16px 10px}
+.stats{display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--line)}
+.stat{padding:14px 10px; text-align:center; border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat b{
+  display:block; font-family:"IBM Plex Mono",monospace; font-size:21px; font-weight:600; letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+}
+.stat span{display:block; font-family:"Archivo",sans-serif; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:4px; font-weight:600}
+.alert{
+  display:flex; gap:9px; align-items:flex-start; padding:11px 14px; font-size:13px; line-height:1.45;
+  border-top:1px solid var(--line); background:var(--warn-soft); color:var(--warn);
+}
+.alert.stop{background:var(--accent-soft); color:var(--accent)}
+.alert svg{flex:none; margin-top:1px}
+
+/* ---------- photo ---------- */
+.photos{display:grid; grid-template-columns:repeat(3,1fr); gap:9px}
+.shoot{
+  aspect-ratio:1; border:1.5px dashed var(--line-strong); border-radius:11px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:6px; color:var(--muted); text-align:center; padding:6px;
+}
+.shoot:hover{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+.shoot small{font-size:10.5px; line-height:1.3}
+.thumb{position:relative; aspect-ratio:1; border-radius:11px; overflow:hidden; border:1px solid var(--line)}
+.thumb img{width:100%; height:100%; object-fit:cover; display:block}
+.thumb button{
+  position:absolute; top:5px; right:5px; width:24px; height:24px; border-radius:7px; background:var(--accent);
+  color:#fff; display:grid; place-items:center;
+}
+
+/* ---------- bottom bar ---------- */
+.bottom{
+  position:fixed; left:0; right:0; bottom:0; z-index:20; background:var(--card); border-top:1px solid var(--line);
+  padding:10px 16px calc(14px + env(safe-area-inset-bottom));
+}
+.bottom-in{max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:9px}
+.draft-link{
+  background:none; color:var(--muted); font-size:14px; text-decoration:underline; text-underline-offset:3px; padding:5px;
+  font-family:"Archivo",sans-serif; font-weight:500;
+}
+.send{
+  width:100%; padding:16px; border-radius:13px; background:var(--accent); color:var(--accent-ink);
+  font-family:"Archivo",sans-serif; font-weight:700; font-size:16px; letter-spacing:.01em;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  transition:transform .12s, filter .15s;
+}
+.send:active{transform:scale(.985)}
+.send:disabled{opacity:.45; cursor:not-allowed}
+
+/* ---------- overlays ---------- */
+.sheet{
+  position:fixed; inset:0; z-index:40; background:var(--ground); display:none; flex-direction:column;
+}
+.sheet.open{display:flex}
+.sheet-top{
+  position:sticky; top:0; background:var(--card); border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:12px; padding:14px 16px;
+}
+.sheet-top h2{font-family:"Archivo",sans-serif; font-size:17px; font-weight:600; margin:0; flex:1}
+.sheet-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px; max-width:520px; margin:0 auto; width:100%}
+.shot-img{width:100%; border-radius:12px; border:1px solid var(--line); display:block; box-shadow:var(--shadow)}
+.shot-actions{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0 10px}
+.btn{
+  padding:14px; border-radius:12px; font-family:"Archivo",sans-serif; font-weight:600; font-size:14.5px;
+  display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--line); background:var(--card); color:var(--ink);
+}
+.btn.primary{background:var(--accent); color:var(--accent-ink); border-color:transparent}
+.order-item{
+  display:flex; align-items:center; gap:12px; padding:13px 14px; background:var(--card); border:1px solid var(--line);
+  border-radius:12px; margin-bottom:9px; width:100%; text-align:left;
+}
+.order-item .oi{flex:1; min-width:0}
+.order-item b{display:block; font-family:"Archivo",sans-serif; font-size:14.5px; font-weight:600}
+.order-item small{display:block; color:var(--muted); font-size:12.5px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.empty{text-align:center; color:var(--muted); padding:48px 20px; font-size:14px; line-height:1.6}
+
+.toast{
+  position:fixed; left:50%; bottom:120px; transform:translate(-50%,14px); z-index:60; opacity:0; pointer-events:none;
+  background:var(--ink); color:var(--ground); padding:11px 18px; border-radius:11px; font-size:14px;
+  font-family:"Archivo",sans-serif; font-weight:500; transition:opacity .22s, transform .22s; max-width:88vw; text-align:center;
+}
+.toast.show{opacity:1; transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+</style>
+</head>
+<body>
+
+
+<div class="app">
+  <div class="top">
+    <div class="topbar">
+      <button class="icon-btn" id="btnHistory" aria-label="Mes bons de commande">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h1>Nouveau bon de commande</h1>
+      <div class="avatar" title="Agent">MS</div>
+    </div>
+    <div class="progress">
+      <div class="track"><div class="fill" id="fill"></div></div>
+      <div class="pct" id="pct">0%</div>
+    </div>
+  </div>
+
+  <main>
+    <!-- CLIENT -->
+    <section class="card">
+      <div class="card-head"><div class="label">Client</div><div class="badge" id="numBadge">BC</div></div>
+      <div class="field">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+        <input id="nom" type="text" placeholder="Nom du client" autocomplete="name">
+      </div>
+      <div class="field">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h4l2 5-3 2a13 13 0 006 6l2-3 5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"/></svg>
+        <input id="tel" type="tel" inputmode="tel" placeholder="06 00 00 00 00" autocomplete="tel">
+      </div>
+      <div class="field">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <input id="adresse" type="text" placeholder="Adresse (quartier, ville)">
+      </div>
+    </section>
+
+    <!-- TYPE -->
+    <section class="card">
+      <div class="card-head"><div class="label">Type de store</div></div>
+      <div class="seg" id="seg">
+        <button type="button" data-type="ENR" aria-pressed="true">Enrouleur<span class="sub">S-0</span></button>
+        <button type="button" data-type="JN" aria-pressed="false">Jour et Nuit<span class="sub">JN_0</span></button>
+      </div>
+    </section>
+
+    <!-- DIMENSIONS -->
+    <section class="card">
+      <div class="card-head"><div class="label">Dimensions</div><div class="badge" id="dimCount">0 store</div></div>
+      <div class="dim-head"><span></span><span>Largeur (cm)</span><span></span><span>Hauteur (cm)</span><span></span></div>
+      <div id="rows"></div>
+      <button class="add" id="addRow" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Ajouter une dimension
+      </button>
+      <div class="total-bar"><span>Total surface</span><b id="dimTotal">0,00 m²</b></div>
+    </section>
+
+    <!-- TISSU -->
+    <section class="card">
+      <div class="card-head"><div class="label">Tissu</div><div class="badge" id="refCount">0 tissu</div></div>
+      <div id="chips"></div>
+      <button class="add" id="refBtn" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span id="refBtnLabel">Choisir les tissus</span>
+      </button>
+    </section>
+
+    <!-- POSE -->
+    <section class="card">
+      <div class="card-head"><div class="label">Pose / Livraison</div></div>
+      <div class="seg" id="segPose">
+        <button type="button" data-pose="Pose" aria-pressed="true">Pose</button>
+        <button type="button" data-pose="Livraison" aria-pressed="false">Livraison</button>
+      </div>
+      <div style="height:9px"></div>
+      <div class="field">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+        <input id="notes" type="text" placeholder="Remarque (côté chaînette, étage, ...)">
+      </div>
+    </section>
+
+    <!-- PHOTO -->
+    <section class="card">
+      <div class="card-head"><div class="label">Photo</div><div class="badge" id="photoCount">0 / 3</div></div>
+      <div class="photos" id="photos"></div>
+      <input type="file" id="file" accept="image/*" capture="environment" hidden>
+      <p class="hint">Photographiez la fenêtre avec le mètre en place. La photo part avec le bon.</p>
+    </section>
+
+    <!-- RECAP -->
+    <section class="recap" id="recap">
+      <div class="rh"><div class="label">Récapitulatif</div></div>
+      <div class="stats">
+        <div class="stat"><b id="sNb">0</b><span>Stores</span></div>
+        <div class="stat"><b id="sM2">0,00</b><span>m² tissu</span></div>
+        <div class="stat"><b id="sMl">0,00</b><span>ml tissu</span></div>
+      </div>
+      <div id="alerts"></div>
+    </section>
+  </main>
+
+  <div class="bottom">
+    <div class="bottom-in">
+      <button class="draft-link" id="btnDraft" type="button">Enregistrer brouillon</button>
+      <button class="send" id="btnSend" type="button">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Envoyer à l'agent
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SHOT SHEET -->
+<div class="sheet" id="shotSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="shotSheet" aria-label="Fermer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <h2>Bon de commande</h2>
+  </div>
+  <div class="sheet-body">
+    <img class="shot-img" id="shotImg" alt="Capture du bon de commande">
+    <div class="shot-actions">
+      <button class="btn primary" id="btnShare">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7M12 16V3M8 7l4-4 4 4"/></svg>
+        Partager
+      </button>
+      <button class="btn" id="btnSave">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Enregistrer
+      </button>
+    </div>
+    <p class="hint">Sur téléphone, un appui long sur l'image permet aussi de l'enregistrer dans la galerie ou de l'envoyer sur WhatsApp.</p>
+    <button class="btn" id="btnNew" style="width:100%; margin-top:14px">Nouveau bon de commande</button>
+  </div>
+</div>
+
+<!-- FABRIC PICKER -->
+<div class="sheet" id="refSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="refSheet" aria-label="Fermer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2 id="refSheetTitle">Tissu</h2>
+  </div>
+  <div class="sheet-body" style="padding-bottom:110px">
+    <div class="field" style="margin-bottom:14px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="refSearch" type="search" placeholder="Rechercher une référence" autocomplete="off">
+    </div>
+    <p class="hint" style="margin:0 2px 12px">Touchez plusieurs références si la commande mélange plusieurs tissus.</p>
+    <div id="refList"></div>
+  </div>
+  <div class="bottom">
+    <div class="bottom-in">
+      <button class="send" data-close="refSheet" type="button" id="refDone">Terminé</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY SHEET -->
+<div class="sheet" id="histSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="histSheet" aria-label="Fermer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2>Mes bons de commande</h2>
+  </div>
+  <div class="sheet-body" id="histBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ============ Catalogue tissus (SAGE - Liste articles stock, 18/08/26) ============ */
+/* ref, laize (cm), stock disponible ml */
+const CATALOGUE = [
+  ["S-023-200",200,0.01],["S-025-200",200,0],["S-026-200",200,0],
+  ["S-027-200",200,0],["S-028-200",200,0],["S-029-200",200,0],
+  ["S-030-200",200,0],["S-031-250",250,0],["S-032-250",250,42.50],
+  ["S-033-250",250,0],["S-034-250",250,0],["S-035-250",250,0],
+  ["S-036-250",250,0],["S-037-250",250,0],["S-038-250",250,0],
+  ["S-039-300",300,0],["S-040-250",250,0],["S-041-250",250,21.03],
+  ["S-041-320",320,7.80],["S-042-250",250,0],["S-043-250",250,0],
+  ["S-044-250",250,0],["S-045-250",250,32.92],["S-046-250",250,0],
+  ["S-047-250",250,0],["S-048-250",250,0],["S-049-250",250,0.01],
+  ["S-050-200",200,12.00],["S-050-250",250,0],["S-050-300",300,96.67],
+  ["S-051-200",200,6.84],["S-051-250",250,3.50],["S-051-300",300,264.31],
+  ["S-052-300",300,22.19],["S-053-300",300,84.51],["S-054-250",250,36.33],
+  ["S-054-300",300,59.69],["S-055-250",250,5.63],["S-055-300",300,163.53],
+  ["S-056-300",300,335.42],["S-057-300",300,0],["S-058-300",300,56.28],
+  ["JN_001_320",320,14.76],["JN_002_320",320,68.00],["JN_003_320",320,16.00],
+  ["JN_004_320",320,55.00],["JN_005_320",320,45.00],["JN_006_320",320,7.15],
+  ["JN_007_320",320,26.00],["JN_008_320",320,84.80]
+].map(a => ({ref:a[0], laize:a[1], dispo:a[2], type:a[0].startsWith("JN") ? "JN" : "ENR"}));
+
+/* ============ State ============ */
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+};
+
+let S = blank();
+
+function blank(){
+  return {
+    id: "d" + Date.now(),
+    num: nextNum(),
+    date: new Date().toISOString(),
+    nom:"", tel:"", adresse:"",
+    type:"ENR",
+    dims:[{l:"",h:"",ref:"",note:""}],
+    refs:[],
+    pose:"Pose",
+    notes:"",
+    photos:[],
+    status:"draft"
+  };
+}
+function nextNum(){
+  const d = new Date();
+  const stamp = String(d.getFullYear()).slice(2) + pad(d.getMonth()+1) + pad(d.getDate());
+  const c = LS.get("mst_seq", {day:stamp, n:0});
+  const n = (c.day === stamp ? c.n : 0) + 1;
+  LS.set("mst_seq", {day:stamp, n:n});
+  return "BC-" + stamp + "-" + pad(n);
+}
+function pad(n){ return String(n).padStart(2,"0"); }
+function fr(n, d){ return Number(n).toFixed(d === undefined ? 2 : d).replace(".", ","); }
+
+/* ============ Elements ============ */
+const $ = id => document.getElementById(id);
+const rowsEl = $("rows"), photosEl = $("photos");
+
+/* ============ Computation ============ */
+function fab(ref){ return CATALOGUE.find(f => f.ref === ref) || null; }
+function chosen(){ return S.refs.map(fab).filter(Boolean); }
+/* tissu appliqué à une ligne : celui assigné s'il est toujours sélectionné, sinon le premier */
+function rowRef(i){
+  const d = S.dims[i];
+  if (d && d.ref && S.refs.indexOf(d.ref) >= 0) return d.ref;
+  return S.refs[0] || "";
+}
+function rowFab(i){ return fab(rowRef(i)); }
+function validDims(){
+  return S.dims
+    .map((d, i) => ({l:parseFloat(d.l), h:parseFloat(d.h), ref:rowRef(i), note:d.note || "", i:i}))
+    .filter(d => d.l > 0 && d.h > 0);
+}
+function totals(){
+  const v = validDims();
+  return {
+    nb: v.length,
+    m2: v.reduce((s,d) => s + (d.l * d.h) / 10000, 0),
+    ml: v.reduce((s,d) => s + d.h / 100, 0)
+  };
+}
+/* ml consommés par référence */
+function mlByRef(){
+  const m = {};
+  validDims().forEach(d => { m[d.ref] = (m[d.ref] || 0) + d.h / 100; });
+  return m;
+}
+
+/* ============ Render ============ */
+function renderRows(){
+  rowsEl.innerHTML = "";
+  S.dims.forEach((d, i) => {
+    const wrap = document.createElement("div");
+    wrap.dataset.row = i;
+    wrap.innerHTML =
+      '<div class="row">' +
+        '<div class="idx">' + (i+1) + '</div>' +
+        '<input inputmode="decimal" value="' + (d.l || "") + '" data-k="l" data-i="' + i + '" aria-label="Largeur store ' + (i+1) + '">' +
+        '<div class="times">&times;</div>' +
+        '<input inputmode="decimal" value="' + (d.h || "") + '" data-k="h" data-i="' + i + '" aria-label="Hauteur store ' + (i+1) + '">' +
+        '<button class="del" data-del="' + i + '" aria-label="Supprimer la ligne ' + (i+1) + '">' +
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="row-note"></div>' +
+      (S.refs.length > 1
+        ? '<div class="assign">' + S.refs.map(r =>
+            '<button type="button" data-assign="' + i + '" data-ref="' + r + '" aria-pressed="' + (rowRef(i) === r) + '">' + r + '</button>'
+          ).join("") + '</div>'
+        : "") +
+      '<div class="rem">' +
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h9"/></svg>' +
+        '<input type="text" value="' + esc(d.note || "") + '" data-note="' + i + '" placeholder="Remarque (ex. fenêtre cuisine)" aria-label="Remarque store ' + (i+1) + '">' +
+      '</div>';
+    rowsEl.appendChild(wrap);
+    updateNote(i);
+  });
+}
+
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+
+function updateNote(i){
+  const wrap = rowsEl.querySelector('[data-row="' + i + '"]');
+  if (!wrap) return;
+  const note = wrap.querySelector(".row-note");
+  const d = S.dims[i], f = rowFab(i);
+  const l = parseFloat(d.l), h = parseFloat(d.h);
+  if (!(l > 0 && h > 0)){ note.textContent = ""; note.className = "row-note"; return; }
+  const over = f && l > f.laize;
+  note.className = "row-note" + (over ? " alert" : "");
+  note.textContent = over
+    ? "Largeur " + l + " cm au-delà de la laize " + f.laize + " cm : raccord nécessaire"
+    : fr(l*h/10000) + " m²";
+}
+
+function updateAllNotes(){ S.dims.forEach((d, i) => updateNote(i)); }
+
+function renderRefs(){
+  const box = $("chips"), need = mlByRef();
+  box.innerHTML = "";
+  chosen().forEach(f => {
+    const ml = need[f.ref] || 0;
+    const short = ml > f.dispo;
+    const d = document.createElement("div");
+    d.className = "chip" + (short ? " short" : "");
+    d.innerHTML =
+      '<span class="ci"><span class="cref">' + f.ref + '</span>' +
+        '<span class="csub">laize ' + (f.laize/100).toFixed(2).replace(".",",") + " m  ·  " +
+        (ml > 0 ? fr(ml) + " ml / " + fr(f.dispo) + " ml" : fr(f.dispo) + " ml en stock") +
+        '</span></span>' +
+      '<button class="cx" data-unpick="' + f.ref + '" aria-label="Retirer ' + f.ref + '">' +
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
+      '</button>';
+    box.appendChild(d);
+  });
+  $("refCount").textContent = S.refs.length + (S.refs.length > 1 ? " tissus" : " tissu");
+  $("refBtnLabel").textContent = S.refs.length ? "Ajouter un autre tissu" : "Choisir les tissus";
+}
+
+function renderRefList(){
+  const q = ($("refSearch").value || "").trim().toLowerCase();
+  const list = CATALOGUE.filter(f => f.type === S.type && f.ref.toLowerCase().includes(q));
+  const inStock = list.filter(f => f.dispo >= 1).sort((a,b) => b.dispo - a.dispo);
+  const outStock = list.filter(f => f.dispo < 1);
+  const box = $("refList");
+  box.innerHTML = "";
+  $("refSheetTitle").textContent = S.type === "JN" ? "Tissu jour et nuit" : "Tissu enrouleur";
+
+  const group = (title, arr, out) => {
+    if (!arr.length) return;
+    const h = document.createElement("div");
+    h.className = "grp"; h.textContent = title;
+    box.appendChild(h);
+    arr.forEach(f => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt" + (out ? " out" : "");
+      const on = S.refs.indexOf(f.ref) >= 0;
+      b.setAttribute("aria-selected", String(on));
+      b.dataset.ref = f.ref;
+      b.innerHTML =
+        '<span class="oref">' + f.ref +
+          '<span class="osub">laize ' + (f.laize/100).toFixed(2).replace(".",",") + " m" +
+          (out ? "  ·  rupture au dépôt" : "  ·  " + fr(f.dispo) + " ml disponibles") + '</span>' +
+        '</span>' +
+        (on
+          ? '<svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+          : '<svg class="check" style="color:var(--line-strong)" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/></svg>');
+      box.appendChild(b);
+    });
+  };
+  group("En stock", inStock, false);
+  group("Rupture, à confirmer avec le dépôt", outStock, true);
+  if (!list.length) box.innerHTML = '<div class="empty">Aucune référence ne correspond.</div>';
+}
+
+function renderPhotos(){
+  photosEl.innerHTML = "";
+  S.photos.forEach((p, i) => {
+    const d = document.createElement("div");
+    d.className = "thumb";
+    d.innerHTML = '<img src="' + p + '" alt="Photo ' + (i+1) + '">' +
+      '<button data-photo="' + i + '" aria-label="Supprimer la photo ' + (i+1) + '">' +
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>';
+    photosEl.appendChild(d);
+  });
+  if (S.photos.length < 3){
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "shoot"; b.id = "shoot";
+    b.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h3l2-3h8l2 3h3v12H3z"/><circle cx="12" cy="13" r="3.6"/></svg><small>Ajouter<br>une photo</small>';
+    b.addEventListener("click", () => $("file").click());
+    photosEl.appendChild(b);
+  }
+  $("photoCount").textContent = S.photos.length + " / 3";
+}
+
+function renderRecap(){
+  const t = totals();
+  $("sNb").textContent = t.nb;
+  $("sM2").textContent = fr(t.m2);
+  $("sMl").textContent = fr(t.ml);
+  $("dimCount").textContent = t.nb + (t.nb > 1 ? " stores" : " store");
+  $("dimTotal").textContent = fr(t.m2) + " m²";
+
+  const box = $("alerts");
+  box.innerHTML = "";
+  const warn = (txt, stop) => {
+    const d = document.createElement("div");
+    d.className = "alert" + (stop ? " stop" : "");
+    d.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg><div>' + txt + '</div>';
+    box.appendChild(d);
+  };
+  const need = mlByRef();
+  chosen().forEach(f => {
+    const ml = need[f.ref] || 0;
+    if (!ml) return;
+    if (f.dispo < 1) warn("<b>" + f.ref + "</b> est en rupture au dépôt. Confirmez la disponibilité avant de promettre un délai.", true);
+    else if (f.dispo < ml) warn("<b>" + f.ref + "</b> : stock " + fr(f.dispo) + " ml insuffisant pour " + fr(ml) + " ml demandés. Manque <b>" + fr(ml - f.dispo) + " ml</b>.", true);
+    else if (f.dispo - ml < 10) warn("Après ce bon il ne restera que <b>" + fr(f.dispo - ml) + " ml</b> de " + f.ref + ".");
+  });
+  const over = validDims().filter(d => { const g = fab(d.ref); return g && d.l > g.laize; });
+  if (over.length) warn(over.length + (over.length > 1 ? " stores dépassent" : " store dépasse") + " la laize de leur tissu : raccord ou changement de tissu.", true);
+  if (t.ml > 0) warn("Consommation nette, hors chutes de coupe et ourlets.");
+}
+
+function renderProgress(){
+  let done = 0;
+  if (S.nom.trim() && S.tel.trim()) done++;
+  if (S.type) done++;
+  if (totals().nb > 0) done++;
+  if (S.refs.length) done++;
+  if (S.pose) done++;
+  const p = Math.round(done / 5 * 100);
+  $("fill").style.width = p + "%";
+  $("pct").textContent = p + "%";
+  $("btnSend").disabled = done < 5;
+  $("numBadge").textContent = S.num;
+}
+
+function renderAll(){
+  renderRows(); renderRefs(); renderPhotos(); renderRecap(); renderProgress();
+}
+
+/* ============ Events ============ */
+$("nom").addEventListener("input", e => { S.nom = e.target.value; renderProgress(); });
+$("tel").addEventListener("input", e => { S.tel = e.target.value; renderProgress(); });
+$("adresse").addEventListener("input", e => { S.adresse = e.target.value; });
+$("notes").addEventListener("input", e => { S.notes = e.target.value; });
+$("segPose").addEventListener("click", e => {
+  const b = e.target.closest("button[data-pose]");
+  if (!b) return;
+  S.pose = b.dataset.pose;
+  [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderProgress();
+});
+$("refBtn").addEventListener("click", () => {
+  $("refSearch").value = "";
+  renderRefList();
+  openSheet("refSheet");
+});
+$("refSearch").addEventListener("input", renderRefList);
+$("refList").addEventListener("click", e => {
+  const b = e.target.closest("button[data-ref]");
+  if (!b) return;
+  const r = b.dataset.ref, i = S.refs.indexOf(r);
+  if (i >= 0) S.refs.splice(i, 1); else S.refs.push(r);
+  renderRefList();
+  renderRows(); renderRefs(); renderRecap(); renderProgress();
+});
+$("chips").addEventListener("click", e => {
+  const b = e.target.closest("button[data-unpick]");
+  if (!b) return;
+  const i = S.refs.indexOf(b.dataset.unpick);
+  if (i >= 0) S.refs.splice(i, 1);
+  renderRows(); renderRefs(); renderRecap(); renderProgress();
+});
+
+$("seg").addEventListener("click", e => {
+  const b = e.target.closest("button[data-type]");
+  if (!b) return;
+  S.type = b.dataset.type;
+  S.refs = [];
+  S.dims.forEach(d => { d.ref = ""; });
+  [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderAll();
+});
+
+rowsEl.addEventListener("input", e => {
+  const n = e.target.dataset.note;
+  if (n !== undefined){ S.dims[n].note = e.target.value; return; }
+  const i = e.target.dataset.i;
+  if (i === undefined) return;
+  const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
+  if (clean !== e.target.value) e.target.value = clean;
+  S.dims[i][e.target.dataset.k] = clean;
+  updateNote(+i); renderRefs(); renderRecap(); renderProgress();
+});
+rowsEl.addEventListener("click", e => {
+  const a = e.target.closest("button[data-assign]");
+  if (a){
+    S.dims[+a.dataset.assign].ref = a.dataset.ref;
+    const wrap = a.parentElement;
+    [...wrap.children].forEach(x => x.setAttribute("aria-pressed", String(x === a)));
+    updateNote(+a.dataset.assign); renderRefs(); renderRecap();
+    return;
+  }
+  const b = e.target.closest("button[data-del]");
+  if (!b) return;
+  const i = +b.dataset.del;
+  S.dims.splice(i, 1);
+  if (!S.dims.length) S.dims = [{l:"",h:"",ref:"",note:""}];
+  renderAll();
+});
+$("addRow").addEventListener("click", () => {
+  S.dims.push({l:"",h:"",ref:"",note:""});
+  renderRows(); renderRecap();
+  const inp = rowsEl.querySelector('input[data-i="' + (S.dims.length-1) + '"][data-k="l"]');
+  if (inp) inp.focus();
+});
+
+$("file").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const img = new Image();
+  const rd = new FileReader();
+  rd.onload = () => { img.onload = () => {
+    const max = 1000, sc = Math.min(1, max / Math.max(img.width, img.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    S.photos.push(c.toDataURL("image/jpeg", 0.72));
+    renderPhotos();
+  }; img.src = rd.result; };
+  rd.readAsDataURL(f);
+  e.target.value = "";
+});
+photosEl.addEventListener("click", e => {
+  const b = e.target.closest("button[data-photo]");
+  if (!b) return;
+  S.photos.splice(+b.dataset.photo, 1);
+  renderPhotos();
+});
+
+/* ============ Toast ============ */
+let tt;
+function toast(msg){
+  const el = $("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(tt); tt = setTimeout(() => el.classList.remove("show"), 2400);
+}
+
+/* ============ Storage of orders ============ */
+function saveOrder(status){
+  const all = LS.get("mst_orders", []);
+  const rec = JSON.parse(JSON.stringify(S));
+  rec.status = status;
+  rec.date = new Date().toISOString();
+  const i = all.findIndex(o => o.id === rec.id);
+  if (i >= 0) all[i] = rec; else all.unshift(rec);
+  const ok = LS.set("mst_orders", all.slice(0, 40));
+  if (!ok) toast("Mémoire pleine, brouillon non conservé");
+  return ok;
+}
+
+$("btnDraft").addEventListener("click", () => {
+  if (saveOrder("draft")) toast("Brouillon " + S.num + " enregistré");
+});
+
+/* ============ History ============ */
+function openSheet(id){ $(id).classList.add("open"); document.body.style.overflow = "hidden"; }
+function closeSheet(id){ $(id).classList.remove("open"); document.body.style.overflow = ""; }
+document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => closeSheet(b.dataset.close)));
+
+$("btnHistory").addEventListener("click", () => {
+  const all = LS.get("mst_orders", []);
+  const body = $("histBody");
+  body.innerHTML = "";
+  if (!all.length){
+    body.innerHTML = '<div class="empty">Aucun bon enregistré pour le moment.<br>Les brouillons et les bons envoyés apparaîtront ici.</div>';
+  } else {
+    all.forEach(o => {
+      const t = o.dims.map(d => ({l:parseFloat(d.l), h:parseFloat(d.h)})).filter(d => d.l>0 && d.h>0);
+      const btn = document.createElement("button");
+      btn.className = "order-item";
+      btn.innerHTML =
+        '<span class="badge ' + (o.status === "sent" ? "ok" : "") + '">' + (o.status === "sent" ? "Envoyé" : "Brouillon") + '</span>' +
+        '<span class="oi"><b>' + (o.nom || "Client sans nom") + '</b>' +
+        '<small>' + o.num + '  ·  ' + t.length + ' store(s)  ·  ' + ((o.refs || (o.ref ? [o.ref] : [])).join(", ") || "tissu non choisi") + '</small></span>';
+      btn.addEventListener("click", () => {
+        S = migrate(JSON.parse(JSON.stringify(o)));
+        $("nom").value = S.nom; $("tel").value = S.tel; $("adresse").value = S.adresse || "";
+        $("notes").value = S.notes || "";
+        [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === S.type)));
+        [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === S.pose)));
+        renderAll();
+        closeSheet("histSheet");
+        toast("Bon " + S.num + " ouvert");
+      });
+      body.appendChild(btn);
+    });
+  }
+  openSheet("histSheet");
+});
+
+function migrate(o){
+  if (!o.refs) o.refs = o.ref ? [o.ref] : [];
+  o.dims = (o.dims || []).map(d => ({l:d.l||"", h:d.h||"", ref:d.ref||"", note:d.note||""}));
+  if (!o.dims.length) o.dims = [{l:"",h:"",ref:"",note:""}];
+  if (o.pose !== "Livraison") o.pose = "Pose";
+  return o;
+}
+
+$("btnNew").addEventListener("click", () => {
+  S = blank();
+  $("nom").value = ""; $("tel").value = ""; $("adresse").value = ""; $("notes").value = "";
+  [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === "Pose")));
+  renderAll();
+  closeSheet("shotSheet");
+  window.scrollTo({top:0, behavior:"instant"});
+});
+
+/* ============ Screenshot du bon ============ */
+const T = { ink:"#191315", muted:"#6F6569", line:"#E4DDDE", accent:"#D5001F", soft:"#FCEAEC", card:"#F7F4F4" };
+
+function ticket(){
+  const W = 1080, P = 64;
+  const big = document.createElement("canvas");
+  big.width = W; big.height = 3200;
+  const x = big.getContext("2d");
+  x.fillStyle = "#FFFFFF"; x.fillRect(0,0,W,big.height);
+
+  const A = 'Archivo, sans-serif', B = '"IBM Plex Sans", sans-serif', M = '"IBM Plex Mono", monospace';
+  let y = 0;
+
+  // header band
+  x.fillStyle = T.accent; x.fillRect(0,0,W,164);
+  x.fillStyle = "#FFFFFF";
+  x.font = "700 46px " + A; x.textBaseline = "alphabetic";
+  x.fillText("MSTORECASA", P, 78);
+  x.font = "500 22px " + A;
+  x.globalAlpha = .85; x.fillText("Bon de commande", P, 116); x.globalAlpha = 1;
+  x.font = "600 26px " + M; x.textAlign = "right";
+  x.fillText(S.num, W-P, 78);
+  const d = new Date();
+  x.font = "500 20px " + M;
+  x.globalAlpha = .85;
+  x.fillText(pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear()+"  "+pad(d.getHours())+":"+pad(d.getMinutes()), W-P, 114);
+  x.globalAlpha = 1; x.textAlign = "left";
+  y = 164 + 46;
+
+  const lab = (t) => { x.fillStyle = T.muted; x.font = "600 19px " + A; x.fillText(t.toUpperCase(), P, y); y += 34; };
+  const val = (t, size) => { x.fillStyle = T.ink; x.font = "500 " + (size||31) + "px " + B; x.fillText(t, P, y); y += (size||31) + 12; };
+  const rule = () => { y += 12; x.strokeStyle = T.line; x.lineWidth = 2; x.beginPath(); x.moveTo(P, y); x.lineTo(W-P, y); x.stroke(); y += 40; };
+
+  lab("Client");
+  val(S.nom || "-", 34);
+  x.fillStyle = T.muted; x.font = "400 27px " + B;
+  x.fillText(S.tel + (S.adresse ? "   ·   " + S.adresse : ""), P, y); y += 34;
+  rule();
+
+  // type + tissu
+  const fl = chosen();
+  const colL = P, colR = W/2 + 20;
+  x.fillStyle = T.muted; x.font = "600 19px " + A;
+  x.fillText("TYPE DE STORE", colL, y); x.fillText(fl.length > 1 ? "TISSUS" : "TISSU", colR, y); y += 36;
+  x.fillStyle = T.ink; x.font = "500 32px " + B;
+  x.fillText(S.type === "JN" ? "Jour et Nuit" : "Enrouleur", colL, y);
+  x.fillStyle = T.muted; x.font = "400 24px " + B;
+  x.fillText(S.pose, colL, y + 34);
+  const need = mlByRef();
+  let ty = y;
+  x.fillStyle = T.ink;
+  fl.forEach(f => {
+    x.font = "600 30px " + M; x.fillStyle = T.ink;
+    x.fillText(f.ref, colR, ty);
+    x.font = "400 22px " + B; x.fillStyle = T.muted;
+    x.fillText("laize " + (f.laize/100).toFixed(2).replace(".",",") + " m  ·  " + fr(need[f.ref] || 0) + " ml", colR, ty + 30);
+    ty += 66;
+  });
+  y = Math.max(y + 56, ty - 10);
+  rule();
+
+  // dimensions table
+  lab("Dimensions");
+  const rows = validDims();
+  const multi = fl.length > 1;
+  const cx = multi ? [P+8, P+90, P+310, P+540, W-P-8] : [P+8, P+120, P+400, P+660, W-P-8];
+  x.fillStyle = T.muted; x.font = "600 19px " + A;
+  x.fillText("N°", cx[0], y); x.fillText("LARGEUR", cx[1], y); x.fillText("HAUTEUR", cx[2], y);
+  if (multi) x.fillText("TISSU", cx[3], y);
+  x.textAlign = "right"; x.fillText("M²", W-P-8, y); x.textAlign = "left";
+  y += 14;
+  x.strokeStyle = T.line; x.lineWidth = 2; x.beginPath(); x.moveTo(P,y); x.lineTo(W-P,y); x.stroke();
+  y += 40;
+  rows.forEach((r, i) => {
+    const h = r.note ? 78 : 52;
+    if (i % 2 === 1){ x.fillStyle = T.card; x.fillRect(P, y-32, W-2*P, h); }
+    x.fillStyle = T.muted; x.font = "500 26px " + M; x.fillText(String(i+1), cx[0], y);
+    x.fillStyle = T.ink; x.font = "600 30px " + M;
+    x.fillText(r.l + " cm", cx[1], y);
+    x.fillText(r.h + " cm", cx[2], y);
+    if (multi){ x.font = "500 25px " + M; x.fillStyle = T.muted; x.fillText(r.ref, cx[3], y); }
+    x.textAlign = "right"; x.font = "600 28px " + M; x.fillStyle = T.ink;
+    x.fillText(fr(r.l*r.h/10000) + " m²", W-P-8, y); x.textAlign = "left";
+    if (r.note){
+      x.fillStyle = T.muted; x.font = "400 22px " + B;
+      x.fillText(r.note, cx[1], y + 30);
+    }
+    y += h;
+  });
+  y += 8;
+
+  // totals box
+  const t = totals();
+  x.fillStyle = T.soft; x.beginPath();
+  const bh = 116;
+  if (x.roundRect) { x.roundRect(P, y, W-2*P, bh, 16); x.fill(); } else { x.fillRect(P, y, W-2*P, bh); }
+  const cw = (W-2*P)/3;
+  const cell = (i, big, small) => {
+    const cxp = P + cw*i + cw/2;
+    x.textAlign = "center";
+    x.fillStyle = T.accent; x.font = "600 40px " + M; x.fillText(big, cxp, y+58);
+    x.fillStyle = T.muted; x.font = "600 18px " + A; x.fillText(small, cxp, y+90);
+    x.textAlign = "left";
+  };
+  cell(0, String(t.nb), "STORES");
+  cell(1, fr(t.m2), "M² TISSU");
+  cell(2, fr(t.ml), "ML TISSU");
+  y += bh + 46;
+
+  if (S.notes){ lab("Remarque"); val(S.notes, 27); y += 6; }
+
+  // photos
+  if (S.photos.length){
+    lab("Photos");
+    const n = Math.min(S.photos.length, 3), gap = 18;
+    const pw = (W - 2*P - gap*(n-1)) / n, ph = pw * 0.78;
+    for (let i = 0; i < n; i++){
+      const im = window._imgs && window._imgs[i];
+      const px = P + i*(pw+gap);
+      x.fillStyle = T.card; x.fillRect(px, y, pw, ph);
+      if (im && im.complete && im.naturalWidth){
+        const s = Math.max(pw/im.naturalWidth, ph/im.naturalHeight);
+        const dw = im.naturalWidth*s, dh = im.naturalHeight*s;
+        x.save(); x.beginPath(); x.rect(px, y, pw, ph); x.clip();
+        x.drawImage(im, px + (pw-dw)/2, y + (ph-dh)/2, dw, dh); x.restore();
+      }
+      x.strokeStyle = T.line; x.lineWidth = 2; x.strokeRect(px, y, pw, ph);
+    }
+    y += ph + 40;
+  }
+
+  // footer
+  x.strokeStyle = T.line; x.lineWidth = 2; x.beginPath(); x.moveTo(P,y); x.lineTo(W-P,y); x.stroke();
+  y += 38;
+  x.fillStyle = T.muted; x.font = "400 21px " + B;
+  x.fillText("Consommation nette hors chutes et ourlets  ·  Stock indicatif SAGE", P, y);
+  y += 30;
+  x.fillText("MSTORECASA  ·  Casablanca  ·  bon généré depuis l'application agent", P, y);
+  y += 46;
+
+  const out = document.createElement("canvas");
+  out.width = W; out.height = Math.min(y, big.height);
+  out.getContext("2d").drawImage(big, 0, 0);
+  return out;
+}
+
+function loadPhotoImgs(){
+  window._imgs = S.photos.slice(0,3).map(src => { const i = new Image(); i.src = src; return i; });
+  return Promise.all(window._imgs.map(i => i.decode ? i.decode().catch(()=>{}) : Promise.resolve()));
+}
+
+let shotBlob = null, shotUrl = null;
+function shotName(){
+  return S.num + "-" + (S.nom || "client").trim().replace(/[^\w]+/g, "-").toLowerCase().replace(/^-|-$/g, "") + ".png";
+}
+$("btnSend").addEventListener("click", async () => {
+  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch(e){}
+  await loadPhotoImgs();
+  const c = ticket();
+  shotUrl = c.toDataURL("image/png");
+  $("shotImg").src = shotUrl;
+  c.toBlob(b => { shotBlob = b; }, "image/png");
+  S.status = "sent";
+  saveOrder("sent");
+  openSheet("shotSheet");
+  toast("Bon " + S.num + " prêt");
+});
+
+$("btnShare").addEventListener("click", async () => {
+  const name = shotName();
+  try {
+    if (shotBlob && navigator.canShare) {
+      const file = new File([shotBlob], name, {type:"image/png"});
+      if (navigator.canShare({files:[file]})) {
+        await navigator.share({files:[file], title:"Bon de commande " + S.num});
+        return;
+      }
+    }
+    if (navigator.share) { await navigator.share({title:"Bon de commande " + S.num, text:"Bon " + S.num + " - " + S.nom}); return; }
+    toast("Partage non disponible, faites un appui long sur l'image");
+  } catch(e){ /* annulé par l'utilisateur */ }
+});
+
+let DL = null;
+(async () => {
+  try { if (window.claude && typeof claude.use === "function") DL = await claude.use("downloads"); } catch(e){}
+})();
+
+$("btnSave").addEventListener("click", async () => {
+  const name = shotName();
+  if (DL && shotBlob){
+    try { await DL.save({filename:name, data:shotBlob}); toast("Image enregistrée"); return; }
+    catch(e){
+      if (e && e.code === "declined") return;
+      if (e && e.code === "rate_limited"){ toast("Réessayez dans un instant"); return; }
+    }
+  }
+  try {
+    const a = document.createElement("a");
+    a.href = shotUrl; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    toast("Si rien ne se passe, appui long sur l'image");
+  } catch(e){ toast("Appui long sur l'image pour l'enregistrer"); }
+});
+
+/* ============ Boot ============ */
+renderRefs();
+renderAll();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+</script>
+</body>
+</html>

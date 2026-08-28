@@ -1,0 +1,20 @@
+{
+  "name": "MSTORECASA Bon de commande",
+  "short_name": "MSTORECASA",
+  "description": "Saisie des bons de commande de stores sur le terrain : dimensions, tissu, stock et envoi à l'agent.",
+  "id": "/",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F1EEEE",
+  "theme_color": "#D5001F",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
