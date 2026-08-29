@@ -42,6 +42,9 @@
 }
 
 *{box-sizing:border-box}
+/* Une règle d'affichage sur une classe l'emporte sinon sur le [hidden] du
+   navigateur : sans ceci, masquer un élément en flex n'a aucun effet. */
+[hidden]{display:none !important}
 body{
   margin:0; background:var(--ground); color:var(--ink);
   font-family:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -694,8 +697,9 @@ select{appearance:none; -webkit-appearance:none}
       <div id="chips"></div>
       <button class="add" id="refBtn" type="button">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        <span id="refBtnLabel">Choisir les tissus</span>
+        <span id="refBtnLabel">Choisir le tissu</span>
       </button>
+      <p class="hint" id="refNote" hidden style="margin-top:0">Le tissu se choisit sur chaque fenêtre, dans la partie Dimensions.</p>
     </section>
 
     <!-- POSE -->
@@ -1034,7 +1038,7 @@ select{appearance:none; -webkit-appearance:none}
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
       <input id="refSearch" type="search" placeholder="Rechercher une référence" autocomplete="off">
     </div>
-    <p class="hint" style="margin:0 2px 12px">Touchez plusieurs références si la commande mélange plusieurs tissus.</p>
+    <p class="hint" id="refHint" style="margin:0 2px 12px"></p>
     <div id="refList"></div>
   </div>
   <div class="bottom">
@@ -1207,10 +1211,18 @@ function famOf(t){ return t === "JN" ? "JN" : "ENR"; }
 
 function fab(ref){ return CATALOGUE.find(f => f.ref === ref) || null; }
 function chosen(){ return S.refs.map(fab).filter(Boolean); }
+/* En mode plusieurs couleurs, les tissus du bon sont ceux choisis fenêtre par fenêtre. */
+function syncRefs(){
+  if (!S.multi) return;
+  const seen = [];
+  S.dims.forEach(d => { if (d.ref && seen.indexOf(d.ref) < 0) seen.push(d.ref); });
+  S.refs = seen;
+}
 /* tissu appliqué à une ligne : celui assigné s'il est toujours sélectionné, sinon le premier */
 function rowRef(i){
   const d = S.dims[i];
-  if (S.multi && d && d.ref && S.refs.indexOf(d.ref) >= 0) return d.ref;
+  /* Plusieurs couleurs : chaque fenêtre porte son propre tissu, sans repli. */
+  if (S.multi) return (d && d.ref) || "";
   if (!S.multi) return S.refs[0] || "";
   /* multi couleurs : à défaut, la première référence compatible avec le type de la ligne */
   const t = rowType(i);
@@ -1365,9 +1377,12 @@ function renderRefs(){
     box.appendChild(d);
   });
   $("refCount").textContent = S.refs.length + (S.refs.length > 1 ? " tissus" : " tissu");
-  $("refBtnLabel").textContent = S.multi
-    ? (S.refs.length ? "Ajouter un autre tissu" : "Choisir les tissus")
-    : (S.refs.length ? "Changer de tissu" : "Choisir le tissu");
+  /* Plusieurs couleurs : le tissu se choisit sur chaque ligne de dimension. */
+  $("refBtn").hidden = !!S.multi;
+  $("refNote").hidden = !S.multi;
+  $("refBtnLabel").textContent = S.refs.length ? "Changer de tissu" : "Choisir le tissu";
+  if (S.multi && !S.refs.length)
+    box.innerHTML = '<div class="hint" style="margin:0 0 4px">Choisissez le tissu de chaque fenêtre dans la partie Dimensions.</div>';
 }
 
 function pickFamily(){
@@ -1385,6 +1400,9 @@ function renderRefList(){
   const fam2 = pickFamily();
   $("refSheetTitle").textContent = (pickTarget !== null ? "Store " + (pickTarget+1) + " · " : "") +
     (fam2 === "JN" ? "Tissu jour et nuit" : fam2 === "ENR" ? "Tissu enrouleur" : "Tissu");
+  $("refHint").textContent = pickTarget !== null
+    ? "Un seul tissu par fenêtre. Appuyez sur celui qui est coché pour le retirer."
+    : (S.multi ? "" : "Un seul tissu pour tout le bon.");
 
   const group = (title, arr, out) => {
     if (!arr.length) return;
@@ -1395,7 +1413,9 @@ function renderRefList(){
       const b = document.createElement("button");
       b.type = "button";
       b.className = "opt" + (out ? " out" : "");
-      const on = S.refs.indexOf(f.ref) >= 0;
+      const on = pickTarget !== null
+        ? ((S.dims[pickTarget] || {}).ref === f.ref)
+        : (S.refs.indexOf(f.ref) >= 0);
       b.setAttribute("aria-selected", String(on));
       b.dataset.ref = f.ref;
       b.innerHTML =
@@ -1629,6 +1649,9 @@ $("segMulti").addEventListener("click", e => {
   if (!S.multi){
     S.refs = S.refs.slice(0, 1);
     S.dims.forEach(d => { d.ref = ""; });
+  } else {
+    /* on repart des tissus déjà posés sur les fenêtres */
+    syncRefs();
   }
   renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
 });
@@ -1703,8 +1726,9 @@ $("refList").addEventListener("click", e => {
   if (!b) return;
   const r = b.dataset.ref;
   if (pickTarget !== null){
-    S.dims[pickTarget].ref = r;
-    if (S.refs.indexOf(r) < 0) S.refs.push(r);
+    /* même tissu = on le retire de cette fenêtre */
+    S.dims[pickTarget].ref = (S.dims[pickTarget].ref === r) ? "" : r;
+    syncRefs();
     closeSheet("refSheet");
   } else if (!S.multi){
     S.refs = [r];
@@ -1714,6 +1738,7 @@ $("refList").addEventListener("click", e => {
     const i = S.refs.indexOf(r);
     if (i >= 0){ S.refs.splice(i, 1); S.dims.forEach(d => { if (d.ref === r) d.ref = ""; }); }
     else S.refs.push(r);
+    syncRefs();
     renderRefList();
   }
   renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
@@ -1721,9 +1746,12 @@ $("refList").addEventListener("click", e => {
 $("chips").addEventListener("click", e => {
   const b = e.target.closest("button[data-unpick]");
   if (!b) return;
-  const i = S.refs.indexOf(b.dataset.unpick);
+  const r = b.dataset.unpick;
+  const i = S.refs.indexOf(r);
   if (i >= 0) S.refs.splice(i, 1);
-  renderRows(); renderRefs(); renderRecap(); renderProgress();
+  S.dims.forEach(d => { if (d.ref === r) d.ref = ""; });
+  syncRefs();
+  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
 });
 
 $("seg").addEventListener("click", e => {
@@ -2846,6 +2874,8 @@ function renderHist(){
   let list = all.filter(o => {
     if (histFilter === "mine" && USER && o.author !== USER.login) return false;
     if (histFilter === "mois" && !ceMois(o)) return false;
+    /* Un bon livré n'a plus d'échéance à surveiller, sauf si on le demande. */
+    if (histSort === "ech" && histFilter !== "livre" && etatDe(o) === "livre") return false;
     if (ETATS.some(e => e.k === histFilter) && etatDe(o) !== histFilter) return false;
     if (!q) return true;
     const hay = [o.nom, o.num, o.tel, o.author, (o.refs || []).join(" ")].join(" ").toLowerCase();
@@ -3038,7 +3068,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "3.4";
+const APP_VERSION = "3.6";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -3559,12 +3589,18 @@ function renderPlan(){
   if (cutMode === "tissu") Object.keys(byRef).forEach(ref => {
     const f = fab(ref);
     const lz = f ? f.laize : laize;
-    /* Un bon à un seul tissu : toute chute saisie le concerne, quelle que soit
-       la référence enregistrée avec elle. Sinon on respecte le tissu choisi. */
-    const fcs = (o.refs || []).length > 1
-      ? (CUT.fabcuts || []).filter(c => (c.ref || (o.refs || [])[0]) === ref)
-      : (CUT.fabcuts || []);
+    /* Une chute sans référence vaut pour tous les tissus du bon. Une chute
+       attribuée à un tissu précis ne sert que pour celui là, et on le dit. */
+    const multiRef = (o.refs || []).length > 1;
+    const fcs   = (CUT.fabcuts || []).filter(c => !multiRef || !c.ref || c.ref === ref);
+    const other = (CUT.fabcuts || []).filter(c =>  multiRef &&  c.ref && c.ref !== ref);
     const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong, fcs);
+    other.forEach(c => {
+      const n = Math.max(0, Math.round(c.qty || 0));
+      if (n > 0 && c.w > 0 && c.l > 0)
+        T.unused.push({w:c.w, len:c.l, swap:false,
+                       why:"enregistrée pour le tissu " + c.ref + " : changez sa référence en haut si elle convient ici"});
+    });
     h += '<div class="banner"><b>TISSU ' + ref + '</b><span>rouleau de ' + fr(lz,0) + ' cm de large</span></div>';
     h += '<p class="bsum">' +
          (T.nbStock ? '<b>' + T.nbStock + '</b> chute' + (T.nbStock > 1 ? 's' : '') + ' du stock réutilisée' + (T.nbStock > 1 ? 's' : '') + '  ·  ' : '') +
@@ -3705,7 +3741,8 @@ function renderFc(){
       const sel = document.createElement("div");
       sel.className = "offsel";
       sel.innerHTML = '<select data-fcref="' + i + '" aria-label="Tissu de la chute ' + (i+1) + '">' +
-        refs.map(r => '<option value="' + r + '"' + ((c.ref || refs[0]) === r ? " selected" : "") + '>' + r + '</option>').join("") +
+        '<option value=""' + (c.ref ? "" : " selected") + '>Tous les tissus du bon</option>' +
+        refs.map(r => '<option value="' + r + '"' + (c.ref === r ? " selected" : "") + '>' + r + '</option>').join("") +
         '</select>';
       box.appendChild(sel);
     }
@@ -3725,7 +3762,7 @@ function renderFc(){
 $("fcAdd").addEventListener("click", () => {
   const ord = ORDERS.find(x => x.id === cutOrderId);
   const refs = (ord && ord.refs) || [];
-  CUT.fabcuts = (CUT.fabcuts || []).concat([{ref:refs[0] || "", w:"", l:"", qty:1}]);
+  CUT.fabcuts = (CUT.fabcuts || []).concat([{ref:"", w:"", l:"", qty:1}]);
   cutSave(); renderFc(); renderPlan();
 });
 $("fcList").addEventListener("input", e => {
