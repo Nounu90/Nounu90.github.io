@@ -2397,7 +2397,9 @@ async function pullBons(){
     if (error) throw error;
     const map = {};
     ORDERS.forEach(o => { map[o.id] = o; });
+    const distants = {};
     data.forEach(r => {
+      distants[r.id] = true;
       if (TOMBS.indexOf(r.id) >= 0) return;        /* supprimé ici, pas encore côté base */
       const cur = map[r.id];
       if (cur && cur.pending) return;              /* le brouillon local n'est pas écrasé */
@@ -2405,12 +2407,31 @@ async function pullBons(){
       o.id = r.id; o.num = r.num; o.author = r.author;
       map[r.id] = o;
     });
+
+    /* Un bon absent de la base a été supprimé par un autre téléphone : il doit
+       disparaître ici aussi. On épargne les bons pas encore envoyés, et on ne
+       fait le ménage que si la base a répondu la liste complète. */
+    const complete = data.length < 200;
+    if (complete){
+      Object.keys(map).forEach(id => {
+        if (distants[id]) return;
+        if (map[id] && map[id].pending) return;
+        delete map[id];
+      });
+    }
+
     ORDERS = Object.keys(map).map(k => map[k])
       .sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
     persistOrders();
     ONLINE = true;
+    if (S.status !== "draft" && !S.pending && !ORDERS.some(o => o.id === S.id) && !$("home").classList.contains("open")){
+      /* le bon ouvert a été supprimé ailleurs */
+      toast("Le bon " + S.num + " vient d'être supprimé par un autre téléphone");
+      newOrder(); nav("home");
+    }
     renderHome();
     if ($("histSheet").classList.contains("open")) renderHist();
+    if ($("cutSheet").classList.contains("open")) renderPlan();
     return true;
   } catch(e){ ONLINE = false; renderHome(); return false; }
 }
@@ -3068,7 +3089,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "3.6";
+const APP_VERSION = "3.7";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
