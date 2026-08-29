@@ -2328,8 +2328,10 @@ async function doLogin(){
     $("logPass").value = "";
     showLogin(false);
     ONLINE = true;
+    renderArt();
     renderHome();
     syncAll();
+    if (artAllowed() && !ARTICLES.length) syncStock(true).then(() => { renderArt(); renderHome(); });
   } catch(e){
     msg.className = "login-msg";
     msg.textContent = "Identifiant ou mot de passe incorrect.";
@@ -2344,6 +2346,7 @@ function logout(){
   ask("Se déconnecter ?", "Les bons déjà envoyés restent dans la base. Un bon en attente d'envoi serait perdu.", async () => {
     try { if (SB) await SB.auth.signOut(); } catch(e){}
     USER = null; LS.set("mst_user", null);
+    ARTICLES = []; LS.set("mst_art", []);
     ORDERS = ORDERS.filter(o => o.pending);
     persistOrders();
     showLogin(true);
@@ -2410,6 +2413,7 @@ function renderHome(){
   $("tileStockSub").textContent = CATALOGUE.length + " références  ·  " + inStock + " en stock";
   $("tileCutSub").textContent = all.length ? "Barres et tissu, à partir d'un bon enregistré" : "Enregistrez d'abord un bon";
   renderUserLine();
+  $("tileArt").hidden = !artAllowed();
   const nArt = ARTICLES.filter(a => !a.serv).length;
   $("tileArtSub").textContent = nArt
     ? nArt + " articles  ·  " + ARTICLES.filter(a => !a.serv && a.dispo <= 0).length + " en rupture"
@@ -2424,11 +2428,23 @@ function srcLabel(){
 }
 
 /* ============ Stock ============ */
+/* Le stock des articles est réservé à ces identifiants. */
+const ART_USERS = ["noureddine"];
+function artAllowed(){
+  return !!USER && ART_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
+}
 let ARTICLES = LS.get("mst_art", []);
 let artFilter = "piece";
 let artSort = LS.get("mst_artsort", "sheet");
 
 function renderArt(){
+  $("tileArt").hidden = !artAllowed();
+  if (!artAllowed()){
+    if (ARTICLES.length){ ARTICLES = []; LS.set("mst_art", []); }
+    if ($("artSheet").classList.contains("open")) nav("home");
+    $("artList").innerHTML = "";
+    return;
+  }
   const q = ($("artSearch").value || "").trim().toLowerCase();
   let list = ARTICLES.filter(a =>
     a.ref.toLowerCase().includes(q) || (a.nom || "").toLowerCase().includes(q));
@@ -2667,13 +2683,15 @@ async function syncStock(silent){
     const rows = parseCSV(await res.text());
     const list = catalogueFromRows(rows);
     if (!list.length) throw new Error("aucune référence lue");
-    ARTICLES = articlesFromRows(rows);
+    ARTICLES = artAllowed() ? articlesFromRows(rows) : [];
     LS.set("mst_art", ARTICLES);
     const d = new Date();
     applyCatalogue(list, {date: pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + String(d.getFullYear()).slice(2) +
                                 " à " + pad(d.getHours()) + ":" + pad(d.getMinutes()), n:list.length});
     renderArt();
-    if (!silent) toast(list.length + " tissus et " + ARTICLES.length + " articles synchronisés");
+    if (!silent) toast(artAllowed()
+      ? list.length + " tissus et " + ARTICLES.length + " articles synchronisés"
+      : list.length + " références synchronisées");
     ok = true;
   } catch(err){
     if (!silent) toast("Lecture impossible : la feuille doit être partagée en lecture par lien");
@@ -2885,7 +2903,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "3.1";
+const APP_VERSION = "3.2";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -3665,6 +3683,7 @@ $("cutPickBody").addEventListener("click", e => {
 });
 
 $("tileArt").addEventListener("click", () => {
+  if (!artAllowed()) return;
   renderArt();
   nav("artSheet");
   if (!ARTICLES.length) syncStock(true).then(() => renderArt());
