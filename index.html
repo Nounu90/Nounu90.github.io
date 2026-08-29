@@ -1014,6 +1014,7 @@ select{appearance:none; -webkit-appearance:none}
     <div class="filters" id="histFilters">
       <button type="button" data-f="all" aria-pressed="true">Tous</button>
       <button type="button" data-f="mine" aria-pressed="false">Mes bons</button>
+      <button type="button" data-f="mois" aria-pressed="false">Ce mois</button>
       <button type="button" data-f="devis" aria-pressed="false">Devis</button>
       <button type="button" data-f="production" aria-pressed="false">En production</button>
       <button type="button" data-f="pret" aria-pressed="false">Prêt</button>
@@ -1094,13 +1095,26 @@ function blank(){
     status:"draft"
   };
 }
+/* Numéro du bon : BC-mois-année-rang, le rang repartant à 1 chaque mois.
+   Le rang tient compte des bons déjà enregistrés, pour limiter les doublons
+   entre les téléphones de l'équipe. */
+function moisStamp(d){
+  return pad(d.getMonth() + 1) + "-" + String(d.getFullYear()).slice(2);
+}
 function nextNum(){
-  const d = new Date();
-  const stamp = String(d.getFullYear()).slice(2) + pad(d.getMonth()+1) + pad(d.getDate());
-  const c = LS.get("mst_seq", {day:stamp, n:0});
-  const n = (c.day === stamp ? c.n : 0) + 1;
-  LS.set("mst_seq", {day:stamp, n:n});
-  return "BC-" + stamp + "-" + pad(n);
+  const pref = "BC-" + moisStamp(new Date()) + "-";
+  /* Le rang se déduit des bons déjà enregistrés : ouvrir un formulaire sans
+     l'enregistrer ne consomme donc aucun numéro. */
+  let liste = [];
+  try { liste = ORDERS || []; } catch(e){ liste = LS.get("mst_orders", []) || []; }
+  let n = 0;
+  liste.forEach(o => {
+    const v = String(o && o.num || "");
+    if (v.indexOf(pref) !== 0) return;
+    const k = parseInt(v.slice(pref.length), 10);
+    if (k > n) n = k;
+  });
+  return pref + pad(n + 1);
 }
 function pad(n){ return String(n).padStart(2,"0"); }
 function fr(n, d){ return Number(n).toFixed(d === undefined ? 2 : d).replace(".", ","); }
@@ -2539,6 +2553,13 @@ $("btnLocalStock").addEventListener("click", () => {
 
 /* ============ Historique ============ */
 let histFilter = "all";
+/* Un bon du mois en cours : d'abord son numéro, sinon sa date */
+function ceMois(o){
+  const now = new Date(), stamp = moisStamp(now);
+  if (o && o.num && String(o.num).indexOf("BC-" + stamp + "-") === 0) return true;
+  const d = new Date(o && o.date || 0);
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+}
 
 function orderTotals(o){
   const v = [];
@@ -2567,6 +2588,7 @@ function renderHist(){
   const q = ($("histSearch").value || "").trim().toLowerCase();
   let list = all.filter(o => {
     if (histFilter === "mine" && USER && o.author !== USER.login) return false;
+    if (histFilter === "mois" && !ceMois(o)) return false;
     if (ETATS.some(e => e.k === histFilter) && etatDe(o) !== histFilter) return false;
     if (!q) return true;
     const hay = [o.nom, o.num, o.tel, o.author, (o.refs || []).join(" ")].join(" ").toLowerCase();
@@ -2722,7 +2744,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "2.9";
+const APP_VERSION = "3.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
