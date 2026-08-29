@@ -281,6 +281,19 @@ select{appearance:none; -webkit-appearance:none}
 
 
 
+
+/* ---------- decoupe dans le formulaire ---------- */
+.cutblock{border:1px solid var(--line); border-radius:12px; padding:11px 12px; margin-bottom:9px; background:var(--card2)}
+.cutblock h4{
+  margin:0 0 8px; font-family:"Archivo",sans-serif; font-size:12px; font-weight:600; letter-spacing:.04em;
+  color:var(--muted); display:flex; justify-content:space-between; gap:10px;
+}
+.cutblock h4 em{font-style:normal; font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink)}
+.cutp{display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:5px 0; border-top:1px dashed var(--line)}
+.cutp:first-of-type{border-top:0}
+.cutp span{font-size:13.5px}
+.cutp b{font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap}
+
 /* ---------- plan de coupe ---------- */
 .pcard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:11px}
 .pcard-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px}
@@ -309,7 +322,10 @@ select{appearance:none; -webkit-appearance:none}
 .kpi b{display:block; font-family:"IBM Plex Mono",monospace; font-size:19px; font-weight:600; font-variant-numeric:tabular-nums}
 .kpi span{display:block; font-family:"Archivo",sans-serif; font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin-top:3px}
 .kpi.bad b{color:var(--accent)} .kpi.good b{color:var(--ok)} .kpi.warn b{color:var(--warn)}
-.offrow{display:grid; grid-template-columns:1fr 78px 34px; gap:8px; align-items:center; margin-bottom:8px}
+.offrow{display:grid; grid-template-columns:1fr 70px 34px; gap:8px; align-items:center; margin-bottom:8px}
+.offrow.j{grid-template-columns:1fr 70px 34px}
+.offsel{margin-bottom:8px}
+.offsel select{width:100%; border:1px solid var(--line); background:var(--card2); border-radius:10px; padding:10px 11px; font-size:13.5px}
 .offrow input{width:100%; border:1px solid var(--line); background:var(--card2); border-radius:10px; padding:11px;
   font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; text-align:center}
 .offrow input:focus{border-color:var(--accent); background:var(--card); outline:none}
@@ -474,6 +490,13 @@ select{appearance:none; -webkit-appearance:none}
         Ajouter une dimension
       </button>
       <div class="total-bar"><span>Total surface</span><b id="dimTotal">0,00 m²</b></div>
+    </section>
+
+    <!-- DECOUPE DES TUBES -->
+    <section class="card">
+      <div class="card-head"><div class="label">Découpe des tubes</div><div class="badge" id="cutBadge">—</div></div>
+      <div id="cutList"></div>
+      <p class="hint" id="cutRule"></p>
     </section>
 
     <!-- TISSU -->
@@ -826,7 +849,7 @@ function rowRef(i){
 function rowFab(i){ return fab(rowRef(i)); }
 function validDims(){
   return S.dims
-    .map((d, i) => ({l:parseFloat(d.l), h:parseFloat(d.h), ref:rowRef(i), note:d.note || "", i:i}))
+    .map((d, i) => ({l:parseFloat(d.l), h:parseFloat(d.h), ref:rowRef(i), note:d.note || "", i:i, i0:i+1}))
     .filter(d => d.l > 0 && d.h > 0);
 }
 const MINCM = 100;   /* minimum facturé par côté */
@@ -982,6 +1005,28 @@ function renderPhotos(){
   $("photoCount").textContent = S.photos.length + " / 3";
 }
 
+function renderDecoupe(){
+  const list = PIECES[S.type] || PIECES.ENR;
+  const v = validDims();
+  const box = $("cutList");
+  box.innerHTML = "";
+  $("cutBadge").textContent = v.length ? (v.length * list.length) + " coupes" : "—";
+  $("cutRule").textContent = S.type === "JN"
+    ? "Jour et nuit : cache largeur moins 0,5 cm, tube 32 moins 2 cm, barre de charge moins 1,5 cm."
+    : "Enrouleur : tube 38 et barre de charge à la largeur moins 3 cm.";
+  if (!v.length){
+    box.innerHTML = '<div class="hint" style="margin:0">Saisissez une dimension pour voir les longueurs à couper.</div>';
+    return;
+  }
+  v.forEach(d => {
+    const el = document.createElement("div");
+    el.className = "cutblock";
+    el.innerHTML = '<h4><span>Store ' + d.i0 + (d.note ? " · " + esc(d.note) : "") + '</span><em>' + fr(d.l,0) + ' × ' + fr(d.h,0) + '</em></h4>' +
+      list.map(pc => '<div class="cutp"><span>' + pc.label + '</span><b>' + fr(d.l - pc.d, (d.l - pc.d) % 1 ? 1 : 0) + ' cm</b></div>').join("");
+    box.appendChild(el);
+  });
+}
+
 function renderRecap(){
   const t = totals();
   $("sNb").textContent = t.nb;
@@ -1045,7 +1090,7 @@ function renderProgress(){
 }
 
 function renderAll(){
-  renderRows(); renderRefs(); renderPhotos(); renderRecap(); renderProgress();
+  renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap(); renderProgress();
 }
 
 /* ============ Events ============ */
@@ -1107,7 +1152,7 @@ rowsEl.addEventListener("input", e => {
   const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
   if (clean !== e.target.value) e.target.value = clean;
   S.dims[i][e.target.dataset.k] = clean;
-  updateNote(+i); renderRefs(); renderRecap(); renderProgress();
+  updateNote(+i); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
 });
 rowsEl.addEventListener("click", e => {
   const a = e.target.closest("button[data-assign]");
@@ -1115,7 +1160,7 @@ rowsEl.addEventListener("click", e => {
     S.dims[+a.dataset.assign].ref = a.dataset.ref;
     const wrap = a.parentElement;
     [...wrap.children].forEach(x => x.setAttribute("aria-pressed", String(x === a)));
-    updateNote(+a.dataset.assign); renderRefs(); renderRecap();
+    updateNote(+a.dataset.assign); renderRefs(); renderDecoupe(); renderRecap();
     return;
   }
   const b = e.target.closest("button[data-del]");
@@ -1127,7 +1172,7 @@ rowsEl.addEventListener("click", e => {
 });
 $("addRow").addEventListener("click", () => {
   S.dims.push({l:"",h:"",ref:"",note:""});
-  renderRows(); renderRecap();
+  renderRows(); renderDecoupe(); renderRecap();
   const inp = rowsEl.querySelector('input[data-i="' + (S.dims.length-1) + '"][data-k="l"]');
   if (inp) inp.focus();
 });
@@ -1716,7 +1761,13 @@ $("cfYes").addEventListener("click", () => {
 });
 
 /* ============ Entrées de l'accueil ============ */
-$("tileNew").addEventListener("click", () => { nav("form"); });
+$("tileNew").addEventListener("click", () => {
+  /* si le bon en cours est deja enregistre, on en ouvre un neuf ;
+     sinon on reprend la saisie en cours pour ne rien perdre */
+  const saved = LS.get("mst_orders", []).some(o => o.id === S.id);
+  if (saved) newOrder();
+  nav("form");
+});
 $("tileHist").addEventListener("click", () => { renderHist(); nav("histSheet"); });
 $("tileStock").addEventListener("click", () => { renderStock(); nav("stockSheet"); });
 
@@ -1726,6 +1777,20 @@ $("tileStock").addEventListener("click", () => { renderStock(); nav("stockSheet"
    Barres : on prend toujours la plus grande pièce qui rentre dans le reste de la barre.
    Tissu  : une bande = un déroulé sur la laize, on place côte à côte les stores dont la
             somme des largeurs tient dans la laize, et on déroule sur le plus long. */
+
+/* Pièces à couper, retrait en cm sur la largeur du store */
+const PIECES = {
+  ENR: [{k:"tube38", label:"Tube 38", d:3}, {k:"barre", label:"Barre de charge", d:3}],
+  JN:  [{k:"cache", label:"Cache", d:0.5}, {k:"tube32", label:"Tube 32", d:2}, {k:"barre", label:"Barre de charge", d:1.5}]
+};
+/* Regroupement pour le plan de coupe : le tube 38 et la barre de charge
+   se coupent a la meme longueur, ils partagent donc le meme plan. */
+const PROFILS = {
+  ENR: [{k:"enr", label:"Tube 38 et barre de charge", d:3, note:"Une barre neuve = un tube 38 + une barre de charge, coupés à l'identique."}],
+  JN:  [{k:"cache", label:"Cache jour et nuit", d:0.5, note:""},
+        {k:"tube32", label:"Tube 32", d:2, note:""},
+        {k:"barre", label:"Barre de charge", d:1.5, note:""}]
+};
 
 const CUT_DEF = {laize:320, bar:600, surplus:20, seuilBarre:90, seuilLaize:90, seuilLong:120};
 let CUT = Object.assign({}, CUT_DEF, LS.get("mst_cut", {}));
@@ -1775,21 +1840,22 @@ function planBarres(pieces, barLen, offcuts, seuil){
 }
 
 /* --- tissu --- */
-function planTissu(stores, laize, surplus, sLaize, sLong){
+function planTissu(stores, laize, surplus, sLaize, sLong, jn){
+  const need = s => (jn ? 2 * s.h : s.h) + surplus;
   const impossible = stores.filter(s => s.l > laize);
   const items = stores.filter(s => s.l <= laize).slice().sort((a,b) => (b.h - a.h) || (b.l - a.l));
   const bands = [];
   items.forEach(s => {
-    const need = s.h + surplus;
+    const nd = need(s);
     let best = null, diff = Infinity;
     bands.forEach(b => {
       if (b.used + s.l <= laize + 0.001){
-        const d = Math.abs(b.unroll - need);
+        const d = Math.abs(b.unroll - nd);
         if (d < diff){ diff = d; best = b; }
       }
     });
-    if (best){ best.items.push(s); best.used += s.l; best.unroll = Math.max(best.unroll, need); }
-    else bands.push({items:[s], used:s.l, unroll:need});
+    if (best){ best.items.push(s); best.used += s.l; best.unroll = Math.max(best.unroll, nd); }
+    else bands.push({items:[s], used:s.l, unroll:nd});
   });
   bands.forEach((b, i) => {
     b.n = i + 1;
@@ -1798,7 +1864,7 @@ function planTissu(stores, laize, surplus, sLaize, sLong){
     b.utile = b.items.reduce((t,x) => t + x.l * x.h / 10000, 0);
     b.chuteLat = b.restLaize * b.unroll / 10000;
     b.latFate = (b.restLaize >= sLaize && b.unroll >= sLong) ? "keep" : "drop";
-    b.chuteLong = b.items.reduce((t,x) => t + x.l * (b.unroll - (x.h + surplus)), 0) / 10000;
+    b.chuteLong = b.items.reduce((t,x) => t + x.l * (b.unroll - need(x)), 0) / 10000;
     b.chute = b.chuteLat + b.chuteLong;
   });
   const conso = bands.reduce((t,b) => t + b.conso, 0);
@@ -1850,42 +1916,49 @@ function renderCut(){
 
   const laize = parseFloat(CUT.laize) || CUT_DEF.laize;
   const barLen = parseFloat(CUT.bar) || CUT_DEF.bar;
-  const B = planBarres(dims.map(x => ({w:x.l, s:x})), barLen, CUT.offcuts || [], CUT.seuilBarre);
+  const profils = PROFILS[o.type === "JN" ? "JN" : "ENR"];
 
   let h = "";
 
-  /* ---- barres ---- */
-  h += '<div class="psec">Barres · tube 38 et barre de charge</div>';
-  h += '<div class="grid2" style="margin-bottom:13px">' +
-    kpi(B.neuves, "barres neuves", "") +
-    kpi(fr(B.used,0) + " cm", "longueur utilisée", "") +
-    kpi(fr(B.garde,0) + " cm", "chute gardée", B.garde > 0 ? "warn" : "") +
-    kpi(fr(B.jete,0) + " cm", "chute jetée", B.jete > 0 ? "bad" : "good") +
-  '</div>';
+  /* ---- barres, un plan par profilé ---- */
+  profils.forEach(pr => {
+    const pieces = dims.map(x => ({w: x.l - pr.d, s:x}));
+    const offs = (CUT.offcuts || []).filter(f => (f.profil || profils[0].k) === pr.k);
+    const B = planBarres(pieces, barLen, offs, CUT.seuilBarre);
 
-  B.bars.forEach(b => {
-    const parts = b.cuts.map(c => ({len:c.p.w}));
-    if (b.rest > 0.5) parts.push({len:b.rest, rest:true});
-    h += '<div class="pcard">' +
-      '<div class="pcard-head"><b>' + b.label + '</b><span class="badge">' + fr(b.len,0) + ' cm</span></div>' +
-      strip(parts, b.len);
-    b.cuts.forEach((c, i) => {
-      h += '<div class="cutline">' +
-        '<span class="cl">coupe ' + (i+1) + '</span>' +
-        '<span class="cm">' + fr(c.p.w,0) + ' cm</span>' +
-        '<span class="cr">store ' + c.p.s.n + '  ·  reste ' + fr(c.after,0) + '</span>' +
-      '</div>';
+    h += '<div class="psec">Barres · ' + pr.label + '</div>';
+    h += '<div class="grid2" style="margin-bottom:13px">' +
+      kpi(B.neuves, "barres neuves", "") +
+      kpi(fr(B.used,0) + " cm", "longueur utilisée", "") +
+      kpi(fr(B.garde,0) + " cm", "chute gardée", B.garde > 0 ? "warn" : "") +
+      kpi(fr(B.jete,0) + " cm", "chute jetée", B.jete > 0 ? "bad" : "good") +
+    '</div>';
+
+    B.bars.forEach(b => {
+      const parts = b.cuts.map(c => ({len:c.p.w}));
+      if (b.rest > 0.5) parts.push({len:b.rest, rest:true});
+      h += '<div class="pcard">' +
+        '<div class="pcard-head"><b>' + b.label + '</b><span class="badge">' + fr(b.len,0) + ' cm</span></div>' +
+        strip(parts, b.len);
+      b.cuts.forEach((c, i) => {
+        h += '<div class="cutline">' +
+          '<span class="cl">coupe ' + (i+1) + '</span>' +
+          '<span class="cm">' + fr(c.p.w, c.p.w % 1 ? 1 : 0) + ' cm</span>' +
+          '<span class="cr">store ' + c.p.s.n + ' (' + fr(c.p.s.l,0) + ')  ·  reste ' + fr(c.after, c.after % 1 ? 1 : 0) + '</span>' +
+        '</div>';
+      });
+      h += '<div class="fate ' + b.fate + '">' +
+        (b.fate === "full" ? "Barre entièrement utilisée."
+         : b.fate === "keep" ? "Reste " + fr(b.rest, b.rest % 1 ? 1 : 0) + " cm : à garder en stock de chutes."
+         : "Reste " + fr(b.rest, b.rest % 1 ? 1 : 0) + " cm : sous le seuil de " + CUT.seuilBarre + " cm, jeté.") +
+      '</div></div>';
     });
-    h += '<div class="fate ' + b.fate + '">' +
-      (b.fate === "full" ? "Barre entièrement utilisée."
-       : b.fate === "keep" ? "Reste " + fr(b.rest,0) + " cm : à garder en stock de chutes."
-       : "Reste " + fr(b.rest,0) + " cm : sous le seuil de " + CUT.seuilBarre + " cm, jeté.") +
-    '</div></div>';
+    if (pr.note) h += '<p class="hint" style="margin:-2px 2px 4px">' + pr.note + '</p>';
+    if (B.impossible.length){
+      h += '<div class="pcard"><div class="fate drop">' + B.impossible.length +
+        ' store(s) plus large(s) que la barre de ' + fr(barLen,0) + ' cm : coupe impossible en une pièce.</div></div>';
+    }
   });
-  if (B.impossible.length){
-    h += '<div class="pcard"><div class="fate drop">' + B.impossible.length +
-      ' store(s) plus large(s) que la barre de ' + fr(barLen,0) + ' cm : coupe impossible en une pièce.</div></div>';
-  }
 
   /* ---- tissu, une section par référence ---- */
   const byRef = {};
@@ -1893,7 +1966,8 @@ function renderCut(){
   Object.keys(byRef).forEach(ref => {
     const f = fab(ref);
     const lz = f ? Math.min(laize, f.laize) : laize;
-    const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong);
+    const isJN = o.type === "JN";
+    const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong, isJN);
     h += '<div class="psec">Tissu ' + ref + '  ·  laize ' + fr(lz,0) + ' cm</div>';
     h += '<div class="grid2" style="margin-bottom:13px">' +
       kpi(T.bands.length, "bandes", "") +
@@ -1910,8 +1984,8 @@ function renderCut(){
       b.items.forEach(x => {
         h += '<div class="cutline">' +
           '<span class="cl">store ' + x.n + '</span>' +
-          '<span class="cm">' + fr(x.l,0) + ' × ' + fr(x.h + CUT.surplus,0) + ' cm</span>' +
-          '<span class="cr">fini ' + fr(x.h,0) + ' + ' + CUT.surplus + '</span>' +
+          '<span class="cm">' + fr(x.l,0) + ' × ' + fr((isJN ? 2*x.h : x.h) + CUT.surplus,0) + ' cm</span>' +
+          '<span class="cr">' + (isJN ? '2 × ' + fr(x.h,0) + ' + ' + CUT.surplus : 'fini ' + fr(x.h,0) + ' + ' + CUT.surplus) + '</span>' +
         '</div>';
       });
       h += '<div class="fate ' + (b.latFate === "keep" ? "keep" : (b.chuteLat > 0.01 ? "drop" : "full")) + '">' +
@@ -1928,8 +2002,11 @@ function renderCut(){
     }
   });
 
-  h += '<p class="hint" style="margin-top:18px">Longueur déroulée = hauteur du store + ' + CUT.surplus +
-       ' cm d\'enroulement autour du tube. Chute de barre gardée à partir de ' + CUT.seuilBarre +
+  h += '<p class="hint" style="margin-top:18px">' +
+       (o.type === "JN"
+         ? 'Jour et nuit : longueur déroulée = 2 × hauteur + ' + CUT.surplus + ' cm, le tissu faisant une boucle autour du rail inférieur. '
+         : 'Longueur déroulée = hauteur du store + ' + CUT.surplus + ' cm d\'enroulement autour du tube. ') +
+       'Chute de barre gardée à partir de ' + CUT.seuilBarre +
        ' cm, chute de tissu gardée si la laize restante atteint ' + CUT.seuilLaize + ' cm sur au moins ' +
        CUT.seuilLong + ' cm de long.</p>';
   out.innerHTML = h;
@@ -1943,8 +2020,18 @@ function kpi(val, label, cls){
 function renderOff(){
   const box = $("offList");
   const list = CUT.offcuts || [];
+  const ord = LS.get("mst_orders", []).find(x => x.id === cutOrderId);
+  const profils = PROFILS[(ord && ord.type === "JN") ? "JN" : "ENR"];
   box.innerHTML = "";
   list.forEach((o, i) => {
+    if (profils.length > 1){
+      const sel = document.createElement("div");
+      sel.className = "offsel";
+      sel.innerHTML = '<select data-offp="' + i + '" aria-label="Profilé de la chute ' + (i+1) + '">' +
+        profils.map(pr => '<option value="' + pr.k + '"' + ((o.profil || profils[0].k) === pr.k ? " selected" : "") + '>' + pr.label + '</option>').join("") +
+        '</select>';
+      box.appendChild(sel);
+    }
     const d = document.createElement("div");
     d.className = "offrow";
     d.innerHTML =
@@ -1967,6 +2054,12 @@ $("offList").addEventListener("input", e => {
   const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
   if (clean !== e.target.value) e.target.value = clean;
   CUT.offcuts[i][e.target.dataset.k] = clean === "" ? "" : parseFloat(clean);
+  cutSave(); renderCut();
+});
+$("offList").addEventListener("change", e => {
+  const i = e.target.dataset.offp;
+  if (i === undefined) return;
+  CUT.offcuts[i].profil = e.target.value;
   cutSave(); renderCut();
 });
 $("offList").addEventListener("click", e => {
