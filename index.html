@@ -141,7 +141,14 @@ select{appearance:none; -webkit-appearance:none}
 /* ---------- dimensions ---------- */
 .dim-head{display:grid; grid-template-columns:26px 1fr 14px 1fr 34px; gap:8px; align-items:center; padding:0 2px 6px}
 .dim-head span{font-family:"Archivo",sans-serif; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600}
-.row{display:grid; grid-template-columns:26px 1fr 14px 1fr 34px; gap:8px; align-items:center; margin-bottom:8px}
+.row{display:grid; grid-template-columns:24px 1fr 12px 1fr 56px 32px; gap:7px; align-items:center; margin-bottom:8px}
+.qty{display:flex; align-items:center; gap:2px; background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:0 5px 0 6px; height:38px}
+.qty > span{flex:none; font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted)}
+.qty input{width:100%; min-width:0; border:0; background:none; padding:0; text-align:center; font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; color:var(--ink)}
+.qty input::placeholder{color:var(--muted); opacity:.6; font-weight:500}
+.qty:focus-within{border-color:var(--accent); background:var(--card)}
+.qty.on{background:var(--accent-soft); border-color:transparent}
+.qty.on > span, .qty.on input{color:var(--accent)}
 .idx{
   width:26px; height:26px; border-radius:50%; background:var(--card2); border:1px solid var(--line);
   display:grid; place-items:center; font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; color:var(--muted);
@@ -1006,7 +1013,7 @@ function blank(){
     nom:"", tel:"", adresse:"",
     type:"ENR",
     multi:false,
-    dims:[{l:"",h:"",ref:"",note:"",type:"ENR"}],
+    dims:[{l:"",h:"",ref:"",note:"",type:"ENR",q:""}],
     refs:[],
     prix: LS.get("mst_prix", ""),
     pose:"Pose",
@@ -1053,10 +1060,31 @@ function rowRef(i){
   return ok[0] || S.refs[0] || "";
 }
 function rowFab(i){ return fab(rowRef(i)); }
+/* Nombre de fenêtres identiques portées par une ligne enregistrée */
+function qtyRow(x){
+  const n = Math.round(parseFloat(String(x && x.q !== undefined ? x.q : "").replace(",", ".")));
+  return (n >= 1 && n <= 99) ? n : 1;
+}
+/* Nombre de fenêtres identiques d'une ligne. Vide ou invalide = 1, plafond 99. */
+function qtyOf(i){
+  const d = S.dims[i];
+  if (!d) return 1;
+  const n = Math.round(parseFloat(String(d.q === undefined ? "" : d.q).replace(",", ".")));
+  return (n >= 1 && n <= 99) ? n : 1;
+}
+/* Une ligne saisie devient autant de fenêtres qu'annoncé : tout le reste
+   du programme (prix, coupes, plan, pièces) travaille fenêtre par fenêtre. */
 function validDims(){
-  return S.dims
-    .map((d, i) => ({l:parseFloat(d.l), h:parseFloat(d.h), ref:rowRef(i), note:d.note || "", i:i, i0:i+1, t:rowType(i)}))
-    .filter(d => d.l > 0 && d.h > 0);
+  const out = [];
+  S.dims.forEach((d, i) => {
+    const l = parseFloat(d.l), h = parseFloat(d.h);
+    if (!(l > 0 && h > 0)) return;
+    const q = qtyOf(i);
+    for (let k = 1; k <= q; k++)
+      out.push({l:l, h:h, ref:rowRef(i), note:d.note || "", i:i, i0:out.length+1,
+                t:rowType(i), q:q, k:k});
+  });
+  return out;
 }
 const MINCM = 100;   /* minimum facturé par côté */
 const MAXH  = 500;   /* hauteur maximale fabricable, en cm */
@@ -1092,6 +1120,9 @@ function renderRows(){
         '<input inputmode="decimal" value="' + (d.l || "") + '" data-k="l" data-i="' + i + '" aria-label="Largeur store ' + (i+1) + '">' +
         '<div class="times">&times;</div>' +
         '<input inputmode="decimal" value="' + (d.h || "") + '" data-k="h" data-i="' + i + '" aria-label="Hauteur store ' + (i+1) + '">' +
+        '<div class="qty' + (qtyOf(i) > 1 ? " on" : "") + '"><span>&times;</span>' +
+          '<input inputmode="numeric" value="' + (d.q || "") + '" data-k="q" data-i="' + i + '" placeholder="1" aria-label="Nombre de fenêtres identiques, ligne ' + (i+1) + '">' +
+        '</div>' +
         '<button class="del" data-del="' + i + '" aria-label="Supprimer la ligne ' + (i+1) + '">' +
           '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>' +
         '</button>' +
@@ -1135,7 +1166,9 @@ function updateNote(i){
     ? "Hauteur " + h + " cm au-delà du maximum " + MAXH + " cm"
     : wide
       ? "Largeur " + l + " cm au-delà de la laize " + f.laize + " cm : raccord nécessaire"
-      : fr(l*h/10000) + " m²";
+      : (qtyOf(i) > 1
+          ? qtyOf(i) + " fenêtres · " + fr(l*h/10000) + " m² chacune · " + fr(qtyOf(i)*l*h/10000) + " m²"
+          : fr(l*h/10000) + " m²");
 }
 
 function updateAllNotes(){ S.dims.forEach((d, i) => updateNote(i)); }
@@ -1257,6 +1290,7 @@ function renderDecoupe(){
     const el = document.createElement("div");
     el.className = "cutblock";
     el.innerHTML = '<h4><span>Store ' + d.i0 +
+        (d.q > 1 ? " (" + d.k + " sur " + d.q + ")" : "") +
         (S.type === "MIX" ? " · " + (d.t === "JN" ? "jour et nuit" : "enrouleur") : "") +
         (d.note ? " · " + esc(d.note) : "") + '</span><em>' + fr(d.l,0) + ' × ' + fr(d.h,0) + '</em></h4>' +
       list.map(pc => '<div class="cutp"><span>' + pc.label + '</span><b>' + fr(d.l - pc.d, (d.l - pc.d) % 1 ? 1 : 0) + ' cm</b></div>').join("");
@@ -1438,6 +1472,10 @@ rowsEl.addEventListener("input", e => {
   const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
   if (clean !== e.target.value) e.target.value = clean;
   S.dims[i][e.target.dataset.k] = clean;
+  if (e.target.dataset.k === "q"){
+    const box = e.target.closest(".qty");
+    if (box) box.className = "qty" + (qtyOf(+i) > 1 ? " on" : "");
+  }
   updateNote(+i); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
 });
 rowsEl.addEventListener("click", e => {
@@ -1455,11 +1493,11 @@ rowsEl.addEventListener("click", e => {
   if (!b) return;
   const i = +b.dataset.del;
   S.dims.splice(i, 1);
-  if (!S.dims.length) S.dims = [{l:"",h:"",ref:"",note:"",type: S.type === "MIX" ? "ENR" : S.type}];
+  if (!S.dims.length) S.dims = [{l:"",h:"",ref:"",note:"",q:"",type: S.type === "MIX" ? "ENR" : S.type}];
   renderAll();
 });
 $("addRow").addEventListener("click", () => {
-  S.dims.push({l:"",h:"",ref:"",note:"",type: S.type === "MIX" ? (S.dims.length ? rowType(S.dims.length-1) : "ENR") : S.type});
+  S.dims.push({l:"",h:"",ref:"",note:"",q:"",type: S.type === "MIX" ? (S.dims.length ? rowType(S.dims.length-1) : "ENR") : S.type});
   renderRows(); renderDecoupe(); renderRecap(); renderPieces();
   const inp = rowsEl.querySelector('input[data-i="' + (S.dims.length-1) + '"][data-k="l"]');
   if (inp) inp.focus();
@@ -1544,8 +1582,8 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
 
 function migrate(o){
   if (!o.refs) o.refs = o.ref ? [o.ref] : [];
-  o.dims = (o.dims || []).map(d => ({l:d.l||"", h:d.h||"", ref:d.ref||"", note:d.note||"", type:d.type||""}));
-  if (!o.dims.length) o.dims = [{l:"",h:"",ref:"",note:"",type:"ENR"}];
+  o.dims = (o.dims || []).map(d => ({l:d.l||"", h:d.h||"", ref:d.ref||"", note:d.note||"", type:d.type||"", q:d.q||""}));
+  if (!o.dims.length) o.dims = [{l:"",h:"",ref:"",note:"",type:"ENR",q:""}];
   if (o.pose !== "Livraison") o.pose = "Pose";
   if (o.prix === undefined) o.prix = "";
   if (o.multi === undefined) o.multi = (o.refs || []).length > 1;
@@ -2245,7 +2283,12 @@ $("btnLocalStock").addEventListener("click", () => {
 let histFilter = "all";
 
 function orderTotals(o){
-  const v = (o.dims || []).map(d => ({l:parseFloat(d.l), h:parseFloat(d.h)})).filter(d => d.l > 0 && d.h > 0);
+  const v = [];
+  (o.dims || []).forEach(d => {
+    const l = parseFloat(d.l), h = parseFloat(d.h);
+    if (!(l > 0 && h > 0)) return;
+    for (let k = 0; k < qtyRow(d); k++) v.push({l:l, h:h});
+  });
   const m2f = v.reduce((s,d) => s + (Math.max(d.l,MINCM) * Math.max(d.h,MINCM))/10000, 0);
   const pu = parseFloat(String(o.prix || "").replace(",", ".")) || 0;
   return {nb:v.length, prix: pu > 0 ? m2f * pu : 0};
@@ -2404,7 +2447,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "2.0";
+const APP_VERSION = "2.1";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -2573,7 +2616,9 @@ function pcRow(fam){
   const pu = parseFloat(String(S.prix).replace(",", ".")) || 0;
   const dt = new Date(S.date || Date.now());
   const dateFR = pad(dt.getDate()) + "/" + pad(dt.getMonth()+1) + "/" + dt.getFullYear();
-  const dims = d.dims.map(x => fr(x.l,0) + "x" + fr(x.h,0)).join(" · ");
+  const grp = new Map();
+  d.dims.forEach(x => { const k = fr(x.l,0) + "x" + fr(x.h,0); grp.set(k, (grp.get(k) || 0) + 1); });
+  const dims = [...grp].map(a => a[1] > 1 ? a[0] + " \u00d7" + a[1] : a[0]).join(" · ");
   const tissus = [...new Set(d.dims.map(x => x.ref).filter(Boolean))].join(", ");
   const total = Math.round(d.venteM2 * pu * 100) / 100;
   const head = [dateFR, S.nom || "", S.num || "", S.notes || "",
@@ -2802,15 +2847,20 @@ function renderPlan(){
   $("cutOrderSub").textContent = o.num + "  ·  " + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + String(d.getFullYear()).slice(2);
 
   const refs = o.refs || [];
-  const dims = (o.dims || []).map((x, i) => {
+  const dims = [];
+  (o.dims || []).forEach(x => {
+    const l = parseFloat(x.l), hh = parseFloat(x.h);
+    if (!(l > 0 && hh > 0)) return;
     const t = o.type === "MIX" ? (x.type === "JN" ? "JN" : "ENR") : o.type;
     let rf = (o.multi && x.ref && refs.indexOf(x.ref) >= 0) ? x.ref : "";
     if (!rf){
       const ok = refs.filter(r => { const f = fab(r); return f && f.type === t; });
       rf = ok[0] || refs[0] || "";
     }
-    return {l: parseFloat(x.l), h: parseFloat(x.h), n: i + 1, note: x.note || "", ref: rf, t: t};
-  }).filter(x => x.l > 0 && x.h > 0);
+    const q = qtyRow(x);
+    for (let k = 0; k < q; k++)
+      dims.push({l:l, h:hh, n: dims.length + 1, note: x.note || "", ref: rf, t: t});
+  });
 
   if (!dims.length){ out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>'; return; }
   if (!cutMode){
