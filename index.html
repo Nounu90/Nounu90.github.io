@@ -515,10 +515,11 @@ select{appearance:none; -webkit-appearance:none}
 .hrow .hmain{flex:1; min-width:0; text-align:left; display:block}
 .hl1{display:flex; align-items:center; gap:8px}
 .hl1 b{flex:1; min-width:0; font-family:"Archivo",sans-serif; font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.hl2{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:5px}
-.hl2 small{color:var(--muted); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.hl2{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-top:5px}
+.hl2 small{color:var(--muted); font-size:12.5px; line-height:1.45; min-width:0}
 .hright{flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:2px}
 .hech{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500; color:var(--muted); white-space:nowrap}
+.hnum{font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:500; color:var(--muted); opacity:.75; letter-spacing:.02em; white-space:nowrap}
 .hprice{font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:600; color:var(--accent); white-space:nowrap; flex:none}
 .hacts{display:flex; gap:2px; flex:none}
 .hact{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; color:var(--muted); flex:none}
@@ -1437,6 +1438,7 @@ $("pcEtat").addEventListener("change", e => {
   $("pcEtatWrap").className = "etatsel " + S.etat;
   const i = ORDERS.findIndex(o => o.id === S.id);
   if (i >= 0){ ORDERS[i].etat = S.etat; persistOrders(); pushBon(ORDERS[i]); }
+  sheetSituation(S.num, etatLabel(S.etat));
 });
 $("btnPieces").addEventListener("click", pcConfirm);
 $("btnHook").addEventListener("click", askHook);
@@ -1996,6 +1998,29 @@ function removeOrder(id){
   if (gone && gone.num) sheetDelete(gone.num);
 }
 
+/* --- situation : la colonne E du tableau suit l'état choisi --- */
+/* On ne réécrit que cette case, le reste de la ligne n'est pas touché. */
+let SHEETSIT = LS.get("mst_sheetsit", {});
+
+function sheetSituation(num, label){
+  if (!num) return Promise.resolve();
+  SHEETSIT[num] = label;
+  LS.set("mst_sheetsit", SHEETSIT);
+  return flushSheetSit();
+}
+function flushSheetSit(){
+  const url = hookUrl();
+  const nums = Object.keys(SHEETSIT || {});
+  if (!url || !nums.length) return Promise.resolve();
+  return Promise.all(nums.map(num =>
+    fetch(url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+                body: JSON.stringify({action:"situation", key:num, value:SHEETSIT[num]})})
+      .then(r => r.text())
+      .then(t => { const j = JSON.parse(t); if (j && j.ok) delete SHEETSIT[num]; })
+      .catch(() => {})
+  )).then(() => { LS.set("mst_sheetsit", SHEETSIT); });
+}
+
 /* --- suppression de la ligne dans le tableau de production --- */
 /* Le script Google retire la ligne entière : aucun trou entre deux lignes. */
 let SHEETDEL = LS.get("mst_sheetdel", []);
@@ -2067,6 +2092,7 @@ async function pullBons(){
 
 async function syncAll(){
   flushSheetDel();
+  flushSheetSit();
   if (!SB || !USER) return;
   await flushTombs();
   await flushPending();
@@ -2402,14 +2428,13 @@ function renderHist(){
     row.innerHTML =
       '<button class="hmain" data-open="' + o.id + '">' +
         '<span class="hl1"><b><span class="etat-box etat-' + et + '">' + (o.nom || "Client sans nom") + '</span></b></span>' +
-        '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + o.num + '  ·  ' + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
+        '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
           '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + '</small>' +
-          ((t.prix || o.ech)
-            ? '<span class="hright">' +
-                (t.prix ? '<span class="hprice">' + fr(t.prix) + ' MAD</span>' : '') +
-                echSuffix(o) +
-              '</span>'
-            : '') + '</span>' +
+          '<span class="hright">' +
+            (t.prix ? '<span class="hprice">' + fr(t.prix) + ' MAD</span>' : '') +
+            echSuffix(o) +
+            '<span class="hnum">' + o.num + '</span>' +
+          '</span></span>' +
       '</button>' +
       '<span class="hside">' +
         '<span class="etatsel ' + et + '">' +
@@ -2463,6 +2488,7 @@ $("histBody").addEventListener("change", e => {
     if (nom) nom.className = "etat-box etat-" + o.etat;
   }
   pushBon(o);
+  sheetSituation(o.num, etatLabel(o.etat));
   toast(etatLabel(o.etat) + "  ·  " + (o.nom || "client"));
 });
 
@@ -2534,7 +2560,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "2.4";
+const APP_VERSION = "2.6";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
