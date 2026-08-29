@@ -276,6 +276,17 @@ select{appearance:none; -webkit-appearance:none}
 .pc-confirm[disabled]{opacity:.5}
 .pc-confirm.done{background:var(--ok)}
 
+/* ---------- chutes non utilisées ---------- */
+.unused{margin:10px 0 4px; padding:12px 14px; border:1px dashed var(--line);
+  border-radius:10px; background:var(--card2)}
+.unused > b{display:block; font-family:Archivo,sans-serif; font-size:10.5px; font-weight:700;
+  letter-spacing:.11em; text-transform:uppercase; color:var(--muted); margin-bottom:8px}
+.uline{display:flex; gap:10px; align-items:baseline; margin-bottom:6px}
+.uline:last-child{margin-bottom:0}
+.uline > span{flex:none; font-family:"IBM Plex Mono",monospace; font-size:12.5px;
+  font-weight:600; color:var(--ink)}
+.uline > em{font-style:normal; font-size:12.5px; color:var(--muted); line-height:1.45}
+
 /* ---------- recap ---------- */
 .recap{background:var(--card); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow)}
 .recap .rh{padding:14px 16px 10px}
@@ -907,7 +918,7 @@ select{appearance:none; -webkit-appearance:none}
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         Ajouter une chute de tissu
       </button>
-      <p class="hint">Largeur et longueur du morceau en cm, et nombre de morceaux. Elles sont utilisées avant de dérouler le rouleau.</p>
+      <p class="hint"><b>Laize</b> = la mesure en travers du rouleau, <b>longueur</b> = dans le sens du déroulé. En cm, avec le nombre de morceaux. Ces chutes sont utilisées avant d'entamer le rouleau ; celles qui ne peuvent pas servir sont listées sous le plan, avec la raison.</p>
     </div>
     </div>
 
@@ -2711,7 +2722,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "2.8";
+const APP_VERSION = "2.9";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -3065,6 +3076,22 @@ function planTissu(stores, laize, surplus, sLaize, sLong, stock){
     bands.push({items:[s], used:fabW(s), unroll:nd, src:"rouleau", width:laize, maxLen:Infinity});
   });
 
+  /* Chutes restées sur le carreau, avec la raison : le silence est pire qu'un refus */
+  const minW  = items.length ? Math.min.apply(null, items.map(s => fabW(s))) : 0;
+  const minLen= items.length ? Math.min.apply(null, items.map(s => need(s)))  : 0;
+  const unused = pieces.map(pc => {
+    let why;
+    if (!items.length) why = "aucune fenêtre à couper dans ce tissu";
+    else if (pc.w < minW - 0.001)
+      why = "trop étroite : la coupe la plus fine demande " + fr(minW,0) + " cm de large";
+    else if (pc.len < minLen - 0.001)
+      why = "trop courte : la bande la plus courte demande " + fr(minLen,0) + " cm";
+    else why = "pas nécessaire, toutes les fenêtres étaient déjà placées";
+    const swap = items.length && (pc.w < minW - 0.001 || pc.len < minLen - 0.001) &&
+                 pc.len >= minW - 0.001 && pc.w >= minLen - 0.001;
+    return {label:pc.label, w:pc.w, len:pc.len, why:why, swap:swap};
+  });
+
   let nb = 0;
   bands.forEach(b => {
     b.n = b.src === "rouleau" ? ++nb : 0;
@@ -3078,7 +3105,7 @@ function planTissu(stores, laize, surplus, sLaize, sLong, stock){
   });
   const roll = bands.filter(b => b.src === "rouleau");
   const conso = roll.reduce((t,b) => t + b.conso, 0);
-  return {bands:bands, impossible:impossible, conso:conso,
+  return {bands:bands, impossible:impossible, conso:conso, unused:unused,
           nbRoll: roll.length, nbStock: bands.length - roll.length,
           stockUsed: bands.filter(b => b.src === "chute").reduce((t,b) => t + b.conso, 0),
           utile: bands.reduce((t,b) => t + b.utile, 0),
@@ -3216,7 +3243,11 @@ function renderPlan(){
   if (cutMode === "tissu") Object.keys(byRef).forEach(ref => {
     const f = fab(ref);
     const lz = f ? f.laize : laize;
-    const fcs = (CUT.fabcuts || []).filter(c => (c.ref || (o.refs || [])[0]) === ref);
+    /* Un bon à un seul tissu : toute chute saisie le concerne, quelle que soit
+       la référence enregistrée avec elle. Sinon on respecte le tissu choisi. */
+    const fcs = (o.refs || []).length > 1
+      ? (CUT.fabcuts || []).filter(c => (c.ref || (o.refs || [])[0]) === ref)
+      : (CUT.fabcuts || []);
     const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong, fcs);
     h += '<div class="banner"><b>TISSU ' + ref + '</b><span>rouleau de ' + fr(lz,0) + ' cm de large</span></div>';
     h += '<p class="bsum">' +
@@ -3261,6 +3292,15 @@ function renderPlan(){
     if (T.impossible.length){
       h += '<div class="pcard"><div class="fate drop">' + T.impossible.length +
         ' fenêtre(s) trop large(s) pour le rouleau de ' + fr(lz,0) + ' cm.</div></div>';
+    }
+    if (T.unused && T.unused.length){
+      h += '<div class="unused"><b>Chutes du stock non utilisées</b>';
+      T.unused.forEach(u => {
+        h += '<div class="uline"><span>' + fr(u.w,0) + ' × ' + fr(u.len,0) + ' cm</span><em>' +
+             u.why + (u.swap ? '. Dans l\'autre sens elle conviendrait : vérifiez que la largeur est bien la mesure en travers du rouleau' : '') +
+             '</em></div>';
+      });
+      h += '</div>';
     }
   });
 
@@ -3356,8 +3396,8 @@ function renderFc(){
     const d = document.createElement("div");
     d.className = "offrow fc";
     d.innerHTML =
-      '<input inputmode="decimal" value="' + (c.w || "") + '" data-fc="' + i + '" data-k="w" placeholder="Largeur" aria-label="Largeur de la chute ' + (i+1) + '">' +
-      '<input inputmode="decimal" value="' + (c.l || "") + '" data-fc="' + i + '" data-k="l" placeholder="Longueur" aria-label="Longueur de la chute ' + (i+1) + '">' +
+      '<input inputmode="decimal" value="' + (c.w || "") + '" data-fc="' + i + '" data-k="w" placeholder="Laize" aria-label="Largeur de la chute ' + (i+1) + ', en travers du rouleau">' +
+      '<input inputmode="decimal" value="' + (c.l || "") + '" data-fc="' + i + '" data-k="l" placeholder="Longueur" aria-label="Longueur de la chute ' + (i+1) + ', dans le sens du déroulé">' +
       '<input inputmode="numeric" value="' + (c.qty || "") + '" data-fc="' + i + '" data-k="qty" placeholder="Qté" aria-label="Nombre de morceaux ' + (i+1) + '">' +
       '<button class="del" data-fcdel="' + i + '" aria-label="Retirer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>';
     box.appendChild(d);
