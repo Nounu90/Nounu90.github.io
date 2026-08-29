@@ -21,7 +21,7 @@
 :root{
   --ground:#F1EEEE; --card:#FFFFFF; --card2:#F7F4F4; --ink:#191315; --muted:#6F6569;
   --line:#E4DDDE; --line-strong:#D3C9CB; --accent:#D5001F; --accent-ink:#FFFFFF; --accent-soft:#FCEAEC;
-  --ok:#0F7A46; --ok-soft:#E6F3EB; --warn:#8F5400; --warn-soft:#FAEFDD;
+  --ok:#0F7A46; --ok-soft:#E6F3EB; --warn:#8F5400; --warn-soft:#FAEFDD; --info:#1B5FBF; --info-soft:#E7EFFB;
   --shadow:0 1px 2px rgba(25,19,21,.05), 0 10px 26px rgba(25,19,21,.06);
   --r:14px;
 }
@@ -31,7 +31,7 @@
     color-scheme:dark;
     --ground:#141011; --card:#201A1C; --card2:#2A2224; --ink:#F4EFF0; --muted:#A3979A;
     --line:#332B2D; --line-strong:#463C3F; --accent:#FF4257; --accent-ink:#2A0509; --accent-soft:#3A1419;
-    --ok:#4ADE80; --ok-soft:#132D1E; --warn:#F0B15A; --warn-soft:#332510;
+    --ok:#4ADE80; --ok-soft:#132D1E; --warn:#F0B15A; --warn-soft:#332510; --info:#7FB0FF; --info-soft:#12233D;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.35);
   }
 }
@@ -381,6 +381,26 @@ select{appearance:none; -webkit-appearance:none}
 .pick-order b{display:block; font-family:"Archivo",sans-serif; font-size:15px; font-weight:600}
 .pick-order small{display:block; color:var(--muted); font-size:12.5px; margin-top:2px}
 
+
+
+/* ---------- état d'une commande ---------- */
+.etat-box{display:inline-block; padding:3px 9px; border-radius:8px; max-width:100%; overflow:hidden; text-overflow:ellipsis}
+.etat-devis{background:var(--card2); color:var(--ink)}
+.etat-production{background:var(--warn-soft); color:var(--warn)}
+.etat-pret{background:var(--info-soft); color:var(--info)}
+.etat-livre{background:var(--ok-soft); color:var(--ok)}
+.hside{display:flex; flex-direction:column; align-items:flex-end; gap:7px; flex:none}
+.etatsel{position:relative; display:flex; align-items:center}
+.etatsel select{
+  appearance:none; -webkit-appearance:none; border:1px solid var(--line); border-radius:9px;
+  padding:7px 26px 7px 11px; font-family:"Archivo",sans-serif; font-weight:600; font-size:12px;
+  background:var(--card2); color:var(--muted);
+}
+.etatsel svg{position:absolute; right:8px; pointer-events:none; color:currentColor; opacity:.7}
+.etatsel.devis select{background:var(--card2); color:var(--ink)}
+.etatsel.production select{background:var(--warn-soft); color:var(--warn); border-color:transparent}
+.etatsel.pret select{background:var(--info-soft); color:var(--info); border-color:transparent}
+.etatsel.livre select{background:var(--ok-soft); color:var(--ok); border-color:transparent}
 
 /* ---------- connexion ---------- */
 .login{position:fixed; inset:0; z-index:80; background:var(--ground); display:none; align-items:center; justify-content:center; padding:22px; overflow-y:auto}
@@ -868,8 +888,10 @@ select{appearance:none; -webkit-appearance:none}
     <div class="filters" id="histFilters">
       <button type="button" data-f="all" aria-pressed="true">Tous</button>
       <button type="button" data-f="mine" aria-pressed="false">Mes bons</button>
-      <button type="button" data-f="sent" aria-pressed="false">Envoyés</button>
-      <button type="button" data-f="draft" aria-pressed="false">Brouillons</button>
+      <button type="button" data-f="devis" aria-pressed="false">Devis</button>
+      <button type="button" data-f="production" aria-pressed="false">En production</button>
+      <button type="button" data-f="pret" aria-pressed="false">Prêt</button>
+      <button type="button" data-f="livre" aria-pressed="false">Livré</button>
     </div>
     <div id="histBody"></div>
   </div>
@@ -1437,7 +1459,7 @@ $("btnDraft").addEventListener("click", () => {
 });
 
 /* ============ History ============ */
-function openSheet(id){ $(id).classList.add("open"); document.body.style.overflow = "hidden"; }
+function openSheet(id){ armBack(); $(id).classList.add("open"); document.body.style.overflow = "hidden"; }
 function closeSheet(id){ $(id).classList.remove("open"); document.body.style.overflow = ""; }
 document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => {
   const id = b.dataset.close;
@@ -1812,9 +1834,28 @@ function markPending(id, v){
   persistOrders();
 }
 
+let TOMBS = LS.get("mst_deleted", []);   /* bons supprimés, tant que la base ne l'a pas confirmé */
+
+function removeOrder(id){
+  ORDERS = ORDERS.filter(o => o.id !== id);
+  if (TOMBS.indexOf(id) < 0){ TOMBS.push(id); LS.set("mst_deleted", TOMBS.slice(-100)); }
+  persistOrders();
+  deleteBon(id);
+}
+
 async function deleteBon(id){
-  if (!SB || !USER) return;
-  try { await SB.from("bons").delete().eq("id", id); } catch(e){}
+  if (!SB || !USER) return false;
+  try {
+    const {error} = await SB.from("bons").delete().eq("id", id);
+    if (error) throw error;
+    TOMBS = TOMBS.filter(x => x !== id);
+    LS.set("mst_deleted", TOMBS);
+    return true;
+  } catch(e){ return false; }
+}
+
+async function flushTombs(){
+  for (const id of TOMBS.slice()) await deleteBon(id);
 }
 
 async function flushPending(){
@@ -1833,6 +1874,7 @@ async function pullBons(){
     const map = {};
     ORDERS.forEach(o => { map[o.id] = o; });
     data.forEach(r => {
+      if (TOMBS.indexOf(r.id) >= 0) return;        /* supprimé ici, pas encore côté base */
       const cur = map[r.id];
       if (cur && cur.pending) return;              /* le brouillon local n'est pas écrasé */
       const o = Object.assign({}, r.data || {});
@@ -1851,6 +1893,7 @@ async function pullBons(){
 
 async function syncAll(){
   if (!SB || !USER) return;
+  await flushTombs();
   await flushPending();
   await pullBons();
 }
@@ -1931,6 +1974,7 @@ async function bootAuth(){
 
 /* ============ Navigation ============ */
 function nav(where){
+  armBack();
   const home = $("home");
   ["refSheet","shotSheet","histSheet","stockSheet","cutSheet","cutPickSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
@@ -2136,9 +2180,8 @@ function renderHist(){
   const all = ORDERS;
   const q = ($("histSearch").value || "").trim().toLowerCase();
   let list = all.filter(o => {
-    if (histFilter === "sent" && o.status !== "sent") return false;
-    if (histFilter === "draft" && o.status === "sent") return false;
     if (histFilter === "mine" && USER && o.author !== USER.login) return false;
+    if (ETATS.some(e => e.k === histFilter) && etatDe(o) !== histFilter) return false;
     if (!q) return true;
     const hay = [o.nom, o.num, o.tel, o.author, (o.refs || []).join(" ")].join(" ").toLowerCase();
     return hay.includes(q);
@@ -2155,18 +2198,25 @@ function renderHist(){
     const d = new Date(o.date);
     const row = document.createElement("div");
     row.className = "hrow";
+    const et = etatDe(o);
     row.innerHTML =
       '<button class="hmain" data-open="' + o.id + '">' +
-        '<span class="hl1"><b>' + (o.nom || "Client sans nom") + '</b>' +
-          '<span class="badge ' + (o.pending ? "warn" : (o.status === "sent" ? "ok" : "")) + '">' +
-            (o.pending ? "À envoyer" : (o.status === "sent" ? "Envoyé" : "Brouillon")) + '</span></span>' +
+        '<span class="hl1"><b><span class="etat-box etat-' + et + '">' + (o.nom || "Client sans nom") + '</span></b></span>' +
         '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + o.num + '  ·  ' + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
           '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + '</small>' +
           (t.prix ? '<span class="hprice">' + fr(t.prix) + ' MAD</span>' : '') + '</span>' +
       '</button>' +
-      '<span class="hacts">' +
-        '<button class="hact" data-dup="' + o.id + '" aria-label="Dupliquer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg></button>' +
-        '<button class="hact danger" data-del="' + o.id + '" aria-label="Supprimer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>' +
+      '<span class="hside">' +
+        '<span class="etatsel ' + et + '">' +
+          '<select data-etat="' + o.id + '" aria-label="État de la commande">' +
+            ETATS.map(e => '<option value="' + e.k + '"' + (e.k === et ? " selected" : "") + '>' + e.label + '</option>').join("") +
+          '</select>' +
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>' +
+        '</span>' +
+        '<span style="display:flex; align-items:center; gap:6px">' +
+          (o.pending ? '<span class="badge warn">À envoyer</span>' : '') +
+          '<button class="hact danger" data-del="' + o.id + '" aria-label="Supprimer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>' +
+        '</span>' +
       '</span>';
     body.appendChild(row);
   });
@@ -2193,27 +2243,37 @@ function loadOrder(o){
   window.scrollTo({top:0, behavior:"instant"});
 }
 
+$("histBody").addEventListener("change", e => {
+  const sel = e.target.closest("select[data-etat]");
+  if (!sel) return;
+  const o = ORDERS.find(x => x.id === sel.dataset.etat);
+  if (!o) return;
+  o.etat = sel.value;
+  persistOrders();
+  const box = sel.closest(".hrow");
+  if (box){
+    const wrap = sel.closest(".etatsel");
+    wrap.className = "etatsel " + o.etat;
+    const nom = box.querySelector(".etat-box");
+    if (nom) nom.className = "etat-box etat-" + o.etat;
+  }
+  pushBon(o);
+  toast(etatLabel(o.etat) + "  ·  " + (o.nom || "client"));
+});
+
 $("histBody").addEventListener("click", e => {
   const open = e.target.closest("button[data-open]");
-  const dup  = e.target.closest("button[data-dup]");
   const del  = e.target.closest("button[data-del]");
-  const all = ORDERS;
   if (open){
-    const o = all.find(x => x.id === open.dataset.open);
+    const o = ORDERS.find(x => x.id === open.dataset.open);
     if (o){ loadOrder(o); toast("Bon " + o.num + " ouvert"); }
-  } else if (dup){
-    const o = all.find(x => x.id === dup.dataset.dup);
-    if (!o) return;
-    const c = migrate(JSON.parse(JSON.stringify(o)));
-    c.id = "d" + Date.now(); c.num = nextNum(); c.status = "draft"; c.photos = [];
-    loadOrder(c);
-    toast("Copie créée sous " + c.num);
   } else if (del){
-    const o = all.find(x => x.id === del.dataset.del);
+    const o = ORDERS.find(x => x.id === del.dataset.del);
     if (!o) return;
-    ask("Supprimer ce bon ?", "Le bon " + o.num + " de " + (o.nom || "client sans nom") + " sera définitivement effacé de ce téléphone.", () => {
-      LS.set("mst_orders", all.filter(x => x.id !== o.id));
-      if (S.id === o.id){ newOrder(); }
+    ask("Supprimer ce bon ?", "Le bon " + o.num + " de " + (o.nom || "client sans nom") +
+        " sera effacé pour toute l'équipe, sur tous les téléphones.", () => {
+      removeOrder(o.id);
+      if (S.id === o.id) newOrder();
       renderHist(); renderHome();
       toast("Bon " + o.num + " supprimé");
     });
@@ -2224,7 +2284,7 @@ $("histBody").addEventListener("click", e => {
 let cfAction = null;
 function ask(title, text, fn){
   $("cfTitle").textContent = title; $("cfText").textContent = text;
-  cfAction = fn; $("confirm").classList.add("open");
+  cfAction = fn; armBack(); $("confirm").classList.add("open");
 }
 $("cfNo").addEventListener("click", () => { $("confirm").classList.remove("open"); cfAction = null; });
 $("cfYes").addEventListener("click", () => {
@@ -2269,7 +2329,17 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "1.8";
+const APP_VERSION = "1.9";
+
+/* États d'avancement d'une commande */
+const ETATS = [
+  {k:"devis",      label:"Devis"},
+  {k:"production", label:"En production"},
+  {k:"pret",       label:"Prêt"},
+  {k:"livre",      label:"Livré"}
+];
+function etatDe(o){ return (o && o.etat && ETATS.some(e => e.k === o.etat)) ? o.etat : "devis"; }
+function etatLabel(k){ const e = ETATS.find(x => x.k === k); return e ? e.label : "Devis"; }
 
 const CUT_DEF = {laize:320, bar:600, surplus:20, seuilBarre:90, seuilLaize:90, seuilLong:120};
 let CUT = Object.assign({}, CUT_DEF, LS.get("mst_cut", {}));
@@ -2738,6 +2808,7 @@ $("cutPick").addEventListener("click", () => {
       '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + '</small></span></span>';
     body.appendChild(btn);
   });
+  armBack();
   $("cutPickSheet").classList.add("open");
 });
 $("cutPickBody").addEventListener("click", e => {
@@ -2751,6 +2822,28 @@ $("cutPickBody").addEventListener("click", e => {
 
 $("tileCut").addEventListener("click", () => { cutMode = CUT.mode || null; renderCut(); nav("cutSheet"); pullBons().then(() => renderCut()); });
 
+
+/* ============ Bouton Retour du téléphone ============ */
+/* Un cran en arrière au lieu de quitter l'application. */
+function backOneStep(){
+  if ($("login").classList.contains("open")) return false;      /* pas connecté : on laisse sortir */
+  if ($("confirm").classList.contains("open")){ $("confirm").classList.remove("open"); cfAction = null; return true; }
+  if ($("cutPickSheet").classList.contains("open")){ $("cutPickSheet").classList.remove("open"); return true; }
+  if ($("refSheet").classList.contains("open")){ closeSheet("refSheet"); return true; }
+  if ($("shotSheet").classList.contains("open")){ closeSheet("shotSheet"); return true; }
+  if ($("histSheet").classList.contains("open") ||
+      $("stockSheet").classList.contains("open") ||
+      $("cutSheet").classList.contains("open")){ nav("home"); return true; }
+  if (!$("home").classList.contains("open")){ nav("home"); return true; }   /* formulaire */
+  return false;                                                  /* accueil : sortie de l'app */
+}
+
+function armBack(){ try { history.pushState({mst:1}, ""); } catch(e){} }
+
+window.addEventListener("popstate", () => {
+  if (backOneStep()) armBack();
+});
+
 /* ============ Boot ============ */
 (function boot(){
   const cached = LS.get("mst_cat", null);
@@ -2759,6 +2852,7 @@ $("tileCut").addEventListener("click", () => { cutMode = CUT.mode || null; rende
   $("prix").value = S.prix || "";
   renderAll();
   renderStock();
+  armBack();
   nav("home");
   bootAuth().then(okAuth => {
     if (!okAuth){ showLogin(true); return; }
