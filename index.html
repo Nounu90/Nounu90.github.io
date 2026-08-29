@@ -247,6 +247,12 @@ select{appearance:none; -webkit-appearance:none}
   font-size:11px; color:var(--muted)}
 .pcetat{padding:0 0 12px; border-bottom:1px solid var(--line); margin-bottom:12px}
 .pcetat > label{font-size:13.5px; color:var(--muted)}
+.pcopt{display:flex; flex-wrap:wrap; gap:6px; padding:0 12px 9px 12px}
+.pcopt button{
+  flex:1 1 auto; min-width:0; padding:8px 10px; border:1px solid var(--line); border-radius:9px;
+  background:var(--card2); color:var(--muted); font-family:Archivo,sans-serif;
+  font-size:11.5px; font-weight:600; letter-spacing:.02em; white-space:nowrap; cursor:pointer}
+.pcopt button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
 .pcreset{display:block; width:100%; background:none; border:0; padding:8px 12px 10px;
   text-align:left; font-family:Archivo,sans-serif; font-size:11.5px; font-weight:600;
   letter-spacing:.04em; color:var(--muted); cursor:pointer}
@@ -783,6 +789,11 @@ select{appearance:none; -webkit-appearance:none}
       <button type="button" data-f="jn" aria-pressed="false">Jour et Nuit</button>
       <button type="button" data-f="out" aria-pressed="false">Rupture</button>
     </div>
+    <div class="filters" id="stockSort">
+      <button type="button" data-s="sheet" aria-pressed="true">Ordre de la feuille</button>
+      <button type="button" data-s="asc" aria-pressed="false">Stock croissant</button>
+      <button type="button" data-s="desc" aria-pressed="false">Stock décroissant</button>
+    </div>
     <div id="stockList"></div>
     <div class="srcbox">
       <h3>Source des quantités</h3>
@@ -1020,6 +1031,7 @@ function blank(){
     notes:"",
     photos:[],
     pieces:{},
+    modeles:{},
     status:"draft"
   };
 }
@@ -1396,10 +1408,10 @@ $("pcList").addEventListener("input", e => {
   inp.className = v === "" ? "" : "edited";
 });
 $("pcList").addEventListener("click", e => {
-  const b = e.target.closest("button[data-reset]");
+  const b = e.target.closest("button[data-opt]");
   if (!b) return;
-  if (S.pieces) delete S.pieces[b.dataset.reset];
-  renderPieces();
+  modelSet(b.dataset.fam, b.dataset.opt, b.dataset.v);
+  [...b.parentNode.children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
 });
 $("pcEtat").addEventListener("change", e => {
   S.etat = e.target.value;
@@ -1590,6 +1602,7 @@ function migrate(o){
   o.dims.forEach(d => { if (!d.type) d.type = o.type === "MIX" ? "ENR" : o.type; });
   if (!o.photos) o.photos = [];
   if (!o.pieces || typeof o.pieces !== "object") o.pieces = {};
+  if (!o.modeles || typeof o.modeles !== "object") o.modeles = {};
   return o;
 }
 
@@ -2123,6 +2136,7 @@ function srcLabel(){
 
 /* ============ Stock ============ */
 let stockFilter = "stock";
+let stockSort = LS.get("mst_stocksort", "sheet");   /* sheet | asc | desc */
 
 function renderStock(){
   const q = ($("stockSearch").value || "").trim().toLowerCase();
@@ -2131,7 +2145,10 @@ function renderStock(){
   else if (stockFilter === "out") list = list.filter(f => f.dispo < 1);
   else if (stockFilter === "enr") list = list.filter(f => f.type === "ENR");
   else if (stockFilter === "jn") list = list.filter(f => f.type === "JN");
-  list = list.slice().sort((a,b) => b.dispo - a.dispo || a.ref.localeCompare(b.ref));
+  /* Par défaut on respecte l'ordre exact de la feuille Google. */
+  if (stockSort === "asc")       list = list.slice().sort((a,b) => a.dispo - b.dispo || a.ref.localeCompare(b.ref));
+  else if (stockSort === "desc") list = list.slice().sort((a,b) => b.dispo - a.dispo || a.ref.localeCompare(b.ref));
+  else                           list = list.slice();
 
   const tot = list.reduce((s,f) => s + f.dispo, 0);
   $("stockSumLabel").textContent = list.length + (list.length > 1 ? " références" : " référence");
@@ -2150,10 +2167,19 @@ function renderStock(){
       '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : fr(f.dispo) + " ml") + '</span>';
     box.appendChild(d);
   });
+  [...$("stockSort").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.s === stockSort)));
   $("srcInfo").innerHTML = srcLabel() + ".<br>L'application lit la feuille MSTORECASA à chaque ouverture : colonne A pour la référence, colonne AB pour la quantité, et seules les lignes commençant par B-0, S-0 ou JN_0 sont reprises. La feuille doit rester partagée en lecture par lien.";
 }
 
 $("stockSearch").addEventListener("input", renderStock);
+$("stockSort").addEventListener("click", e => {
+  const b = e.target.closest("button[data-s]");
+  if (!b) return;
+  stockSort = b.dataset.s;
+  LS.set("mst_stocksort", stockSort);
+  [...$("stockSort").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderStock();
+});
 $("stockFilters").addEventListener("click", e => {
   const b = e.target.closest("button[data-f]");
   if (!b) return;
@@ -2447,7 +2473,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "2.1";
+const APP_VERSION = "2.2";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -2460,8 +2486,10 @@ function hookUrl(){ return LS.get("mst_hook", "") || HOOK_DEFAULT; }
    L'ordre suit exactement les colonnes du tableau de production. */
 const PIECES_DEF = {
   ENR: [
-    {k:"mecanisme", label:"Mécanisme",          u:"u"},
-    {k:"tube",      label:"Tube 38",            u:"ml", auto:d => d.coupeMl},
+    {k:"mecanisme", label:"Mécanisme",          u:"u",
+     opts:["Mécanisme 38 normal", "Mécanisme 38 PRO", "Mécanisme 40"]},
+    {k:"tube",      label:"Tube",               u:"ml", auto:d => d.coupeMl,
+     opts:["Tube 38", "Tube 40"]},
     {k:"barre",     label:"Barre de charge",    u:"ml", auto:d => d.coupeMl},
     {k:"chainette", label:"Chaînette",          u:"ml"},
     {k:"bouchon",   label:"Bouchon",            u:"u"},
@@ -2536,6 +2564,18 @@ function famsPresent(){
   const v = validDims();
   return ["ENR","JN"].filter(f => v.some(d => d.t === f));
 }
+/* Modèle choisi pour une pièce qui en propose plusieurs */
+function modelVal(fam, def){
+  if (!def.opts) return "";
+  const o = S.modeles && S.modeles[fam];
+  const v = o ? o[def.k] : "";
+  return def.opts.indexOf(v) >= 0 ? v : def.opts[0];
+}
+function modelSet(fam, k, v){
+  if (!S.modeles) S.modeles = {};
+  if (!S.modeles[fam]) S.modeles[fam] = {};
+  S.modeles[fam][k] = v;
+}
 function pcVal(fam, k){
   const o = S.pieces && S.pieces[fam];
   return (o && o[k] !== undefined && o[k] !== null && o[k] !== "") ? o[k] : null;
@@ -2581,18 +2621,22 @@ function renderPieces(){
         const man = pcVal(fam, def.k);
         const val = man !== null ? esc(String(man)) : (a !== null ? fr(a) : "");
         const cls = man !== null ? "edited" : (a !== null ? "auto" : "");
-        return '<div class="pcrow"><label>' + def.label + '</label>' +
+        const row = '<div class="pcrow"><label>' + def.label + '</label>' +
           '<input type="text" inputmode="decimal" class="' + cls + '" value="' + val + '"' +
           ' data-fam="' + fam + '" data-k="' + def.k + '"' +
           ' placeholder="' + (a !== null ? "" : "—") + '"><u>' + def.u + '</u></div>';
+        if (!def.opts) return row;
+        const chosen2 = modelVal(fam, def);
+        return row + '<div class="pcopt">' + def.opts.map(o =>
+          '<button type="button" data-fam="' + fam + '" data-opt="' + def.k + '" data-v="' + esc(o) + '"' +
+          ' aria-pressed="' + (o === chosen2) + '">' + o + '</button>').join("") + '</div>';
       }).join("") + '</div>';
     const el = document.createElement("div");
     el.className = "pcfam";
     el.innerHTML =
       '<h4><span>' + FAM_LABEL[fam] + '</span><em>' + d.nb + (d.nb > 1 ? " stores" : " store") + '</em></h4>' +
       grp("Tissu", TISSU_DEF[fam]) +
-      grp("Pièces", PIECES_DEF[fam]) +
-      '<button class="pcreset" type="button" data-reset="' + fam + '">Revenir aux valeurs calculées</button>';
+      grp("Pièces", PIECES_DEF[fam]);
     box.appendChild(el);
   });
   const u = hookUrl();
@@ -2624,7 +2668,13 @@ function pcRow(fam){
   const head = [dateFR, S.nom || "", S.num || "", S.notes || "",
                 etatLabel(etatDe(S)), pu || "", pu ? total : "", dims, tissus];
   const T = k => pcNum(fam, TISSU_DEF[fam].find(x => x.k === k) || {k:k}, d);
-  const P = k => pcNum(fam, PIECES_DEF[fam].find(x => x.k === k) || {k:k}, d);
+  const P = k => {
+    const def = PIECES_DEF[fam].find(x => x.k === k) || {k:k};
+    const n = pcNum(fam, def, d);
+    if (!def.opts) return n;
+    const m = modelVal(fam, def);
+    return n === "" ? m : m + " · " + String(n).replace(".", ",");
+  };
   if (fam === "ENR")
     return head.concat([T("tissuCoupe"), T("tissuVente"),
       P("mecanisme"), P("tube"), P("barre"),
