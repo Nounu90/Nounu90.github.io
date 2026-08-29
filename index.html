@@ -121,6 +121,7 @@ select{appearance:none; -webkit-appearance:none}
 .price-bar.sub b{font-size:17px; color:var(--ink)}
 .price-bar.tot{background:var(--accent); border-top:0}
 .price-bar.tot span, .price-bar.tot b{color:#fff}
+.numhint{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted); margin:-4px 2px 11px}
 .hint{font-size:12.5px; color:var(--muted); margin:8px 2px 0; line-height:1.5}
 
 /* ---------- type toggle ---------- */
@@ -540,6 +541,7 @@ select{appearance:none; -webkit-appearance:none}
 .hright{flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:2px}
 .hech{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500; color:var(--muted); white-space:nowrap}
 .hpose{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500; color:var(--ink); white-space:nowrap}
+.hech.soon{color:var(--accent); font-weight:600}
 .hnum{font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:500; color:var(--muted); opacity:.75; letter-spacing:.02em; white-space:nowrap}
 .hprice{font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:600; color:var(--accent); white-space:nowrap; flex:none}
 .hacts{display:flex; gap:2px; flex:none}
@@ -608,6 +610,7 @@ select{appearance:none; -webkit-appearance:none}
     <!-- CLIENT -->
     <section class="card">
       <div class="card-head"><div class="label">Client</div><div class="badge" id="numBadge">BC</div></div>
+      <p class="numhint" id="numHint"></p>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>
         <input id="nom" type="text" placeholder="Nom du client" autocomplete="name">
@@ -648,6 +651,11 @@ select{appearance:none; -webkit-appearance:none}
       <div class="field" style="margin-top:9px">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4L11 3.8V3H4v8h.8l9.6 9.6a2 2 0 002.8 0l3.4-3.4a2 2 0 000-2.8z"/><circle cx="7.5" cy="6.5" r="1.2" fill="currentColor"/></svg>
         <input id="prix" inputmode="decimal" placeholder="Prix au m²">
+        <span class="unit">MAD/m²</span>
+      </div>
+      <div class="field" id="prixJNField" style="margin-top:9px" hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4L11 3.8V3H4v8h.8l9.6 9.6a2 2 0 002.8 0l3.4-3.4a2 2 0 000-2.8z"/><circle cx="7.5" cy="6.5" r="1.2" fill="currentColor"/></svg>
+        <input id="prixJN" inputmode="decimal" placeholder="Prix au m² jour et nuit">
         <span class="unit">MAD/m²</span>
       </div>
     </section>
@@ -1059,6 +1067,10 @@ select{appearance:none; -webkit-appearance:none}
       <button type="button" data-f="pret" aria-pressed="false">Prêt</button>
       <button type="button" data-f="livre" aria-pressed="false">Livré</button>
     </div>
+    <div class="filters" id="histSort">
+      <button type="button" data-s="recent" aria-pressed="true">Plus récents</button>
+      <button type="button" data-s="ech" aria-pressed="false">Échéance la plus proche</button>
+    </div>
     <div id="histBody"></div>
   </div>
 </div>
@@ -1124,6 +1136,7 @@ function blank(){
     dims:[{l:"",h:"",ref:"",note:"",type:"ENR",q:""}],
     refs:[],
     prix: LS.get("mst_prix", ""),
+    prixJN: LS.get("mst_prixjn", ""),
     posePrix: LS.get("mst_poseprix", ""),
     poseMode: LS.get("mst_posemode", "forfait"),
     pose:"Pose",
@@ -1140,6 +1153,27 @@ function blank(){
 function moisStamp(d){
   return pad(d.getMonth() + 1) + "-" + String(d.getFullYear()).slice(2);
 }
+/* Le dernier numéro du mois déjà pris, tous agents confondus. */
+function lastNum(){
+  const pref = "BC-" + moisStamp(new Date()) + "-";
+  let liste = [];
+  try { liste = ORDERS || []; } catch(e){ liste = LS.get("mst_orders", []) || []; }
+  let n = 0, best = "";
+  liste.forEach(o => {
+    const v = String(o && o.num || "");
+    if (v.indexOf(pref) !== 0) return;
+    const k = parseInt(v.slice(pref.length), 10);
+    if (k > n){ n = k; best = v; }
+  });
+  return best;
+}
+/* Ce numéro est-il déjà porté par un autre bon ? */
+function numPris(num, id){
+  let liste = [];
+  try { liste = ORDERS || []; } catch(e){ liste = []; }
+  return liste.some(o => o && o.num === num && o.id !== id);
+}
+
 function nextNum(){
   const pref = "BC-" + moisStamp(new Date()) + "-";
   /* Le rang se déduit des bons déjà enregistrés : ouvrir un formulaire sans
@@ -1210,6 +1244,19 @@ function validDims(){
   });
   return out;
 }
+/* Prix au m² d'une famille. Hors mode mixte, un seul prix vaut pour tout. */
+function puFam(fam, o){
+  const src = o || S;
+  const v = (src.type === "MIX" && fam === "JN") ? src.prixJN : src.prix;
+  return parseFloat(String(v === undefined ? "" : v).replace(",", ".")) || 0;
+}
+/* Libellé du premier champ selon le type de store */
+function renderPrixFields(){
+  const mix = S.type === "MIX";
+  $("prixJNField").hidden = !mix;
+  $("prix").placeholder = mix ? "Prix au m² enrouleur" : "Prix au m²";
+}
+
 const MINCM = 100;   /* minimum facturé par côté */
 const MAXH  = 500;   /* hauteur maximale fabricable, en cm */
 function billed(d){ return (Math.max(d.l, MINCM) * Math.max(d.h, MINCM)) / 10000; }
@@ -1220,6 +1267,8 @@ function totals(){
     nb: v.length,
     m2: v.reduce((s,d) => s + (d.l * d.h) / 10000, 0),          /* surface réelle */
     m2f: v.reduce((s,d) => s + billed(d), 0),                    /* surface facturée */
+    m2fENR: v.filter(d => d.t !== "JN").reduce((s,d) => s + billed(d), 0),
+    m2fJN:  v.filter(d => d.t === "JN").reduce((s,d) => s + billed(d), 0),
     ml:     v.reduce((s,d) => s + d.l / 100, 0),   /* tube : la largeur */
     mlTissu:v.reduce((s,d) => s + d.h / 100, 0),   /* tissu : la hauteur, la largeur tient dans la laize */
     mini: v.filter(d => d.l < MINCM || d.h < MINCM).length       /* lignes ramenées au minimum */
@@ -1422,6 +1471,12 @@ function renderDecoupe(){
   });
 }
 
+/* Montant des stores : un prix par famille en mode mixte */
+function storesTotal(t){
+  const tt = t || totals();
+  return tt.m2fENR * puFam("ENR") + tt.m2fJN * puFam("JN");
+}
+
 function renderRecap(){
   const t = totals();
   $("sNb").textContent = t.nb;
@@ -1430,8 +1485,7 @@ function renderRecap(){
   $("dimCount").textContent = t.nb + (t.nb > 1 ? " stores" : " store");
   $("dimTotal").textContent = fr(t.m2) + " m²";
 
-  const pu = parseFloat(String(S.prix).replace(",", ".")) || 0;
-  const stores = (pu > 0 && t.m2f > 0) ? t.m2f * pu : 0;
+  const stores = storesTotal(t);
   const pose = poseTotal();
   $("priceBar").hidden = !(stores > 0);
   if (stores > 0) $("sPrix").textContent = fr(stores) + " MAD";
@@ -1486,6 +1540,10 @@ function renderProgress(){
   $("btnSend").disabled = done < 5;
   $("numBadge").textContent = S.num;
   const known = ORDERS.some(o => o.id === S.id);
+  const dern = lastNum();
+  $("numHint").textContent = known
+    ? "Bon déjà enregistré"
+    : (dern ? "Dernier bon du mois : " + dern : "Premier bon du mois");
   $("formTitle").textContent = known ? "Modifier le bon" : "Nouveau bon de commande";
   $("btnDraft").textContent = S.status === "sent" ? "Enregistrer les modifications" : "Enregistrer brouillon";
 }
@@ -1554,7 +1612,14 @@ $("prix").addEventListener("input", e => {
   if (clean !== e.target.value) e.target.value = clean;
   S.prix = clean;
   LS.set("mst_prix", clean);
-  renderRecap();
+  renderRecap(); renderPieces();
+});
+$("prixJN").addEventListener("input", e => {
+  const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
+  if (clean !== e.target.value) e.target.value = clean;
+  S.prixJN = clean;
+  LS.set("mst_prixjn", clean);
+  renderRecap(); renderPieces();
 });
 $("segMulti").addEventListener("click", e => {
   const b = e.target.closest("button[data-multi]");
@@ -1667,6 +1732,7 @@ $("seg").addEventListener("click", e => {
   S.type = b.dataset.type;
   S.refs = [];
   S.dims.forEach(d => { d.ref = ""; d.type = S.type === "MIX" ? (d.type || "ENR") : S.type; });
+  renderPrixFields();
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   renderAll();
 });
@@ -1755,6 +1821,14 @@ function toast(msg){
 
 /* ============ Storage of orders ============ */
 function saveOrder(status){
+  /* Dernier rempart : si un bon arrivé entre temps porte déjà ce numéro,
+     on en prend un neuf avant d'écrire. */
+  if (numPris(S.num, S.id)){
+    const avant = S.num;
+    S.num = nextNum();
+    renderProgress();
+    toast("Numéro " + avant + " déjà pris, ce bon devient " + S.num);
+  }
   const all = ORDERS.slice();
   const rec = JSON.parse(JSON.stringify(S));
   rec.status = status;
@@ -1793,6 +1867,7 @@ function migrate(o){
   if (!o.dims.length) o.dims = [{l:"",h:"",ref:"",note:"",type:"ENR",q:""}];
   if (o.pose !== "Livraison") o.pose = "Pose";
   if (o.prix === undefined) o.prix = "";
+  if (o.prixJN === undefined) o.prixJN = "";
   if (o.posePrix === undefined) o.posePrix = "";
   if (o.poseMode !== "fenetre") o.poseMode = "forfait";
   if (o.multi === undefined) o.multi = (o.refs || []).length > 1;
@@ -1808,7 +1883,8 @@ function migrate(o){
 function newOrder(){
   S = blank();
   $("nom").value = ""; $("tel").value = ""; $("adresse").value = ""; $("notes").value = ""; $("ech").value = ""; $("gps").value = ""; renderGps();
-  $("prix").value = S.prix || ""; $("posePrix").value = S.posePrix || ""; renderPoseMode();
+  $("prix").value = S.prix || ""; $("prixJN").value = S.prixJN || "";
+  $("posePrix").value = S.posePrix || ""; renderPoseMode(); renderPrixFields();
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === "ENR")));
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === "Pose")));
   [...$("segMulti").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.multi === "0")));
@@ -1817,7 +1893,7 @@ function newOrder(){
 }
 
 $("btnHistory").addEventListener("click", () => nav("home"));
-$("btnNew").addEventListener("click", () => { newOrder(); nav("form"); });
+$("btnNew").addEventListener("click", () => { newOrderSynced(); nav("form"); });
 
 /* ============ Screenshot du bon ============ */
 const T = { ink:"#191315", muted:"#6F6569", line:"#E4DDDE", accent:"#D5001F", soft:"#FCEAEC", card:"#F7F4F4" };
@@ -1939,21 +2015,32 @@ function ticket(){
   cell(2, fr(t.ml), "ML TUBE");
   y += bh + 24;
 
-  const pu = parseFloat(String(S.prix).replace(",", ".")) || 0;
-  if (pu > 0 && t.m2f > 0){
-    x.fillStyle = T.muted; x.font = "400 24px " + B;
-    x.fillText(fr(t.m2f) + " m² facturés  ×  " + fr(pu) + " MAD/m²", P + 8, y + 26);
-    if (t.mini){
-      x.font = "400 20px " + B;
-      x.fillText("minimum 1,00 m par côté appliqué", P + 8, y + 56);
+  const stores = storesTotal(t);
+  if (stores > 0){
+    /* en mode mixte, une ligne de détail par famille */
+    const lignes = [];
+    if (S.type === "MIX"){
+      if (t.m2fENR > 0 && puFam("ENR") > 0)
+        lignes.push("Enrouleur  " + fr(t.m2fENR) + " m²  ×  " + fr(puFam("ENR")) + " MAD/m²");
+      if (t.m2fJN > 0 && puFam("JN") > 0)
+        lignes.push("Jour et nuit  " + fr(t.m2fJN) + " m²  ×  " + fr(puFam("JN")) + " MAD/m²");
+    } else {
+      lignes.push(fr(t.m2f) + " m² facturés  ×  " + fr(puFam(S.type === "JN" ? "JN" : "ENR")) + " MAD/m²");
     }
+    if (t.mini) lignes.push("minimum 1,00 m par côté appliqué");
+
+    x.fillStyle = T.muted; x.font = "400 24px " + B;
+    lignes.forEach((l, i) => {
+      if (i === 1 && t.mini && lignes.length === 2) x.font = "400 20px " + B;
+      x.fillText(l, P + 8, y + 26 + i * 30);
+    });
     x.textAlign = "right";
     x.fillStyle = T.muted; x.font = "600 19px " + A;
     x.fillText(poseTotal() > 0 ? "STORES" : "PRIX TOTAL", W - P - 8, y);
     x.fillStyle = T.accent; x.font = "600 44px " + M;
-    x.fillText(fr(t.m2f * pu) + " MAD", W - P - 8, y + 40);
+    x.fillText(fr(stores) + " MAD", W - P - 8, y + 40);
     x.textAlign = "left";
-    y += t.mini ? 88 : 62;
+    y += Math.max(62, 32 + lignes.length * 30);
   }
 
   /* pose ou livraison, puis le total général */
@@ -1970,14 +2057,14 @@ function ticket(){
     x.fillText(fr(posT) + " MAD", W - P - 8, y + 26);
     x.textAlign = "left";
     y += 50;
-    if (pu > 0 && t.m2f > 0){
+    if (stores > 0){
       x.fillStyle = T.line; x.fillRect(P + 8, y, W - 2*P - 16, 2);
       y += 30;
       x.fillStyle = T.muted; x.font = "600 19px " + A;
       x.fillText("TOTAL GÉNÉRAL", P + 8, y + 12);
       x.textAlign = "right";
       x.fillStyle = T.accent; x.font = "600 44px " + M;
-      x.fillText(fr(t.m2f * pu + posT) + " MAD", W - P - 8, y + 20);
+      x.fillText(fr(stores + posT) + " MAD", W - P - 8, y + 20);
       x.textAlign = "left";
       y += 46;
     }
@@ -2405,7 +2492,10 @@ function nav(where){
 function renderHome(){
   const all = ORDERS;
   const drafts = all.filter(o => o.status !== "sent").length;
-  $("tileNewSub").textContent = "Numéro " + S.num;
+  const dern = lastNum();
+  const rang = dern ? dern.slice(dern.lastIndexOf("-") + 1) : "";
+  $("tileNewSub").textContent = "Numéro " + S.num +
+    (dern ? "  ·  dernier n° " + rang : "  ·  premier du mois");
   $("tileHistSub").textContent = all.length
     ? all.length + (all.length > 1 ? " bons enregistrés" : " bon enregistré") + (drafts ? "  ·  " + drafts + " brouillon" + (drafts > 1 ? "s" : "") : "")
     : "Aucun bon enregistré";
@@ -2712,6 +2802,13 @@ $("btnLocalStock").addEventListener("click", () => {
 
 /* ============ Historique ============ */
 let histFilter = "all";
+let histSort = LS.get("mst_histsort", "recent");
+/* Date d'échéance exploitable pour le tri, ou rien */
+function echTime(o){
+  if (!o || !o.ech) return NaN;
+  const t = new Date(String(o.ech) + "T12:00:00").getTime();
+  return isNaN(t) ? NaN : t;
+}
 /* Un bon du mois en cours : d'abord son numéro, sinon sa date */
 function ceMois(o){
   const now = new Date(), stamp = moisStamp(now);
@@ -2725,13 +2822,13 @@ function orderTotals(o){
   (o.dims || []).forEach(d => {
     const l = parseFloat(d.l), h = parseFloat(d.h);
     if (!(l > 0 && h > 0)) return;
-    for (let k = 0; k < qtyRow(d); k++) v.push({l:l, h:h});
+    const t = o.type === "MIX" ? (d.type === "JN" ? "JN" : "ENR") : o.type;
+    for (let k = 0; k < qtyRow(d); k++) v.push({l:l, h:h, t:t});
   });
-  const m2f = v.reduce((s,d) => s + (Math.max(d.l,MINCM) * Math.max(d.h,MINCM))/10000, 0);
-  const pu = parseFloat(String(o.prix || "").replace(",", ".")) || 0;
   const pp = parseFloat(String(o.posePrix || "").replace(",", ".")) || 0;
   const pose = pp > 0 ? (o.poseMode === "fenetre" ? pp * v.length : pp) : 0;
-  return {nb:v.length, prix: pu > 0 ? m2f * pu : 0, pose:pose,
+  const prix = v.reduce((t,d) => t + (Math.max(d.l,MINCM) * Math.max(d.h,MINCM))/10000 * puFam(d.t, o), 0);
+  return {nb:v.length, prix: prix, pose:pose,
           poseLab: o.pose === "Livraison" ? "Livraison" : "Pose"};
 }
 
@@ -2740,7 +2837,8 @@ function echSuffix(o){
   if (!o || !o.ech) return "";
   const a = String(o.ech).split("-");
   const j = a.length === 3 ? a[2] + "/" + a[1] + "/" + a[0].slice(2) : o.ech;
-  return '<span class="hech">' + (o.pose === "Livraison" ? "Livr." : "Pose") + " " + j + '</span>';
+  const soon = histSort === "ech" ? " soon" : "";
+  return '<span class="hech' + soon + '">' + (o.pose === "Livraison" ? "Livr." : "Pose") + " " + j + '</span>';
 }
 function renderHist(){
   const all = ORDERS;
@@ -2753,6 +2851,19 @@ function renderHist(){
     const hay = [o.nom, o.num, o.tel, o.author, (o.refs || []).join(" ")].join(" ").toLowerCase();
     return hay.includes(q);
   });
+  /* Tri par échéance : la plus proche en tête, les bons sans date à la fin.
+     Une échéance passée reste devant, c'est un retard qu'il faut voir. */
+  if (histSort === "ech"){
+    list = list.slice().sort((a,b) => {
+      const ta = echTime(a), tb = echTime(b);
+      if (isNaN(ta) && isNaN(tb)) return new Date(b.date || 0) - new Date(a.date || 0);
+      if (isNaN(ta)) return 1;
+      if (isNaN(tb)) return -1;
+      return ta - tb;
+    });
+  }
+  [...$("histSort").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.s === histSort)));
+
   $("histSum").textContent = all.length;
   const body = $("histBody");
   body.innerHTML = "";
@@ -2795,6 +2906,13 @@ function renderHist(){
 }
 
 $("histSearch").addEventListener("input", renderHist);
+$("histSort").addEventListener("click", e => {
+  const b = e.target.closest("button[data-s]");
+  if (!b) return;
+  histSort = b.dataset.s;
+  LS.set("mst_histsort", histSort);
+  renderHist();
+});
 $("histFilters").addEventListener("click", e => {
   const b = e.target.closest("button[data-f]");
   if (!b) return;
@@ -2806,8 +2924,8 @@ $("histFilters").addEventListener("click", e => {
 function loadOrder(o){
   S = migrate(JSON.parse(JSON.stringify(o)));
   $("nom").value = S.nom || ""; $("tel").value = S.tel || ""; $("adresse").value = S.adresse || ""; $("ech").value = S.ech || ""; $("gps").value = S.gps || ""; renderGps();
-  $("notes").value = S.notes || ""; $("prix").value = S.prix || "";
-  $("posePrix").value = S.posePrix || ""; renderPoseMode();
+  $("notes").value = S.notes || ""; $("prix").value = S.prix || ""; $("prixJN").value = S.prixJN || "";
+  $("posePrix").value = S.posePrix || ""; renderPoseMode(); renderPrixFields();
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === S.type)));
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === S.pose)));
   [...$("segMulti").children].forEach(x => x.setAttribute("aria-pressed", String((x.dataset.multi === "1") === !!S.multi)));
@@ -2868,11 +2986,28 @@ $("cfYes").addEventListener("click", () => {
 });
 
 /* ============ Entrées de l'accueil ============ */
+/* Avant de numéroter, on rapatrie les bons des autres téléphones :
+   le numéro proposé tient alors compte de ce qu'ils ont déjà créé. */
+function newOrderSynced(){
+  newOrder();
+  if (!SB || !USER) return;
+  pullBons().then(ok => {
+    if (!ok) return;
+    if (ORDERS.some(o => o.id === S.id)) return;      /* le bon a été enregistré entre temps */
+    const n = nextNum();
+    if (n !== S.num){
+      S.num = n;
+      renderProgress();
+      renderHome();
+    }
+  });
+}
+
 $("tileNew").addEventListener("click", () => {
   /* si le bon en cours est deja enregistre, on en ouvre un neuf ;
      sinon on reprend la saisie en cours pour ne rien perdre */
   const saved = ORDERS.some(o => o.id === S.id);
-  if (saved) newOrder();
+  if (saved) newOrderSynced();
   nav("form");
 });
 $("tileHist").addEventListener("click", () => { renderHist(); nav("histSheet"); pullBons().then(() => renderHist()); });
@@ -2903,7 +3038,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "3.2";
+const APP_VERSION = "3.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -3087,7 +3222,7 @@ function renderEtatSel(){
 /* Une ligne du tableau, dans l'ordre exact des colonnes */
 function pcRow(fam){
   const d = pcData[fam] || famData(fam);
-  const pu = parseFloat(String(S.prix).replace(",", ".")) || 0;
+  const pu = puFam(fam);
   const dt = new Date(S.date || Date.now());
   const dateFR = pad(dt.getDate()) + "/" + pad(dt.getMonth()+1) + "/" + dt.getFullYear();
   const grp = new Map();
@@ -3718,7 +3853,8 @@ window.addEventListener("popstate", () => {
   const cached = LS.get("mst_cat", null);
   if (cached && cached.list && cached.list.length){ CATALOGUE = cached.list; SRC = cached.src; }
   $("sheetUrl").value = LS.get("mst_sheeturl", "");
-  $("prix").value = S.prix || ""; $("posePrix").value = S.posePrix || ""; renderPoseMode();
+  $("prix").value = S.prix || ""; $("prixJN").value = S.prixJN || "";
+  $("posePrix").value = S.posePrix || ""; renderPoseMode(); renderPrixFields();
   renderAll();
   renderStock();
   renderArt();
