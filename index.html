@@ -4,13 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#D5001F">
-<meta name="description" content="Saisie des bons de commande de stores MSTORECASA sur le terrain.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MSTORECASA">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png" sizes="192x192">
+<link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Bon de commande MSTORECASA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -215,6 +213,44 @@ select{appearance:none; -webkit-appearance:none}
 .opt .osub{display:block; font-family:"IBM Plex Sans",sans-serif; font-weight:400; font-size:12.5px; color:var(--muted); margin-top:3px}
 .opt.out .oref{color:var(--muted)}
 .check{color:var(--accent); flex:none}
+
+/* ---------- pieces utilisees ---------- */
+.pcfam{border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-bottom:12px}
+.pcfam:last-of-type{margin-bottom:0}
+.pcfam > h4{
+  margin:0; background:var(--accent); color:#fff; padding:9px 12px;
+  font-family:Archivo,sans-serif; font-size:12px; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:space-between; gap:8px}
+.pcfam > h4 em{font-style:normal; font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:500; opacity:.9}
+.pcgrp{padding:4px 0; border-bottom:1px solid var(--line)}
+.pcgrp:last-child{border-bottom:0}
+.pcgrp > span{display:block; padding:8px 12px 2px; font-family:Archivo,sans-serif;
+  font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
+.pcrow{display:flex; align-items:center; gap:8px; padding:5px 12px}
+.pcrow > label{flex:1; font-size:13.5px; color:var(--ink); line-height:1.3}
+.pcrow input{
+  width:88px; text-align:right; border:1px solid var(--line); background:var(--card2);
+  border-radius:9px; padding:8px 9px; font-family:"IBM Plex Mono",monospace;
+  font-size:14px; font-weight:600; color:var(--ink); -webkit-appearance:none}
+.pcrow input:focus{outline:none; border-color:var(--accent); background:var(--card)}
+.pcrow input.auto{background:var(--accent-soft); border-color:transparent; color:var(--accent)}
+.pcrow input.edited{background:var(--card); border-color:var(--accent)}
+.pcrow > u{flex:none; width:22px; text-decoration:none; font-family:"IBM Plex Mono",monospace;
+  font-size:11px; color:var(--muted)}
+.pcetat{padding:0 0 12px; border-bottom:1px solid var(--line); margin-bottom:12px}
+.pcetat > label{font-size:13.5px; color:var(--muted)}
+.pcreset{display:block; width:100%; background:none; border:0; padding:8px 12px 10px;
+  text-align:left; font-family:Archivo,sans-serif; font-size:11.5px; font-weight:600;
+  letter-spacing:.04em; color:var(--muted); cursor:pointer}
+.pcreset:active{color:var(--accent)}
+.pc-confirm{
+  width:100%; margin-top:14px; padding:14px; border:0; border-radius:12px;
+  background:var(--ink); color:#fff; font-family:Archivo,sans-serif; font-size:14px;
+  font-weight:700; letter-spacing:.04em; cursor:pointer}
+.pc-confirm:active{transform:translateY(1px)}
+.pc-confirm[disabled]{opacity:.5}
+.pc-confirm.done{background:var(--ok)}
 
 /* ---------- recap ---------- */
 .recap{background:var(--card); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow)}
@@ -636,6 +672,21 @@ select{appearance:none; -webkit-appearance:none}
       </div>
       <div id="alerts"></div>
     </section>
+
+    <!-- PIECES UTILISEES -->
+    <section class="card" id="piecesCard">
+      <div class="card-head"><div class="label">Pièces utilisées</div><div class="badge" id="pcBadge">—</div></div>
+      <div class="pcrow pcetat"><label>État de la commande</label>
+        <span class="etatsel devis" id="pcEtatWrap">
+          <select id="pcEtat" aria-label="État de la commande"></select>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </span>
+      </div>
+      <div id="pcList"></div>
+      <button class="pc-confirm" id="btnPieces" type="button">Confirmer et envoyer au tableau</button>
+      <p class="hint" id="pcHint">Les cases rouges sont calculées par l'application, vous pouvez les corriger. Les autres sont à remplir par l'atelier.</p>
+      <button class="pcreset" id="btnHook" type="button" style="padding-left:2px">Lien du tableau de production</button>
+    </section>
   </main>
 
   <div class="bottom">
@@ -961,6 +1012,7 @@ function blank(){
     pose:"Pose",
     notes:"",
     photos:[],
+    pieces:{},
     status:"draft"
   };
 }
@@ -1275,7 +1327,7 @@ function renderProgress(){
 }
 
 function renderAll(){
-  renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap(); renderProgress();
+  renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
 }
 
 /* ============ Events ============ */
@@ -1299,8 +1351,30 @@ $("segMulti").addEventListener("click", e => {
     S.refs = S.refs.slice(0, 1);
     S.dims.forEach(d => { d.ref = ""; });
   }
-  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
+  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
 });
+
+$("pcList").addEventListener("input", e => {
+  const inp = e.target.closest("input[data-k]");
+  if (!inp) return;
+  const v = inp.value.trim();
+  pcSet(inp.dataset.fam, inp.dataset.k, v);
+  inp.className = v === "" ? "" : "edited";
+});
+$("pcList").addEventListener("click", e => {
+  const b = e.target.closest("button[data-reset]");
+  if (!b) return;
+  if (S.pieces) delete S.pieces[b.dataset.reset];
+  renderPieces();
+});
+$("pcEtat").addEventListener("change", e => {
+  S.etat = e.target.value;
+  $("pcEtatWrap").className = "etatsel " + S.etat;
+  const i = ORDERS.findIndex(o => o.id === S.id);
+  if (i >= 0){ ORDERS[i].etat = S.etat; persistOrders(); pushBon(ORDERS[i]); }
+});
+$("btnPieces").addEventListener("click", pcConfirm);
+$("btnHook").addEventListener("click", askHook);
 
 $("segPose").addEventListener("click", e => {
   const b = e.target.closest("button[data-pose]");
@@ -1336,7 +1410,7 @@ $("refList").addEventListener("click", e => {
     else S.refs.push(r);
     renderRefList();
   }
-  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
+  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
 });
 $("chips").addEventListener("click", e => {
   const b = e.target.closest("button[data-unpick]");
@@ -1364,7 +1438,7 @@ rowsEl.addEventListener("input", e => {
   const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
   if (clean !== e.target.value) e.target.value = clean;
   S.dims[i][e.target.dataset.k] = clean;
-  updateNote(+i); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
+  updateNote(+i); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
 });
 rowsEl.addEventListener("click", e => {
   const rt = e.target.closest("button[data-rtype]");
@@ -1372,7 +1446,7 @@ rowsEl.addEventListener("click", e => {
     const i = +rt.dataset.rtype;
     S.dims[i].type = rt.dataset.v;
     if (S.dims[i].ref){ const f = fab(S.dims[i].ref); if (!f || f.type !== rt.dataset.v) S.dims[i].ref = ""; }
-    renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
+    renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
     return;
   }
   const rf = e.target.closest("button[data-rowfab]");
@@ -1386,7 +1460,7 @@ rowsEl.addEventListener("click", e => {
 });
 $("addRow").addEventListener("click", () => {
   S.dims.push({l:"",h:"",ref:"",note:"",type: S.type === "MIX" ? (S.dims.length ? rowType(S.dims.length-1) : "ENR") : S.type});
-  renderRows(); renderDecoupe(); renderRecap();
+  renderRows(); renderDecoupe(); renderRecap(); renderPieces();
   const inp = rowsEl.querySelector('input[data-i="' + (S.dims.length-1) + '"][data-k="l"]');
   if (inp) inp.focus();
 });
@@ -1477,6 +1551,7 @@ function migrate(o){
   if (o.multi === undefined) o.multi = (o.refs || []).length > 1;
   o.dims.forEach(d => { if (!d.type) d.type = o.type === "MIX" ? "ENR" : o.type; });
   if (!o.photos) o.photos = [];
+  if (!o.pieces || typeof o.pieces !== "object") o.pieces = {};
   return o;
 }
 
@@ -2329,7 +2404,232 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "1.9";
+const APP_VERSION = "2.0";
+
+/* Onglets du tableau de production */
+const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
+function hookUrl(){ return LS.get("mst_hook", ""); }
+
+/* Pièces par type de store.
+   auto = valeur proposée par le programme, l'agent peut la corriger.
+   sans auto = case vide, remplie par l'atelier.
+   L'ordre suit exactement les colonnes du tableau de production. */
+const PIECES_DEF = {
+  ENR: [
+    {k:"mecanisme", label:"Mécanisme",          u:"u"},
+    {k:"tube",      label:"Tube 38",            u:"ml", auto:d => d.coupeMl},
+    {k:"barre",     label:"Barre de charge",    u:"ml", auto:d => d.coupeMl},
+    {k:"chainette", label:"Chaînette",          u:"ml"},
+    {k:"bouchon",   label:"Bouchon",            u:"u"},
+    {k:"frein",     label:"Frein",              u:"u"}
+  ],
+  JN: [
+    {k:"cache",      label:"Cache",              u:"ml", auto:d => d.cacheMl},
+    {k:"tube32",     label:"Triangle 32",        u:"ml", auto:d => d.tube32Ml},
+    {k:"barre",      label:"Barre de charge",    u:"ml", auto:d => d.barreMl},
+    {k:"embout",     label:"Embout J/N",         u:"u"},
+    {k:"support",    label:"Support",            u:"u"},
+    {k:"bouchonInf", label:"Bouchon inférieur",  u:"u"},
+    {k:"chainette",  label:"Chaînette",          u:"ml"}
+  ]
+};
+/* Tissu, calculé par le programme, modifiable lui aussi */
+const TISSU_DEF = {
+  ENR: [
+    {k:"tissuCoupe", label:"Tissu m² coupé", u:"m²", auto:d => d.coupeM2},
+    {k:"tissuVente", label:"Tissu m² vente", u:"m²", auto:d => d.venteM2},
+    {k:"chutes",     label:"Chutes",         u:"m²", auto:d => d.chuteM2}
+  ],
+  JN: [
+    {k:"tissuCoupe", label:"Tissu m² coupé", u:"m²", auto:d => d.coupeM2},
+    {k:"tissuVente", label:"Tissu m² vente", u:"m²", auto:d => d.venteM2}
+  ]
+};
+const FAM_LABEL = {ENR:"Store enrouleur", JN:"Store jour et nuit"};
+
+/* Mesures d'une famille de stores d'un bon */
+function famData(fam){
+  const v = validDims().filter(d => d.t === fam);
+  const drop = fam === "JN" ? FABDROP.JN : FABDROP.ENR;
+  const sum = f => v.reduce((t,d) => t + f(d), 0);
+  const dep = fam === "JN" ? 2 : 1;
+  const coupeM2 = sum(d => (d.l - drop) * (dep * d.h + CUT.surplus)) / 10000;
+  const venteM2 = sum(d => billed(d));
+  return {
+    nb: v.length,
+    dims: v,
+    coupeMl:  sum(d => d.l - (fam === "JN" ? 0 : 3)) / 100,
+    cacheMl:  sum(d => d.l - 0.5) / 100,
+    tube32Ml: sum(d => d.l - 2) / 100,
+    barreMl:  sum(d => d.l - 1.5) / 100,
+    hMl2:     2 * sum(d => d.h) / 100,
+    supports: sum(d => d.l >= 200 ? 3 : 2),
+    coupeM2: coupeM2,
+    venteM2: venteM2,
+    chuteM2: famChute(v)
+  };
+}
+
+/* Chute réelle, calculée avec le même plan de coupe que l'écran dédié */
+function famChute(v){
+  const byRef = {};
+  v.forEach(x => { const k = x.ref || "?"; (byRef[k] = byRef[k] || []).push(x); });
+  let tot = 0;
+  Object.keys(byRef).forEach(ref => {
+    const f = fab(ref);
+    const lz = f ? f.laize : CUT_DEF.laize;
+    const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong,
+                        (CUT.fabcuts || []).filter(c => (c.ref || "") === ref));
+    tot += T.chute;
+  });
+  return tot;
+}
+
+/* ---------- Fiche de production : pièces utilisées ---------- */
+let pcData = {};      /* mesures courantes par famille, refaites à chaque rendu */
+
+function famsPresent(){
+  const v = validDims();
+  return ["ENR","JN"].filter(f => v.some(d => d.t === f));
+}
+function pcVal(fam, k){
+  const o = S.pieces && S.pieces[fam];
+  return (o && o[k] !== undefined && o[k] !== null && o[k] !== "") ? o[k] : null;
+}
+function pcSet(fam, k, v){
+  if (!S.pieces) S.pieces = {};
+  if (!S.pieces[fam]) S.pieces[fam] = {};
+  if (v === "" || v === null || v === undefined) delete S.pieces[fam][k];
+  else S.pieces[fam][k] = v;
+}
+/* valeur retenue pour l'envoi : la saisie de l'atelier, sinon le calcul */
+function pcNum(fam, def, d){
+  const man = pcVal(fam, def.k);
+  if (man !== null){
+    const n = parseFloat(String(man).replace(",", "."));
+    return isNaN(n) ? String(man) : n;
+  }
+  if (!def.auto) return "";
+  return Math.round(def.auto(d) * 100) / 100;
+}
+
+function renderPieces(){
+  const box = $("pcList"), badge = $("pcBadge"), btn = $("btnPieces");
+  const fams = famsPresent();
+  renderEtatSel();
+  box.innerHTML = "";
+  pcData = {};
+  if (!fams.length){
+    badge.textContent = "—";
+    btn.disabled = true;
+    box.innerHTML = '<div class="hint" style="margin:0">Saisissez une dimension pour préparer la fiche de production.</div>';
+    return;
+  }
+  btn.disabled = false;
+  badge.textContent = fams.length > 1 ? "2 fiches" : "1 fiche";
+  fams.forEach(fam => {
+    const d = famData(fam);
+    pcData[fam] = d;
+    const grp = (title, defs) =>
+      '<div class="pcgrp"><span>' + title + '</span>' +
+      defs.map(def => {
+        const a   = def.auto ? Math.round(def.auto(d) * 100) / 100 : null;
+        const man = pcVal(fam, def.k);
+        const val = man !== null ? esc(String(man)) : (a !== null ? fr(a) : "");
+        const cls = man !== null ? "edited" : (a !== null ? "auto" : "");
+        return '<div class="pcrow"><label>' + def.label + '</label>' +
+          '<input type="text" inputmode="decimal" class="' + cls + '" value="' + val + '"' +
+          ' data-fam="' + fam + '" data-k="' + def.k + '"' +
+          ' placeholder="' + (a !== null ? "" : "—") + '"><u>' + def.u + '</u></div>';
+      }).join("") + '</div>';
+    const el = document.createElement("div");
+    el.className = "pcfam";
+    el.innerHTML =
+      '<h4><span>' + FAM_LABEL[fam] + '</span><em>' + d.nb + (d.nb > 1 ? " stores" : " store") + '</em></h4>' +
+      grp("Tissu", TISSU_DEF[fam]) +
+      grp("Pièces", PIECES_DEF[fam]) +
+      '<button class="pcreset" type="button" data-reset="' + fam + '">Revenir aux valeurs calculées</button>';
+    box.appendChild(el);
+  });
+  const u = hookUrl();
+  $("btnHook").textContent = u ? "Tableau de production : lien enregistré" : "Lien du tableau de production : à régler";
+}
+
+/* Le sélecteur d'état, en tête de la fiche : il part en colonne D du tableau */
+function renderEtatSel(){
+  const et = etatDe(S);
+  const sel = $("pcEtat");
+  sel.innerHTML = ETATS.map(e =>
+    '<option value="' + e.k + '"' + (e.k === et ? " selected" : "") + '>' + e.label + '</option>').join("");
+  $("pcEtatWrap").className = "etatsel " + et;
+}
+
+/* Une ligne du tableau, dans l'ordre exact des colonnes */
+function pcRow(fam){
+  const d = pcData[fam] || famData(fam);
+  const pu = parseFloat(String(S.prix).replace(",", ".")) || 0;
+  const dt = new Date(S.date || Date.now());
+  const dateFR = pad(dt.getDate()) + "/" + pad(dt.getMonth()+1) + "/" + dt.getFullYear();
+  const dims = d.dims.map(x => fr(x.l,0) + "x" + fr(x.h,0)).join(" · ");
+  const tissus = [...new Set(d.dims.map(x => x.ref).filter(Boolean))].join(", ");
+  const total = Math.round(d.venteM2 * pu * 100) / 100;
+  const head = [dateFR, S.nom || "", S.num || "", S.notes || "",
+                etatLabel(etatDe(S)), pu || "", pu ? total : "", dims, tissus];
+  const T = k => pcNum(fam, TISSU_DEF[fam].find(x => x.k === k) || {k:k}, d);
+  const P = k => pcNum(fam, PIECES_DEF[fam].find(x => x.k === k) || {k:k}, d);
+  if (fam === "ENR")
+    return head.concat([T("tissuCoupe"), T("tissuVente"),
+      P("mecanisme"), P("tube"), P("barre"),
+      P("chainette"), P("bouchon"), P("frein"), T("chutes")]);
+  return head.concat([T("tissuCoupe"), T("tissuVente"),
+    P("cache"), P("tube32"), P("barre"), P("embout"),
+    P("support"), P("bouchonInf"), P("chainette")]);
+}
+
+function askHook(){
+  const cur = hookUrl();
+  const v = window.prompt(
+    "Adresse du script Google qui écrit dans le tableau de production.\n" +
+    "Elle se termine par /exec. Laissez vide pour effacer.", cur);
+  if (v === null) return;
+  LS.set("mst_hook", v.trim());
+  renderPieces();
+  toast(v.trim() ? "Lien enregistré" : "Lien effacé");
+}
+
+function pcConfirm(){
+  const fams = famsPresent();
+  if (!fams.length) return;
+  const url = hookUrl();
+  if (!url){ askHook(); return; }
+  const btn = $("btnPieces"), lbl = "Confirmer et envoyer au tableau";
+  const payload = {
+    key: S.num,
+    bon: S.num,
+    client: S.nom || "",
+    auteur: USER ? USER.login : "",
+    rows: fams.map(f => ({sheet:f, gid:SHEET_GIDS[f], values:pcRow(f)}))
+  };
+  btn.disabled = true; btn.textContent = "Envoi en cours...";
+  fetch(url, {method:"POST", body:JSON.stringify(payload),
+              headers:{"Content-Type":"text/plain;charset=utf-8"}})
+    .then(r => r.text())
+    .then(t => {
+      let j = null; try{ j = JSON.parse(t); }catch(e){}
+      if (!j || !j.ok) throw new Error(j && j.error ? j.error : "réponse inattendue du script");
+      btn.textContent = "Envoyé au tableau"; btn.classList.add("done");
+      toast(j.updated ? "Ligne mise à jour dans le tableau" : "Ligne ajoutée au tableau");
+      S.sheetAt = new Date().toISOString();
+      saveOrder(S.status === "sent" ? "sent" : "draft");
+      setTimeout(() => {
+        btn.textContent = lbl; btn.classList.remove("done"); btn.disabled = false;
+      }, 2500);
+    })
+    .catch(e => {
+      btn.disabled = false; btn.textContent = lbl;
+      toast("Envoi impossible : " + (e.message || "réseau"));
+    });
+}
 
 /* États d'avancement d'une commande */
 const ETATS = [
@@ -2874,10 +3174,8 @@ window.addEventListener("popstate", () => {
 </script>
 
 <script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function(){
-    navigator.serviceWorker.register("sw.js").catch(function(){});
-  });
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
 }
 </script>
 </body>
