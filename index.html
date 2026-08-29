@@ -1401,6 +1401,44 @@ function ticket(){
   }
   y += 26;
 
+  /* ---- découpe des tubes ---- */
+  {
+    const pl = PIECES[S.type] || PIECES.ENR;
+    const vd = validDims();
+    if (vd.length){
+      y += 6;
+      lab("Découpe des tubes");
+      const x0 = P + 8, xs = P + 70, xw = W - P - 8, first = P + 330;
+      const colW = (xw - first) / pl.length;
+      x.fillStyle = T.muted; x.font = "600 18px " + A;
+      x.fillText("N°", x0, y); x.fillText("STORE", xs, y);
+      x.textAlign = "right";
+      pl.forEach((pc, i) => x.fillText(pc.label.toUpperCase(), first + colW * (i + 1) - 6, y));
+      x.textAlign = "left";
+      y += 14;
+      x.strokeStyle = T.line; x.lineWidth = 2; x.beginPath(); x.moveTo(P,y); x.lineTo(W-P,y); x.stroke();
+      y += 38;
+      vd.forEach((d, i) => {
+        if (i % 2 === 1){ x.fillStyle = T.card; x.fillRect(P, y-30, W-2*P, 50); }
+        x.fillStyle = T.muted; x.font = "500 25px " + M; x.fillText(String(d.i0), x0, y);
+        x.font = "500 25px " + M; x.fillText(fr(d.l,0) + " × " + fr(d.h,0), xs, y);
+        x.textAlign = "right"; x.fillStyle = T.ink; x.font = "600 29px " + M;
+        pl.forEach((pc, k) => {
+          const v = d.l - pc.d;
+          x.fillText(fr(v, v % 1 ? 1 : 0), first + colW * (k + 1) - 6, y);
+        });
+        x.textAlign = "left";
+        y += 50;
+      });
+      y += 4;
+      x.fillStyle = T.muted; x.font = "400 21px " + B;
+      x.fillText(S.type === "JN"
+        ? "Longueurs en cm : cache largeur moins 0,5 · tube 32 moins 2 · barre de charge moins 1,5."
+        : "Longueurs en cm : tube 38 et barre de charge à la largeur moins 3.", P + 8, y);
+      y += 34;
+    }
+  }
+
   if (S.notes){ lab("Remarque"); val(S.notes, 27); y += 6; }
 
   // photos
