@@ -343,7 +343,12 @@ select{appearance:none; -webkit-appearance:none}
 .bdot.keep{background:var(--ok)}
 .bline .bl{flex:1; min-width:0; color:var(--muted); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .bline .bv{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600; color:var(--ink); white-space:nowrap; font-variant-numeric:tabular-nums}
-.btot{display:flex; justify-content:space-between; gap:10px; margin-top:14px; padding-top:11px; border-top:1px solid var(--line-strong); font-size:12.5px; color:var(--muted)}
+.btots{margin-top:15px; padding-top:12px; border-top:1px solid var(--line-strong)}
+.btr{display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:6px 0; font-size:13px; color:var(--muted)}
+.btr b{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums}
+.btr.grand{margin-top:4px; padding-top:10px; border-top:1px solid var(--line); color:var(--ink); font-weight:600}
+.btr.grand b{font-size:16px}
+.btot{display:flex; justify-content:space-between; gap:10px; margin-top:12px; font-size:11.5px; color:var(--muted); line-height:1.5}
 .btot b{font-family:"IBM Plex Mono",monospace; color:var(--ink)}
 
 .banner{
@@ -2188,8 +2193,8 @@ function renderPlan(){
           '<span class="cv">' + cm(c.p.w) + ' cm</span>' +
         '</div>';
       });
-      if (b.fate === "keep") bilan.keep.push({t:pr.label + "  ·  " + b.label, v:cm(b.rest) + " cm"});
-      if (b.fate === "drop") bilan.drop.push({t:pr.label + "  ·  " + b.label, v:cm(b.rest) + " cm"});
+      if (b.fate === "keep") bilan.keep.push({t:pr.label + "  ·  " + b.label, v:cm(b.rest) + " cm", q:b.rest / 100});
+      if (b.fate === "drop") bilan.drop.push({t:pr.label + "  ·  " + b.label, v:cm(b.rest) + " cm", q:b.rest / 100});
       h += '<div class="fate ' + b.fate + '">' +
         (b.fate === "full" ? "Rien ne reste, barre utilisée à 100 %."
          : b.fate === "keep" ? "Reste " + cm(b.rest) + " cm : à garder."
@@ -2231,12 +2236,12 @@ function renderPlan(){
       });
       if (b.restLaize >= 0.5){
         const line = {t: ref + "  ·  " + (b.src === "chute" ? b.label : "bande " + b.n) + "  ·  côté",
-                      v: fr(b.restLaize,0) + " × " + fr(b.unroll,0) + " cm"};
+                      v: fr(b.restLaize,0) + " × " + fr(b.unroll,0) + " cm", q: b.chuteLat};
         (b.latFate === "keep" ? bilan.keep : bilan.drop).push(line);
       }
       if (b.chuteLong > 0.005){
         bilan.drop.push({t: ref + "  ·  " + (b.src === "chute" ? b.label : "bande " + b.n) + "  ·  bout de longueur",
-                         v: fr(b.chuteLong) + " m²"});
+                         v: fr(b.chuteLong) + " m²", q: b.chuteLong});
       }
       h += '<div class="fate ' + (b.latFate === "keep" ? "keep" : (b.chuteLat > 0.01 ? "drop" : "full")) + '">' +
         (b.src === "chute"
@@ -2275,10 +2280,18 @@ function renderPlan(){
         h += '<div class="bline"><span class="bdot"></span><span class="bl">' + l.t + '</span><span class="bv">' + l.v + '</span></div>';
       });
     }
+    const sum = a => a.reduce((t,l) => t + (l.q || 0), 0);
+    const u = cutMode === "tube" ? " m" : " m²";
+    const tk = sum(bilan.keep), td = sum(bilan.drop);
+    h += '<div class="btots">' +
+      '<div class="btr"><span>Total à garder  ·  ' + bilan.keep.length + ' morceau' + (bilan.keep.length > 1 ? 'x' : '') + '</span><b>' + fr(tk) + u + '</b></div>' +
+      '<div class="btr"><span>Total à jeter  ·  ' + bilan.drop.length + ' morceau' + (bilan.drop.length > 1 ? 'x' : '') + '</span><b>' + fr(td) + u + '</b></div>' +
+      '<div class="btr grand"><span>Total des chutes</span><b>' + fr(tk + td) + u + '</b></div>' +
+    '</div>';
     h += '<div class="btot"><span>' + (cutMode === "tube"
-        ? "Seuil de réutilisation : " + CUT.seuilBarre + " cm"
-        : "Seuil de réutilisation : " + CUT.seuilLaize + " cm de large sur " + CUT.seuilLong + " cm de long") +
-      '</span><b>' + bilan.keep.length + ' à garder · ' + bilan.drop.length + ' à jeter</b></div>';
+        ? "Seuil de réutilisation : " + CUT.seuilBarre + " cm. Les longueurs sont des mètres de barre."
+        : "Seuil de réutilisation : " + CUT.seuilLaize + " cm de large sur " + CUT.seuilLong + " cm de long.") +
+      '</span></div>';
     h += '</div>';
   }
 
