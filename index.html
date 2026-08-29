@@ -672,10 +672,10 @@ select{appearance:none; -webkit-appearance:none}
       <p id="srcInfo"></p>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg>
-        <input id="sheetUrl" type="url" placeholder="Lien CSV publié de la feuille Google" autocomplete="off">
+        <input id="sheetUrl" type="url" placeholder="Autre feuille (facultatif)" autocomplete="off">
       </div>
       <div style="height:10px"></div>
-      <button class="btn primary" id="btnSync" type="button">Actualiser depuis la feuille</button>
+      <button class="btn primary" id="btnSync" type="button">Actualiser maintenant</button>
       <div style="height:8px"></div>
       <button class="btn" id="btnLocalStock" type="button">Revenir à la liste intégrée</button>
     </div>
@@ -863,6 +863,16 @@ const BUILTIN = [
 ].map(a => ({ref:a[0], laize:a[1], dispo:a[2], type:a[0].startsWith("JN") ? "JN" : "ENR"}));
 
 const BUILTIN_DATE = "18/08/26";
+
+/* Feuille Google MSTORECASA : colonne A = référence, colonne AB = quantité.
+   Seules les références commençant par B-0, S-0 ou JN_0 sont retenues. */
+const SHEET_ID  = "1yToN1fuikP1PBYgDjA40EycaiwTMwXpo8eNQuok2HrQ";
+const SHEET_GID = "0";
+const QTY_COL   = 27;   /* AB */
+function sheetUrl(){
+  const custom = LS.get("mst_sheeturl", "");
+  return custom || "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv&gid=" + SHEET_GID;
+}
 let CATALOGUE = BUILTIN.slice();      /* liste active */
 let SRC = null;                        /* {url, date, n} si feuille Google */
 
@@ -1715,8 +1725,8 @@ function renderHome(){
 
 function srcLabel(){
   return SRC
-    ? "Stock synchronisé le " + SRC.date + " depuis la feuille Google"
-    : "Stock de la liste intégrée du " + BUILTIN_DATE;
+    ? "Stock à jour, feuille Google lue le " + SRC.date + " (" + SRC.n + " références)"
+    : "Stock de la liste intégrée du " + BUILTIN_DATE + ", feuille Google pas encore lue";
 }
 
 /* ============ Stock ============ */
@@ -1748,7 +1758,7 @@ function renderStock(){
       '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : fr(f.dispo) + " ml") + '</span>';
     box.appendChild(d);
   });
-  $("srcInfo").textContent = srcLabel() + ". Publiez la feuille en CSV depuis Google Sheets (Fichier, Partager, Publier sur le web, format CSV) puis collez le lien ici.";
+  $("srcInfo").innerHTML = srcLabel() + ".<br>L'application lit la feuille MSTORECASA à chaque ouverture : colonne A pour la référence, colonne AB pour la quantité, et seules les lignes commençant par B-0, S-0 ou JN_0 sont reprises. La feuille doit rester partagée en lecture par lien.";
 }
 
 $("stockSearch").addEventListener("input", renderStock);
@@ -1779,8 +1789,37 @@ function parseCSV(text){
   return rows.filter(r => r.some(v => String(v).trim() !== ""));
 }
 
+function numFr(v){
+  let t = String(v == null ? "" : v).replace(/[\s\u00a0\u202f]/g, "");
+  if (t.indexOf(".") >= 0 && t.indexOf(",") >= 0){
+    t = (t.indexOf(".") < t.indexOf(",")) ? t.replace(/\./g, "") : t.replace(/,/g, "");
+  }
+  t = t.replace(",", ".").replace(/[^0-9.\-]/g, "");
+  const n = parseFloat(t);
+  return isFinite(n) ? n : 0;
+}
+
+function laizeOf(ref){
+  const nums = (ref.match(/\d{2,4}/g) || []).map(Number).filter(n => n >= 150 && n <= 400);
+  return nums.length ? nums[nums.length - 1] : 250;
+}
+
+/* Lecture de la feuille MSTORECASA : colonne A et colonne AB */
 function catalogueFromRows(rows){
   if (!rows.length) return [];
+  /* format MSTORECASA : références en colonne A, quantité en colonne AB */
+  const direct = [];
+  rows.forEach(r => {
+    const ref = String(r[0] == null ? "" : r[0]).trim();
+    if (!/^(B-0|S-0|JN[_-]?0)/i.test(ref)) return;
+    let raw = r.length > QTY_COL ? r[QTY_COL] : "";
+    if (raw === "" || raw === undefined || raw === null) raw = r[r.length - 1];
+    direct.push({ref:ref.toUpperCase(), laize:laizeOf(ref), dispo:numFr(raw),
+                 type:/^JN/i.test(ref) ? "JN" : "ENR"});
+  });
+  if (direct.length) return direct;
+
+  /* sinon, ancienne lecture par en-têtes */
   const head = rows[0].map(h => h.toLowerCase().trim());
   const find = (...keys) => head.findIndex(h => keys.some(k => h.includes(k)));
   let iRef = find("référence","reference","ref","article");
@@ -1814,24 +1853,34 @@ function applyCatalogue(list, src){
   renderAll(); renderStock(); renderHome();
 }
 
-$("btnSync").addEventListener("click", async () => {
-  const url = ($("sheetUrl").value || "").trim();
-  if (!url){ toast("Collez d'abord le lien CSV de la feuille"); return; }
-  $("btnSync").textContent = "Connexion...";
+let syncing = false;
+
+async function syncStock(silent){
+  if (syncing) return false;
+  syncing = true;
+  if (!silent) $("btnSync").textContent = "Connexion...";
+  let ok = false;
   try {
-    const res = await fetch(url, {cache:"no-store"});
+    const res = await fetch(sheetUrl(), {cache:"no-store"});
     if (!res.ok) throw new Error("http " + res.status);
     const list = catalogueFromRows(parseCSV(await res.text()));
     if (!list.length) throw new Error("aucune référence lue");
     const d = new Date();
-    applyCatalogue(list, {url:url, date:pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+String(d.getFullYear()).slice(2)+" à "+pad(d.getHours())+":"+pad(d.getMinutes()), n:list.length});
-    LS.set("mst_sheeturl", url);
-    toast(list.length + " références synchronisées");
+    applyCatalogue(list, {date: pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + String(d.getFullYear()).slice(2) +
+                                " à " + pad(d.getHours()) + ":" + pad(d.getMinutes()), n:list.length});
+    if (!silent) toast(list.length + " références synchronisées");
+    ok = true;
   } catch(err){
-    toast("Lecture impossible : vérifiez que la feuille est publiée en CSV");
+    if (!silent) toast("Lecture impossible : la feuille doit être partagée en lecture par lien");
   }
-  $("btnSync").textContent = "Actualiser depuis la feuille";
-});
+  syncing = false;
+  if (!silent) $("btnSync").textContent = "Actualiser maintenant";
+  return ok;
+}
+
+$("btnSync").addEventListener("click", () => syncStock(false));
+
+$("sheetUrl").addEventListener("change", e => { LS.set("mst_sheeturl", (e.target.value || "").trim()); });
 
 $("btnLocalStock").addEventListener("click", () => {
   applyCatalogue(BUILTIN.slice(), null);
@@ -2466,6 +2515,12 @@ $("tileCut").addEventListener("click", () => { cutMode = CUT.mode || null; rende
   renderAll();
   renderStock();
   nav("home");
+  /* mise à jour du stock en arrière plan, sans bloquer l'application */
+  setTimeout(() => syncStock(true), 400);
+  /* et à chaque retour sur l'application */
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) syncStock(true);
+  });
 })();
 </script>
 
