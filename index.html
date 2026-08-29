@@ -121,6 +121,22 @@ select{appearance:none; -webkit-appearance:none}
   font-family:"Archivo",sans-serif; font-weight:600; font-size:14.5px; color:var(--muted); text-align:center;
   transition:background .15s, color .15s, border-color .15s;
 }
+.seg3{grid-template-columns:repeat(3,1fr)}
+.seg3 button{padding:12px 5px; font-size:13px}
+.seg3 button .sub{font-size:9.5px; letter-spacing:.02em}
+.rowsel{display:flex; gap:6px; padding:0 0 9px 34px; margin-top:-2px}
+.rowsel button{
+  flex:1; padding:8px 6px; border-radius:9px; border:1px solid var(--line); background:var(--card2);
+  font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--muted);
+}
+.rowsel button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.rowfab{
+  display:flex; align-items:center; gap:9px; margin:0 0 9px 34px; padding:9px 11px; width:calc(100% - 34px);
+  background:var(--card2); border:1px solid var(--line); border-radius:10px; text-align:left;
+}
+.rowfab b{flex:1; font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:600}
+.rowfab b.ph{font-family:"IBM Plex Sans",sans-serif; font-weight:400; color:var(--muted)}
+.rowfab svg{flex:none; color:var(--muted)}
 .seg button .sub{display:block; font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:500; letter-spacing:.06em; margin-top:3px; opacity:.8}
 .seg button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
 
@@ -469,14 +485,24 @@ select{appearance:none; -webkit-appearance:none}
     <!-- TYPE -->
     <section class="card">
       <div class="card-head"><div class="label">Type de store</div></div>
-      <div class="seg" id="seg">
+      <div class="seg seg3" id="seg">
         <button type="button" data-type="ENR" aria-pressed="true">Enrouleur<span class="sub">S-0</span></button>
         <button type="button" data-type="JN" aria-pressed="false">Jour et Nuit<span class="sub">JN_0</span></button>
+        <button type="button" data-type="MIX" aria-pressed="false">Les deux<span class="sub">S-0 + JN_0</span></button>
       </div>
       <div class="field" style="margin-top:9px">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4L11 3.8V3H4v8h.8l9.6 9.6a2 2 0 002.8 0l3.4-3.4a2 2 0 000-2.8z"/><circle cx="7.5" cy="6.5" r="1.2" fill="currentColor"/></svg>
         <input id="prix" inputmode="decimal" placeholder="Prix au m²">
         <span class="unit">MAD/m²</span>
+      </div>
+    </section>
+
+    <!-- COULEUR -->
+    <section class="card">
+      <div class="card-head"><div class="label">Couleur du tissu</div></div>
+      <div class="seg" id="segMulti">
+        <button type="button" data-multi="0" aria-pressed="true">Une seule couleur<span class="sub">tous les stores</span></button>
+        <button type="button" data-multi="1" aria-pressed="false">Plusieurs couleurs<span class="sub">une par fenêtre</span></button>
       </div>
     </section>
 
@@ -651,6 +677,7 @@ select{appearance:none; -webkit-appearance:none}
         <input id="cutLaize" inputmode="decimal" placeholder="Largeur du rouleau">
         <span class="unit">cm</span>
       </div>
+      <p class="hint" style="margin:2px 2px 9px">Utilisée pour les tissus dont la laize n'est pas connue. Les références portent la leur dans leur nom, S-055-<b>300</b> ou JN_002_<b>320</b>, et c'est celle là qui est appliquée.</p>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18v4H3z"/><path d="M7 10V8M12 10V8M17 10V8"/></svg>
         <input id="cutBar" inputmode="decimal" placeholder="Longueur de la barre">
@@ -813,7 +840,8 @@ function blank(){
     date: new Date().toISOString(),
     nom:"", tel:"", adresse:"",
     type:"ENR",
-    dims:[{l:"",h:"",ref:"",note:""}],
+    multi:false,
+    dims:[{l:"",h:"",ref:"",note:"",type:"ENR"}],
     refs:[],
     prix: LS.get("mst_prix", ""),
     pose:"Pose",
@@ -838,18 +866,30 @@ const $ = id => document.getElementById(id);
 const rowsEl = $("rows"), photosEl = $("photos");
 
 /* ============ Computation ============ */
+/* type de store d'une ligne : le type global, ou le choix de la ligne en mode mixte */
+function rowType(i){
+  if (S.type !== "MIX") return S.type;
+  const d = S.dims[i];
+  return (d && d.type === "JN") ? "JN" : "ENR";
+}
+function famOf(t){ return t === "JN" ? "JN" : "ENR"; }
+
 function fab(ref){ return CATALOGUE.find(f => f.ref === ref) || null; }
 function chosen(){ return S.refs.map(fab).filter(Boolean); }
 /* tissu appliqué à une ligne : celui assigné s'il est toujours sélectionné, sinon le premier */
 function rowRef(i){
   const d = S.dims[i];
-  if (d && d.ref && S.refs.indexOf(d.ref) >= 0) return d.ref;
-  return S.refs[0] || "";
+  if (S.multi && d && d.ref && S.refs.indexOf(d.ref) >= 0) return d.ref;
+  if (!S.multi) return S.refs[0] || "";
+  /* multi couleurs : à défaut, la première référence compatible avec le type de la ligne */
+  const t = rowType(i);
+  const ok = S.refs.filter(r => { const f = fab(r); return f && f.type === t; });
+  return ok[0] || S.refs[0] || "";
 }
 function rowFab(i){ return fab(rowRef(i)); }
 function validDims(){
   return S.dims
-    .map((d, i) => ({l:parseFloat(d.l), h:parseFloat(d.h), ref:rowRef(i), note:d.note || "", i:i, i0:i+1}))
+    .map((d, i) => ({l:parseFloat(d.l), h:parseFloat(d.h), ref:rowRef(i), note:d.note || "", i:i, i0:i+1, t:rowType(i)}))
     .filter(d => d.l > 0 && d.h > 0);
 }
 const MINCM = 100;   /* minimum facturé par côté */
@@ -891,10 +931,18 @@ function renderRows(){
         '</button>' +
       '</div>' +
       '<div class="row-note"></div>' +
-      (S.refs.length > 1
-        ? '<div class="assign">' + S.refs.map(r =>
-            '<button type="button" data-assign="' + i + '" data-ref="' + r + '" aria-pressed="' + (rowRef(i) === r) + '">' + r + '</button>'
-          ).join("") + '</div>'
+      (S.type === "MIX"
+        ? '<div class="rowsel">' +
+            '<button type="button" data-rtype="' + i + '" data-v="ENR" aria-pressed="' + (rowType(i) === "ENR") + '">Enrouleur</button>' +
+            '<button type="button" data-rtype="' + i + '" data-v="JN" aria-pressed="' + (rowType(i) === "JN") + '">Jour et nuit</button>' +
+          '</div>'
+        : "") +
+      (S.multi
+        ? '<button class="rowfab" type="button" data-rowfab="' + i + '">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="7" cy="6" rx="3" ry="3"/><path d="M7 3h10a3 3 0 010 6H7M7 9v12M17 9v9a3 3 0 01-3 3H7"/></svg>' +
+            '<b class="' + (rowRef(i) ? "" : "ph") + '">' + (rowRef(i) || "Choisir la couleur") + '</b>' +
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>' +
+          '</button>'
         : "") +
       '<div class="rem">' +
         '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h9"/></svg>' +
@@ -945,17 +993,26 @@ function renderRefs(){
     box.appendChild(d);
   });
   $("refCount").textContent = S.refs.length + (S.refs.length > 1 ? " tissus" : " tissu");
-  $("refBtnLabel").textContent = S.refs.length ? "Ajouter un autre tissu" : "Choisir les tissus";
+  $("refBtnLabel").textContent = S.multi
+    ? (S.refs.length ? "Ajouter un autre tissu" : "Choisir les tissus")
+    : (S.refs.length ? "Changer de tissu" : "Choisir le tissu");
 }
 
+function pickFamily(){
+  if (pickTarget !== null) return rowType(pickTarget);
+  return S.type === "MIX" ? null : S.type;   /* null = les deux familles */
+}
 function renderRefList(){
   const q = ($("refSearch").value || "").trim().toLowerCase();
-  const list = CATALOGUE.filter(f => f.type === S.type && f.ref.toLowerCase().includes(q));
+  const fam = pickFamily();
+  const list = CATALOGUE.filter(f => (fam === null || f.type === fam) && f.ref.toLowerCase().includes(q));
   const inStock = list.filter(f => f.dispo >= 1).sort((a,b) => b.dispo - a.dispo);
   const outStock = list.filter(f => f.dispo < 1);
   const box = $("refList");
   box.innerHTML = "";
-  $("refSheetTitle").textContent = S.type === "JN" ? "Tissu jour et nuit" : "Tissu enrouleur";
+  const fam2 = pickFamily();
+  $("refSheetTitle").textContent = (pickTarget !== null ? "Store " + (pickTarget+1) + " · " : "") +
+    (fam2 === "JN" ? "Tissu jour et nuit" : fam2 === "ENR" ? "Tissu enrouleur" : "Tissu");
 
   const group = (title, arr, out) => {
     if (!arr.length) return;
@@ -1006,22 +1063,28 @@ function renderPhotos(){
 }
 
 function renderDecoupe(){
-  const list = PIECES[S.type] || PIECES.ENR;
   const v = validDims();
   const box = $("cutList");
   box.innerHTML = "";
-  $("cutBadge").textContent = v.length ? (v.length * list.length) + " coupes" : "—";
-  $("cutRule").textContent = S.type === "JN"
-    ? "Jour et nuit : cache largeur moins 0,5 cm, tube 32 moins 2 cm, barre de charge moins 1,5 cm."
-    : "Enrouleur : tube 38 et barre de charge à la largeur moins 3 cm.";
+  const nb = v.reduce((t,d) => t + PIECES[d.t].length, 0);
+  $("cutBadge").textContent = nb ? nb + " coupes" : "—";
+  const rENR = "Enrouleur : tube 38 et barre de charge à la largeur moins 3 cm.";
+  const rJN  = "Jour et nuit : cache moins 0,5 cm, tube 32 moins 2 cm, barre de charge moins 1,5 cm.";
+  const fams = [...new Set(v.map(d => d.t))];
+  $("cutRule").textContent = S.type === "MIX"
+    ? (fams.length ? [fams.indexOf("ENR") >= 0 ? rENR : "", fams.indexOf("JN") >= 0 ? rJN : ""].filter(Boolean).join(" ") : rENR + " " + rJN)
+    : (S.type === "JN" ? rJN : rENR);
   if (!v.length){
     box.innerHTML = '<div class="hint" style="margin:0">Saisissez une dimension pour voir les longueurs à couper.</div>';
     return;
   }
   v.forEach(d => {
+    const list = PIECES[d.t];
     const el = document.createElement("div");
     el.className = "cutblock";
-    el.innerHTML = '<h4><span>Store ' + d.i0 + (d.note ? " · " + esc(d.note) : "") + '</span><em>' + fr(d.l,0) + ' × ' + fr(d.h,0) + '</em></h4>' +
+    el.innerHTML = '<h4><span>Store ' + d.i0 +
+        (S.type === "MIX" ? " · " + (d.t === "JN" ? "jour et nuit" : "enrouleur") : "") +
+        (d.note ? " · " + esc(d.note) : "") + '</span><em>' + fr(d.l,0) + ' × ' + fr(d.h,0) + '</em></h4>' +
       list.map(pc => '<div class="cutp"><span>' + pc.label + '</span><b>' + fr(d.l - pc.d, (d.l - pc.d) % 1 ? 1 : 0) + ' cm</b></div>').join("");
     box.appendChild(el);
   });
@@ -1105,6 +1168,18 @@ $("prix").addEventListener("input", e => {
   LS.set("mst_prix", clean);
   renderRecap();
 });
+$("segMulti").addEventListener("click", e => {
+  const b = e.target.closest("button[data-multi]");
+  if (!b) return;
+  S.multi = b.dataset.multi === "1";
+  [...$("segMulti").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  if (!S.multi){
+    S.refs = S.refs.slice(0, 1);
+    S.dims.forEach(d => { d.ref = ""; });
+  }
+  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
+});
+
 $("segPose").addEventListener("click", e => {
   const b = e.target.closest("button[data-pose]");
   if (!b) return;
@@ -1112,19 +1187,34 @@ $("segPose").addEventListener("click", e => {
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   renderProgress();
 });
-$("refBtn").addEventListener("click", () => {
+let pickTarget = null;   /* null = carte tissu, sinon index de ligne */
+function openPicker(target){
+  pickTarget = (target === undefined) ? null : target;
   $("refSearch").value = "";
   renderRefList();
   openSheet("refSheet");
-});
+}
+$("refBtn").addEventListener("click", () => openPicker());
 $("refSearch").addEventListener("input", renderRefList);
 $("refList").addEventListener("click", e => {
   const b = e.target.closest("button[data-ref]");
   if (!b) return;
-  const r = b.dataset.ref, i = S.refs.indexOf(r);
-  if (i >= 0) S.refs.splice(i, 1); else S.refs.push(r);
-  renderRefList();
-  renderRows(); renderRefs(); renderRecap(); renderProgress();
+  const r = b.dataset.ref;
+  if (pickTarget !== null){
+    S.dims[pickTarget].ref = r;
+    if (S.refs.indexOf(r) < 0) S.refs.push(r);
+    closeSheet("refSheet");
+  } else if (!S.multi){
+    S.refs = [r];
+    S.dims.forEach(d => { d.ref = ""; });
+    closeSheet("refSheet");
+  } else {
+    const i = S.refs.indexOf(r);
+    if (i >= 0){ S.refs.splice(i, 1); S.dims.forEach(d => { if (d.ref === r) d.ref = ""; }); }
+    else S.refs.push(r);
+    renderRefList();
+  }
+  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
 });
 $("chips").addEventListener("click", e => {
   const b = e.target.closest("button[data-unpick]");
@@ -1139,7 +1229,7 @@ $("seg").addEventListener("click", e => {
   if (!b) return;
   S.type = b.dataset.type;
   S.refs = [];
-  S.dims.forEach(d => { d.ref = ""; });
+  S.dims.forEach(d => { d.ref = ""; d.type = S.type === "MIX" ? (d.type || "ENR") : S.type; });
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   renderAll();
 });
@@ -1155,23 +1245,25 @@ rowsEl.addEventListener("input", e => {
   updateNote(+i); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
 });
 rowsEl.addEventListener("click", e => {
-  const a = e.target.closest("button[data-assign]");
-  if (a){
-    S.dims[+a.dataset.assign].ref = a.dataset.ref;
-    const wrap = a.parentElement;
-    [...wrap.children].forEach(x => x.setAttribute("aria-pressed", String(x === a)));
-    updateNote(+a.dataset.assign); renderRefs(); renderDecoupe(); renderRecap();
+  const rt = e.target.closest("button[data-rtype]");
+  if (rt){
+    const i = +rt.dataset.rtype;
+    S.dims[i].type = rt.dataset.v;
+    if (S.dims[i].ref){ const f = fab(S.dims[i].ref); if (!f || f.type !== rt.dataset.v) S.dims[i].ref = ""; }
+    renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
     return;
   }
+  const rf = e.target.closest("button[data-rowfab]");
+  if (rf){ openPicker(+rf.dataset.rowfab); return; }
   const b = e.target.closest("button[data-del]");
   if (!b) return;
   const i = +b.dataset.del;
   S.dims.splice(i, 1);
-  if (!S.dims.length) S.dims = [{l:"",h:"",ref:"",note:""}];
+  if (!S.dims.length) S.dims = [{l:"",h:"",ref:"",note:"",type: S.type === "MIX" ? "ENR" : S.type}];
   renderAll();
 });
 $("addRow").addEventListener("click", () => {
-  S.dims.push({l:"",h:"",ref:"",note:""});
+  S.dims.push({l:"",h:"",ref:"",note:"",type: S.type === "MIX" ? (S.dims.length ? rowType(S.dims.length-1) : "ENR") : S.type});
   renderRows(); renderDecoupe(); renderRecap();
   const inp = rowsEl.querySelector('input[data-i="' + (S.dims.length-1) + '"][data-k="l"]');
   if (inp) inp.focus();
@@ -1253,10 +1345,12 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
 
 function migrate(o){
   if (!o.refs) o.refs = o.ref ? [o.ref] : [];
-  o.dims = (o.dims || []).map(d => ({l:d.l||"", h:d.h||"", ref:d.ref||"", note:d.note||""}));
-  if (!o.dims.length) o.dims = [{l:"",h:"",ref:"",note:""}];
+  o.dims = (o.dims || []).map(d => ({l:d.l||"", h:d.h||"", ref:d.ref||"", note:d.note||"", type:d.type||""}));
+  if (!o.dims.length) o.dims = [{l:"",h:"",ref:"",note:"",type:"ENR"}];
   if (o.pose !== "Livraison") o.pose = "Pose";
   if (o.prix === undefined) o.prix = "";
+  if (o.multi === undefined) o.multi = (o.refs || []).length > 1;
+  o.dims.forEach(d => { if (!d.type) d.type = o.type === "MIX" ? "ENR" : o.type; });
   if (!o.photos) o.photos = [];
   return o;
 }
@@ -1267,6 +1361,7 @@ function newOrder(){
   $("prix").value = S.prix || "";
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === "ENR")));
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === "Pose")));
+  [...$("segMulti").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.multi === "0")));
   renderAll();
   window.scrollTo({top:0, behavior:"instant"});
 }
@@ -1319,7 +1414,7 @@ function ticket(){
   x.fillStyle = T.muted; x.font = "600 19px " + A;
   x.fillText("TYPE DE STORE", colL, y); x.fillText(fl.length > 1 ? "TISSUS" : "TISSU", colR, y); y += 36;
   x.fillStyle = T.ink; x.font = "500 32px " + B;
-  x.fillText(S.type === "JN" ? "Jour et Nuit" : "Enrouleur", colL, y);
+  x.fillText(S.type === "MIX" ? "Enrouleur et Jour et Nuit" : (S.type === "JN" ? "Jour et Nuit" : "Enrouleur"), colL, y);
   x.fillStyle = T.muted; x.font = "400 24px " + B;
   x.fillText(S.pose, colL, y + 34);
   const need = mlByRef();
@@ -1403,39 +1498,51 @@ function ticket(){
 
   /* ---- découpe des tubes ---- */
   {
-    const pl = PIECES[S.type] || PIECES.ENR;
     const vd = validDims();
+    const fams = S.type === "MIX" ? ["ENR","JN"].filter(t => vd.some(d => d.t === t)) : [S.type === "JN" ? "JN" : "ENR"];
     if (vd.length){
       y += 6;
       lab("Découpe des tubes");
-      const x0 = P + 8, xs = P + 70, xw = W - P - 8, first = P + 330;
-      const colW = (xw - first) / pl.length;
-      x.fillStyle = T.muted; x.font = "600 18px " + A;
-      x.fillText("N°", x0, y); x.fillText("STORE", xs, y);
-      x.textAlign = "right";
-      pl.forEach((pc, i) => x.fillText(pc.label.toUpperCase(), first + colW * (i + 1) - 6, y));
-      x.textAlign = "left";
-      y += 14;
-      x.strokeStyle = T.line; x.lineWidth = 2; x.beginPath(); x.moveTo(P,y); x.lineTo(W-P,y); x.stroke();
-      y += 38;
-      vd.forEach((d, i) => {
-        if (i % 2 === 1){ x.fillStyle = T.card; x.fillRect(P, y-30, W-2*P, 50); }
-        x.fillStyle = T.muted; x.font = "500 25px " + M; x.fillText(String(d.i0), x0, y);
-        x.font = "500 25px " + M; x.fillText(fr(d.l,0) + " × " + fr(d.h,0), xs, y);
-        x.textAlign = "right"; x.fillStyle = T.ink; x.font = "600 29px " + M;
-        pl.forEach((pc, k) => {
-          const v = d.l - pc.d;
-          x.fillText(fr(v, v % 1 ? 1 : 0), first + colW * (k + 1) - 6, y);
-        });
+      fams.forEach((fm, fi) => {
+        const rows2 = vd.filter(d => d.t === fm);
+        if (!rows2.length) return;
+        const pl = PIECES[fm];
+        if (fams.length > 1){
+          if (fi) y += 16;
+          x.fillStyle = T.ink; x.font = "600 24px " + B;
+          x.fillText(fm === "JN" ? "Jour et nuit" : "Enrouleur", P + 8, y);
+          y += 30;
+        }
+        const x0 = P + 8, xs = P + 70, xw = W - P - 8, first = P + 330;
+        const colW = (xw - first) / pl.length;
+        x.fillStyle = T.muted; x.font = "600 18px " + A;
+        x.fillText("N°", x0, y); x.fillText("STORE", xs, y);
+        x.textAlign = "right";
+        pl.forEach((pc, i) => x.fillText(pc.label.toUpperCase(), first + colW * (i + 1) - 6, y));
         x.textAlign = "left";
-        y += 50;
+        y += 14;
+        x.strokeStyle = T.line; x.lineWidth = 2; x.beginPath(); x.moveTo(P,y); x.lineTo(W-P,y); x.stroke();
+        y += 38;
+        rows2.forEach((d, i) => {
+          if (i % 2 === 1){ x.fillStyle = T.card; x.fillRect(P, y-30, W-2*P, 50); }
+          x.fillStyle = T.muted; x.font = "500 25px " + M; x.fillText(String(d.i0), x0, y);
+          x.fillText(fr(d.l,0) + " × " + fr(d.h,0), xs, y);
+          x.textAlign = "right"; x.fillStyle = T.ink; x.font = "600 29px " + M;
+          pl.forEach((pc, k) => {
+            const v2 = d.l - pc.d;
+            x.fillText(fr(v2, v2 % 1 ? 1 : 0), first + colW * (k + 1) - 6, y);
+          });
+          x.textAlign = "left";
+          y += 50;
+        });
       });
       y += 4;
       x.fillStyle = T.muted; x.font = "400 21px " + B;
-      x.fillText(S.type === "JN"
-        ? "Longueurs en cm : cache largeur moins 0,5 · tube 32 moins 2 · barre de charge moins 1,5."
-        : "Longueurs en cm : tube 38 et barre de charge à la largeur moins 3.", P + 8, y);
-      y += 34;
+      const notes = [];
+      if (fams.indexOf("ENR") >= 0) notes.push("Enrouleur : tube 38 et barre de charge à la largeur moins 3 cm.");
+      if (fams.indexOf("JN") >= 0) notes.push("Jour et nuit : cache moins 0,5 cm · tube 32 moins 2 cm · barre de charge moins 1,5 cm.");
+      notes.forEach(t => { x.fillText(t, P + 8, y); y += 28; });
+      y += 8;
     }
   }
 
@@ -1753,6 +1860,7 @@ function loadOrder(o){
   $("notes").value = S.notes || ""; $("prix").value = S.prix || "";
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === S.type)));
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === S.pose)));
+  [...$("segMulti").children].forEach(x => x.setAttribute("aria-pressed", String((x.dataset.multi === "1") === !!S.multi)));
   renderAll();
   nav("form");
   window.scrollTo({top:0, behavior:"instant"});
@@ -1878,8 +1986,8 @@ function planBarres(pieces, barLen, offcuts, seuil){
 }
 
 /* --- tissu --- */
-function planTissu(stores, laize, surplus, sLaize, sLong, jn){
-  const need = s => (jn ? 2 * s.h : s.h) + surplus;
+function planTissu(stores, laize, surplus, sLaize, sLong){
+  const need = s => (s.t === "JN" ? 2 * s.h : s.h) + surplus;
   const impossible = stores.filter(s => s.l > laize);
   const items = stores.filter(s => s.l <= laize).slice().sort((a,b) => (b.h - a.h) || (b.l - a.l));
   const bands = [];
@@ -1945,26 +2053,37 @@ function renderCut(){
   $("cutOrderSub").textContent = o.num + "  ·  " + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + String(d.getFullYear()).slice(2);
 
   const refs = o.refs || [];
-  const dims = (o.dims || []).map((x, i) => ({
-    l: parseFloat(x.l), h: parseFloat(x.h), n: i + 1, note: x.note || "",
-    ref: (x.ref && refs.indexOf(x.ref) >= 0) ? x.ref : (refs[0] || "")
-  })).filter(x => x.l > 0 && x.h > 0);
+  const dims = (o.dims || []).map((x, i) => {
+    const t = o.type === "MIX" ? (x.type === "JN" ? "JN" : "ENR") : o.type;
+    let rf = (o.multi && x.ref && refs.indexOf(x.ref) >= 0) ? x.ref : "";
+    if (!rf){
+      const ok = refs.filter(r => { const f = fab(r); return f && f.type === t; });
+      rf = ok[0] || refs[0] || "";
+    }
+    return {l: parseFloat(x.l), h: parseFloat(x.h), n: i + 1, note: x.note || "", ref: rf, t: t};
+  }).filter(x => x.l > 0 && x.h > 0);
 
   if (!dims.length){ out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>'; return; }
 
   const laize = parseFloat(CUT.laize) || CUT_DEF.laize;
   const barLen = parseFloat(CUT.bar) || CUT_DEF.bar;
-  const profils = PROFILS[o.type === "JN" ? "JN" : "ENR"];
+  const fams = o.type === "MIX" ? ["ENR","JN"].filter(t => dims.some(d => d.t === t)) : [o.type === "JN" ? "JN" : "ENR"];
 
   let h = "";
 
-  /* ---- barres, un plan par profilé ---- */
+  /* ---- barres, un plan par profilé et par famille ---- */
+  const profils = [];
+  fams.forEach(fm => PROFILS[fm].forEach(pr => profils.push(Object.assign({fam:fm}, pr))));
+
   profils.forEach(pr => {
-    const pieces = dims.map(x => ({w: x.l - pr.d, s:x}));
+    const mine = dims.filter(d => d.t === pr.fam);
+    if (!mine.length) return;
+    const pieces = mine.map(x => ({w: x.l - pr.d, s:x}));
     const offs = (CUT.offcuts || []).filter(f => (f.profil || profils[0].k) === pr.k);
+    const famLabel = fams.length > 1 ? (pr.fam === "JN" ? "jour et nuit" : "enrouleur") + " · " : "";
     const B = planBarres(pieces, barLen, offs, CUT.seuilBarre);
 
-    h += '<div class="psec">Barres · ' + pr.label + '</div>';
+    h += '<div class="psec">Barres · ' + famLabel + pr.label + '</div>';
     h += '<div class="grid2" style="margin-bottom:13px">' +
       kpi(B.neuves, "barres neuves", "") +
       kpi(fr(B.used,0) + " cm", "longueur utilisée", "") +
@@ -2003,9 +2122,8 @@ function renderCut(){
   dims.forEach(x => { const k = x.ref || "sans tissu"; (byRef[k] = byRef[k] || []).push(x); });
   Object.keys(byRef).forEach(ref => {
     const f = fab(ref);
-    const lz = f ? Math.min(laize, f.laize) : laize;
-    const isJN = o.type === "JN";
-    const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong, isJN);
+    const lz = f ? f.laize : laize;   /* la laize est portée par la référence */
+    const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong);
     h += '<div class="psec">Tissu ' + ref + '  ·  laize ' + fr(lz,0) + ' cm</div>';
     h += '<div class="grid2" style="margin-bottom:13px">' +
       kpi(T.bands.length, "bandes", "") +
@@ -2022,8 +2140,8 @@ function renderCut(){
       b.items.forEach(x => {
         h += '<div class="cutline">' +
           '<span class="cl">store ' + x.n + '</span>' +
-          '<span class="cm">' + fr(x.l,0) + ' × ' + fr((isJN ? 2*x.h : x.h) + CUT.surplus,0) + ' cm</span>' +
-          '<span class="cr">' + (isJN ? '2 × ' + fr(x.h,0) + ' + ' + CUT.surplus : 'fini ' + fr(x.h,0) + ' + ' + CUT.surplus) + '</span>' +
+          '<span class="cm">' + fr(x.l,0) + ' × ' + fr((x.t === "JN" ? 2*x.h : x.h) + CUT.surplus,0) + ' cm</span>' +
+          '<span class="cr">' + (x.t === "JN" ? '2 × ' + fr(x.h,0) + ' + ' + CUT.surplus : 'fini ' + fr(x.h,0) + ' + ' + CUT.surplus) + '</span>' +
         '</div>';
       });
       h += '<div class="fate ' + (b.latFate === "keep" ? "keep" : (b.chuteLat > 0.01 ? "drop" : "full")) + '">' +
@@ -2041,9 +2159,12 @@ function renderCut(){
   });
 
   h += '<p class="hint" style="margin-top:18px">' +
-       (o.type === "JN"
+       (fams.indexOf("JN") >= 0
          ? 'Jour et nuit : longueur déroulée = 2 × hauteur + ' + CUT.surplus + ' cm, le tissu faisant une boucle autour du rail inférieur. '
-         : 'Longueur déroulée = hauteur du store + ' + CUT.surplus + ' cm d\'enroulement autour du tube. ') +
+         : '') +
+       (fams.indexOf("ENR") >= 0
+         ? 'Enrouleur : longueur déroulée = hauteur + ' + CUT.surplus + ' cm d\'enroulement autour du tube. '
+         : '') +
        'Chute de barre gardée à partir de ' + CUT.seuilBarre +
        ' cm, chute de tissu gardée si la laize restante atteint ' + CUT.seuilLaize + ' cm sur au moins ' +
        CUT.seuilLong + ' cm de long.</p>';
@@ -2059,14 +2180,17 @@ function renderOff(){
   const box = $("offList");
   const list = CUT.offcuts || [];
   const ord = LS.get("mst_orders", []).find(x => x.id === cutOrderId);
-  const profils = PROFILS[(ord && ord.type === "JN") ? "JN" : "ENR"];
+  const fams = (ord && ord.type === "MIX") ? ["ENR","JN"] : [(ord && ord.type === "JN") ? "JN" : "ENR"];
+  const profils = [];
+  fams.forEach(fm => PROFILS[fm].forEach(pr => profils.push(Object.assign({fam:fm}, pr))));
   box.innerHTML = "";
   list.forEach((o, i) => {
     if (profils.length > 1){
       const sel = document.createElement("div");
       sel.className = "offsel";
       sel.innerHTML = '<select data-offp="' + i + '" aria-label="Profilé de la chute ' + (i+1) + '">' +
-        profils.map(pr => '<option value="' + pr.k + '"' + ((o.profil || profils[0].k) === pr.k ? " selected" : "") + '>' + pr.label + '</option>').join("") +
+        profils.map(pr => '<option value="' + pr.k + '"' + ((o.profil || profils[0].k) === pr.k ? " selected" : "") + '>' +
+          (fams.length > 1 ? (pr.fam === "JN" ? "JN · " : "ENR · ") : "") + pr.label + '</option>').join("") +
         '</select>';
       box.appendChild(sel);
     }
