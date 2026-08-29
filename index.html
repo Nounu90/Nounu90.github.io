@@ -2265,6 +2265,10 @@ const PROFILS = {
         {k:"barre", label:"Barre de charge", d:1.5, note:""}]
 };
 
+/* Retrait sur la largeur de la fenêtre pour la coupe du tissu */
+const FABDROP = {ENR:3, JN:2};
+function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
+
 const CUT_DEF = {laize:320, bar:600, surplus:20, seuilBarre:90, seuilLaize:90, seuilLong:120};
 let CUT = Object.assign({}, CUT_DEF, LS.get("mst_cut", {}));
 let cutOrderId = null;
@@ -2318,8 +2322,8 @@ function planBarres(pieces, barLen, offcuts, seuil){
 /* --- tissu --- */
 function planTissu(stores, laize, surplus, sLaize, sLong, stock){
   const need = s => (s.t === "JN" ? 2 * s.h : s.h) + surplus;
-  const impossible = stores.filter(s => s.l > laize);
-  const items = stores.filter(s => s.l <= laize).slice().sort((a,b) => (need(b) - need(a)) || (b.l - a.l));
+  const impossible = stores.filter(s => fabW(s) > laize);
+  const items = stores.filter(s => fabW(s) <= laize).slice().sort((a,b) => (need(b) - need(a)) || (fabW(b) - fabW(a)));
 
   /* chutes disponibles pour cette référence, les plus petites d'abord */
   const pieces = [];
@@ -2336,21 +2340,21 @@ function planTissu(stores, laize, surplus, sLaize, sLong, stock){
     /* 1. une bande déjà ouverte qui accepte la largeur et la longueur */
     let best = null, diff = Infinity;
     bands.forEach(b => {
-      if (b.used + s.l > b.width + 0.001) return;
+      if (b.used + fabW(s) > b.width + 0.001) return;
       if (b.src === "chute" && Math.max(b.unroll, nd) > b.maxLen + 0.001) return;
       const d = Math.abs(b.unroll - nd);
       if (d < diff){ diff = d; best = b; }
     });
-    if (best){ best.items.push(s); best.used += s.l; best.unroll = Math.max(best.unroll, nd); return; }
+    if (best){ best.items.push(s); best.used += fabW(s); best.unroll = Math.max(best.unroll, nd); return; }
     /* 2. la plus petite chute en stock qui convient */
-    const pi = pieces.findIndex(pc => pc.w >= s.l - 0.001 && pc.len >= nd - 0.001);
+    const pi = pieces.findIndex(pc => pc.w >= fabW(s) - 0.001 && pc.len >= nd - 0.001);
     if (pi >= 0){
       const pc = pieces.splice(pi, 1)[0];
-      bands.push({items:[s], used:s.l, unroll:nd, src:"chute", width:pc.w, maxLen:pc.len, label:pc.label});
+      bands.push({items:[s], used:fabW(s), unroll:nd, src:"chute", width:pc.w, maxLen:pc.len, label:pc.label});
       return;
     }
     /* 3. sinon on déroule le rouleau */
-    bands.push({items:[s], used:s.l, unroll:nd, src:"rouleau", width:laize, maxLen:Infinity});
+    bands.push({items:[s], used:fabW(s), unroll:nd, src:"rouleau", width:laize, maxLen:Infinity});
   });
 
   let nb = 0;
@@ -2358,10 +2362,10 @@ function planTissu(stores, laize, surplus, sLaize, sLong, stock){
     b.n = b.src === "rouleau" ? ++nb : 0;
     b.restLaize = b.width - b.used;
     b.conso = b.width * b.unroll / 10000;
-    b.utile = b.items.reduce((t,x) => t + x.l * x.h / 10000, 0);
+    b.utile = b.items.reduce((t,x) => t + fabW(x) * x.h / 10000, 0);
     b.chuteLat = b.restLaize * b.unroll / 10000;
     b.latFate = (b.restLaize >= sLaize && b.unroll >= sLong) ? "keep" : "drop";
-    b.chuteLong = b.items.reduce((t,x) => t + x.l * (b.unroll - need(x)), 0) / 10000;
+    b.chuteLong = b.items.reduce((t,x) => t + fabW(x) * (b.unroll - need(x)), 0) / 10000;
     b.chute = b.chuteLat + b.chuteLong;
   });
   const roll = bands.filter(b => b.src === "rouleau");
@@ -2506,9 +2510,11 @@ function renderPlan(){
          (T.nbStock ? '<b>' + T.nbStock + '</b> chute' + (T.nbStock > 1 ? 's' : '') + ' du stock réutilisée' + (T.nbStock > 1 ? 's' : '') + '  ·  ' : '') +
          '<b>' + T.nbRoll + '</b> bande' + (T.nbRoll > 1 ? 's' : '') + ' à dérouler du rouleau' +
          (T.conso > 0 ? '  ·  ' + fr(T.conso) + ' m² de tissu  ·  ' + fr(T.chute) + ' m² de chute (' + fr(T.taux*100,0) + ' %)' : '') +
-         '</p>';
+         '<br>Largeur de coupe = largeur de la fenêtre moins ' +
+         ([...new Set(byRef[ref].map(x => x.t))].map(t => FABDROP[t] + " cm" + (fams.length > 1 ? " (" + (t === "JN" ? "jour et nuit" : "enrouleur") + ")" : "")).join(" et ")) +
+         '.</p>';
     T.bands.forEach(b => {
-      const parts = b.items.map(x => ({len:x.l}));
+      const parts = b.items.map(x => ({len:fabW(x)}));
       if (b.restLaize > 0.5) parts.push({len:b.restLaize, rest:true});
       h += '<div class="pcard' + (b.src === "chute" ? " stockcard" : "") + '">' +
         '<div class="pcard-head"><b>' + (b.src === "chute" ? b.label : "Bande " + b.n) + '</b><span class="badge">' +
@@ -2517,7 +2523,7 @@ function renderPlan(){
       b.items.forEach(x => {
         h += '<div class="cutline">' +
           '<span class="cm"><b>Fenêtre ' + x.n + '</b>  <span>' + fr(x.l,0) + ' × ' + fr(x.h,0) + ' cm</span></span>' +
-          '<span class="cv">' + fr(x.l,0) + ' × ' + fr((x.t === "JN" ? 2*x.h : x.h) + CUT.surplus,0) + ' cm</span>' +
+          '<span class="cv">' + cm(fabW(x)) + ' × ' + fr((x.t === "JN" ? 2*x.h : x.h) + CUT.surplus,0) + ' cm</span>' +
         '</div>';
       });
       if (b.restLaize >= 0.5){
@@ -2541,7 +2547,7 @@ function renderPlan(){
     });
     if (T.impossible.length){
       h += '<div class="pcard"><div class="fate drop">' + T.impossible.length +
-        ' fenêtre(s) plus large(s) que le rouleau de ' + fr(lz,0) + ' cm.</div></div>';
+        ' fenêtre(s) trop large(s) pour le rouleau de ' + fr(lz,0) + ' cm.</div></div>';
     }
   });
 
