@@ -2408,7 +2408,8 @@ const APP_VERSION = "2.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
-function hookUrl(){ return LS.get("mst_hook", ""); }
+const HOOK_DEFAULT = "https://script.google.com/macros/s/AKfycbwCKMhNti35hXKh80Z9z6QyQ1oTME4boVtjfRqzL3isytLTPSPuAAk33ctM5BUz1bB2/exec";
+function hookUrl(){ return LS.get("mst_hook", "") || HOOK_DEFAULT; }
 
 /* Pièces par type de store.
    auto = valeur proposée par le programme, l'agent peut la corriger.
@@ -2552,7 +2553,9 @@ function renderPieces(){
     box.appendChild(el);
   });
   const u = hookUrl();
-  $("btnHook").textContent = u ? "Tableau de production : lien enregistré" : "Lien du tableau de production : à régler";
+  $("btnHook").textContent = (u === HOOK_DEFAULT)
+    ? "Tableau de production : connecté"
+    : "Tableau de production : lien personnalisé";
 }
 
 /* Le sélecteur d'état, en tête de la fiche : il part en colonne D du tableau */
@@ -2592,9 +2595,9 @@ function askHook(){
     "Adresse du script Google qui écrit dans le tableau de production.\n" +
     "Elle se termine par /exec. Laissez vide pour effacer.", cur);
   if (v === null) return;
-  LS.set("mst_hook", v.trim());
+  LS.set("mst_hook", v.trim() === HOOK_DEFAULT ? "" : v.trim());
   renderPieces();
-  toast(v.trim() ? "Lien enregistré" : "Lien effacé");
+  toast(v.trim() ? "Lien enregistré" : "Lien remis par défaut");
 }
 
 function pcConfirm(){
