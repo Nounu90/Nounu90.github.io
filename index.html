@@ -517,6 +517,8 @@ select{appearance:none; -webkit-appearance:none}
 .hl1 b{flex:1; min-width:0; font-family:"Archivo",sans-serif; font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .hl2{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:5px}
 .hl2 small{color:var(--muted); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.hright{flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:2px}
+.hech{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500; color:var(--muted); white-space:nowrap}
 .hprice{font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:600; color:var(--accent); white-space:nowrap; flex:none}
 .hacts{display:flex; gap:2px; flex:none}
 .hact{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; color:var(--muted); flex:none}
@@ -1986,10 +1988,33 @@ function markPending(id, v){
 let TOMBS = LS.get("mst_deleted", []);   /* bons supprimés, tant que la base ne l'a pas confirmé */
 
 function removeOrder(id){
+  const gone = ORDERS.find(o => o.id === id);
   ORDERS = ORDERS.filter(o => o.id !== id);
   if (TOMBS.indexOf(id) < 0){ TOMBS.push(id); LS.set("mst_deleted", TOMBS.slice(-100)); }
   persistOrders();
   deleteBon(id);
+  if (gone && gone.num) sheetDelete(gone.num);
+}
+
+/* --- suppression de la ligne dans le tableau de production --- */
+/* Le script Google retire la ligne entière : aucun trou entre deux lignes. */
+let SHEETDEL = LS.get("mst_sheetdel", []);
+
+function sheetDelete(num){
+  if (SHEETDEL.indexOf(num) < 0){ SHEETDEL.push(num); LS.set("mst_sheetdel", SHEETDEL.slice(-100)); }
+  return flushSheetDel();
+}
+function flushSheetDel(){
+  const url = hookUrl();
+  if (!url || !SHEETDEL.length) return Promise.resolve();
+  const list = SHEETDEL.slice();
+  return Promise.all(list.map(num =>
+    fetch(url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+                body: JSON.stringify({action:"delete", key:num})})
+      .then(r => r.text())
+      .then(t => { const j = JSON.parse(t); if (j && j.ok) SHEETDEL = SHEETDEL.filter(x => x !== num); })
+      .catch(() => {})
+  )).then(() => { LS.set("mst_sheetdel", SHEETDEL); });
 }
 
 async function deleteBon(id){
@@ -2041,6 +2066,7 @@ async function pullBons(){
 }
 
 async function syncAll(){
+  flushSheetDel();
   if (!SB || !USER) return;
   await flushTombs();
   await flushPending();
@@ -2347,8 +2373,8 @@ function orderTotals(o){
 function echSuffix(o){
   if (!o || !o.ech) return "";
   const a = String(o.ech).split("-");
-  const j = a.length === 3 ? a[2] + "/" + a[1] : o.ech;
-  return "  ·  " + (o.pose === "Livraison" ? "livr." : "pose") + " " + j;
+  const j = a.length === 3 ? a[2] + "/" + a[1] + "/" + a[0].slice(2) : o.ech;
+  return '<span class="hech">' + (o.pose === "Livraison" ? "Livraison" : "Pose") + " " + j + '</span>';
 }
 function renderHist(){
   const all = ORDERS;
@@ -2377,8 +2403,13 @@ function renderHist(){
       '<button class="hmain" data-open="' + o.id + '">' +
         '<span class="hl1"><b><span class="etat-box etat-' + et + '">' + (o.nom || "Client sans nom") + '</span></b></span>' +
         '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + o.num + '  ·  ' + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
-          '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + echSuffix(o) + '</small>' +
-          (t.prix ? '<span class="hprice">' + fr(t.prix) + ' MAD</span>' : '') + '</span>' +
+          '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + '</small>' +
+          ((t.prix || o.ech)
+            ? '<span class="hright">' +
+                (t.prix ? '<span class="hprice">' + fr(t.prix) + ' MAD</span>' : '') +
+                echSuffix(o) +
+              '</span>'
+            : '') + '</span>' +
       '</button>' +
       '<span class="hside">' +
         '<span class="etatsel ' + et + '">' +
@@ -2503,7 +2534,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "2.3";
+const APP_VERSION = "2.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
