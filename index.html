@@ -331,6 +331,21 @@ select{appearance:none; -webkit-appearance:none}
 .fate.full{background:var(--ok-soft); color:var(--ok)}
 .fate.keep{background:var(--warn-soft); color:var(--warn)}
 .fate.drop{background:var(--accent-soft); color:var(--accent)}
+
+/* ---------- bilan des chutes, volontairement discret ---------- */
+.bilan{margin-top:30px; padding:16px 15px 14px; background:var(--card2); border:1px solid var(--line); border-radius:14px}
+.bilan h3{font-family:"Archivo",sans-serif; font-weight:600; font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 5px}
+.bilan .bnote{margin:0 0 14px; font-size:12px; color:var(--muted); line-height:1.55}
+.bsubt{font-family:"Archivo",sans-serif; font-weight:600; font-size:12.5px; color:var(--muted); margin:14px 0 3px}
+.bsubt:first-of-type{margin-top:0}
+.bline{display:flex; align-items:center; gap:10px; padding:7px 0; border-top:1px solid var(--line); font-size:13px}
+.bdot{width:8px; height:8px; border-radius:50%; flex:none; background:var(--line-strong)}
+.bdot.keep{background:var(--ok)}
+.bline .bl{flex:1; min-width:0; color:var(--muted); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bline .bv{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600; color:var(--ink); white-space:nowrap; font-variant-numeric:tabular-nums}
+.btot{display:flex; justify-content:space-between; gap:10px; margin-top:14px; padding-top:11px; border-top:1px solid var(--line-strong); font-size:12.5px; color:var(--muted)}
+.btot b{font-family:"IBM Plex Mono",monospace; color:var(--ink)}
+
 .banner{
   display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
   background:var(--accent); color:var(--accent-ink); border-radius:12px; padding:13px 15px; margin:26px 0 9px;
@@ -2132,6 +2147,7 @@ function renderPlan(){
     out.innerHTML = '<div class="empty">Choisissez ci dessus ce que vous voulez couper : les tubes ou le tissu.</div>';
     return;
   }
+  const bilan = {keep:[], drop:[]};
 
   const laize = CUT_DEF.laize;   /* repli si une référence n'a pas de laize connue */
   const barLen = parseFloat(CUT.bar) || CUT_DEF.bar;
@@ -2172,6 +2188,8 @@ function renderPlan(){
           '<span class="cv">' + cm(c.p.w) + ' cm</span>' +
         '</div>';
       });
+      if (b.fate === "keep") bilan.keep.push({t:pr.label + "  ·  " + b.label, v:cm(b.rest) + " cm"});
+      if (b.fate === "drop") bilan.drop.push({t:pr.label + "  ·  " + b.label, v:cm(b.rest) + " cm"});
       h += '<div class="fate ' + b.fate + '">' +
         (b.fate === "full" ? "Rien ne reste, barre utilisée à 100 %."
          : b.fate === "keep" ? "Reste " + cm(b.rest) + " cm : à garder."
@@ -2211,6 +2229,15 @@ function renderPlan(){
           '<span class="cv">' + fr(x.l,0) + ' × ' + fr((x.t === "JN" ? 2*x.h : x.h) + CUT.surplus,0) + ' cm</span>' +
         '</div>';
       });
+      if (b.restLaize >= 0.5){
+        const line = {t: ref + "  ·  " + (b.src === "chute" ? b.label : "bande " + b.n) + "  ·  côté",
+                      v: fr(b.restLaize,0) + " × " + fr(b.unroll,0) + " cm"};
+        (b.latFate === "keep" ? bilan.keep : bilan.drop).push(line);
+      }
+      if (b.chuteLong > 0.005){
+        bilan.drop.push({t: ref + "  ·  " + (b.src === "chute" ? b.label : "bande " + b.n) + "  ·  bout de longueur",
+                         v: fr(b.chuteLong) + " m²"});
+      }
       h += '<div class="fate ' + (b.latFate === "keep" ? "keep" : (b.chuteLat > 0.01 ? "drop" : "full")) + '">' +
         (b.src === "chute"
           ? "Pris dans une chute du stock, dérouler " + fr(b.unroll,0) + " cm sur ce morceau." +
@@ -2232,6 +2259,29 @@ function renderPlan(){
        : 'Longueur à dérouler = hauteur de la fenêtre + ' + CUT.surplus + ' cm' +
          (fams.indexOf("JN") >= 0 ? ', et 2 × hauteur + ' + CUT.surplus + ' cm pour le jour et nuit, le tissu faisant une boucle autour du rail' : '') + '.') +
        '</p>';
+  /* bilan des chutes, après le plan, dans un bloc volontairement discret */
+  if (bilan.keep.length || bilan.drop.length){
+    h += '<div class="bilan"><h3>Bilan des chutes de cette commande</h3>' +
+      '<p class="bnote">À traiter une fois la coupe terminée. Cette liste ne sert pas à couper.</p>';
+    if (bilan.keep.length){
+      h += '<div class="bsubt">À garder en stock (' + bilan.keep.length + ')</div>';
+      bilan.keep.forEach(l => {
+        h += '<div class="bline"><span class="bdot keep"></span><span class="bl">' + l.t + '</span><span class="bv">' + l.v + '</span></div>';
+      });
+    }
+    if (bilan.drop.length){
+      h += '<div class="bsubt">À jeter (' + bilan.drop.length + ')</div>';
+      bilan.drop.forEach(l => {
+        h += '<div class="bline"><span class="bdot"></span><span class="bl">' + l.t + '</span><span class="bv">' + l.v + '</span></div>';
+      });
+    }
+    h += '<div class="btot"><span>' + (cutMode === "tube"
+        ? "Seuil de réutilisation : " + CUT.seuilBarre + " cm"
+        : "Seuil de réutilisation : " + CUT.seuilLaize + " cm de large sur " + CUT.seuilLong + " cm de long") +
+      '</span><b>' + bilan.keep.length + ' à garder · ' + bilan.drop.length + ' à jeter</b></div>';
+    h += '</div>';
+  }
+
   out.innerHTML = h;
 }
 
