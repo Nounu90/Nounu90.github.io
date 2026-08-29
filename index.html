@@ -678,6 +678,12 @@ select{appearance:none; -webkit-appearance:none}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
     </button>
 
+    <div class="seg" id="cutModeSeg" style="margin-bottom:14px">
+      <button type="button" data-mode="tube" aria-pressed="false">Découpe des tubes<span class="sub">barres et profilés</span></button>
+      <button type="button" data-mode="tissu" aria-pressed="false">Découpe du tissu<span class="sub">bandes et chutes</span></button>
+    </div>
+
+    <div id="cutTubeParams" hidden>
     <div class="card" style="margin-bottom:14px">
       <div class="card-head"><div class="label">Barre neuve</div></div>
       <div class="field">
@@ -697,7 +703,9 @@ select{appearance:none; -webkit-appearance:none}
       </button>
       <p class="hint">Longueur en cm et nombre de morceaux. Ces chutes sont utilisées avant d'entamer une barre neuve.</p>
     </div>
+    </div>
 
+    <div id="cutFabParams" hidden>
     <div class="card" style="margin-bottom:14px">
       <div class="card-head"><div class="label">Chutes de tissu en stock</div><div class="badge" id="fcCount">0</div></div>
       <div id="fcList"></div>
@@ -706,6 +714,7 @@ select{appearance:none; -webkit-appearance:none}
         Ajouter une chute de tissu
       </button>
       <p class="hint">Largeur et longueur du morceau en cm, et nombre de morceaux. Elles sont utilisées avant de dérouler le rouleau.</p>
+    </div>
     </div>
 
     <div id="cutOut"></div>
@@ -1953,6 +1962,7 @@ const PROFILS = {
 const CUT_DEF = {laize:320, bar:600, surplus:20, seuilBarre:90, seuilLaize:90, seuilLong:120};
 let CUT = Object.assign({}, CUT_DEF, LS.get("mst_cut", {}));
 let cutOrderId = null;
+let cutMode = null;   /* "tube" | "tissu" */
 
 function cm(v){ return fr(v, Math.abs(v % 1) > 0.001 ? 1 : 0); }
 
@@ -2073,8 +2083,24 @@ function renderCut(){
   $("cutBar").value = CUT.bar;
   renderOff();
   renderFc();
+  renderMode();
   renderPlan();
 }
+
+function renderMode(){
+  [...$("cutModeSeg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === cutMode)));
+  $("cutTubeParams").hidden = cutMode !== "tube";
+  $("cutFabParams").hidden = cutMode !== "tissu";
+}
+
+$("cutModeSeg").addEventListener("click", e => {
+  const b = e.target.closest("button[data-mode]");
+  if (!b) return;
+  cutMode = b.dataset.mode;
+  CUT.mode = cutMode; cutSave();
+  renderMode(); renderPlan();
+  $("cutSheet").querySelector(".sheet-body").scrollTop = 0;
+});
 
 function renderPlan(){
   const out = $("cutOut");
@@ -2102,6 +2128,10 @@ function renderPlan(){
   }).filter(x => x.l > 0 && x.h > 0);
 
   if (!dims.length){ out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>'; return; }
+  if (!cutMode){
+    out.innerHTML = '<div class="empty">Choisissez ci dessus ce que vous voulez couper : les tubes ou le tissu.</div>';
+    return;
+  }
 
   const laize = CUT_DEF.laize;   /* repli si une référence n'a pas de laize connue */
   const barLen = parseFloat(CUT.bar) || CUT_DEF.bar;
@@ -2113,7 +2143,7 @@ function renderPlan(){
   const profils = [];
   fams.forEach(fm => PROFILS[fm].forEach(pr => profils.push(Object.assign({fam:fm}, pr))));
 
-  profils.forEach(pr => {
+  if (cutMode === "tube") profils.forEach(pr => {
     const mine = dims.filter(d => d.t === pr.fam);
     if (!mine.length) return;
     const pieces = mine.map(x => ({w: x.l - pr.d, s:x}));
@@ -2157,7 +2187,7 @@ function renderPlan(){
   /* ---- tissu, une section par référence ---- */
   const byRef = {};
   dims.forEach(x => { const k = x.ref || "sans tissu"; (byRef[k] = byRef[k] || []).push(x); });
-  Object.keys(byRef).forEach(ref => {
+  if (cutMode === "tissu") Object.keys(byRef).forEach(ref => {
     const f = fab(ref);
     const lz = f ? f.laize : laize;
     const fcs = (CUT.fabcuts || []).filter(c => (c.ref || (o.refs || [])[0]) === ref);
@@ -2197,9 +2227,11 @@ function renderPlan(){
     }
   });
 
-  h += '<p class="hint" style="margin-top:20px">Longueur à dérouler = hauteur de la fenêtre + ' + CUT.surplus + ' cm' +
-       (fams.indexOf("JN") >= 0 ? ', et 2 × hauteur + ' + CUT.surplus + ' cm pour le jour et nuit' : '') +
-       '. Une chute de barre est gardée à partir de ' + CUT.seuilBarre + ' cm.</p>';
+  h += '<p class="hint" style="margin-top:20px">' + (cutMode === "tube"
+       ? 'Une chute de barre est gardée à partir de ' + CUT.seuilBarre + ' cm, en dessous elle est jetée.'
+       : 'Longueur à dérouler = hauteur de la fenêtre + ' + CUT.surplus + ' cm' +
+         (fams.indexOf("JN") >= 0 ? ', et 2 × hauteur + ' + CUT.surplus + ' cm pour le jour et nuit, le tissu faisant une boucle autour du rail' : '') + '.') +
+       '</p>';
   out.innerHTML = h;
 }
 
@@ -2357,9 +2389,10 @@ $("cutPickBody").addEventListener("click", e => {
   cutOrderId = b.dataset.cut;
   $("cutPickSheet").classList.remove("open");
   renderCut();
+  $("cutSheet").querySelector(".sheet-body").scrollTop = 0;
 });
 
-$("tileCut").addEventListener("click", () => { renderCut(); nav("cutSheet"); });
+$("tileCut").addEventListener("click", () => { cutMode = CUT.mode || null; renderCut(); nav("cutSheet"); });
 
 /* ============ Boot ============ */
 (function boot(){
