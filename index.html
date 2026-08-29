@@ -98,6 +98,8 @@ main{padding:14px 16px 190px; display:flex; flex-direction:column; gap:14px}
   flex:1; border:0; background:none; padding:13px 0; width:100%; font-size:15.5px; min-width:0;
 }
 .field input::placeholder{color:var(--muted); opacity:.75}
+.field .fsuf{flex:none; font-family:Archivo,sans-serif; font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted)}
+.field input[type="date"]{min-width:0}
 .field:focus-within{border-color:var(--accent); background:var(--card)}
 select{appearance:none; -webkit-appearance:none}
 .sel{position:relative}
@@ -594,6 +596,11 @@ select{appearance:none; -webkit-appearance:none}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
         <input id="adresse" type="text" placeholder="Adresse (quartier, ville)">
       </div>
+      <div class="field">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        <input id="ech" type="date" aria-label="Échéance de pose ou de livraison">
+        <span class="fsuf" id="echLab">Échéance</span>
+      </div>
     </section>
 
     <!-- TYPE -->
@@ -1021,7 +1028,7 @@ function blank(){
     id: "d" + Date.now(),
     num: nextNum(),
     date: new Date().toISOString(),
-    nom:"", tel:"", adresse:"",
+    nom:"", tel:"", adresse:"", ech:"",
     type:"ENR",
     multi:false,
     dims:[{l:"",h:"",ref:"",note:"",type:"ENR",q:""}],
@@ -1373,13 +1380,23 @@ function renderProgress(){
 }
 
 function renderAll(){
-  renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
+  renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap(); renderPieces(); renderEch(); renderProgress();
 }
 
 /* ============ Events ============ */
 $("nom").addEventListener("input", e => { S.nom = e.target.value; renderProgress(); });
 $("tel").addEventListener("input", e => { S.tel = e.target.value; renderProgress(); });
 $("adresse").addEventListener("input", e => { S.adresse = e.target.value; });
+$("ech").addEventListener("change", e => { S.ech = e.target.value; renderEch(); });
+/* Le libellé rappelle s'il s'agit d'une pose ou d'une livraison. */
+function renderEch(){
+  $("echLab").textContent = S.ech ? (S.pose === "Livraison" ? "Livraison" : "Pose") : "Échéance";
+}
+function echFR(){
+  if (!S.ech) return "";
+  const a = String(S.ech).split("-");
+  return a.length === 3 ? a[2] + "/" + a[1] + "/" + a[0] : S.ech;
+}
 $("notes").addEventListener("input", e => { S.notes = e.target.value; });
 $("prix").addEventListener("input", e => {
   const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
@@ -1427,7 +1444,7 @@ $("segPose").addEventListener("click", e => {
   if (!b) return;
   S.pose = b.dataset.pose;
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
-  renderProgress();
+  renderEch(); renderProgress();
 });
 let pickTarget = null;   /* null = carte tissu, sinon index de ligne */
 function openPicker(target){
@@ -1600,6 +1617,7 @@ function migrate(o){
   if (o.prix === undefined) o.prix = "";
   if (o.multi === undefined) o.multi = (o.refs || []).length > 1;
   o.dims.forEach(d => { if (!d.type) d.type = o.type === "MIX" ? "ENR" : o.type; });
+  if (o.ech === undefined) o.ech = "";
   if (!o.photos) o.photos = [];
   if (!o.pieces || typeof o.pieces !== "object") o.pieces = {};
   if (!o.modeles || typeof o.modeles !== "object") o.modeles = {};
@@ -1608,7 +1626,7 @@ function migrate(o){
 
 function newOrder(){
   S = blank();
-  $("nom").value = ""; $("tel").value = ""; $("adresse").value = ""; $("notes").value = "";
+  $("nom").value = ""; $("tel").value = ""; $("adresse").value = ""; $("notes").value = ""; $("ech").value = "";
   $("prix").value = S.prix || "";
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === "ENR")));
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === "Pose")));
@@ -1657,6 +1675,11 @@ function ticket(){
   val(S.nom || "-", 34);
   x.fillStyle = T.muted; x.font = "400 27px " + B;
   x.fillText(S.tel + (S.adresse ? "   ·   " + S.adresse : ""), P, y); y += 34;
+  if (S.ech){
+    x.fillStyle = T.accent; x.font = "600 27px " + B;
+    x.fillText((S.pose === "Livraison" ? "Livraison" : "Pose") + " prévue le " + echFR(), P, y);
+    y += 34;
+  }
   rule();
 
   // type + tissu
@@ -2320,6 +2343,13 @@ function orderTotals(o){
   return {nb:v.length, prix: pu > 0 ? m2f * pu : 0};
 }
 
+/* Rappel de l'échéance dans la liste des bons */
+function echSuffix(o){
+  if (!o || !o.ech) return "";
+  const a = String(o.ech).split("-");
+  const j = a.length === 3 ? a[2] + "/" + a[1] : o.ech;
+  return "  ·  " + (o.pose === "Livraison" ? "livr." : "pose") + " " + j;
+}
 function renderHist(){
   const all = ORDERS;
   const q = ($("histSearch").value || "").trim().toLowerCase();
@@ -2347,7 +2377,7 @@ function renderHist(){
       '<button class="hmain" data-open="' + o.id + '">' +
         '<span class="hl1"><b><span class="etat-box etat-' + et + '">' + (o.nom || "Client sans nom") + '</span></b></span>' +
         '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + o.num + '  ·  ' + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
-          '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + '</small>' +
+          '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + echSuffix(o) + '</small>' +
           (t.prix ? '<span class="hprice">' + fr(t.prix) + ' MAD</span>' : '') + '</span>' +
       '</button>' +
       '<span class="hside">' +
@@ -2377,7 +2407,7 @@ $("histFilters").addEventListener("click", e => {
 
 function loadOrder(o){
   S = migrate(JSON.parse(JSON.stringify(o)));
-  $("nom").value = S.nom || ""; $("tel").value = S.tel || ""; $("adresse").value = S.adresse || "";
+  $("nom").value = S.nom || ""; $("tel").value = S.tel || ""; $("adresse").value = S.adresse || ""; $("ech").value = S.ech || "";
   $("notes").value = S.notes || ""; $("prix").value = S.prix || "";
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === S.type)));
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === S.pose)));
@@ -2473,7 +2503,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "2.2";
+const APP_VERSION = "2.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
