@@ -272,6 +272,9 @@ select{appearance:none; -webkit-appearance:none}
   text-align:left; font-family:Archivo,sans-serif; font-size:11.5px; font-weight:600;
   letter-spacing:.04em; color:var(--muted); cursor:pointer}
 .pcreset:active{color:var(--accent)}
+.pcmiss{margin:14px 0 0; padding:11px 13px; border-radius:10px; background:var(--warn-soft);
+  color:var(--warn); font-size:12.5px; line-height:1.5}
+.pcrow input.miss{border-color:var(--warn); background:var(--warn-soft)}
 .pc-confirm{
   width:100%; margin-top:14px; padding:14px; border:0; border-radius:12px;
   background:var(--ink); color:#fff; font-family:Archivo,sans-serif; font-size:14px;
@@ -279,6 +282,22 @@ select{appearance:none; -webkit-appearance:none}
 .pc-confirm:active{transform:translateY(1px)}
 .pc-confirm[disabled]{opacity:.5}
 .pc-confirm.done{background:var(--ok)}
+
+/* ---------- fenêtres fabriquées ---------- */
+.fait{
+  display:grid; grid-template-columns:26px 1fr; grid-template-rows:auto auto; gap:2px 11px;
+  width:100%; text-align:left; padding:11px 12px; margin-bottom:8px;
+  border:1px solid var(--line); border-radius:12px; background:var(--card2); cursor:pointer}
+.fait:last-of-type{margin-bottom:0}
+.fait .fbox{
+  grid-row:1 / span 2; align-self:center; width:26px; height:26px; border-radius:8px;
+  border:1.5px solid var(--line-strong); display:grid; place-items:center; color:transparent}
+.fait .fdim{font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; color:var(--ink)}
+.fait .fsub{font-size:11.5px; color:var(--muted); line-height:1.35}
+.fait.on{background:var(--ok-soft); border-color:transparent}
+.fait.on .fbox{background:var(--ok); border-color:var(--ok); color:#fff}
+.fait.on .fdim{color:var(--ok)}
+.fait.on .fsub{color:var(--ok); opacity:.8}
 
 /* ---------- chutes non utilisées ---------- */
 .unused{margin:10px 0 4px; padding:12px 14px; border:1px dashed var(--line);
@@ -765,6 +784,7 @@ select{appearance:none; -webkit-appearance:none}
         </span>
       </div>
       <div id="pcList"></div>
+      <p class="pcmiss" id="pcMiss" hidden></p>
       <button class="pc-confirm" id="btnPieces" type="button">Confirmer et envoyer au tableau</button>
       <p class="hint" id="pcHint">Les cases rouges sont calculées par l'application, vous pouvez les corriger. Les autres sont à remplir par l'atelier.</p>
       <button class="pcreset" id="btnHook" type="button" style="padding-left:2px">Lien du tableau de production</button>
@@ -933,6 +953,12 @@ select{appearance:none; -webkit-appearance:none}
       <span class="po"><b id="cutOrderName">Choisir un bon de commande</b><small id="cutOrderSub">Les dimensions sont reprises automatiquement</small></span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
     </button>
+
+    <div class="card" id="cutFaitCard" style="margin-bottom:14px">
+      <div class="card-head"><div class="label">Fenêtres fabriquées</div><div class="badge" id="cutFaitCount">0 / 0</div></div>
+      <div id="cutFait"></div>
+      <p class="hint">Cochez chaque fenêtre une fois fabriquée. La coche apparaît sur les téléphones de toute l'équipe.</p>
+    </div>
 
     <div class="seg" id="cutModeSeg" style="margin-bottom:14px">
       <button type="button" data-mode="tube" aria-pressed="false">Découpe des tubes<span class="sub">barres et profilés</span></button>
@@ -1662,6 +1688,7 @@ $("pcList").addEventListener("input", e => {
   const v = inp.value.trim();
   pcSet(inp.dataset.fam, inp.dataset.k, v);
   inp.className = v === "" ? "" : "edited";
+  pcCheck();
 });
 $("pcList").addEventListener("click", e => {
   const b = e.target.closest("button[data-opt]");
@@ -2654,13 +2681,15 @@ function renderStock(){
   else if (stockFilter === "enr") list = list.filter(f => f.type === "ENR");
   else if (stockFilter === "jn") list = list.filter(f => f.type === "JN");
   /* Par défaut on respecte l'ordre exact de la feuille Google. */
-  if (stockSort === "asc")       list = list.slice().sort((a,b) => a.dispo - b.dispo || a.ref.localeCompare(b.ref));
-  else if (stockSort === "desc") list = list.slice().sort((a,b) => b.dispo - a.dispo || a.ref.localeCompare(b.ref));
+  if (stockSort === "asc")       list = list.slice().sort((a,b) => m2(a) - m2(b) || a.ref.localeCompare(b.ref));
+  else if (stockSort === "desc") list = list.slice().sort((a,b) => m2(b) - m2(a) || a.ref.localeCompare(b.ref));
   else                           list = list.slice();
 
-  const tot = list.reduce((s,f) => s + f.dispo, 0);
+  /* La feuille donne des mètres linéaires ; la surface se déduit de la laize. */
+  const m2 = f => f.dispo * f.laize / 100;
+  const tot = list.reduce((s,f) => s + m2(f), 0);
   $("stockSumLabel").textContent = list.length + (list.length > 1 ? " références" : " référence");
-  $("stockSum").textContent = fr(tot) + " ml";
+  $("stockSum").textContent = fr(tot) + " m²";
 
   const box = $("stockList");
   box.innerHTML = "";
@@ -2671,12 +2700,13 @@ function renderStock(){
     const cls = f.dispo < 1 ? "out" : (f.dispo < 20 ? "low" : "ok");
     d.innerHTML =
       '<span class="sref"><b>' + f.ref + '</b>' +
-      '<small>' + (f.type === "JN" ? "Jour et nuit" : "Enrouleur") + '  ·  laize ' + (f.laize/100).toFixed(2).replace(".",",") + ' m</small></span>' +
-      '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : fr(f.dispo) + " ml") + '</span>';
+      '<small>' + (f.type === "JN" ? "Jour et nuit" : "Enrouleur") + '  ·  laize ' +
+        (f.laize/100).toFixed(2).replace(".",",") + ' m  ·  ' + fr(f.dispo) + ' ml</small></span>' +
+      '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : fr(m2(f)) + " m²") + '</span>';
     box.appendChild(d);
   });
   [...$("stockSort").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.s === stockSort)));
-  $("srcInfo").innerHTML = srcLabel() + ".<br>L'application lit la feuille MSTORECASA à chaque ouverture : colonne A pour la référence, colonne AB pour la quantité, et seules les lignes commençant par B-0, S-0 ou JN_0 sont reprises. La feuille doit rester partagée en lecture par lien.";
+  $("srcInfo").innerHTML = srcLabel() + ".<br>Les quantités sont affichées en <b>m²</b>, obtenues en multipliant les mètres linéaires de la colonne AB par la laize de la référence. Le nombre de ml reste indiqué sous chaque référence. Seules les lignes commençant par B-0, S-0 ou JN_0 sont reprises, et la feuille doit rester partagée en lecture par lien.";
 }
 
 $("stockSearch").addEventListener("input", renderStock);
@@ -3089,7 +3119,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "3.7";
+const APP_VERSION = "3.8";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -3213,6 +3243,20 @@ function pcNum(fam, def, d){
   return Math.round(def.auto(d) * 100) / 100;
 }
 
+/* Ce qui manque encore pour pouvoir envoyer la fiche */
+function pcManquants(){
+  const out = [];
+  famsPresent().forEach(fam => {
+    const d = pcData[fam] || famData(fam);
+    TISSU_DEF[fam].concat(PIECES_DEF[fam]).forEach(def => {
+      const man = pcVal(fam, def.k);
+      const auto = def.auto ? def.auto(d) : null;
+      if (man === null && auto === null) out.push({fam:fam, k:def.k, label:def.label});
+    });
+  });
+  return out;
+}
+
 function renderPieces(){
   const box = $("pcList"), badge = $("pcBadge"), btn = $("btnPieces");
   const fams = famsPresent();
@@ -3222,6 +3266,8 @@ function renderPieces(){
   if (!fams.length){
     badge.textContent = "—";
     btn.disabled = true;
+    btn.textContent = "Confirmer et envoyer au tableau";
+    $("pcMiss").hidden = true;
     box.innerHTML = '<div class="hint" style="margin:0">Saisissez une dimension pour préparer la fiche de production.</div>';
     return;
   }
@@ -3255,10 +3301,29 @@ function renderPieces(){
       grp("Pièces", PIECES_DEF[fam]);
     box.appendChild(el);
   });
+  pcCheck();
   const u = hookUrl();
   $("btnHook").textContent = (u === HOOK_DEFAULT)
     ? "Tableau de production : connecté"
     : "Tableau de production : lien personnalisé";
+}
+
+/* Le bouton ne s'active que si tout est renseigné, et on dit ce qui manque. */
+function pcCheck(){
+  const btn = $("btnPieces"), miss = $("pcMiss");
+  if (!famsPresent().length){ btn.disabled = true; miss.hidden = true; return; }
+  const m = pcManquants();
+  btn.disabled = m.length > 0;
+  btn.textContent = m.length
+    ? "Il reste " + m.length + (m.length > 1 ? " cases à remplir" : " case à remplir")
+    : "Confirmer et envoyer au tableau";
+  miss.hidden = !m.length;
+  if (m.length) miss.textContent = "À compléter : " + m.map(x => x.label).join(", ") + ".";
+  /* on souligne les cases vides */
+  [...$("pcList").querySelectorAll("input[data-k]")].forEach(inp => {
+    const vide = m.some(x => x.fam === inp.dataset.fam && x.k === inp.dataset.k);
+    inp.classList.toggle("miss", vide);
+  });
 }
 
 /* Le sélecteur d'état, en tête de la fiche : il part en colonne D du tableau */
@@ -3499,6 +3564,43 @@ function renderCut(){
   renderPlan();
 }
 
+/* Les fenêtres déjà fabriquées, cochées par l'atelier. */
+function faites(o){ return (o && Array.isArray(o.faites)) ? o.faites : []; }
+
+function renderFait(o, dims){
+  const box = $("cutFait");
+  const done = faites(o);
+  const n = dims.filter(d => done.indexOf(d.key) >= 0).length;
+  $("cutFaitCount").textContent = n + " / " + dims.length;
+  $("cutFaitCount").className = "badge" + (n === dims.length ? " ok" : (n ? " warn" : ""));
+  box.innerHTML = dims.map(d => {
+    const on = done.indexOf(d.key) >= 0;
+    return '<button class="fait' + (on ? " on" : "") + '" type="button" data-fait="' + d.key + '">' +
+      '<span class="fbox">' + (on
+        ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+        : '') + '</span>' +
+      '<span class="fdim">' + fr(d.l,0) + ' × ' + fr(d.h,0) + ' cm</span>' +
+      '<span class="fsub">' + (d.t === "JN" ? "jour et nuit" : "enrouleur") +
+        (d.ref ? "  ·  " + d.ref : "") + (d.note ? "  ·  " + esc(d.note) : "") + '</span>' +
+    '</button>';
+  }).join("");
+}
+
+$("cutFait").addEventListener("click", e => {
+  const b = e.target.closest("button[data-fait]");
+  if (!b) return;
+  const o = ORDERS.find(x => x.id === cutOrderId);
+  if (!o) return;
+  const k = b.dataset.fait;
+  const l = faites(o).slice();
+  const i = l.indexOf(k);
+  if (i >= 0) l.splice(i, 1); else l.push(k);
+  o.faites = l;
+  persistOrders();
+  pushBon(o);                 /* les autres téléphones suivent */
+  renderPlan();
+});
+
 function renderMode(){
   [...$("cutModeSeg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === cutMode)));
   $("cutTubeParams").hidden = cutMode !== "tube";
@@ -3522,6 +3624,7 @@ function renderPlan(){
     $("cutOrderName").textContent = "Choisir un bon de commande";
     $("cutOrderSub").textContent = "Les dimensions sont reprises automatiquement";
     out.innerHTML = '<div class="empty">Sélectionnez un bon de commande pour générer son plan de coupe.</div>';
+    $("cutFaitCard").hidden = true;
     return;
   }
   const d = new Date(o.date);
@@ -3540,11 +3643,18 @@ function renderPlan(){
       rf = ok[0] || refs[0] || "";
     }
     const q = qtyRow(x);
+    const ri = (o.dims || []).indexOf(x);
     for (let k = 0; k < q; k++)
-      dims.push({l:l, h:hh, n: dims.length + 1, note: x.note || "", ref: rf, t: t});
+      dims.push({l:l, h:hh, n: dims.length + 1, note: x.note || "", ref: rf, t: t,
+                 key: ri + ":" + k});
   });
 
   if (!dims.length){ out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>'; return; }
+
+  /* Suivi de fabrication, partagé avec les autres téléphones */
+  $("cutFaitCard").hidden = false;
+  renderFait(o, dims);
+
   if (!cutMode){
     out.innerHTML = '<div class="empty">Choisissez ci dessus ce que vous voulez couper : les tubes ou le tissu.</div>';
     return;
