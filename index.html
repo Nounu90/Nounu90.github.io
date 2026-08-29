@@ -1955,7 +1955,7 @@ function renderHome(){
   $("tileStockSub").textContent = CATALOGUE.length + " références  ·  " + inStock + " en stock";
   $("tileCutSub").textContent = all.length ? "Barres et tissu, à partir d'un bon enregistré" : "Enregistrez d'abord un bon";
   renderUserLine();
-  $("homeFoot").innerHTML = srcLabel() + "<br>MSTORECASA · Casablanca";
+  $("homeFoot").innerHTML = srcLabel() + "<br>MSTORECASA · Casablanca · version " + APP_VERSION;
 }
 
 function srcLabel(){
@@ -2268,6 +2268,8 @@ const PROFILS = {
 /* Retrait sur la largeur de la fenêtre pour la coupe du tissu */
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
+
+const APP_VERSION = "1.8";
 
 const CUT_DEF = {laize:320, bar:600, surplus:20, seuilBarre:90, seuilLaize:90, seuilLong:120};
 let CUT = Object.assign({}, CUT_DEF, LS.get("mst_cut", {}));
