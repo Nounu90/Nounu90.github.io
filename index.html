@@ -322,24 +322,32 @@ select{appearance:none; -webkit-appearance:none}
 .seg-piece.alt{background:#8E1226}
 :root[data-theme="dark"] .seg-piece.alt, :root:not([data-theme="light"]) .seg-piece.alt{background:#B33045}
 .seg-rest{display:grid; place-items:center; font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--muted); background:repeating-linear-gradient(45deg, var(--card2), var(--card2) 5px, var(--line) 5px, var(--line) 10px)}
-.cutline{display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:7px 0; border-top:1px dashed var(--line); font-size:13px}
+.cutline{display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:9px 0; border-top:1px dashed var(--line); font-size:13.5px}
 .cutline:first-of-type{border-top:0}
-.cutline .cl{color:var(--muted); font-family:"IBM Plex Mono",monospace; font-size:12px; white-space:nowrap}
-.cutline .cm{flex:1; min-width:0; font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:13.5px}
-.cutline .cr{font-family:"IBM Plex Mono",monospace; font-size:12.5px; color:var(--muted); white-space:nowrap}
+.cutline .cm{flex:1; min-width:0}
+.cutline .cm b{font-family:"Archivo",sans-serif; font-weight:600}
+.cutline .cm span{color:var(--muted); font-family:"IBM Plex Mono",monospace; font-size:12.5px}
 .fate{margin-top:9px; padding:8px 11px; border-radius:9px; font-size:12.5px; font-family:"IBM Plex Sans",sans-serif}
 .fate.full{background:var(--ok-soft); color:var(--ok)}
 .fate.keep{background:var(--warn-soft); color:var(--warn)}
 .fate.drop{background:var(--accent-soft); color:var(--accent)}
-.psec{font-family:"Archivo",sans-serif; font-weight:600; font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:22px 2px 11px}
-.psec:first-child{margin-top:0}
+.banner{
+  display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  background:var(--accent); color:var(--accent-ink); border-radius:12px; padding:13px 15px; margin:26px 0 9px;
+}
+.banner:first-child{margin-top:0}
+.banner b{font-family:"Archivo",sans-serif; font-weight:700; font-size:16.5px; letter-spacing:.01em}
+.banner span{font-size:13px; opacity:.9}
+.bsum{margin:0 3px 13px; font-size:12.5px; color:var(--muted); line-height:1.6}
+.cv{font-family:"IBM Plex Mono",monospace; font-size:16px; font-weight:600; white-space:nowrap; font-variant-numeric:tabular-nums}
 .grid2{display:grid; grid-template-columns:1fr 1fr; gap:9px}
 .kpi{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 13px}
 .kpi b{display:block; font-family:"IBM Plex Mono",monospace; font-size:19px; font-weight:600; font-variant-numeric:tabular-nums}
 .kpi span{display:block; font-family:"Archivo",sans-serif; font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); margin-top:3px}
 .kpi.bad b{color:var(--accent)} .kpi.good b{color:var(--ok)} .kpi.warn b{color:var(--warn)}
 .offrow{display:grid; grid-template-columns:1fr 70px 34px; gap:8px; align-items:center; margin-bottom:8px}
-.offrow.j{grid-template-columns:1fr 70px 34px}
+.offrow.fc{grid-template-columns:1fr 1fr 60px 34px}
+.pcard.stockcard{border-color:var(--warn); background:var(--warn-soft)}
 .offsel{margin-bottom:8px}
 .offsel select{width:100%; border:1px solid var(--line); background:var(--card2); border-radius:10px; padding:10px 11px; font-size:13.5px}
 .offrow input{width:100%; border:1px solid var(--line); background:var(--card2); border-radius:10px; padding:11px;
@@ -671,19 +679,13 @@ select{appearance:none; -webkit-appearance:none}
     </button>
 
     <div class="card" style="margin-bottom:14px">
-      <div class="card-head"><div class="label">Matière disponible</div></div>
-      <div class="field">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="7" cy="6" rx="3" ry="3"/><path d="M7 3h10a3 3 0 010 6H7M7 9v12M17 9v9a3 3 0 01-3 3H7"/></svg>
-        <input id="cutLaize" inputmode="decimal" placeholder="Largeur du rouleau">
-        <span class="unit">cm</span>
-      </div>
-      <p class="hint" style="margin:2px 2px 9px">Utilisée pour les tissus dont la laize n'est pas connue. Les références portent la leur dans leur nom, S-055-<b>300</b> ou JN_002_<b>320</b>, et c'est celle là qui est appliquée.</p>
+      <div class="card-head"><div class="label">Barre neuve</div></div>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18v4H3z"/><path d="M7 10V8M12 10V8M17 10V8"/></svg>
         <input id="cutBar" inputmode="decimal" placeholder="Longueur de la barre">
         <span class="unit">cm</span>
       </div>
-      <p class="hint">Le tube 38 et la barre de charge sont coupés à la même longueur, celle de la largeur du store.</p>
+      <p class="hint">Longueur d'une barre à l'achat. La laize de chaque tissu est lue dans sa référence, S-055-<b>300</b> ou JN_002_<b>320</b>.</p>
     </div>
 
     <div class="card" style="margin-bottom:14px">
@@ -694,6 +696,16 @@ select{appearance:none; -webkit-appearance:none}
         Ajouter une chute de barre
       </button>
       <p class="hint">Longueur en cm et nombre de morceaux. Ces chutes sont utilisées avant d'entamer une barre neuve.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-head"><div class="label">Chutes de tissu en stock</div><div class="badge" id="fcCount">0</div></div>
+      <div id="fcList"></div>
+      <button class="add" id="fcAdd" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Ajouter une chute de tissu
+      </button>
+      <p class="hint">Largeur et longueur du morceau en cm, et nombre de morceaux. Elles sont utilisées avant de dérouler le rouleau.</p>
     </div>
 
     <div id="cutOut"></div>
@@ -1942,6 +1954,8 @@ const CUT_DEF = {laize:320, bar:600, surplus:20, seuilBarre:90, seuilLaize:90, s
 let CUT = Object.assign({}, CUT_DEF, LS.get("mst_cut", {}));
 let cutOrderId = null;
 
+function cm(v){ return fr(v, Math.abs(v % 1) > 0.001 ? 1 : 0); }
+
 function cutSave(){ LS.set("mst_cut", CUT); }
 
 /* --- barres --- */
@@ -1986,41 +2000,62 @@ function planBarres(pieces, barLen, offcuts, seuil){
 }
 
 /* --- tissu --- */
-function planTissu(stores, laize, surplus, sLaize, sLong){
+function planTissu(stores, laize, surplus, sLaize, sLong, stock){
   const need = s => (s.t === "JN" ? 2 * s.h : s.h) + surplus;
   const impossible = stores.filter(s => s.l > laize);
-  const items = stores.filter(s => s.l <= laize).slice().sort((a,b) => (b.h - a.h) || (b.l - a.l));
+  const items = stores.filter(s => s.l <= laize).slice().sort((a,b) => (need(b) - need(a)) || (b.l - a.l));
+
+  /* chutes disponibles pour cette référence, les plus petites d'abord */
+  const pieces = [];
+  (stock || []).forEach((c, ci) => {
+    const n = Math.max(0, Math.round(c.qty || 0));
+    for (let k = 0; k < n; k++) if (c.w > 0 && c.l > 0)
+      pieces.push({w:c.w, len:c.l, label:"Chute " + fr(c.w,0) + " × " + fr(c.l,0) + " cm n°" + (k+1)});
+  });
+  pieces.sort((a,b) => (a.w * a.len) - (b.w * b.len));
+
   const bands = [];
   items.forEach(s => {
     const nd = need(s);
+    /* 1. une bande déjà ouverte qui accepte la largeur et la longueur */
     let best = null, diff = Infinity;
     bands.forEach(b => {
-      if (b.used + s.l <= laize + 0.001){
-        const d = Math.abs(b.unroll - nd);
-        if (d < diff){ diff = d; best = b; }
-      }
+      if (b.used + s.l > b.width + 0.001) return;
+      if (b.src === "chute" && Math.max(b.unroll, nd) > b.maxLen + 0.001) return;
+      const d = Math.abs(b.unroll - nd);
+      if (d < diff){ diff = d; best = b; }
     });
-    if (best){ best.items.push(s); best.used += s.l; best.unroll = Math.max(best.unroll, nd); }
-    else bands.push({items:[s], used:s.l, unroll:nd});
+    if (best){ best.items.push(s); best.used += s.l; best.unroll = Math.max(best.unroll, nd); return; }
+    /* 2. la plus petite chute en stock qui convient */
+    const pi = pieces.findIndex(pc => pc.w >= s.l - 0.001 && pc.len >= nd - 0.001);
+    if (pi >= 0){
+      const pc = pieces.splice(pi, 1)[0];
+      bands.push({items:[s], used:s.l, unroll:nd, src:"chute", width:pc.w, maxLen:pc.len, label:pc.label});
+      return;
+    }
+    /* 3. sinon on déroule le rouleau */
+    bands.push({items:[s], used:s.l, unroll:nd, src:"rouleau", width:laize, maxLen:Infinity});
   });
-  bands.forEach((b, i) => {
-    b.n = i + 1;
-    b.restLaize = laize - b.used;
-    b.conso = laize * b.unroll / 10000;
+
+  let nb = 0;
+  bands.forEach(b => {
+    b.n = b.src === "rouleau" ? ++nb : 0;
+    b.restLaize = b.width - b.used;
+    b.conso = b.width * b.unroll / 10000;
     b.utile = b.items.reduce((t,x) => t + x.l * x.h / 10000, 0);
     b.chuteLat = b.restLaize * b.unroll / 10000;
     b.latFate = (b.restLaize >= sLaize && b.unroll >= sLong) ? "keep" : "drop";
     b.chuteLong = b.items.reduce((t,x) => t + x.l * (b.unroll - need(x)), 0) / 10000;
     b.chute = b.chuteLat + b.chuteLong;
   });
-  const conso = bands.reduce((t,b) => t + b.conso, 0);
+  const roll = bands.filter(b => b.src === "rouleau");
+  const conso = roll.reduce((t,b) => t + b.conso, 0);
   return {bands:bands, impossible:impossible, conso:conso,
+          nbRoll: roll.length, nbStock: bands.length - roll.length,
+          stockUsed: bands.filter(b => b.src === "chute").reduce((t,b) => t + b.conso, 0),
           utile: bands.reduce((t,b) => t + b.utile, 0),
-          latKeep: bands.filter(b => b.latFate === "keep").reduce((t,b) => t + b.chuteLat, 0),
-          latDrop: bands.filter(b => b.latFate === "drop").reduce((t,b) => t + b.chuteLat, 0),
-          long: bands.reduce((t,b) => t + b.chuteLong, 0),
-          chute: bands.reduce((t,b) => t + b.chute, 0),
-          taux: conso > 0 ? bands.reduce((t,b) => t + b.chute, 0) / conso : 0};
+          chute: roll.reduce((t,b) => t + b.chute, 0),
+          taux: conso > 0 ? roll.reduce((t,b) => t + b.chute, 0) / conso : 0};
 }
 
 /* --- rendu --- */
@@ -2028,17 +2063,20 @@ function strip(parts, total){
   let h = '<div class="strip">';
   parts.forEach((p, i) => {
     const pct = Math.max(0, p.len / total * 100);
-    if (p.rest) h += '<div class="seg-rest" style="width:' + pct + '%">' + (pct > 9 ? fr(p.len,0) : "") + '</div>';
-    else h += '<div class="seg-piece' + (i % 2 ? " alt" : "") + '" style="width:' + pct + '%">' + (pct > 11 ? fr(p.len,0) : "") + '</div>';
+    if (p.rest) h += '<div class="seg-rest" style="width:' + pct + '%">' + (pct > 9 ? cm(p.len) : "") + '</div>';
+    else h += '<div class="seg-piece' + (i % 2 ? " alt" : "") + '" style="width:' + pct + '%">' + (pct > 11 ? cm(p.len) : "") + '</div>';
   });
   return h + '</div>';
 }
 
 function renderCut(){
-  $("cutLaize").value = CUT.laize;
   $("cutBar").value = CUT.bar;
   renderOff();
+  renderFc();
+  renderPlan();
+}
 
+function renderPlan(){
   const out = $("cutOut");
   const all = LS.get("mst_orders", []);
   const o = all.find(x => x.id === cutOrderId);
@@ -2065,7 +2103,7 @@ function renderCut(){
 
   if (!dims.length){ out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>'; return; }
 
-  const laize = parseFloat(CUT.laize) || CUT_DEF.laize;
+  const laize = CUT_DEF.laize;   /* repli si une référence n'a pas de laize connue */
   const barLen = parseFloat(CUT.bar) || CUT_DEF.bar;
   const fams = o.type === "MIX" ? ["ENR","JN"].filter(t => dims.some(d => d.t === t)) : [o.type === "JN" ? "JN" : "ENR"];
 
@@ -2080,16 +2118,17 @@ function renderCut(){
     if (!mine.length) return;
     const pieces = mine.map(x => ({w: x.l - pr.d, s:x}));
     const offs = (CUT.offcuts || []).filter(f => (f.profil || profils[0].k) === pr.k);
-    const famLabel = fams.length > 1 ? (pr.fam === "JN" ? "jour et nuit" : "enrouleur") + " · " : "";
     const B = planBarres(pieces, barLen, offs, CUT.seuilBarre);
 
-    h += '<div class="psec">Barres · ' + famLabel + pr.label + '</div>';
-    h += '<div class="grid2" style="margin-bottom:13px">' +
-      kpi(B.neuves, "barres neuves", "") +
-      kpi(fr(B.used,0) + " cm", "longueur utilisée", "") +
-      kpi(fr(B.garde,0) + " cm", "chute gardée", B.garde > 0 ? "warn" : "") +
-      kpi(fr(B.jete,0) + " cm", "chute jetée", B.jete > 0 ? "bad" : "good") +
-    '</div>';
+    h += '<div class="banner"><b>' + pr.label.toUpperCase() + '</b>' +
+         (fams.length > 1 ? '<span>stores ' + (pr.fam === "JN" ? "jour et nuit" : "enrouleur") + '</span>' : '') +
+         '</div>';
+    h += '<p class="bsum"><b>' + B.neuves + '</b> barre' + (B.neuves > 1 ? 's' : '') + ' neuve' + (B.neuves > 1 ? 's' : '') +
+         ' de ' + fr(barLen,0) + ' cm  ·  ' + cm(B.used) + ' cm coupés' +
+         (B.garde > 0 ? '  ·  ' + cm(B.garde) + ' cm à garder' : '') +
+         (B.jete > 0 ? '  ·  ' + cm(B.jete) + ' cm jetés' : '') +
+         (pr.d ? '<br>Chaque coupe = largeur de la fenêtre moins ' + cm(pr.d) + ' cm.' : '') +
+         '</p>';
 
     B.bars.forEach(b => {
       const parts = b.cuts.map(c => ({len:c.p.w}));
@@ -2097,23 +2136,21 @@ function renderCut(){
       h += '<div class="pcard">' +
         '<div class="pcard-head"><b>' + b.label + '</b><span class="badge">' + fr(b.len,0) + ' cm</span></div>' +
         strip(parts, b.len);
-      b.cuts.forEach((c, i) => {
+      b.cuts.forEach(c => {
         h += '<div class="cutline">' +
-          '<span class="cl">coupe ' + (i+1) + '</span>' +
-          '<span class="cm">' + fr(c.p.w, c.p.w % 1 ? 1 : 0) + ' cm</span>' +
-          '<span class="cr">store ' + c.p.s.n + ' (' + fr(c.p.s.l,0) + ')  ·  reste ' + fr(c.after, c.after % 1 ? 1 : 0) + '</span>' +
+          '<span class="cm"><b>Fenêtre ' + c.p.s.n + '</b>  <span>' + fr(c.p.s.l,0) + ' × ' + fr(c.p.s.h,0) + ' cm</span></span>' +
+          '<span class="cv">' + cm(c.p.w) + ' cm</span>' +
         '</div>';
       });
       h += '<div class="fate ' + b.fate + '">' +
-        (b.fate === "full" ? "Barre entièrement utilisée."
-         : b.fate === "keep" ? "Reste " + fr(b.rest, b.rest % 1 ? 1 : 0) + " cm : à garder en stock de chutes."
-         : "Reste " + fr(b.rest, b.rest % 1 ? 1 : 0) + " cm : sous le seuil de " + CUT.seuilBarre + " cm, jeté.") +
+        (b.fate === "full" ? "Rien ne reste, barre utilisée à 100 %."
+         : b.fate === "keep" ? "Reste " + cm(b.rest) + " cm : à garder."
+         : "Reste " + cm(b.rest) + " cm : trop court, à jeter.") +
       '</div></div>';
     });
-    if (pr.note) h += '<p class="hint" style="margin:-2px 2px 4px">' + pr.note + '</p>';
     if (B.impossible.length){
       h += '<div class="pcard"><div class="fate drop">' + B.impossible.length +
-        ' store(s) plus large(s) que la barre de ' + fr(barLen,0) + ' cm : coupe impossible en une pièce.</div></div>';
+        ' fenêtre(s) plus large(s) que la barre de ' + fr(barLen,0) + ' cm.</div></div>';
     }
   });
 
@@ -2122,52 +2159,47 @@ function renderCut(){
   dims.forEach(x => { const k = x.ref || "sans tissu"; (byRef[k] = byRef[k] || []).push(x); });
   Object.keys(byRef).forEach(ref => {
     const f = fab(ref);
-    const lz = f ? f.laize : laize;   /* la laize est portée par la référence */
-    const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong);
-    h += '<div class="psec">Tissu ' + ref + '  ·  laize ' + fr(lz,0) + ' cm</div>';
-    h += '<div class="grid2" style="margin-bottom:13px">' +
-      kpi(T.bands.length, "bandes", "") +
-      kpi(fr(T.conso) + " m²", "tissu déroulé", "") +
-      kpi(fr(T.utile) + " m²", "surface utile", "good") +
-      kpi(fr(T.taux*100,1) + " %", "taux de chute", T.taux > 0.25 ? "bad" : "warn") +
-    '</div>';
+    const lz = f ? f.laize : laize;
+    const fcs = (CUT.fabcuts || []).filter(c => (c.ref || (o.refs || [])[0]) === ref);
+    const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong, fcs);
+    h += '<div class="banner"><b>TISSU ' + ref + '</b><span>rouleau de ' + fr(lz,0) + ' cm de large</span></div>';
+    h += '<p class="bsum">' +
+         (T.nbStock ? '<b>' + T.nbStock + '</b> chute' + (T.nbStock > 1 ? 's' : '') + ' du stock réutilisée' + (T.nbStock > 1 ? 's' : '') + '  ·  ' : '') +
+         '<b>' + T.nbRoll + '</b> bande' + (T.nbRoll > 1 ? 's' : '') + ' à dérouler du rouleau' +
+         (T.conso > 0 ? '  ·  ' + fr(T.conso) + ' m² de tissu  ·  ' + fr(T.chute) + ' m² de chute (' + fr(T.taux*100,0) + ' %)' : '') +
+         '</p>';
     T.bands.forEach(b => {
       const parts = b.items.map(x => ({len:x.l}));
       if (b.restLaize > 0.5) parts.push({len:b.restLaize, rest:true});
-      h += '<div class="pcard">' +
-        '<div class="pcard-head"><b>Bande ' + b.n + '</b><span class="badge">dérouler ' + fr(b.unroll,0) + ' cm</span></div>' +
-        strip(parts, lz);
+      h += '<div class="pcard' + (b.src === "chute" ? " stockcard" : "") + '">' +
+        '<div class="pcard-head"><b>' + (b.src === "chute" ? b.label : "Bande " + b.n) + '</b><span class="badge">' +
+          (b.src === "chute" ? "chute du stock" : "dérouler " + fr(b.unroll,0) + " cm") + '</span></div>' +
+        strip(parts, b.width);
       b.items.forEach(x => {
         h += '<div class="cutline">' +
-          '<span class="cl">store ' + x.n + '</span>' +
-          '<span class="cm">' + fr(x.l,0) + ' × ' + fr((x.t === "JN" ? 2*x.h : x.h) + CUT.surplus,0) + ' cm</span>' +
-          '<span class="cr">' + (x.t === "JN" ? '2 × ' + fr(x.h,0) + ' + ' + CUT.surplus : 'fini ' + fr(x.h,0) + ' + ' + CUT.surplus) + '</span>' +
+          '<span class="cm"><b>Fenêtre ' + x.n + '</b>  <span>' + fr(x.l,0) + ' × ' + fr(x.h,0) + ' cm</span></span>' +
+          '<span class="cv">' + fr(x.l,0) + ' × ' + fr((x.t === "JN" ? 2*x.h : x.h) + CUT.surplus,0) + ' cm</span>' +
         '</div>';
       });
       h += '<div class="fate ' + (b.latFate === "keep" ? "keep" : (b.chuteLat > 0.01 ? "drop" : "full")) + '">' +
-        (b.restLaize < 0.5
-          ? "Laize entièrement utilisée."
-          : "Chute latérale " + fr(b.restLaize,0) + " × " + fr(b.unroll,0) + " cm = " + fr(b.chuteLat) + " m², " +
-            (b.latFate === "keep" ? "à garder." : "jetée, sous le seuil.")) +
-        (b.chuteLong > 0.005 ? "<br>Chute en longueur " + fr(b.chuteLong) + " m² sur les stores les plus courts." : "") +
+        (b.src === "chute"
+          ? "Pris dans une chute du stock, dérouler " + fr(b.unroll,0) + " cm sur ce morceau." +
+            (b.restLaize >= 0.5 ? " Il reste " + fr(b.restLaize,0) + " cm de large sur le côté." : "")
+          : b.restLaize < 0.5
+            ? "Toute la largeur du rouleau est utilisée."
+            : "Bande de " + fr(b.restLaize,0) + " cm de large qui reste sur le côté, " +
+              (b.latFate === "keep" ? "à garder." : "à jeter.")) +
       '</div></div>';
     });
     if (T.impossible.length){
       h += '<div class="pcard"><div class="fate drop">' + T.impossible.length +
-        ' store(s) plus large(s) que la laize de ' + fr(lz,0) + ' cm.</div></div>';
+        ' fenêtre(s) plus large(s) que le rouleau de ' + fr(lz,0) + ' cm.</div></div>';
     }
   });
 
-  h += '<p class="hint" style="margin-top:18px">' +
-       (fams.indexOf("JN") >= 0
-         ? 'Jour et nuit : longueur déroulée = 2 × hauteur + ' + CUT.surplus + ' cm, le tissu faisant une boucle autour du rail inférieur. '
-         : '') +
-       (fams.indexOf("ENR") >= 0
-         ? 'Enrouleur : longueur déroulée = hauteur + ' + CUT.surplus + ' cm d\'enroulement autour du tube. '
-         : '') +
-       'Chute de barre gardée à partir de ' + CUT.seuilBarre +
-       ' cm, chute de tissu gardée si la laize restante atteint ' + CUT.seuilLaize + ' cm sur au moins ' +
-       CUT.seuilLong + ' cm de long.</p>';
+  h += '<p class="hint" style="margin-top:20px">Longueur à dérouler = hauteur de la fenêtre + ' + CUT.surplus + ' cm' +
+       (fams.indexOf("JN") >= 0 ? ', et 2 × hauteur + ' + CUT.surplus + ' cm pour le jour et nuit' : '') +
+       '. Une chute de barre est gardée à partir de ' + CUT.seuilBarre + ' cm.</p>';
   out.innerHTML = h;
 }
 
@@ -2206,9 +2238,65 @@ function renderOff(){
   $("offCount").textContent = n + (n > 1 ? " morceaux" : " morceau");
 }
 
+function renderFc(){
+  const box = $("fcList");
+  const list = CUT.fabcuts || [];
+  const ord = LS.get("mst_orders", []).find(x => x.id === cutOrderId);
+  const refs = (ord && ord.refs) || [];
+  box.innerHTML = "";
+  list.forEach((c, i) => {
+    if (refs.length > 1){
+      const sel = document.createElement("div");
+      sel.className = "offsel";
+      sel.innerHTML = '<select data-fcref="' + i + '" aria-label="Tissu de la chute ' + (i+1) + '">' +
+        refs.map(r => '<option value="' + r + '"' + ((c.ref || refs[0]) === r ? " selected" : "") + '>' + r + '</option>').join("") +
+        '</select>';
+      box.appendChild(sel);
+    }
+    const d = document.createElement("div");
+    d.className = "offrow fc";
+    d.innerHTML =
+      '<input inputmode="decimal" value="' + (c.w || "") + '" data-fc="' + i + '" data-k="w" placeholder="Largeur" aria-label="Largeur de la chute ' + (i+1) + '">' +
+      '<input inputmode="decimal" value="' + (c.l || "") + '" data-fc="' + i + '" data-k="l" placeholder="Longueur" aria-label="Longueur de la chute ' + (i+1) + '">' +
+      '<input inputmode="numeric" value="' + (c.qty || "") + '" data-fc="' + i + '" data-k="qty" placeholder="Qté" aria-label="Nombre de morceaux ' + (i+1) + '">' +
+      '<button class="del" data-fcdel="' + i + '" aria-label="Retirer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>';
+    box.appendChild(d);
+  });
+  const n = list.reduce((t,c) => t + (Math.round(c.qty) || 0), 0);
+  $("fcCount").textContent = n + (n > 1 ? " morceaux" : " morceau");
+}
+
+$("fcAdd").addEventListener("click", () => {
+  const ord = LS.get("mst_orders", []).find(x => x.id === cutOrderId);
+  const refs = (ord && ord.refs) || [];
+  CUT.fabcuts = (CUT.fabcuts || []).concat([{ref:refs[0] || "", w:"", l:"", qty:1}]);
+  cutSave(); renderFc(); renderPlan();
+});
+$("fcList").addEventListener("input", e => {
+  const i = e.target.dataset.fc;
+  if (i === undefined) return;
+  const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
+  if (clean !== e.target.value) e.target.value = clean;
+  CUT.fabcuts[i][e.target.dataset.k] = clean === "" ? "" : parseFloat(clean);
+  cutSave();
+  clearTimeout(window._fct); window._fct = setTimeout(renderPlan, 500);
+});
+$("fcList").addEventListener("change", e => {
+  const i = e.target.dataset.fcref;
+  if (i === undefined) return;
+  CUT.fabcuts[i].ref = e.target.value;
+  cutSave(); renderPlan();
+});
+$("fcList").addEventListener("click", e => {
+  const b = e.target.closest("button[data-fcdel]");
+  if (!b) return;
+  CUT.fabcuts.splice(+b.dataset.fcdel, 1);
+  cutSave(); renderFc(); renderPlan();
+});
+
 $("offAdd").addEventListener("click", () => {
   CUT.offcuts = (CUT.offcuts || []).concat([{len:"", qty:1}]);
-  cutSave(); renderOff();
+  cutSave(); renderOff(); renderPlan();
 });
 $("offList").addEventListener("input", e => {
   const i = e.target.dataset.off;
@@ -2216,28 +2304,27 @@ $("offList").addEventListener("input", e => {
   const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
   if (clean !== e.target.value) e.target.value = clean;
   CUT.offcuts[i][e.target.dataset.k] = clean === "" ? "" : parseFloat(clean);
-  cutSave(); renderCut();
+  cutSave();
+  clearTimeout(window._oct); window._oct = setTimeout(renderPlan, 500);
 });
 $("offList").addEventListener("change", e => {
   const i = e.target.dataset.offp;
   if (i === undefined) return;
   CUT.offcuts[i].profil = e.target.value;
-  cutSave(); renderCut();
+  cutSave(); renderPlan();
 });
 $("offList").addEventListener("click", e => {
   const b = e.target.closest("button[data-offdel]");
   if (!b) return;
   CUT.offcuts.splice(+b.dataset.offdel, 1);
-  cutSave(); renderCut();
+  cutSave(); renderOff(); renderPlan();
 });
-["cutLaize","cutBar"].forEach(id => {
-  $(id).addEventListener("input", e => {
-    const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
-    if (clean !== e.target.value) e.target.value = clean;
-    CUT[id === "cutLaize" ? "laize" : "bar"] = parseFloat(clean) || "";
-    cutSave();
-    clearTimeout(window._ct); window._ct = setTimeout(renderCut, 350);
-  });
+$("cutBar").addEventListener("input", e => {
+  const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
+  if (clean !== e.target.value) e.target.value = clean;
+  CUT.bar = parseFloat(clean) || "";
+  cutSave();
+  clearTimeout(window._ct); window._ct = setTimeout(renderPlan, 500);
 });
 
 /* --- choix du bon --- */
@@ -2268,12 +2355,6 @@ $("cutPickBody").addEventListener("click", e => {
   const b = e.target.closest("[data-cut]");
   if (!b) return;
   cutOrderId = b.dataset.cut;
-  const o = LS.get("mst_orders", []).find(x => x.id === cutOrderId);
-  if (o && (o.refs || []).length){
-    const laizes = o.refs.map(r => (fab(r) || {}).laize).filter(Boolean);
-    if (laizes.length) CUT.laize = Math.min.apply(null, laizes);
-    cutSave();
-  }
   $("cutPickSheet").classList.remove("open");
   renderCut();
 });
