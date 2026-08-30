@@ -2703,15 +2703,14 @@ function renderStock(){
   else if (stockFilter === "enr") list = list.filter(f => f.type === "ENR");
   else if (stockFilter === "jn") list = list.filter(f => f.type === "JN");
   /* Par défaut on respecte l'ordre exact de la feuille Google. */
-  if (stockSort === "asc")       list = list.slice().sort((a,b) => m2(a) - m2(b) || a.ref.localeCompare(b.ref));
-  else if (stockSort === "desc") list = list.slice().sort((a,b) => m2(b) - m2(a) || a.ref.localeCompare(b.ref));
+  if (stockSort === "asc")       list = list.slice().sort((a,b) => a.dispo - b.dispo || a.ref.localeCompare(b.ref));
+  else if (stockSort === "desc") list = list.slice().sort((a,b) => b.dispo - a.dispo || a.ref.localeCompare(b.ref));
   else                           list = list.slice();
 
-  /* La feuille donne des mètres linéaires ; la surface se déduit de la laize. */
-  const m2 = f => f.dispo * f.laize / 100;
-  const tot = list.reduce((s,f) => s + m2(f), 0);
+  /* On affiche exactement la colonne AB de la feuille, en mètres linéaires. */
+  const tot = list.reduce((s,f) => s + f.dispo, 0);
   $("stockSumLabel").textContent = list.length + (list.length > 1 ? " références" : " référence");
-  $("stockSum").textContent = fr(tot) + " m²";
+  $("stockSum").textContent = fr(tot) + " ml";
 
   const box = $("stockList");
   box.innerHTML = "";
@@ -2723,12 +2722,12 @@ function renderStock(){
     d.innerHTML =
       '<span class="sref"><b>' + f.ref + '</b>' +
       '<small>' + (f.type === "JN" ? "Jour et nuit" : "Enrouleur") + '  ·  laize ' +
-        (f.laize/100).toFixed(2).replace(".",",") + ' m  ·  ' + fr(f.dispo) + ' ml</small></span>' +
-      '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : fr(m2(f)) + " m²") + '</span>';
+        (f.laize/100).toFixed(2).replace(".",",") + ' m  ·  ' + fr(f.dispo * f.laize / 100) + ' m²</small></span>' +
+      '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : fr(f.dispo) + " ml") + '</span>';
     box.appendChild(d);
   });
   [...$("stockSort").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.s === stockSort)));
-  $("srcInfo").innerHTML = srcLabel() + ".<br>Les quantités sont affichées en <b>m²</b>, obtenues en multipliant les mètres linéaires de la colonne AB par la laize de la référence. Le nombre de ml reste indiqué sous chaque référence. Seules les lignes commençant par B-0, S-0 ou JN_0 sont reprises, et la feuille doit rester partagée en lecture par lien.";
+  $("srcInfo").innerHTML = srcLabel() + ".<br>Le nombre affiché est celui de la colonne <b>AB</b> de votre feuille, en mètres linéaires, sans aucun calcul. La surface correspondante, ml × laize, est rappelée en petit sous chaque référence. Seules les lignes commençant par B-0, S-0 ou JN_0 sont reprises, et la feuille doit rester partagée en lecture par lien.";
 }
 
 $("stockSearch").addEventListener("input", renderStock);
@@ -3147,7 +3146,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "4.0";
+const APP_VERSION = "4.1";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
