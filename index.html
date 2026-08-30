@@ -3432,7 +3432,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "5.1";
+const APP_VERSION = "5.2";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4706,6 +4706,7 @@ function tissuParStore(dims){
   const byRef = {};
   dims.forEach(x => { const k = x.ref || "?"; (byRef[k] = byRef[k] || []).push(x); });
   let total = 0, chute = 0;
+  const bande = {};       /* d'où vient le tissu de chaque fenêtre */
   const hors = {};        /* fenêtres plus larges que la laize : rien à couper */
   Object.keys(byRef).forEach(ref => {
     const f = fab(ref);
@@ -4714,17 +4715,19 @@ function tissuParStore(dims){
                         (CUT.fabcuts || []).filter(c => (c.ref || "") === ref));
     chute += T.chute;
     (T.impossible || []).forEach(x => { hors[x.key] = {ref:ref, laize:lz}; });
-    (T.bands || []).forEach(b => {
+    (T.bands || []).forEach((b, bi) => {
       const surf = (b.width * b.unroll) / 10000;
       total += surf;
       const som = b.items.reduce((t,x) => t + fabW(x) * ((x.t === "JN" ? 2*x.h : x.h) + surplusDe(x.t)), 0);
       b.items.forEach(x => {
         const propre = fabW(x) * ((x.t === "JN" ? 2*x.h : x.h) + surplusDe(x.t));
         part[x.key] = (part[x.key] || 0) + surf * (som > 0 ? propre / som : 1 / b.items.length);
+        bande[x.key] = {n: b.n || (bi + 1), src: b.src, nb: b.items.length,
+                        laize: b.width, unroll: b.unroll, surf: surf, ref: ref};
       });
     });
   });
-  return {part:part, total:total, chute:chute, hors:hors};
+  return {part:part, total:total, chute:chute, hors:hors, bande:bande};
 }
 
 /* Longueur de profilé réellement achetée pour ce bon, par famille, en mètres */
@@ -4777,6 +4780,7 @@ function calcCout(o){
     const pxTisB = px("tissu");
     const pxTisM2 = (f === "JN" && laizeM > 0) ? pxTisB / laizeM : pxTisB;
     const horsLaize = TIS.hors[x.key] || null;
+    const bande = TIS.bande[x.key] || null;
     if (horsLaize) alertes.push("Fenêtre " + x.n + " : " + fr(x.l,0) + " cm de large, le tissu " +
                                 horsLaize.ref + " ne fait que " + fr(horsLaize.laize,0) + " cm de laize");
     const cTissu = m2tissu * pxTisM2;
@@ -4820,7 +4824,7 @@ function calcCout(o){
     const pu = puFam(f, o);
     const vente = m2 * pu;
     return {x:x, fam:f, m2:m2, m2tissu:m2tissu, hors:horsLaize, pu:pu, vente:vente,
-            pxTisB:pxTisB, pxTisM2:pxTisM2, laizeM:laizeM,
+            pxTisB:pxTisB, pxTisM2:pxTisM2, laizeM:laizeM, bande:bande,
             cTissu:cTissu, cPiece:cPiece, pieces:pieces, cBarTh:cBarTh, cBarRe:cBarRe,
             cAcc:cAcc, acc:acc, pose:pose, cout:cout, pr:PR, mlRe:mlRe, pxBar:pxBar, L:L,
             benef: vente - cout, marge: vente > 0 ? (vente - cout) / vente : 0};
@@ -4888,7 +4892,12 @@ function renderCout(){
         ? li("Tissu", "non calculable : " + fr(s.x.l,0) + " cm de large pour une laize de " +
              fr(s.hors.laize,0) + " cm", "—", "neg")
         : li("Tissu", fr(s.m2tissu,2) + " m² × " + fr(s.pxTisM2,2) + " MAD/m²" +
-             (s.fam === "JN" ? "<br>" + fr(s.pxTisB,2) + " MAD/ml ÷ " + fr(s.laizeM,2) + " m de laize" : ""),
+             (s.fam === "JN" ? "<br>" + fr(s.pxTisB,2) + " MAD/ml ÷ " + fr(s.laizeM,2) + " m de laize" : "") +
+             (s.bande
+               ? "<br>" + (s.bande.src === "chute" ? "chute du stock" : "bande " + s.bande.n) +
+                 " : " + fr(s.bande.laize,0) + " × " + fr(s.bande.unroll,0) + " cm = " + fr(s.bande.surf,2) + " m²" +
+                 (s.bande.nb > 1 ? ", partagée entre " + s.bande.nb + " fenêtres" : ", cette fenêtre seule")
+               : ""),
              fr(s.cTissu,2))) +
       li(s.pieces[0].n, s.pieces[0].d && s.pieces[0].d.nom ? esc(s.pieces[0].d.nom) : "1 pièce", fr(s.cPiece,2)) +
       (s.pr.n
