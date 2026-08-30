@@ -2652,7 +2652,7 @@ async function pullBons(){
         if (d && d.ENR && d.JN){
           NOM = d;
           if (!NOM.hyp) NOM.hyp = Object.assign({}, HYP_DEF);
-          nomHypOk();
+          nomHypOk(); nomUnites();
           LS.set("mst_nom", NOM);
         }
         return;
@@ -3432,7 +3432,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "5.0";
+const APP_VERSION = "5.1";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4375,7 +4375,7 @@ const NOM_ROLES = {
     {k:"support",   label:"Support",          u:"u",  q:"sup"},
     {k:"bouchon",   label:"Bouchon",          u:"u",  q:"u2"},
     {k:"chainette", label:"Chaînette",        u:"ml", q:"h2"},
-    {k:"tissu",     label:"Tissu jour/nuit",  u:"m2", q:"tissu"}
+    {k:"tissu",     label:"Tissu jour/nuit",  u:"ml", q:"tissu"}
   ]
 };
 const Q_TXT = {barre:"largeur × coef.", tissu:"m² consommés", u1:"1 par store",
@@ -4413,6 +4413,19 @@ function nomHypOk(){
   if (chg) LS.set("mst_nom", NOM);
 }
 nomHypOk();
+/* L'unité d'une ligne suit la définition du rôle : le tissu jour et nuit
+   est passé du m² au ml, les nomenclatures enregistrées doivent suivre. */
+function nomUnites(){
+  let chg = false;
+  ["ENR","JN"].forEach(f => (NOM[f] || []).forEach(l => {
+    const d = NOM_ROLES[f].find(r => r.k === l.k);
+    if (!d) return;
+    if (l.u !== d.u){ l.u = d.u; chg = true; }
+    if (l.q !== d.q){ l.q = d.q; chg = true; }
+  }));
+  if (chg) LS.set("mst_nom", NOM);
+}
+nomUnites();
 let nomFam = "ENR";
 let nomCible = null;      /* ligne en cours de choix d'article */
 
@@ -4442,7 +4455,7 @@ async function pullNom(){
     if (d && d.ENR && d.JN){
       NOM = d;
       if (!NOM.hyp) NOM.hyp = Object.assign({}, HYP_DEF);
-      nomHypOk();
+      nomHypOk(); nomUnites();
       LS.set("mst_nom", NOM);
       return true;
     }
@@ -4757,10 +4770,16 @@ function calcCout(o){
     const need = (k, lab) => { if (!nomLignes(f, k).length || !px(k)) manque.push(lab + " (" + (f === "JN" ? "jour et nuit" : "enrouleur") + ")"); };
 
     need("tissu", "Tissu");
+    /* Prix du tissu : enrouleur (B-0, S-0) au m², jour et nuit (JN_0) au ml.
+       Le prix au ml se ramène au m² en le divisant par la laize du rouleau. */
+    const fTis   = fab(x.ref);
+    const laizeM = (fTis && fTis.laize > 0 ? fTis.laize : CUT_DEF.laize) / 100;
+    const pxTisB = px("tissu");
+    const pxTisM2 = (f === "JN" && laizeM > 0) ? pxTisB / laizeM : pxTisB;
     const horsLaize = TIS.hors[x.key] || null;
     if (horsLaize) alertes.push("Fenêtre " + x.n + " : " + fr(x.l,0) + " cm de large, le tissu " +
                                 horsLaize.ref + " ne fait que " + fr(horsLaize.laize,0) + " cm de laize");
-    const cTissu = m2tissu * px("tissu");
+    const cTissu = m2tissu * pxTisM2;
 
     let cPiece = 0, pieces = [];
     if (f === "ENR"){
@@ -4801,6 +4820,7 @@ function calcCout(o){
     const pu = puFam(f, o);
     const vente = m2 * pu;
     return {x:x, fam:f, m2:m2, m2tissu:m2tissu, hors:horsLaize, pu:pu, vente:vente,
+            pxTisB:pxTisB, pxTisM2:pxTisM2, laizeM:laizeM,
             cTissu:cTissu, cPiece:cPiece, pieces:pieces, cBarTh:cBarTh, cBarRe:cBarRe,
             cAcc:cAcc, acc:acc, pose:pose, cout:cout, pr:PR, mlRe:mlRe, pxBar:pxBar, L:L,
             benef: vente - cout, marge: vente > 0 ? (vente - cout) / vente : 0};
@@ -4867,7 +4887,9 @@ function renderCout(){
       (s.hors
         ? li("Tissu", "non calculable : " + fr(s.x.l,0) + " cm de large pour une laize de " +
              fr(s.hors.laize,0) + " cm", "—", "neg")
-        : li("Tissu", fr(s.m2tissu,2) + " m² consommés", fr(s.cTissu,2))) +
+        : li("Tissu", fr(s.m2tissu,2) + " m² × " + fr(s.pxTisM2,2) + " MAD/m²" +
+             (s.fam === "JN" ? "<br>" + fr(s.pxTisB,2) + " MAD/ml ÷ " + fr(s.laizeM,2) + " m de laize" : ""),
+             fr(s.cTissu,2))) +
       li(s.pieces[0].n, s.pieces[0].d && s.pieces[0].d.nom ? esc(s.pieces[0].d.nom) : "1 pièce", fr(s.cPiece,2)) +
       (s.pr.n
         ? s.pr.lignes.map(l => li(l.label,
