@@ -367,6 +367,8 @@ select{appearance:none; -webkit-appearance:none}
   position:fixed; inset:0; z-index:40; background:var(--ground); display:none; flex-direction:column;
 }
 .sheet.open{display:flex}
+/* un sélecteur s'ouvre par dessus l'écran qui l'appelle, quel que soit l'ordre du document */
+.sheet.pick{z-index:60}
 .sheet-top{
   position:sticky; top:0; background:var(--card); border-bottom:1px solid var(--line);
   display:flex; align-items:center; gap:12px; padding:14px 16px;
@@ -1105,7 +1107,7 @@ select{appearance:none; -webkit-appearance:none}
 </div>
 
 <!-- CHOIX DU BON POUR LE PLAN -->
-<div class="sheet" id="cutPickSheet">
+<div class="sheet pick" id="cutPickSheet">
   <div class="sheet-top">
     <button class="icon-btn" data-close="cutPickSheet" aria-label="Retour">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -1207,7 +1209,7 @@ select{appearance:none; -webkit-appearance:none}
 </div>
 
 <!-- CHOIX D'UN ARTICLE POUR LA NOMENCLATURE -->
-<div class="sheet" id="nomPickSheet">
+<div class="sheet pick" id="nomPickSheet">
   <div class="sheet-top">
     <button class="icon-btn" data-close="nomPickSheet" aria-label="Fermer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <h2 id="nomPickTitre">Choisir un article</h2>
@@ -1337,9 +1339,22 @@ function trouvePrixCol(rows){
       if (h.indexOf("unitaire") >= 0 || h.indexOf("achat") >= 0) col = j;
       else if (col < 0) col = j;
     });
-    if (col >= 0) return col;
+    if (col >= 0 && colonneChiffree(rows, col)) return col;
+    if (col >= 0) return PRIX_U;
   }
-  return -1;
+  return PRIX_U;
+}
+/* Colonne U de la feuille : le prix d'achat unitaire y est tenu à la main. */
+const PRIX_U = 20;
+/* Une colonne de prix contient des nombres sur les lignes d'articles. */
+function colonneChiffree(rows, col){
+  let n = 0;
+  for (let i = 0; i < rows.length && n < 3; i++){
+    const r = rows[i] || [];
+    if (!String(r[0] || "").trim()) continue;
+    if (numFr(r[col]) > 0) n++;
+  }
+  return n >= 3;
 }
 function sheetUrl(){
   const custom = LS.get("mst_sheeturl", "");
@@ -2115,8 +2130,9 @@ function openSheet(id){ armBack(); $(id).classList.add("open"); document.body.st
 function closeSheet(id){ $(id).classList.remove("open"); document.body.style.overflow = ""; }
 document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => {
   const id = b.dataset.close;
-  if (id === "cutPickSheet"){ $("cutPickSheet").classList.remove("open"); return; }
-  if (id === "histSheet" || id === "stockSheet" || id === "artSheet" || id === "cutSheet") nav("home");
+  if (id === "cutPickSheet" || id === "nomPickSheet"){ $(id).classList.remove("open"); return; }
+  if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
+      id === "cutSheet"  || id === "nomSheet"   || id === "coutSheet") nav("home");
   else closeSheet(id);
 }));
 
@@ -3406,7 +3422,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "4.4";
+const APP_VERSION = "4.5";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4557,7 +4573,7 @@ $("nomPickList").addEventListener("click", e => {
   const art = src.find(x => x.ref === a.dataset.art);
   l.ref = a.dataset.art;
   l.nom = art ? (art.nom || "") : "";
-  if (art && art.prix > 0 && !(l.prix > 0)) l.prix = art.prix;
+  if (art && art.prix > 0) l.prix = art.prix;   /* le prix suit l'article, modifiable après */
   nomSave();
   renderNom();
   $("nomPickSheet").classList.remove("open");
