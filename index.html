@@ -375,6 +375,45 @@ select{appearance:none; -webkit-appearance:none}
 }
 .sheet-top h2{font-family:"Archivo",sans-serif; font-size:17px; font-weight:600; margin:0; flex:1}
 .sheet-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px; max-width:520px; margin:0 auto; width:100%}
+/* --- journal de fabrication --- */
+.lgday{
+  display:flex; align-items:center; gap:10px; margin:16px 0 10px;
+  font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.08em;
+  color:var(--muted); text-transform:uppercase;
+}
+.lgday:before, .lgday:after{content:""; height:1px; background:var(--line); flex:1}
+.lgrow{
+  background:var(--card); border:1px solid var(--line); border-left:3px solid var(--ok);
+  border-radius:11px; padding:11px 13px; margin-bottom:8px;
+}
+.lgrow.off{border-left-color:var(--line-strong); opacity:.72}
+.lgtop{display:flex; align-items:baseline; gap:9px}
+.lgh{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); flex:none}
+.lgd{font-family:"Archivo",sans-serif; font-weight:600; font-size:14px; flex:1; min-width:0}
+.lgb{
+  flex:none; font-family:"IBM Plex Mono",monospace; font-size:11px; padding:2px 7px;
+  border-radius:6px; background:var(--ok-soft); color:var(--ok);
+}
+.lgrow.off .lgb{background:var(--card2); color:var(--muted)}
+.lgsub{display:block; font-size:12.5px; color:var(--muted); margin-top:4px; line-height:1.5}
+.lgsub b{color:var(--ink); font-weight:600}
+.lgbar{display:flex; gap:3px; margin-top:8px}
+.lgseg{height:4px; flex:1; border-radius:2px; background:var(--line)}
+.lgseg.on{background:var(--ok)}
+.lgdate{
+  display:flex; align-items:center; gap:9px; background:var(--card); border:1px solid var(--line);
+  border-radius:12px; padding:11px 13px; margin-bottom:12px;
+}
+.lgdate input{
+  flex:1; border:0; background:transparent; color:var(--ink); font-size:14.5px;
+  font-family:"IBM Plex Mono",monospace;
+}
+.lgdate input:focus{outline:none}
+.lgdate button{
+  flex:none; border:1px solid var(--line); background:var(--card2); color:var(--muted);
+  border-radius:8px; padding:6px 10px; font-size:12px; font-family:"Archivo",sans-serif; font-weight:600; cursor:pointer;
+}
+.lgdate button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
 /* --- nomenclature --- */
 .nrow{
   background:var(--card); border:1px solid var(--line); border-radius:12px;
@@ -863,21 +902,6 @@ select{appearance:none; -webkit-appearance:none}
       <div id="alerts"></div>
     </section>
 
-    <!-- PIECES UTILISEES -->
-    <section class="card" id="piecesCard">
-      <div class="card-head"><div class="label">Pièces utilisées</div><div class="badge" id="pcBadge">—</div></div>
-      <div class="pcrow pcetat"><label>État de la commande</label>
-        <span class="etatsel devis" id="pcEtatWrap">
-          <select id="pcEtat" aria-label="État de la commande"></select>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        </span>
-      </div>
-      <div id="pcList"></div>
-      <p class="pcmiss" id="pcMiss" hidden></p>
-      <button class="pc-confirm" id="btnPieces" type="button">Confirmer et envoyer au tableau</button>
-      <p class="hint" id="pcHint">Les cases rouges sont calculées par l'application, vous pouvez les corriger. Les autres sont à remplir par l'atelier.</p>
-      <button class="pcreset" id="btnHook" type="button" style="padding-left:2px">Lien du tableau de production</button>
-    </section>
   </main>
 
   <div class="bottom">
@@ -944,6 +968,11 @@ select{appearance:none; -webkit-appearance:none}
       <button class="tile" id="tileArt" type="button">
         <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span>
         <span class="tt"><b>Stock des articles</b><small id="tileArtSub">Mécanismes, tubes, accessoires</small></span>
+        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="tile" id="tileLog" type="button">
+        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h9M9 12h9M9 19h9"/><path d="M4.5 5l1 1 2-2M4.5 12l1 1 2-2M4.5 19l1 1 2-2"/></svg></span>
+        <span class="tt"><b>Logs</b><small id="tileLogSub">Fenêtres fabriquées, jour par jour</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
       <button class="tile" id="tileNom" type="button">
@@ -1103,6 +1132,23 @@ select{appearance:none; -webkit-appearance:none}
     </div>
 
     <div id="cutOut"></div>
+
+    <!-- FICHE DE PRODUCTION, sous le bilan des chutes -->
+  <section class="card" id="piecesCard">
+    <div class="card-head"><div class="label">Pièces utilisées</div><div class="badge" id="pcBadge">—</div></div>
+    <div class="pcrow pcetat"><label>État de la commande</label>
+      <span class="etatsel devis" id="pcEtatWrap">
+        <select id="pcEtat" aria-label="État de la commande"></select>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </span>
+    </div>
+    <div id="pcList"></div>
+    <p class="pcmiss" id="pcMiss" hidden></p>
+    <button class="pc-confirm" id="btnPieces" type="button">Confirmer et envoyer au tableau</button>
+    <p class="hint" id="pcHint">Les cases rouges sont calculées par l'application, vous pouvez les corriger. Les autres sont à remplir par l'atelier.</p>
+    <button class="pcreset" id="btnHook" type="button" style="padding-left:2px">Lien du tableau de production</button>
+  </section>
+
   </div>
 </div>
 
@@ -1174,6 +1220,25 @@ select{appearance:none; -webkit-appearance:none}
     <div class="bottom-in">
       <button class="send" data-close="refSheet" type="button" id="refDone">Terminé</button>
     </div>
+  </div>
+</div>
+
+<!-- JOURNAL DE FABRICATION -->
+<div class="sheet" id="logSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="logSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Logs</h2>
+  </div>
+  <div class="sheet-body">
+    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="lgdate">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      <input id="logDate" type="date">
+      <button id="logToday" type="button" aria-pressed="true">Aujourd'hui</button>
+    </div>
+    <div class="sumline"><span id="logSumLabel">Fenêtres fabriquées</span><b id="logSum">0</b></div>
+    <div id="logList"></div>
+    <p class="hint" id="logHint"></p>
   </div>
 </div>
 
@@ -1816,7 +1881,7 @@ function renderProgress(){
 }
 
 function renderAll(){
-  renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap(); renderPieces(); renderEch(); renderProgress();
+  renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap(); renderEch(); renderProgress();
 }
 
 /* ============ Events ============ */
@@ -1879,14 +1944,14 @@ $("prix").addEventListener("input", e => {
   if (clean !== e.target.value) e.target.value = clean;
   S.prix = clean;
   LS.set("mst_prix", clean);
-  renderRecap(); renderPieces();
+  renderRecap();
 });
 $("prixJN").addEventListener("input", e => {
   const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
   if (clean !== e.target.value) e.target.value = clean;
   S.prixJN = clean;
   LS.set("mst_prixjn", clean);
-  renderRecap(); renderPieces();
+  renderRecap();
 });
 $("segMulti").addEventListener("click", e => {
   const b = e.target.closest("button[data-multi]");
@@ -1900,7 +1965,7 @@ $("segMulti").addEventListener("click", e => {
     /* on repart des tissus déjà posés sur les fenêtres */
     syncRefs();
   }
-  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
+  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
 });
 
 $("pcList").addEventListener("input", e => {
@@ -1911,18 +1976,22 @@ $("pcList").addEventListener("input", e => {
   inp.className = v === "" ? "" : "edited";
   pcCheck();
 });
+$("pcList").addEventListener("change", () => pcPush());
 $("pcList").addEventListener("click", e => {
   const b = e.target.closest("button[data-opt]");
   if (!b) return;
   modelSet(b.dataset.fam, b.dataset.opt, b.dataset.v);
   [...b.parentNode.children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  pcPush();
 });
 $("pcEtat").addEventListener("change", e => {
-  S.etat = e.target.value;
-  $("pcEtatWrap").className = "etatsel " + S.etat;
-  const i = ORDERS.findIndex(o => o.id === S.id);
-  if (i >= 0){ ORDERS[i].etat = S.etat; persistOrders(); pushBon(ORDERS[i]); }
-  sheetSituation(S.num, etatLabel(S.etat));
+  const b = pcO(); if (!b) return;
+  b.etat = e.target.value;
+  $("pcEtatWrap").className = "etatsel " + b.etat;
+  if (S.id === b.id) S.etat = b.etat;
+  persistOrders(); pushBon(b);
+  sheetSituation(b.num, etatLabel(b.etat));
+  renderHist();
 });
 $("btnPieces").addEventListener("click", pcConfirm);
 $("btnHook").addEventListener("click", askHook);
@@ -1989,7 +2058,7 @@ $("refList").addEventListener("click", e => {
     syncRefs();
     renderRefList();
   }
-  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
+  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
 });
 $("chips").addEventListener("click", e => {
   const b = e.target.closest("button[data-unpick]");
@@ -1999,7 +2068,7 @@ $("chips").addEventListener("click", e => {
   if (i >= 0) S.refs.splice(i, 1);
   S.dims.forEach(d => { if (d.ref === r) d.ref = ""; });
   syncRefs();
-  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
+  renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
 });
 
 $("seg").addEventListener("click", e => {
@@ -2025,7 +2094,7 @@ rowsEl.addEventListener("input", e => {
     const box = e.target.closest(".qty");
     if (box) box.className = "qty" + (qtyOf(+i) > 1 ? " on" : "");
   }
-  updateNote(+i); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
+  updateNote(+i); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
 });
 rowsEl.addEventListener("click", e => {
   const rt = e.target.closest("button[data-rtype]");
@@ -2033,7 +2102,7 @@ rowsEl.addEventListener("click", e => {
     const i = +rt.dataset.rtype;
     S.dims[i].type = rt.dataset.v;
     if (S.dims[i].ref){ const f = fab(S.dims[i].ref); if (!f || f.type !== rt.dataset.v) S.dims[i].ref = ""; }
-    renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderPieces(); renderProgress();
+    renderRows(); renderRefs(); renderDecoupe(); renderRecap(); renderProgress();
     return;
   }
   const rf = e.target.closest("button[data-rowfab]");
@@ -2047,7 +2116,7 @@ rowsEl.addEventListener("click", e => {
 });
 $("addRow").addEventListener("click", () => {
   S.dims.push({l:"",h:"",ref:"",note:"",q:"",type: S.type === "MIX" ? (S.dims.length ? rowType(S.dims.length-1) : "ENR") : S.type});
-  renderRows(); renderDecoupe(); renderRecap(); renderPieces();
+  renderRows(); renderDecoupe(); renderRecap();
   const inp = rowsEl.querySelector('input[data-i="' + (S.dims.length-1) + '"][data-k="l"]');
   if (inp) inp.focus();
 });
@@ -2134,7 +2203,8 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
   const id = b.dataset.close;
   if (id === "cutPickSheet" || id === "nomPickSheet"){ $(id).classList.remove("open"); return; }
   if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
-      id === "cutSheet"  || id === "nomSheet"   || id === "coutSheet") nav("home");
+      id === "cutSheet"  || id === "nomSheet"   || id === "coutSheet" ||
+      id === "logSheet") nav("home");
   else closeSheet(id);
 }));
 
@@ -2692,6 +2762,7 @@ async function pullBons(){
     renderHome();
     if ($("histSheet").classList.contains("open")) renderHist();
     if ($("cutSheet").classList.contains("open")) renderPlan();
+    if ($("logSheet").classList.contains("open")) renderLog();
     return true;
   } catch(e){ ONLINE = false; renderHome(); return false; }
 }
@@ -2786,7 +2857,7 @@ async function bootAuth(){
 function nav(where){
   armBack();
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -2813,6 +2884,13 @@ function renderHome(){
   $("tileCutSub").textContent = all.length ? "Barres et tissu, à partir d'un bon enregistré" : "Enregistrez d'abord un bon";
   renderUserLine();
   $("tileCut").hidden = !cutAllowed();
+  $("tileLog").hidden = !logAllowed();
+  if (logAllowed()){
+    const nl = logDuJour(jourISO(new Date())).filter(e => e.on).length;
+    $("tileLogSub").textContent = nl
+      ? nl + " fenêtre" + (nl > 1 ? "s" : "") + " fabriquée" + (nl > 1 ? "s" : "") + " aujourd'hui"
+      : "Aucune fenêtre fabriquée aujourd'hui";
+  }
   $("tileArt").hidden = !artAllowed();
   $("tileNom").hidden = !artAllowed();
   $("tileCout").hidden = !artAllowed();
@@ -3142,7 +3220,7 @@ $("btnSync").addEventListener("click", () => syncStock(false));
 /* Une seule fonction pour tout le monde : on relit la feuille Google,
    on resynchronise les bons, puis on redessine l'écran ouvert. */
 function ecranOuvert(){
-  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","refSheet","cutPickSheet","nomPickSheet","shotSheet"];
+  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","refSheet","cutPickSheet","nomPickSheet","shotSheet"];
   for (let i = 0; i < ids.length; i++){
     const el = $(ids[i]);
     if (el && el.classList.contains("open")) return ids[i];
@@ -3173,6 +3251,7 @@ async function rafraichirTout(btn){
     else if (ou === "cutSheet") renderCut();
     else if (ou === "nomSheet"){ majPrix = nomPrixDepuisFeuille(); renderNom(); }
     else if (ou === "coutSheet") renderCout();
+    else if (ou === "logSheet") renderLog();
     else if (ou === "refSheet") renderRefs();
   } catch(e){}
 
@@ -3464,7 +3543,7 @@ function stockTxt(f){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "5.3";
+const APP_VERSION = "5.5";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -3512,7 +3591,7 @@ const FAM_LABEL = {ENR:"Store enrouleur", JN:"Store jour et nuit"};
 
 /* Mesures d'une famille de stores d'un bon */
 function famData(fam){
-  const v = validDims().filter(d => d.t === fam);
+  const v = pcDims().filter(d => d.t === fam);
   const drop = fam === "JN" ? FABDROP.JN : FABDROP.ENR;
   const sum = f => v.reduce((t,d) => t + f(d), 0);
   const dep = fam === "JN" ? 2 : 1;
@@ -3551,14 +3630,19 @@ function famChute(v){
 /* ---------- Fiche de production : pièces utilisées ---------- */
 let pcData = {};      /* mesures courantes par famille, refaites à chaque rendu */
 
+/* La fiche de production travaille sur le bon choisi dans le plan de coupe. */
+function pcO(){ return ORDERS.find(x => x.id === cutOrderId) || null; }
+function pcDims(){ const o = pcO(); return o ? ordDims(o) : []; }
+
 function famsPresent(){
-  const v = validDims();
+  const v = pcDims();
   return ["ENR","JN"].filter(f => v.some(d => d.t === f));
 }
 /* Modèle choisi pour une pièce qui en propose plusieurs */
 function modelVal(fam, def){
   if (!def.opts) return "";
-  const o = S.modeles && S.modeles[fam];
+  const b = pcO(); if (!b) return def.opts[0];
+  const o = b.modeles && b.modeles[fam];
   const v = o ? o[def.k] : "";
   return def.opts.indexOf(v) >= 0 ? v : def.opts[0];
 }
@@ -3568,14 +3652,21 @@ function modelSet(fam, k, v){
   S.modeles[fam][k] = v;
 }
 function pcVal(fam, k){
-  const o = S.pieces && S.pieces[fam];
+  const b = pcO(); if (!b) return null;
+  const o = b.pieces && b.pieces[fam];
   return (o && o[k] !== undefined && o[k] !== null && o[k] !== "") ? o[k] : null;
 }
 function pcSet(fam, k, v){
-  if (!S.pieces) S.pieces = {};
-  if (!S.pieces[fam]) S.pieces[fam] = {};
-  if (v === "" || v === null || v === undefined) delete S.pieces[fam][k];
-  else S.pieces[fam][k] = v;
+  const b = pcO(); if (!b) return;
+  if (!b.pieces) b.pieces = {};
+  if (!b.pieces[fam]) b.pieces[fam] = {};
+  if (v === "" || v === null || v === undefined) delete b.pieces[fam][k];
+  else b.pieces[fam][k] = v;
+}
+/* Toute saisie dans la fiche est enregistrée et partagée. */
+function pcPush(){
+  const b = pcO(); if (!b) return;
+  persistOrders(); pushBon(b);
 }
 /* valeur retenue pour l'envoi : la saisie de l'atelier, sinon le calcul */
 function pcNum(fam, def, d){
@@ -3673,7 +3764,7 @@ function pcCheck(){
 
 /* Le sélecteur d'état, en tête de la fiche : il part en colonne D du tableau */
 function renderEtatSel(){
-  const et = etatDe(S);
+  const et = etatDe(pcO());
   const sel = $("pcEtat");
   sel.innerHTML = ETATS.map(e =>
     '<option value="' + e.k + '"' + (e.k === et ? " selected" : "") + '>' + e.label + '</option>').join("");
@@ -3683,16 +3774,17 @@ function renderEtatSel(){
 /* Une ligne du tableau, dans l'ordre exact des colonnes */
 function pcRow(fam){
   const d = pcData[fam] || famData(fam);
-  const pu = puFam(fam);
-  const dt = new Date(S.date || Date.now());
+  const b = pcO() || S;
+  const pu = puFam(fam, b);
+  const dt = new Date(b.date || Date.now());
   const dateFR = pad(dt.getDate()) + "/" + pad(dt.getMonth()+1) + "/" + dt.getFullYear();
   const grp = new Map();
   d.dims.forEach(x => { const k = fr(x.l,0) + "x" + fr(x.h,0); grp.set(k, (grp.get(k) || 0) + 1); });
   const dims = [...grp].map(a => a[1] > 1 ? a[0] + " \u00d7" + a[1] : a[0]).join(" · ");
   const tissus = [...new Set(d.dims.map(x => x.ref).filter(Boolean))].join(", ");
   const total = Math.round(d.venteM2 * pu * 100) / 100;
-  const head = [dateFR, S.nom || "", S.num || "", S.notes || "",
-                etatLabel(etatDe(S)), pu || "", pu ? total : "", dims, tissus];
+  const head = [dateFR, b.nom || "", b.num || "", b.notes || "",
+                etatLabel(etatDe(b)), pu || "", pu ? total : "", dims, tissus];
   const T = k => pcNum(fam, TISSU_DEF[fam].find(x => x.k === k) || {k:k}, d);
   const P = k => {
     const def = PIECES_DEF[fam].find(x => x.k === k) || {k:k};
@@ -3723,14 +3815,15 @@ function askHook(){
 
 function pcConfirm(){
   const fams = famsPresent();
-  if (!fams.length) return;
+  const b = pcO();
+  if (!fams.length || !b) return;
   const url = hookUrl();
   if (!url){ askHook(); return; }
   const btn = $("btnPieces"), lbl = "Confirmer et envoyer au tableau";
   const payload = {
-    key: S.num,
-    bon: S.num,
-    client: S.nom || "",
+    key: b.num,
+    bon: b.num,
+    client: b.nom || "",
     auteur: USER ? USER.login : "",
     rows: fams.map(f => ({sheet:f, gid:SHEET_GIDS[f], values:pcRow(f)}))
   };
@@ -3743,8 +3836,8 @@ function pcConfirm(){
       if (!j || !j.ok) throw new Error(j && j.error ? j.error : "réponse inattendue du script");
       btn.textContent = "Envoyé au tableau"; btn.classList.add("done");
       toast(j.updated ? "Ligne mise à jour dans le tableau" : "Ligne ajoutée au tableau");
-      S.sheetAt = new Date().toISOString();
-      saveOrder(S.status === "sent" ? "sent" : "draft");
+      b.sheetAt = new Date().toISOString();
+      persistOrders(); pushBon(b);
       setTimeout(() => {
         btn.textContent = lbl; btn.classList.remove("done"); btn.disabled = false;
       }, 2500);
@@ -3960,11 +4053,31 @@ $("cutFait").addEventListener("click", e => {
   const k = b.dataset.fait;
   const l = faites(o).slice();
   const i = l.indexOf(k);
+  const coche = i < 0;
   if (i >= 0) l.splice(i, 1); else l.push(k);
   o.faites = l;
+
+  /* Journal : une ligne par appui, avec l'état du bon à cet instant. */
+  const dims = ordDims(o);
+  const d = dims.find(x => x.key === k);
+  if (!Array.isArray(o.log)) o.log = [];
+  o.log.push({
+    at:   Date.now(),
+    by:   (USER && USER.login) || "",
+    k:    k,
+    on:   coche,
+    dim:  d ? (fr(d.l,0) + " × " + fr(d.h,0) + " cm") : "",
+    t:    d ? d.t : "",
+    ref:  d ? (d.ref || "") : "",
+    fait: dims.filter(x => l.indexOf(x.key) >= 0).length,
+    tot:  dims.length
+  });
+  if (o.log.length > 400) o.log = o.log.slice(-400);
+
   persistOrders();
   pushBon(o);                 /* les autres téléphones suivent */
   renderPlan();
+  if ($("logSheet").classList.contains("open")) renderLog();
 });
 
 function renderMode(){
@@ -4014,6 +4127,7 @@ function renderPlan(){
     $("cutOrderSub").textContent = "Les dimensions sont reprises automatiquement";
     out.innerHTML = '<div class="empty">Sélectionnez un bon de commande pour générer son plan de coupe.</div>';
     $("cutFaitCard").hidden = true;
+    $("piecesCard").hidden = true;
     return;
   }
   const d = new Date(o.date);
@@ -4022,7 +4136,14 @@ function renderPlan(){
 
   const dims = ordDims(o);
 
-  if (!dims.length){ out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>'; return; }
+  if (!dims.length){
+    out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>';
+    $("piecesCard").hidden = true;
+    return;
+  }
+  /* La fiche de production suit le bon choisi, sous le plan et son bilan. */
+  $("piecesCard").hidden = false;
+  renderPieces();
 
   /* Suivi de fabrication, partagé avec les autres téléphones */
   $("cutFaitCard").hidden = false;
@@ -4381,6 +4502,93 @@ $("tileCut").addEventListener("click", () => {
 
 /* identifiant court et unique pour une ligne de nomenclature */
 function nomUid(){ return "n" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* ============ Logs : journal de fabrication ============ */
+/* Chaque coche dans « Fenêtres fabriquées » laisse une ligne, gardée dans le
+   bon lui même : elle voyage donc vers les autres téléphones avec le bon. */
+const LOG_USERS = ["noureddine", "imane"];
+function logAllowed(){
+  return !!USER && LOG_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
+}
+function jourISO(d){
+  const x = d instanceof Date ? d : new Date(d);
+  return x.getFullYear() + "-" + pad(x.getMonth() + 1) + "-" + pad(x.getDate());
+}
+let logJour = jourISO(new Date());
+
+/* Toutes les lignes de journal d'une journée, du plus récent au plus ancien */
+function logDuJour(iso){
+  const out = [];
+  (ORDERS || []).forEach(o => {
+    (o.log || []).forEach(e => {
+      if (jourISO(e.at) !== iso) return;
+      out.push(Object.assign({}, e, {nom:o.nom || "Client sans nom", num:o.num || "", id:o.id}));
+    });
+  });
+  return out.sort((a,b) => b.at - a.at);
+}
+
+function renderLog(){
+  $("logDate").value = logJour;
+  $("logToday").setAttribute("aria-pressed", String(logJour === jourISO(new Date())));
+
+  const lignes = logDuJour(logJour);
+  const posees = lignes.filter(e => e.on).length;
+  $("logSumLabel").textContent = logJour === jourISO(new Date())
+    ? "Fenêtres fabriquées aujourd'hui" : "Fenêtres fabriquées ce jour là";
+  $("logSum").textContent = posees;
+
+  const box = $("logList");
+  if (!lignes.length){
+    box.innerHTML = '<div class="empty">Aucune fenêtre cochée ce jour là.<br>' +
+      'Les lignes apparaissent dès qu\'un agent coche une fenêtre dans le plan de coupe.</div>';
+    $("logHint").textContent = "";
+    return;
+  }
+
+  box.innerHTML = lignes.map(e => {
+    const d = new Date(e.at);
+    const reste = Math.max(0, (e.tot || 0) - (e.fait || 0));
+    const segs = [];
+    for (let i = 0; i < (e.tot || 0); i++) segs.push('<span class="lgseg' + (i < (e.fait||0) ? " on" : "") + '"></span>');
+    return '<div class="lgrow' + (e.on ? "" : " off") + '">' +
+      '<div class="lgtop">' +
+        '<span class="lgh">' + pad(d.getHours()) + ":" + pad(d.getMinutes()) + '</span>' +
+        '<span class="lgd">' + esc(e.dim || "—") + '</span>' +
+        '<span class="lgb">' + (e.on ? "fabriquée" : "décochée") + '</span>' +
+      '</div>' +
+      '<span class="lgsub"><b>' + esc(e.nom) + '</b>' + (e.num ? "  ·  " + esc(e.num) : "") +
+        (e.t ? "  ·  " + (e.t === "JN" ? "jour et nuit" : "enrouleur") : "") +
+        (e.ref ? "  ·  " + esc(e.ref) : "") +
+        (e.by ? "  ·  " + esc(nomDe(e.by)) : "") +
+        '<br>' + (e.fait || 0) + " sur " + (e.tot || 0) + " fabriquée" + ((e.fait||0) > 1 ? "s" : "") +
+        (reste ? ",  reste <b>" + reste + "</b> à fabriquer" : ",  <b>bon terminé</b>") +
+      '</span>' +
+      '<div class="lgbar">' + segs.join("") + '</div>' +
+    '</div>';
+  }).join("");
+
+  const bons = lignes.map(e => e.id).filter((v,i,a) => a.indexOf(v) === i).length;
+  const agents = lignes.map(e => e.by).filter(Boolean).filter((v,i,a) => a.indexOf(v) === i);
+  $("logHint").textContent = lignes.length + " ligne" + (lignes.length > 1 ? "s" : "") +
+    " sur " + bons + " bon" + (bons > 1 ? "s" : "") +
+    (agents.length ? ",  " + agents.map(nomDe).join(" et ") : "") +
+    ".  Le journal est partagé : chaque appui d'un agent apparaît ici.";
+}
+
+$("logDate").addEventListener("change", e => {
+  logJour = e.target.value || jourISO(new Date());
+  renderLog();
+});
+$("logToday").addEventListener("click", () => { logJour = jourISO(new Date()); renderLog(); });
+
+$("tileLog").addEventListener("click", () => {
+  if (!logAllowed()) return;
+  logJour = jourISO(new Date());
+  renderLog();
+  nav("logSheet");
+  pullBons().then(() => renderLog());
+});
 
 /* ============ Nomenclature et prix ============ */
 /* Reprend les onglets « Prix d'achat des articles » du fichier Monte Carlo.
@@ -4996,7 +5204,8 @@ function backOneStep(){
       $("artSheet").classList.contains("open") ||
       $("cutSheet").classList.contains("open") ||
       $("nomSheet").classList.contains("open") ||
-      $("coutSheet").classList.contains("open")){ nav("home"); return true; }
+      $("coutSheet").classList.contains("open") ||
+      $("logSheet").classList.contains("open")){ nav("home"); return true; }
   if (!$("home").classList.contains("open")){ nav("home"); return true; }   /* formulaire */
   return false;                                                  /* accueil : sortie de l'app */
 }
