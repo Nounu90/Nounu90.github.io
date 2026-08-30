@@ -3048,7 +3048,9 @@ function catalogueFromRows(rows){
     if (!/^(B-0|S-0|JN[_-]?0)/i.test(ref)) return;
     let raw = r.length > QTY_COL ? r[QTY_COL] : "";
     if (raw === "" || raw === undefined || raw === null) raw = "";
+    const px = PRIX_COL >= 0 && r.length > PRIX_COL ? numFr(r[PRIX_COL]) : 0;
     direct.push({ref:ref.toUpperCase(), laize:laizeOf(ref), dispo:numFr(raw),
+                 prix: px > 0 ? px : 0,
                  type:/^JN/i.test(ref) ? "JN" : "ENR"});
   });
   if (direct.length) return direct;
@@ -3143,6 +3145,7 @@ async function rafraichirTout(btn){
   boutons.forEach(b => { b.setAttribute("data-busy", "1"); const t = b.querySelector("span"); if (t) t.textContent = "Actualisation..."; });
 
   const avant = ORDERS.length;
+  let majPrix = null;
   let stockOk = false;
   try { stockOk = await syncStock(true); } catch(e){}
   try { await syncAll(); } catch(e){}
@@ -3154,7 +3157,7 @@ async function rafraichirTout(btn){
     else if (ou === "artSheet") renderArt();
     else if (ou === "histSheet") renderHist();
     else if (ou === "cutSheet") renderCut();
-    else if (ou === "nomSheet") renderNom();
+    else if (ou === "nomSheet"){ majPrix = nomPrixDepuisFeuille(); renderNom(); }
     else if (ou === "coutSheet") renderCout();
     else if (ou === "refSheet") renderRefs();
   } catch(e){}
@@ -3166,6 +3169,12 @@ async function rafraichirTout(btn){
   const bons = diff > 0 ? "  ·  " + diff + " bon" + (diff > 1 ? "s" : "") + " en plus"
              : diff < 0 ? "  ·  " + (-diff) + " bon" + (diff < -1 ? "s" : "") + " retiré" + (diff < -1 ? "s" : "")
              : "";
+  if (majPrix && stockOk){
+    toast(majPrix.maj
+      ? majPrix.maj + " prix repris de la feuille" + (majPrix.vides ? ", " + majPrix.vides + " ligne" + (majPrix.vides > 1 ? "s" : "") + " sans article" : "")
+      : "Prix déjà à jour" + (majPrix.vides ? ", " + majPrix.vides + " ligne" + (majPrix.vides > 1 ? "s" : "") + " sans article" : ""));
+    return;
+  }
   toast(stockOk ? "À jour" + bons : "Bons à jour, feuille Google injoignable");
 }
 
@@ -3423,7 +3432,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "4.8";
+const APP_VERSION = "4.9";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4441,15 +4450,33 @@ async function pullNom(){
   return false;
 }
 
-/* Articles proposables : tout ce qui n'est pas un service. */
-function nomArticles(fam){
-  const list = ARTICLES.filter(a => !a.serv);
-  const mine = list.filter(a => !a.type || a.type === fam);
-  return (mine.length ? mine : list);
+/* Tous les articles de la feuille, sauf les services et sauf ceux à zéro. */
+function nomArticles(){
+  return ARTICLES.filter(a => !a.serv && a.dispo > 0);
 }
-/* Le tissu se choisit dans le catalogue des tissus, pas dans les articles. */
-function nomTissus(fam){
-  return CATALOGUE.filter(f => f.type === fam).map(f => ({ref:f.ref, nom:f.nom || "", prix:0}));
+/* Le tissu se choisit dans le catalogue des tissus, également en stock. */
+function nomTissus(){
+  return CATALOGUE.filter(f => f.dispo > 0)
+    .map(f => ({ref:f.ref,
+                nom: f.nom || ((f.type === "JN" ? "Tissu jour et nuit" : "Tissu enrouleur") +
+                               ", laize " + fr(f.laize / 100, 2) + " m"),
+                prix: f.prix > 0 ? f.prix : 0, dispo:f.dispo, type:f.type}));
+}
+/* Reprend le prix de la feuille pour chaque ligne qui porte un article.
+   Une ligne sans article garde sa case vide. */
+function nomPrixDepuisFeuille(){
+  let n = 0, vides = 0;
+  ["ENR","JN"].forEach(f => (NOM[f] || []).forEach(l => {
+    if (!l.ref){ if (l.prix){ l.prix = 0; n++; } vides++; return; }
+    const src = l.q === "tissu" ? nomTissus() : nomArticles();
+    const a = src.find(x => x.ref === l.ref);
+    if (!a) return;
+    if (a.nom) l.nom = a.nom;
+    const px = a.prix > 0 ? a.prix : 0;
+    if (l.prix !== px){ l.prix = px; n++; }
+  }));
+  if (n) nomSave();
+  return {maj:n, vides:vides};
 }
 
 function renderNom(){
@@ -4555,21 +4582,22 @@ function ouvrirNomPick(id){
 
 function renderNomPick(q, ligne){
   const l = ligne || (NOM[nomFam] || []).find(x => x.id === nomCible);
-  const src = l && l.q === "tissu" ? nomTissus(nomFam) : nomArticles(nomFam);
+  const src = l && l.q === "tissu" ? nomTissus() : nomArticles();
   const s = String(q || "").toLowerCase().trim();
   const list = src.filter(a =>
     !s || String(a.ref).toLowerCase().indexOf(s) >= 0 || String(a.nom || "").toLowerCase().indexOf(s) >= 0);
   if (!list.length){
     $("nomPickList").innerHTML = '<div class="empty">' +
       (src.length ? "Aucun article ne correspond." :
-       "La liste est vide. Appuyez sur Actualiser pour lire la feuille Google.") + '</div>';
+       "Aucun article en stock. Appuyez sur Actualiser pour relire la feuille Google.") + '</div>';
     return;
   }
   $("nomPickList").innerHTML = list.slice(0, 400).map(a =>
     '<button class="arow" type="button" data-art="' + esc(a.ref) + '" ' +
     'aria-pressed="' + (l && l.ref === a.ref ? "true" : "false") + '">' +
     '<b>' + esc(a.nom || a.ref) + '</b><small>' + esc(a.ref) +
-    (a.prix > 0 ? "  ·  " + fr(a.prix, 2) + " MAD" : "") + '</small></button>').join("");
+    (a.prix > 0 ? "  ·  " + fr(a.prix, 2) + " MAD" : "  ·  pas de prix") +
+    (a.dispo > 0 ? "  ·  stock " + fr(a.dispo, 2) : "") + '</small></button>').join("");
 }
 
 $("nomPickSearch").addEventListener("input", e => renderNomPick(e.target.value));
@@ -4590,7 +4618,7 @@ $("nomPickList").addEventListener("click", e => {
   if (!a) return;
   const l = (NOM[nomFam] || []).find(x => x.id === nomCible);
   if (!l) return;
-  const src = l.q === "tissu" ? nomTissus(nomFam) : nomArticles(nomFam);
+  const src = l.q === "tissu" ? nomTissus() : nomArticles();
   const art = src.find(x => x.ref === a.dataset.art);
   l.ref = a.dataset.art;
   l.nom = art ? (art.nom || "") : "";
