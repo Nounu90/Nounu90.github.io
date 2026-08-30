@@ -1139,10 +1139,32 @@ const BUILTIN_DATE = "18/08/26";
    Seules les références commençant par B-0, S-0 ou JN_0 sont retenues. */
 const SHEET_ID  = "1yToN1fuikP1PBYgDjA40EycaiwTMwXpo8eNQuok2HrQ";
 const SHEET_GID = "0";
-const QTY_COL   = 27;   /* AB */
+let QTY_COL = 27;      /* AB par défaut, ajusté d'après l'en-tête de la feuille */
+
+/* La feuille peut gagner des colonnes : on relit l'en-tête à chaque lecture et
+   on retient la colonne « Qtés en stock Réel », sinon « Disponible ». */
+function trouveQtyCol(rows){
+  for (let i = 0; i < Math.min(rows.length, 30); i++){
+    const r = rows[i] || [];
+    if (!/^r[ée]f[ée]rence$/i.test(String(r[0] || "").trim())) continue;
+    let reel = -1, dispo = -1;
+    r.forEach((c, j) => {
+      const h = String(c || "").toLowerCase().replace(/\s+/g, " ").trim();
+      if (h.indexOf("qt") !== 0) return;
+      if (h.indexOf("r\u00e9el") >= 0 || h.indexOf("reel") >= 0) reel = j;
+      else if (h.indexOf("disponible") >= 0) dispo = j;
+    });
+    if (reel >= 0) return reel;
+    if (dispo >= 0) return dispo;
+  }
+  return 27;
+}
 function sheetUrl(){
   const custom = LS.get("mst_sheeturl", "");
-  return custom || "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv&gid=" + SHEET_GID;
+  const base = custom || "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv&gid=" + SHEET_GID;
+  /* Google sert volontiers une copie en cache : un paramètre unique force
+     une vraie lecture à chaque fois. */
+  return base + (base.indexOf("?") >= 0 ? "&" : "?") + "mst=" + Date.now();
 }
 let CATALOGUE = BUILTIN.slice();      /* liste active */
 let SRC = null;                        /* {url, date, n} si feuille Google */
@@ -2764,7 +2786,6 @@ function laizeOf(ref){
    Colonne A la référence, colonne E la désignation, colonne X la famille,
    colonne AB la quantité. */
 const NAME_COL = 4;    /* E */
-const FAM_COL  = 23;   /* X */
 const SERVICES = ["ACOMPTE","POSE","LIVRAISON","INSTALLATION","DEPLACEMENT","REMISE","AVOIR"];
 
 function articlesFromRows(rows){
@@ -2775,9 +2796,15 @@ function articlesFromRows(rows){
     if (/^(B-0|S-0|JN[_-]?0)/i.test(ref)) return;          /* les tissus ont leur écran */
     if (/^(référence|reference)$/i.test(ref)) return;       /* ligne d'en-tête */
     let raw = r.length > QTY_COL ? r[QTY_COL] : "";
-    if (raw === "" || raw === undefined || raw === null) raw = r[r.length - 1];
-    const fam = String(r[FAM_COL] == null ? "" : r[FAM_COL]).toUpperCase();
+    if (raw === "" || raw === undefined || raw === null) raw = "";
+    /* la colonne de famille peut se déplacer : on la cherche dans la ligne */
+    let fam = "";
+    r.forEach(c => {
+      const v = String(c == null ? "" : c).toUpperCase();
+      if (v.indexOf("STJOURNUIT") >= 0 || v.indexOf("STENROU") >= 0 || v.indexOf("TISSENR") >= 0) fam = v;
+    });
     const U = ref.toUpperCase();
+    if (!fam) fam = (U.indexOf("J/N") >= 0 || U.indexOf("JN_") === 0) ? "STJOURNUIT" : "STENROU";
     const serv = SERVICES.some(k => U.indexOf(k) === 0) || U.indexOf("CHUTE") === 0;
     out.push({
       ref: ref.toUpperCase(),
@@ -2799,7 +2826,7 @@ function catalogueFromRows(rows){
     const ref = String(r[0] == null ? "" : r[0]).trim();
     if (!/^(B-0|S-0|JN[_-]?0)/i.test(ref)) return;
     let raw = r.length > QTY_COL ? r[QTY_COL] : "";
-    if (raw === "" || raw === undefined || raw === null) raw = r[r.length - 1];
+    if (raw === "" || raw === undefined || raw === null) raw = "";
     direct.push({ref:ref.toUpperCase(), laize:laizeOf(ref), dispo:numFr(raw),
                  type:/^JN/i.test(ref) ? "JN" : "ENR"});
   });
@@ -2850,6 +2877,7 @@ async function syncStock(silent){
     const res = await fetch(sheetUrl(), {cache:"no-store"});
     if (!res.ok) throw new Error("http " + res.status);
     const rows = parseCSV(await res.text());
+    QTY_COL = trouveQtyCol(rows);
     const list = catalogueFromRows(rows);
     if (!list.length) throw new Error("aucune référence lue");
     ARTICLES = artAllowed() ? articlesFromRows(rows) : [];
@@ -3119,7 +3147,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "3.8";
+const APP_VERSION = "4.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -3420,8 +3448,18 @@ const ETATS = [
 function etatDe(o){ return (o && o.etat && ETATS.some(e => e.k === o.etat)) ? o.etat : "devis"; }
 function etatLabel(k){ const e = ETATS.find(x => x.k === k); return e ? e.label : "Devis"; }
 
-const CUT_DEF = {laize:320, bar:600, surplus:20, seuilBarre:90, seuilLaize:90, seuilLong:120};
-let CUT = Object.assign({}, CUT_DEF, LS.get("mst_cut", {}));
+/* Seuils de réemploi des chutes de tissu : 50 cm dans les deux sens,
+   pour l'enrouleur comme pour le jour et nuit. */
+const CUT_DEF = {laize:320, bar:600, surplus:20, seuilBarre:90, seuilLaize:50, seuilLong:50, v:2};
+const CUT_SAVED = LS.get("mst_cut", {});
+let CUT = Object.assign({}, CUT_DEF, CUT_SAVED);
+/* Les téléphones qui gardaient les anciens seuils passent aux nouveaux. */
+if ((CUT_SAVED.v || 0) < 2){
+  CUT.seuilLaize = CUT_DEF.seuilLaize;
+  CUT.seuilLong  = CUT_DEF.seuilLong;
+  CUT.v = 2;
+  LS.set("mst_cut", CUT);
+}
 let cutOrderId = null;
 let cutMode = null;   /* "tube" | "tissu" */
 
