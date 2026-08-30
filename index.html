@@ -3422,7 +3422,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "4.5";
+const APP_VERSION = "4.6";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4707,9 +4707,11 @@ function calcCout(o){
 
     const pxBar = prixBarres(f);
     if (!pxBar) manque.push("Prix des profilés (" + (f === "JN" ? "jour et nuit" : "enrouleur") + ")");
-    const cBarTh = L * coef * pxBar;
+    const mlTh = L * coef;                                   /* longueur facturée au coefficient */
     const part = dims.filter(d => d.t === f).reduce((t,d) => t + d.l/100, 0);
-    const cBarRe = part > 0 ? (reel[f].ml * (L / part)) * pxBar : 0;
+    const mlRe = part > 0 ? reel[f].ml * (L / part) : 0;      /* part de la longueur vraiment achetée */
+    const cBarTh = mlTh * pxBar;
+    const cBarRe = mlRe * pxBar;
 
     let cAcc = 0, acc = [];
     if (f === "ENR"){
@@ -4732,7 +4734,7 @@ function calcCout(o){
     const vente = m2 * pu;
     return {x:x, fam:f, m2:m2, m2tissu:m2tissu, hors:horsLaize, pu:pu, vente:vente,
             cTissu:cTissu, cPiece:cPiece, pieces:pieces, cBarTh:cBarTh, cBarRe:cBarRe,
-            cAcc:cAcc, acc:acc, pose:pose, cout:cout,
+            cAcc:cAcc, acc:acc, pose:pose, cout:cout, mlTh:mlTh, mlRe:mlRe, pxBar:pxBar, L:L,
             benef: vente - cout, marge: vente > 0 ? (vente - cout) / vente : 0};
   });
 
@@ -4799,8 +4801,10 @@ function renderCout(){
              fr(s.hors.laize,0) + " cm", "—", "neg")
         : li("Tissu", fr(s.m2tissu,2) + " m² consommés", fr(s.cTissu,2))) +
       li(s.pieces[0].n, s.pieces[0].d && s.pieces[0].d.nom ? esc(s.pieces[0].d.nom) : "1 pièce", fr(s.cPiece,2)) +
-      li("Profilés", "largeur × " + fr(NOM.hyp.coef,4) + " (Monte Carlo)", fr(s.cBarTh,2)) +
-      li("Profilés, plan de coupe réel", "longueur vraiment achetée pour ce bon", fr(s.cBarRe,2), "alt") +
+      li("Profilés", fr(s.L,2) + " m × " + fr(NOM.hyp.coef,4) + " = " + fr(s.mlTh,2) +
+                     " ml × " + fr(s.pxBar,2) + " MAD/ml", fr(s.cBarTh,2)) +
+      li("Profilés, plan de coupe réel", fr(s.mlRe,2) + " ml achetés × " + fr(s.pxBar,2) + " MAD/ml",
+                     fr(s.cBarRe,2), "alt") +
       s.acc.map(a => li(a.n, a.q, fr(a.v,2))).join("") +
       (s.pose > 0 ? li("Main d’œuvre de pose", "hypothèse", fr(s.pose,2)) : "") +
       li("Coût de revient", fr(s.cout / (s.m2 || 1),2) + " MAD/m²", fr(s.cout,2), "tot") +
