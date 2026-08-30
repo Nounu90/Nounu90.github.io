@@ -3432,7 +3432,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "4.9";
+const APP_VERSION = "5.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4671,19 +4671,19 @@ function prixBarres(fam){
 /* Coût des profilés d'un store : chaque profilé est compté sur SA longueur de
    coupe, largeur de la fenêtre moins son retrait, puis majorée du coefficient. */
 function coutProfiles(fam, lcm, coef){
-  const lignes = (NOM[fam] || []).filter(l => l.q === "barre");
-  let cout = 0, ml = 0, px = 0, lmin = Infinity, lmax = 0;
-  lignes.forEach(l => {
-    const len = Math.max(0, lcm - dropDe(l.k)) / 100;
-    if (len < lmin) lmin = len;
-    if (len > lmax) lmax = len;
-    ml   += len * coef;
-    px   += l.prix > 0 ? l.prix : 0;
-    cout += len * coef * (l.prix > 0 ? l.prix : 0);
+  const src = (NOM[fam] || []).filter(l => l.q === "barre");
+  let cout = 0, ml = 0, px = 0;
+  const lignes = src.map(l => {
+    const drop = dropDe(l.k);
+    const len  = Math.max(0, lcm - drop) / 100;
+    const mll  = len * coef;
+    const prix = l.prix > 0 ? l.prix : 0;
+    const c    = mll * prix;
+    cout += c; ml += mll; px += prix;
+    return {k:l.k, label:l.label, nom:l.nom || "", ref:l.ref || "",
+            drop:drop, lenCm:lcm - drop, len:len, ml:mll, prix:prix, cout:c};
   });
-  if (!lignes.length) lmin = 0;
-  return {cout:cout, ml:ml, px:px, n:lignes.length, lmin:lmin, lmax:lmax,
-          egal: Math.abs(lmax - lmin) < 0.0001};
+  return {cout:cout, ml:ml, px:px, n:lignes.length, lignes:lignes};
 }
 
 /* m² de tissu réellement consommés, répartis fenêtre par fenêtre.
@@ -4869,13 +4869,13 @@ function renderCout(){
              fr(s.hors.laize,0) + " cm", "—", "neg")
         : li("Tissu", fr(s.m2tissu,2) + " m² consommés", fr(s.cTissu,2))) +
       li(s.pieces[0].n, s.pieces[0].d && s.pieces[0].d.nom ? esc(s.pieces[0].d.nom) : "1 pièce", fr(s.cPiece,2)) +
-      li("Profilés",
-         (s.pr.egal
-           ? fr(s.x.l,0) + " − " + cm(s.x.l - s.pr.lmin*100) + " cm = " + fr(s.pr.lmin,2) + " m coupés × " +
-             fr(C.coef,4) + " = " + fr(s.pr.lmin * C.coef,2) + " ml × " + fr(s.pr.px,2) + " MAD/ml"
-           : s.pr.n + " profilés coupés de " + cm(s.pr.lmax*100) + " à " + cm(s.pr.lmin*100) + " cm × " +
-             fr(C.coef,4) + " = " + fr(s.pr.ml,2) + " ml, " + fr(s.pr.px,2) + " MAD/ml au total"),
-         fr(s.cBarTh,2)) +
+      (s.pr.n
+        ? s.pr.lignes.map(l => li(l.label,
+            (l.nom ? esc(l.nom) + "<br>" : "") +
+            fr(s.x.l,0) + " − " + cm(l.drop) + " = " + cm(l.lenCm) + " cm × " + fr(C.coef,4) +
+            " = " + fr(l.ml,2) + " ml × " + fr(l.prix,2) + " MAD/ml", fr(l.cout,2))).join("") +
+          (s.pr.n > 1 ? li("Total profilés", fr(s.pr.ml,2) + " ml au total", fr(s.cBarTh,2)) : "")
+        : li("Profilés", "aucune ligne de profilé dans la nomenclature", "—", "neg")) +
       li("Profilés, plan de coupe réel", fr(s.mlRe,2) + " ml achetés × " + fr(s.pxBar,2) + " MAD/ml",
                      fr(s.cBarRe,2), "alt") +
       s.acc.map(a => li(a.n, a.q, fr(a.v,2))).join("") +
@@ -4901,7 +4901,7 @@ function renderCout(){
     li("Total facturé au client", "stores + " + C.poseLab.toLowerCase(), fr(C.vente + C.posePrix,2), "tot") +
   '</div>';
 
-  h += '<p class="hint">Le tissu est compté sur les m² réellement déroulés par le plan de coupe, chutes du stock déduites, pas sur la surface de la fenêtre. Les deux lignes de profilés montrent l’écart entre le coefficient de perte du Monte Carlo et le vrai plan de coupe de ce bon.</p>';
+  h += '<p class="hint">Le tissu est compté sur les m² réellement déroulés par le plan de coupe, chutes du stock déduites, pas sur la surface de la fenêtre. Chaque profilé a sa ligne, sur sa propre longueur de coupe. La ligne « plan de coupe réel » donne, en regard, ce que ce bon a vraiment sorti du stock.</p>';
 
   out.innerHTML = h;
 }
