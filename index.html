@@ -1608,13 +1608,14 @@ function renderRefs(){
   box.innerHTML = "";
   chosen().forEach(f => {
     const ml = need[f.ref] || 0;
-    const short = ml > f.dispo;
+    const dispoMl = stockMl(f);
+    const short = ml > dispoMl;
     const d = document.createElement("div");
     d.className = "chip" + (short ? " short" : "");
     d.innerHTML =
       '<span class="ci"><span class="cref">' + f.ref + '</span>' +
         '<span class="csub">laize ' + (f.laize/100).toFixed(2).replace(".",",") + " m  ·  " +
-        (ml > 0 ? fr(ml) + " ml / " + fr(f.dispo) + " ml" : fr(f.dispo) + " ml en stock") +
+        (ml > 0 ? fr(ml) + " ml / " + fr(dispoMl) + " ml" : stockTxt(f) + " en stock") +
         '</span></span>' +
       '<button class="cx" data-unpick="' + f.ref + '" aria-label="Retirer ' + f.ref + '">' +
         '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
@@ -1666,7 +1667,7 @@ function renderRefList(){
       b.innerHTML =
         '<span class="oref">' + f.ref +
           '<span class="osub">laize ' + (f.laize/100).toFixed(2).replace(".",",") + " m" +
-          (out ? "  ·  rupture au dépôt" : "  ·  " + fr(f.dispo) + " ml disponibles") + '</span>' +
+          (out ? "  ·  rupture au dépôt" : "  ·  " + stockTxt(f) + " disponibles") + '</span>' +
         '</span>' +
         (on
           ? '<svg class="check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
@@ -1776,9 +1777,10 @@ function renderRecap(){
   chosen().forEach(f => {
     const ml = need[f.ref] || 0;
     if (!ml) return;
+    const dm = stockMl(f);
     if (f.dispo < 1) warn("<b>" + f.ref + "</b> est en rupture au dépôt. Confirmez la disponibilité avant de promettre un délai.", true);
-    else if (f.dispo < ml) warn("<b>" + f.ref + "</b> : stock " + fr(f.dispo) + " ml insuffisant pour " + fr(ml) + " ml demandés. Manque <b>" + fr(ml - f.dispo) + " ml</b>.", true);
-    else if (f.dispo - ml < 10) warn("Après ce bon il ne restera que <b>" + fr(f.dispo - ml) + " ml</b> de " + f.ref + ".");
+    else if (dm < ml) warn("<b>" + f.ref + "</b> : stock " + fr(dm) + " ml insuffisant pour " + fr(ml) + " ml demandés. Manque <b>" + fr(ml - dm) + " ml</b>.", true);
+    else if (dm - ml < 10) warn("Après ce bon il ne restera que <b>" + fr(dm - ml) + " ml</b> de " + f.ref + ".");
   });
   const wide = validDims().filter(d => { const g = fab(d.ref); return g && d.l > g.laize; });
   if (wide.length) warn(wide.length > 1
@@ -2810,6 +2812,7 @@ function renderHome(){
   $("tileStockSub").textContent = CATALOGUE.length + " références  ·  " + inStock + " en stock";
   $("tileCutSub").textContent = all.length ? "Barres et tissu, à partir d'un bon enregistré" : "Enregistrez d'abord un bon";
   renderUserLine();
+  $("tileCut").hidden = !cutAllowed();
   $("tileArt").hidden = !artAllowed();
   $("tileNom").hidden = !artAllowed();
   $("tileCout").hidden = !artAllowed();
@@ -2838,6 +2841,11 @@ function srcLabel(){
 /* ============ Stock ============ */
 /* Le stock des articles est réservé à ces identifiants. */
 const ART_USERS = ["noureddine"];
+/* Le plan de coupe n'est pas ouvert à tout le monde. */
+const CUT_INTERDIT = ["ahmed"];
+function cutAllowed(){
+  return !!USER && CUT_INTERDIT.indexOf(String(USER.login || "").toLowerCase()) < 0;
+}
 function artAllowed(){
   return !!USER && ART_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
 }
@@ -2927,10 +2935,13 @@ function renderStock(){
   else if (stockSort === "desc") list = list.slice().sort((a,b) => b.dispo - a.dispo || a.ref.localeCompare(b.ref));
   else                           list = list.slice();
 
-  /* On affiche exactement la colonne AB de la feuille, en mètres linéaires. */
-  const tot = list.reduce((s,f) => s + f.dispo, 0);
+  /* Chaque famille dans son unité : enrouleur en m², jour et nuit en ml. */
+  const totM2 = list.filter(stockEnM2).reduce((s,f) => s + stockM2(f), 0);
+  const totMl = list.filter(f => !stockEnM2(f)).reduce((s,f) => s + stockMl(f), 0);
   $("stockSumLabel").textContent = list.length + (list.length > 1 ? " références" : " référence");
-  $("stockSum").textContent = fr(tot) + " ml";
+  $("stockSum").textContent = (totM2 > 0 ? fr(totM2) + " m²" : "") +
+    (totM2 > 0 && totMl > 0 ? "  ·  " : "") + (totMl > 0 ? fr(totMl) + " ml" : "") ||
+    "0";
 
   const box = $("stockList");
   box.innerHTML = "";
@@ -2938,16 +2949,19 @@ function renderStock(){
   list.forEach(f => {
     const d = document.createElement("div");
     d.className = "srow";
-    const cls = f.dispo < 1 ? "out" : (f.dispo < 20 ? "low" : "ok");
+    /* le seuil « bientôt vide » se juge en mètres linéaires pour les deux familles */
+    const ml = stockMl(f);
+    const cls = f.dispo < 1 ? "out" : (ml < 20 ? "low" : "ok");
     d.innerHTML =
       '<span class="sref"><b>' + f.ref + '</b>' +
       '<small>' + (f.type === "JN" ? "Jour et nuit" : "Enrouleur") + '  ·  laize ' +
-        (f.laize/100).toFixed(2).replace(".",",") + ' m  ·  ' + fr(f.dispo * f.laize / 100) + ' m²</small></span>' +
-      '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : fr(f.dispo) + " ml") + '</span>';
+        (f.laize/100).toFixed(2).replace(".",",") + ' m  ·  ' +
+        (stockEnM2(f) ? fr(stockMl(f)) + ' ml' : fr(stockM2(f)) + ' m²') + '</small></span>' +
+      '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : stockTxt(f)) + '</span>';
     box.appendChild(d);
   });
   [...$("stockSort").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.s === stockSort)));
-  $("srcInfo").innerHTML = srcLabel() + ".<br>Le nombre affiché est celui de la colonne <b>AB</b> de votre feuille, en mètres linéaires, sans aucun calcul. La surface correspondante, ml × laize, est rappelée en petit sous chaque référence. Seules les lignes commençant par B-0, S-0 ou JN_0 sont reprises, et la feuille doit rester partagée en lecture par lien.";
+  $("srcInfo").innerHTML = srcLabel() + ".<br>Le nombre affiché est celui de la colonne <b>AB</b> de votre feuille, sans aucun calcul, dans l'unité de la famille : les tissus <b>B-0</b> et <b>S-0</b> en <b>m²</b>, les tissus <b>JN_</b> en <b>mètres linéaires</b>. L'autre unité est rappelée en petit sous chaque référence, convertie par la laize du rouleau. Seules les lignes commençant par B-0, S-0 ou JN_0 sont reprises, et la feuille doit rester partagée en lecture par lien.";
 }
 
 $("stockSearch").addEventListener("input", renderStock);
@@ -3428,11 +3442,29 @@ const PROFILS = {
         {k:"barre", label:"Barre de charge", d:1.5, note:""}]
 };
 
+/* Unité du stock dans la feuille Google :
+   B-0 et S-0 (enrouleur) sont comptés en m², JN_ (jour et nuit) en mètres linéaires.
+   Tout le reste de l'application passe par ces deux fonctions. */
+function stockEnM2(f){ return !!f && f.type !== "JN"; }
+function stockMl(f){
+  if (!f) return 0;
+  const lz = f.laize > 0 ? f.laize / 100 : 1;
+  return stockEnM2(f) ? f.dispo / lz : f.dispo;
+}
+function stockM2(f){
+  if (!f) return 0;
+  const lz = f.laize > 0 ? f.laize / 100 : 1;
+  return stockEnM2(f) ? f.dispo : f.dispo * lz;
+}
+function stockTxt(f){
+  return stockEnM2(f) ? fr(stockM2(f)) + " m²" : fr(stockMl(f)) + " ml";
+}
+
 /* Retrait sur la largeur de la fenêtre pour la coupe du tissu */
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "5.2";
+const APP_VERSION = "5.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4341,7 +4373,10 @@ $("tileArt").addEventListener("click", () => {
   nav("artSheet");
   if (!ARTICLES.length) syncStock(true).then(() => renderArt());
 });
-$("tileCut").addEventListener("click", () => { cutMode = CUT.mode || null; renderCut(); nav("cutSheet"); pullBons().then(() => renderCut()); });
+$("tileCut").addEventListener("click", () => {
+  if (!cutAllowed()) return;
+  cutMode = CUT.mode || null; renderCut(); nav("cutSheet"); pullBons().then(() => renderCut());
+});
 
 
 /* identifiant court et unique pour une ligne de nomenclature */
