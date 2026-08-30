@@ -373,6 +373,78 @@ select{appearance:none; -webkit-appearance:none}
 }
 .sheet-top h2{font-family:"Archivo",sans-serif; font-size:17px; font-weight:600; margin:0; flex:1}
 .sheet-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px; max-width:520px; margin:0 auto; width:100%}
+/* --- nomenclature --- */
+.nrow{
+  background:var(--card); border:1px solid var(--line); border-radius:12px;
+  padding:11px 12px; margin-bottom:9px; display:flex; align-items:center; gap:10px;
+}
+.nrow .nl{flex:1; min-width:0}
+.nrow .nrole{font-family:"Archivo",sans-serif; font-size:13.5px; font-weight:600; display:block}
+.nrow .nart{
+  display:block; margin-top:3px; font-size:12.5px; color:var(--muted);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.nrow .nart.vide{color:var(--accent); font-weight:600}
+.nrow .npx{
+  width:96px; flex:none; text-align:right; border:1px solid var(--line); border-radius:9px;
+  padding:9px 8px; font-family:"IBM Plex Mono",monospace; font-size:13.5px; background:var(--card2); color:var(--ink);
+}
+.nrow .npx:focus{outline:none; border-color:var(--accent); background:var(--card)}
+.nrow .nu{flex:none; width:34px; font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--muted)}
+.nrow .ndel{
+  flex:none; width:30px; height:30px; border-radius:9px; border:1px solid var(--line);
+  background:var(--card2); color:var(--muted); display:grid; place-items:center; cursor:pointer;
+}
+.nrow .ndel:active{background:var(--accent-soft); color:var(--accent); border-color:var(--accent)}
+.nadd{
+  width:100%; padding:12px; border-radius:12px; border:1px dashed var(--line-strong);
+  background:transparent; color:var(--muted); font-family:"Archivo",sans-serif; font-weight:600; font-size:13.5px;
+  display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; margin-top:2px;
+}
+.nadd:active{border-color:var(--accent); color:var(--accent)}
+.hyp{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line)}
+.hyp:last-child{border-bottom:0}
+.hyp .hl{flex:1; font-size:13.5px}
+.hyp .hl small{display:block; color:var(--muted); font-size:11.5px; margin-top:2px}
+.hyp input{
+  width:96px; text-align:right; border:1px solid var(--line); border-radius:9px; padding:9px 8px;
+  font-family:"IBM Plex Mono",monospace; font-size:13.5px; background:var(--card2); color:var(--ink);
+}
+.hyp input:focus{outline:none; border-color:var(--accent); background:var(--card)}
+.arow{
+  width:100%; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:11px;
+  padding:11px 12px; margin-bottom:8px; cursor:pointer; display:block;
+}
+.arow b{display:block; font-family:"Archivo",sans-serif; font-size:14px; font-weight:600}
+.arow small{display:block; color:var(--muted); font-size:12px; margin-top:2px; font-family:"IBM Plex Mono",monospace}
+.arow[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft)}
+/* --- cout de revient --- */
+.cst{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:13px 14px; margin-bottom:11px}
+.cst h4{font-family:"Archivo",sans-serif; font-size:14px; font-weight:600; margin:0 0 3px}
+.cst .cdim{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted); margin:0 0 10px}
+.cl{display:flex; align-items:baseline; gap:8px; padding:5px 0; font-size:13px}
+.cl .cn{flex:1; min-width:0}
+.cl .cn em{font-style:normal; color:var(--muted); font-size:11.5px; display:block; margin-top:1px; font-family:"IBM Plex Mono",monospace}
+.cl .cv{font-family:"IBM Plex Mono",monospace; font-size:13px; white-space:nowrap}
+.cl.tot{border-top:1px solid var(--line); margin-top:6px; padding-top:9px; font-weight:600}
+.cl.tot .cv{font-size:14.5px}
+.cl.pos .cv{color:var(--ok)}
+.cl.neg .cv{color:var(--accent)}
+.cl.alt .cv, .cl.alt .cn{color:var(--muted)}
+.cbig{
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px; margin:0 0 14px;
+  background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 10px;
+}
+.cbig div{text-align:center}
+.cbig b{display:block; font-family:"IBM Plex Mono",monospace; font-size:17px; font-weight:600}
+.cbig span{display:block; font-size:10px; color:var(--muted); letter-spacing:.06em; margin-top:3px}
+.cbig .ok b{color:var(--ok)}
+.cbig .ko b{color:var(--accent)}
+.cwarn{
+  background:var(--accent-soft); border:1px solid var(--accent); border-radius:11px;
+  padding:11px 13px; margin-bottom:13px; font-size:13px; line-height:1.5;
+}
+.cwarn b{font-family:"Archivo",sans-serif}
 .refresh{
   width:100%; margin:0 0 14px; padding:12px 14px; border-radius:12px;
   border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink);
@@ -872,6 +944,16 @@ select{appearance:none; -webkit-appearance:none}
         <span class="tt"><b>Stock des articles</b><small id="tileArtSub">Mécanismes, tubes, accessoires</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
+      <button class="tile" id="tileNom" type="button">
+        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h10M4 12h10M4 19h10"/><path d="M18 4v16M16 6l2-2 2 2"/></svg></span>
+        <span class="tt"><b>Nomenclature et prix</b><small id="tileNomSub">Articles et prix par type de store</small></span>
+        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="tile" id="tileCout" type="button">
+        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span>
+        <span class="tt"><b>Coût de revient</b><small id="tileCoutSub">Coût, bénéfice et marge d'un bon</small></span>
+        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
     </div>
     <div class="home-foot" id="homeFoot"></div>
     <div class="userline" id="userLine"></div>
@@ -1093,6 +1175,69 @@ select{appearance:none; -webkit-appearance:none}
   </div>
 </div>
 
+<!-- NOMENCLATURE -->
+<div class="sheet" id="nomSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="nomSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Nomenclature et prix</h2>
+  </div>
+  <div class="sheet-body">
+    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="seg" id="nomSeg" style="margin-bottom:14px">
+      <button type="button" data-fam="ENR" aria-pressed="true">Enrouleur<span class="sub">S-0</span></button>
+      <button type="button" data-fam="JN" aria-pressed="false">Jour et Nuit<span class="sub">JN_0</span></button>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-head"><div class="label" id="nomTitre">Enrouleur</div><div class="badge" id="nomCount">0</div></div>
+      <div id="nomList"></div>
+      <button class="nadd" id="nomAdd" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Ajouter une ligne
+      </button>
+      <p class="hint">Touchez le nom de l'article pour le remplacer par un autre de la feuille Google. Le prix se remplit tout seul depuis la colonne Prix Unitaire HT, vous pouvez le corriger.</p>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="label">Hypothèses de calcul</div></div>
+      <div class="hyp"><span class="hl">Main d'œuvre de pose<small>MAD par store posé</small></span><input id="hypPose" type="number" inputmode="decimal" step="1"></div>
+      <div class="hyp"><span class="hl">Coefficient de perte barre<small>Monte Carlo : 1,0417</small></span><input id="hypCoef" type="number" inputmode="decimal" step="0.0001"></div>
+      <div class="hyp"><span class="hl">Longueur d'une barre<small>mètres, à l'achat</small></span><input id="hypBarre" type="number" inputmode="decimal" step="0.1"></div>
+      <p class="hint">La livraison n'est pas ici : le coût de revient reprend le prix de pose ou de livraison saisi dans le bon lui même.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CHOIX D'UN ARTICLE POUR LA NOMENCLATURE -->
+<div class="sheet" id="nomPickSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="nomPickSheet" aria-label="Fermer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2 id="nomPickTitre">Choisir un article</h2>
+  </div>
+  <div class="sheet-body">
+    <div class="field" id="nomPickField" style="margin-bottom:14px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="nomPickSearch" type="search" placeholder="Rechercher un article" autocomplete="off">
+    </div>
+    <div id="nomPickList"></div>
+  </div>
+</div>
+
+<!-- COUT DE REVIENT -->
+<div class="sheet" id="coutSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="coutSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Coût de revient</h2>
+  </div>
+  <div class="sheet-body">
+    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <button class="pick-order" id="coutPick" type="button">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+      <span class="po"><b id="coutOrderName">Choisir un bon de commande</b><small id="coutOrderSub">Le calcul reprend les mesures et le plan de coupe</small></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div id="coutBody" style="margin-top:14px"></div>
+  </div>
+</div>
+
 <!-- HISTORIQUE -->
 <div class="sheet" id="histSheet">
   <div class="sheet-top">
@@ -1178,6 +1323,23 @@ function trouveQtyCol(rows){
     if (dispo >= 0) return dispo;
   }
   return 27;
+}
+/* Colonne du prix d'achat unitaire, repérée par son en-tête. */
+let PRIX_COL = -1;
+function trouvePrixCol(rows){
+  for (let i = 0; i < Math.min(rows.length, 30); i++){
+    const r = rows[i] || [];
+    if (!/^r[ée]f[ée]rence$/i.test(String(r[0] || "").trim())) continue;
+    let col = -1;
+    r.forEach((c, j) => {
+      const h = String(c || "").toLowerCase().replace(/\s+/g, " ").trim();
+      if (h.indexOf("prix") < 0) return;
+      if (h.indexOf("unitaire") >= 0 || h.indexOf("achat") >= 0) col = j;
+      else if (col < 0) col = j;
+    });
+    if (col >= 0) return col;
+  }
+  return -1;
 }
 function sheetUrl(){
   const custom = LS.get("mst_sheeturl", "");
@@ -2468,6 +2630,16 @@ async function pullBons(){
     ORDERS.forEach(o => { map[o.id] = o; });
     const distants = {};
     data.forEach(r => {
+      /* la nomenclature partagée occupe une rangée réservée, ce n'est pas un bon */
+      if (r.id === NOM_ID){
+        const d = r.data;
+        if (d && d.ENR && d.JN){
+          NOM = d;
+          if (!NOM.hyp) NOM.hyp = Object.assign({}, HYP_DEF);
+          LS.set("mst_nom", NOM);
+        }
+        return;
+      }
       distants[r.id] = true;
       if (TOMBS.indexOf(r.id) >= 0) return;        /* supprimé ici, pas encore côté base */
       const cur = map[r.id];
@@ -2595,7 +2767,7 @@ async function bootAuth(){
 function nav(where){
   armBack();
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -2622,6 +2794,17 @@ function renderHome(){
   $("tileCutSub").textContent = all.length ? "Barres et tissu, à partir d'un bon enregistré" : "Enregistrez d'abord un bon";
   renderUserLine();
   $("tileArt").hidden = !artAllowed();
+  $("tileNom").hidden = !artAllowed();
+  $("tileCout").hidden = !artAllowed();
+  const nPrix = artAllowed()
+    ? (NOM.ENR || []).concat(NOM.JN || []).filter(l => l.prix > 0).length : 0;
+  const nTot = artAllowed() ? (NOM.ENR || []).length + (NOM.JN || []).length : 0;
+  $("tileNomSub").textContent = nTot
+    ? nPrix + " prix sur " + nTot + " lignes renseignés"
+    : "Articles et prix par type de store";
+  $("tileCoutSub").textContent = nPrix
+    ? "Coût, bénéfice et marge d'un bon"
+    : "Renseignez d'abord la nomenclature";
   const nArt = ARTICLES.filter(a => !a.serv).length;
   $("tileArtSub").textContent = nArt
     ? nArt + " articles  ·  " + ARTICLES.filter(a => !a.serv && a.dispo <= 0).length + " en rupture"
@@ -2825,10 +3008,12 @@ function articlesFromRows(rows){
     const U = ref.toUpperCase();
     if (!fam) fam = (U.indexOf("J/N") >= 0 || U.indexOf("JN_") === 0) ? "STJOURNUIT" : "STENROU";
     const serv = SERVICES.some(k => U.indexOf(k) === 0) || U.indexOf("CHUTE") === 0;
+    const px = PRIX_COL >= 0 && r.length > PRIX_COL ? numFr(r[PRIX_COL]) : 0;
     out.push({
       ref: ref.toUpperCase(),
       nom: String(r[NAME_COL] == null ? "" : r[NAME_COL]).trim(),
       dispo: numFr(raw),
+      prix: px > 0 ? px : 0,
       type: fam.indexOf("JOURNUIT") >= 0 ? "JN" : (fam.indexOf("ENROU") >= 0 ? "ENR" : ""),
       serv: serv
     });
@@ -2897,9 +3082,10 @@ async function syncStock(silent){
     if (!res.ok) throw new Error("http " + res.status);
     const rows = parseCSV(await res.text());
     QTY_COL = trouveQtyCol(rows);
+    PRIX_COL = trouvePrixCol(rows);
     const list = catalogueFromRows(rows);
     if (!list.length) throw new Error("aucune référence lue");
-    ARTICLES = artAllowed() ? articlesFromRows(rows) : [];
+    ARTICLES = articlesFromRows(rows);
     LS.set("mst_art", ARTICLES);
     const d = new Date();
     applyCatalogue(list, {date: pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + String(d.getFullYear()).slice(2) +
@@ -2923,7 +3109,7 @@ $("btnSync").addEventListener("click", () => syncStock(false));
 /* Une seule fonction pour tout le monde : on relit la feuille Google,
    on resynchronise les bons, puis on redessine l'écran ouvert. */
 function ecranOuvert(){
-  const ids = ["histSheet","stockSheet","artSheet","cutSheet","refSheet","cutPickSheet","shotSheet"];
+  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","refSheet","cutPickSheet","nomPickSheet","shotSheet"];
   for (let i = 0; i < ids.length; i++){
     const el = $(ids[i]);
     if (el && el.classList.contains("open")) return ids[i];
@@ -2951,6 +3137,8 @@ async function rafraichirTout(btn){
     else if (ou === "artSheet") renderArt();
     else if (ou === "histSheet") renderHist();
     else if (ou === "cutSheet") renderCut();
+    else if (ou === "nomSheet") renderNom();
+    else if (ou === "coutSheet") renderCout();
     else if (ou === "refSheet") renderRefs();
   } catch(e){}
 
@@ -3218,7 +3406,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "4.3";
+const APP_VERSION = "4.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -3736,6 +3924,29 @@ $("cutModeSeg").addEventListener("click", e => {
   $("cutSheet").querySelector(".sheet-body").scrollTop = 0;
 });
 
+/* Mesures exploitables d'un bon, quantités dépliées, tissu résolu par fenêtre.
+   Utilisé par le plan de coupe et par le coût de revient : une seule vérité. */
+function ordDims(o){
+  const refs = (o && o.refs) || [];
+  const dims = [];
+  ((o && o.dims) || []).forEach(x => {
+    const l = parseFloat(x.l), hh = parseFloat(x.h);
+    if (!(l > 0 && hh > 0)) return;
+    const t = o.type === "MIX" ? (x.type === "JN" ? "JN" : "ENR") : o.type;
+    let rf = (o.multi && x.ref && refs.indexOf(x.ref) >= 0) ? x.ref : "";
+    if (!rf){
+      const ok = refs.filter(r => { const f = fab(r); return f && f.type === t; });
+      rf = ok[0] || refs[0] || "";
+    }
+    const q = qtyRow(x);
+    const ri = (o.dims || []).indexOf(x);
+    for (let k = 0; k < q; k++)
+      dims.push({l:l, h:hh, n: dims.length + 1, note: x.note || "", ref: rf, t: t,
+                 key: ri + ":" + k});
+  });
+  return dims;
+}
+
 function renderPlan(){
   const out = $("cutOut");
   const all = ORDERS;
@@ -3751,23 +3962,7 @@ function renderPlan(){
   $("cutOrderName").textContent = (o.nom || "Client sans nom");
   $("cutOrderSub").textContent = o.num + "  ·  " + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + String(d.getFullYear()).slice(2);
 
-  const refs = o.refs || [];
-  const dims = [];
-  (o.dims || []).forEach(x => {
-    const l = parseFloat(x.l), hh = parseFloat(x.h);
-    if (!(l > 0 && hh > 0)) return;
-    const t = o.type === "MIX" ? (x.type === "JN" ? "JN" : "ENR") : o.type;
-    let rf = (o.multi && x.ref && refs.indexOf(x.ref) >= 0) ? x.ref : "";
-    if (!rf){
-      const ok = refs.filter(r => { const f = fab(r); return f && f.type === t; });
-      rf = ok[0] || refs[0] || "";
-    }
-    const q = qtyRow(x);
-    const ri = (o.dims || []).indexOf(x);
-    for (let k = 0; k < q; k++)
-      dims.push({l:l, h:hh, n: dims.length + 1, note: x.note || "", ref: rf, t: t,
-                 key: ri + ":" + k});
-  });
+  const dims = ordDims(o);
 
   if (!dims.length){ out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>'; return; }
 
@@ -4072,7 +4267,9 @@ $("cutBar").addEventListener("input", e => {
 });
 
 /* --- choix du bon --- */
-$("cutPick").addEventListener("click", () => {
+let pickCible = "cut";
+function ouvrirPickBon(cible){
+  pickCible = cible || "cut";
   const all = ORDERS;
   const body = $("cutPickBody");
   body.innerHTML = "";
@@ -4095,12 +4292,19 @@ $("cutPick").addEventListener("click", () => {
   });
   armBack();
   $("cutPickSheet").classList.add("open");
-});
+}
+$("cutPick").addEventListener("click", () => ouvrirPickBon("cut"));
 $("cutPickBody").addEventListener("click", e => {
   const b = e.target.closest("[data-cut]");
   if (!b) return;
-  cutOrderId = b.dataset.cut;
   $("cutPickSheet").classList.remove("open");
+  if (pickCible === "cout"){
+    coutOrderId = b.dataset.cut;
+    renderCout();
+    $("coutSheet").querySelector(".sheet-body").scrollTop = 0;
+    return;
+  }
+  cutOrderId = b.dataset.cut;
   renderCut();
   $("cutSheet").querySelector(".sheet-body").scrollTop = 0;
 });
@@ -4114,18 +4318,526 @@ $("tileArt").addEventListener("click", () => {
 $("tileCut").addEventListener("click", () => { cutMode = CUT.mode || null; renderCut(); nav("cutSheet"); pullBons().then(() => renderCut()); });
 
 
+/* identifiant court et unique pour une ligne de nomenclature */
+function nomUid(){ return "n" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* ============ Nomenclature et prix ============ */
+/* Reprend les onglets « Prix d'achat des articles » du fichier Monte Carlo.
+   Chaque ligne relie un rôle (Tube 38, Mécanisme...) à un article réel de la
+   feuille Google et à son prix. Plusieurs lignes peuvent porter le même rôle :
+   deux tubes, trois mécanismes, chacun avec son article et son prix. */
+
+/* q = règle de quantité par store :
+   barre = largeur × coefficient de perte   tissu = m² réellement consommés
+   u1 = 1 pièce   u2 = 2 pièces   h2 = 2 × hauteur   sup = 2 pièces, 3 si largeur ≥ 2 m */
+const NOM_ROLES = {
+  ENR: [
+    {k:"tube",      label:"Tube 38",          u:"ml", q:"barre"},
+    {k:"barre",     label:"Barre de charge",  u:"ml", q:"barre"},
+    {k:"mecanisme", label:"Mécanisme",        u:"u",  q:"u1"},
+    {k:"chainette", label:"Chaînette",        u:"ml", q:"h2"},
+    {k:"bouchon",   label:"Bouchon",          u:"u",  q:"u2"},
+    {k:"clip",      label:"Clip chaînette",   u:"u",  q:"u2"},
+    {k:"tissu",     label:"Tissu",            u:"m2", q:"tissu"}
+  ],
+  JN: [
+    {k:"cache",     label:"Cache jour/nuit",  u:"ml", q:"barre"},
+    {k:"tube32",    label:"Tube 32",          u:"ml", q:"barre"},
+    {k:"rail1",     label:"Rail inférieur 1", u:"ml", q:"barre"},
+    {k:"rail2",     label:"Rail inférieur 2", u:"ml", q:"barre"},
+    {k:"embout",    label:"Embout",           u:"u",  q:"u1"},
+    {k:"support",   label:"Support",          u:"u",  q:"sup"},
+    {k:"bouchon",   label:"Bouchon",          u:"u",  q:"u2"},
+    {k:"chainette", label:"Chaînette",        u:"ml", q:"h2"},
+    {k:"tissu",     label:"Tissu jour/nuit",  u:"m2", q:"tissu"}
+  ]
+};
+const Q_TXT = {barre:"largeur × coef.", tissu:"m² consommés", u1:"1 par store",
+               u2:"2 par store", h2:"2 × hauteur", sup:"2, ou 3 si largeur ≥ 2 m"};
+const U_TXT = {ml:"/ml", u:"/u", m2:"/m²"};
+
+const HYP_DEF = {pose:52, coef:1.0417, barre:6};
+
+function nomVierge(){
+  const o = {ENR:[], JN:[], hyp:Object.assign({}, HYP_DEF), v:1};
+  ["ENR","JN"].forEach(f => NOM_ROLES[f].forEach(r => {
+    o[f].push({id: nomUid(), k:r.k, label:r.label, u:r.u, q:r.q, ref:"", nom:"", prix:0});
+  }));
+  return o;
+}
+let NOM = LS.get("mst_nom", null);
+if (!NOM || !NOM.ENR || !NOM.JN) NOM = nomVierge();
+if (!NOM.hyp) NOM.hyp = Object.assign({}, HYP_DEF);
+let nomFam = "ENR";
+let nomCible = null;      /* ligne en cours de choix d'article */
+
+const NOM_ID = "cfg-nomenclature";   /* rangée réservée dans la table des bons */
+
+function nomSave(){
+  LS.set("mst_nom", NOM);
+  pushNom();
+}
+async function pushNom(){
+  if (!SB || !USER) return false;
+  try {
+    const {error} = await SB.from("bons").upsert({
+      id: NOM_ID, num: "__NOMENCLATURE__", author: USER.login,
+      data: NOM, updated_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    return true;
+  } catch(e){ return false; }
+}
+async function pullNom(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data,updated_at").eq("id", NOM_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data;
+    if (d && d.ENR && d.JN){
+      NOM = d;
+      if (!NOM.hyp) NOM.hyp = Object.assign({}, HYP_DEF);
+      LS.set("mst_nom", NOM);
+      return true;
+    }
+  } catch(e){}
+  return false;
+}
+
+/* Articles proposables : tout ce qui n'est pas un service. */
+function nomArticles(fam){
+  const list = ARTICLES.filter(a => !a.serv);
+  const mine = list.filter(a => !a.type || a.type === fam);
+  return (mine.length ? mine : list);
+}
+/* Le tissu se choisit dans le catalogue des tissus, pas dans les articles. */
+function nomTissus(fam){
+  return CATALOGUE.filter(f => f.type === fam).map(f => ({ref:f.ref, nom:f.nom || "", prix:0}));
+}
+
+function renderNom(){
+  const lignes = NOM[nomFam] || [];
+  $("nomTitre").textContent = nomFam === "JN" ? "Jour et Nuit" : "Enrouleur";
+  $("nomCount").textContent = lignes.length + " ligne" + (lignes.length > 1 ? "s" : "");
+  Array.prototype.forEach.call($("nomSeg").querySelectorAll("button"),
+    b => b.setAttribute("aria-pressed", b.dataset.fam === nomFam ? "true" : "false"));
+
+  let h = "";
+  lignes.forEach(l => {
+    const vide = !l.ref;
+    h += '<div class="nrow" data-id="' + l.id + '">' +
+      '<span class="nl" data-pick="' + l.id + '">' +
+        '<span class="nrole">' + esc(l.label) + '</span>' +
+        '<span class="nart' + (vide ? ' vide' : '') + '">' +
+          (vide ? "Choisir un article" : esc(l.ref) + (l.nom ? "  ·  " + esc(l.nom) : "")) +
+        '</span>' +
+      '</span>' +
+      '<input class="npx" type="number" inputmode="decimal" step="0.01" data-px="' + l.id + '" ' +
+        'value="' + (l.prix > 0 ? l.prix : "") + '" placeholder="0">' +
+      '<span class="nu">' + U_TXT[l.u] + '</span>' +
+      '<button class="ndel" type="button" data-del="' + l.id + '" aria-label="Supprimer">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
+      '</button>' +
+    '</div>';
+  });
+  if (!lignes.length) h = '<div class="empty">Aucune ligne. Ajoutez celles dont vous avez besoin.</div>';
+  $("nomList").innerHTML = h;
+
+  $("hypPose").value  = NOM.hyp.pose;
+  $("hypCoef").value  = NOM.hyp.coef;
+  $("hypBarre").value = NOM.hyp.barre;
+}
+
+$("nomSeg").addEventListener("click", e => {
+  const b = e.target.closest("button[data-fam]");
+  if (!b) return;
+  nomFam = b.dataset.fam;
+  renderNom();
+});
+
+$("nomList").addEventListener("click", e => {
+  const del = e.target.closest("[data-del]");
+  if (del){
+    const l = (NOM[nomFam] || []).find(x => x.id === del.dataset.del);
+    ask("Supprimer la ligne ?", (l ? l.label : "Cette ligne") + " sera retirée de la nomenclature.", () => {
+      NOM[nomFam] = (NOM[nomFam] || []).filter(x => x.id !== del.dataset.del);
+      nomSave(); renderNom();
+      toast("Ligne supprimée");
+    });
+    return;
+  }
+  const pick = e.target.closest("[data-pick]");
+  if (pick) ouvrirNomPick(pick.dataset.pick);
+});
+
+$("nomList").addEventListener("input", e => {
+  const px = e.target.closest("[data-px]");
+  if (!px) return;
+  const l = (NOM[nomFam] || []).find(x => x.id === px.dataset.px);
+  if (!l) return;
+  l.prix = parseFloat(String(px.value).replace(",", ".")) || 0;
+  LS.set("mst_nom", NOM);
+});
+$("nomList").addEventListener("change", () => nomSave());
+
+["hypPose","hypCoef","hypBarre"].forEach(id => {
+  $(id).addEventListener("input", () => {
+    const v = parseFloat(String($(id).value).replace(",", "."));
+    const k = id === "hypPose" ? "pose" : id === "hypCoef" ? "coef" : "barre";
+    NOM.hyp[k] = isNaN(v) ? HYP_DEF[k] : v;
+    LS.set("mst_nom", NOM);
+  });
+  $(id).addEventListener("change", () => nomSave());
+});
+
+/* --- ajouter une ligne : on choisit d'abord le rôle --- */
+$("nomAdd").addEventListener("click", () => {
+  nomCible = "__new__";
+  const roles = NOM_ROLES[nomFam];
+  $("nomPickTitre").textContent = "Quel rôle ?";
+  $("nomPickSearch").value = "";
+  $("nomPickField").hidden = true;
+  $("nomPickList").innerHTML = roles.map(r =>
+    '<button class="arow" type="button" data-role="' + r.k + '"><b>' + esc(r.label) + '</b>' +
+    '<small>' + U_TXT[r.u] + "  ·  " + Q_TXT[r.q] + '</small></button>').join("");
+  armBack();
+  $("nomPickSheet").classList.add("open");
+});
+
+function ouvrirNomPick(id){
+  const l = (NOM[nomFam] || []).find(x => x.id === id);
+  if (!l) return;
+  nomCible = id;
+  $("nomPickTitre").textContent = l.label;
+  $("nomPickField").hidden = false;
+  $("nomPickSearch").value = "";
+  renderNomPick("", l);
+  armBack();
+  $("nomPickSheet").classList.add("open");
+}
+
+function renderNomPick(q, ligne){
+  const l = ligne || (NOM[nomFam] || []).find(x => x.id === nomCible);
+  const src = l && l.q === "tissu" ? nomTissus(nomFam) : nomArticles(nomFam);
+  const s = String(q || "").toLowerCase().trim();
+  const list = src.filter(a =>
+    !s || String(a.ref).toLowerCase().indexOf(s) >= 0 || String(a.nom || "").toLowerCase().indexOf(s) >= 0);
+  if (!list.length){
+    $("nomPickList").innerHTML = '<div class="empty">' +
+      (src.length ? "Aucun article ne correspond." :
+       "La liste est vide. Appuyez sur Actualiser pour lire la feuille Google.") + '</div>';
+    return;
+  }
+  $("nomPickList").innerHTML = list.slice(0, 400).map(a =>
+    '<button class="arow" type="button" data-art="' + esc(a.ref) + '" ' +
+    'aria-pressed="' + (l && l.ref === a.ref ? "true" : "false") + '">' +
+    '<b>' + esc(a.nom || a.ref) + '</b><small>' + esc(a.ref) +
+    (a.prix > 0 ? "  ·  " + fr(a.prix, 2) + " MAD" : "") + '</small></button>').join("");
+}
+
+$("nomPickSearch").addEventListener("input", e => renderNomPick(e.target.value));
+
+$("nomPickList").addEventListener("click", e => {
+  const r = e.target.closest("[data-role]");
+  if (r){
+    const def = NOM_ROLES[nomFam].find(x => x.k === r.dataset.role);
+    if (!def) return;
+    const l = {id: nomUid(), k:def.k, label:def.label, u:def.u, q:def.q, ref:"", nom:"", prix:0};
+    NOM[nomFam].push(l);
+    nomSave();
+    renderNom();
+    ouvrirNomPick(l.id);
+    return;
+  }
+  const a = e.target.closest("[data-art]");
+  if (!a) return;
+  const l = (NOM[nomFam] || []).find(x => x.id === nomCible);
+  if (!l) return;
+  const src = l.q === "tissu" ? nomTissus(nomFam) : nomArticles(nomFam);
+  const art = src.find(x => x.ref === a.dataset.art);
+  l.ref = a.dataset.art;
+  l.nom = art ? (art.nom || "") : "";
+  if (art && art.prix > 0 && !(l.prix > 0)) l.prix = art.prix;
+  nomSave();
+  renderNom();
+  $("nomPickSheet").classList.remove("open");
+});
+
+$("tileNom").addEventListener("click", () => {
+  if (!artAllowed()) return;
+  renderNom();
+  nav("nomSheet");
+  if (!ARTICLES.length) syncStock(true).then(() => renderNom());
+  pullNom().then(ok => { if (ok) renderNom(); });
+});
+
+/* ============ Coût de revient ============ */
+/* Modèle repris du fichier Monte Carlo, onglets ENR_Monte carlo et JN_Monte carlo :
+   coût d'un store = tissu consommé + pièces + barres + accessoires.
+   Le prix de pose ou de livraison facturé au client reste à part, hors bénéfice. */
+
+let coutOrderId = null;
+
+/* Lignes de nomenclature d'un rôle, celle qui colle au modèle choisi d'abord */
+function nomLignes(fam, k){ return (NOM[fam] || []).filter(l => l.k === k); }
+function nomLigne(fam, k, modele){
+  const list = nomLignes(fam, k);
+  if (!list.length) return null;
+  if (modele){
+    const m = String(modele).toLowerCase();
+    const hit = list.find(l =>
+      m.indexOf(String(l.nom || "").toLowerCase()) >= 0 ||
+      String(l.nom || "").toLowerCase().indexOf(m) >= 0 ||
+      String(l.ref || "").toLowerCase() === m);
+    if (hit) return hit;
+  }
+  return list[0];
+}
+function prixRole(fam, k, modele){
+  const l = nomLigne(fam, k, modele);
+  return l && l.prix > 0 ? l.prix : 0;
+}
+/* Somme des prix au ml des profilés d'une famille : c'est le « prix barre » du Monte Carlo */
+function prixBarres(fam){
+  return (NOM[fam] || []).filter(l => l.q === "barre")
+    .reduce((t,l) => t + (l.prix > 0 ? l.prix : 0), 0);
+}
+
+/* m² de tissu réellement consommés, répartis fenêtre par fenêtre.
+   Une bande consomme laize × déroulé ; chaque fenêtre en porte sa part. */
+function tissuParStore(dims){
+  const part = {};
+  const byRef = {};
+  dims.forEach(x => { const k = x.ref || "?"; (byRef[k] = byRef[k] || []).push(x); });
+  let total = 0, chute = 0;
+  const hors = {};        /* fenêtres plus larges que la laize : rien à couper */
+  Object.keys(byRef).forEach(ref => {
+    const f = fab(ref);
+    const lz = f ? f.laize : CUT_DEF.laize;
+    const T = planTissu(byRef[ref], lz, CUT.seuilLaize, CUT.seuilLong,
+                        (CUT.fabcuts || []).filter(c => (c.ref || "") === ref));
+    chute += T.chute;
+    (T.impossible || []).forEach(x => { hors[x.key] = {ref:ref, laize:lz}; });
+    (T.bands || []).forEach(b => {
+      const surf = (b.width * b.unroll) / 10000;
+      total += surf;
+      const som = b.items.reduce((t,x) => t + fabW(x) * ((x.t === "JN" ? 2*x.h : x.h) + surplusDe(x.t)), 0);
+      b.items.forEach(x => {
+        const propre = fabW(x) * ((x.t === "JN" ? 2*x.h : x.h) + surplusDe(x.t));
+        part[x.key] = (part[x.key] || 0) + surf * (som > 0 ? propre / som : 1 / b.items.length);
+      });
+    });
+  });
+  return {part:part, total:total, chute:chute, hors:hors};
+}
+
+/* Longueur de profilé réellement achetée pour ce bon, par famille, en mètres */
+function barresAchetees(dims, fam){
+  const barLen = parseFloat(CUT.bar) || CUT_DEF.bar;
+  let ml = 0, jete = 0;
+  PROFILS[fam].forEach(pr => {
+    const mine = dims.filter(d => d.t === fam);
+    if (!mine.length) return;
+    const B = planBarres(mine.map(x => ({w: x.l - pr.d, s:x})), barLen,
+                         (CUT.offcuts || []).filter(f => (f.profil || PROFILS[fam][0].k) === pr.k),
+                         CUT.seuilBarre);
+    ml += B.achete / 100;
+    jete += B.jete / 100;
+  });
+  return {ml: ml / PROFILS[fam].length, jete: jete / PROFILS[fam].length};
+}
+
+/* Le modèle choisi par l'atelier dans « Pièces utilisées », s'il y en a un */
+function modeleDe(o, fam, k){
+  const m = o && o.modeles && o.modeles[fam];
+  return m ? (m[k] || "") : "";
+}
+
+function calcCout(o){
+  const dims = ordDims(o);
+  if (!dims.length) return null;
+  const coef = NOM.hyp.coef > 0 ? NOM.hyp.coef : HYP_DEF.coef;
+  const pose = NOM.hyp.pose > 0 ? NOM.hyp.pose : 0;
+  const TIS = tissuParStore(dims);
+  const fams = ["ENR","JN"].filter(f => dims.some(d => d.t === f));
+  const reel = {};
+  fams.forEach(f => { reel[f] = barresAchetees(dims.filter(d => d.t === f), f); });
+
+  const manque = [], alertes = [];
+  const stores = dims.map(x => {
+    const f = x.t;
+    const L = x.l / 100, H = x.h / 100;
+    const m2 = billed({l:x.l, h:x.h});
+    const m2tissu = TIS.part[x.key] || 0;
+    const px = k => prixRole(f, k, modeleDe(o, f, k));
+    const need = (k, lab) => { if (!nomLignes(f, k).length || !px(k)) manque.push(lab + " (" + (f === "JN" ? "jour et nuit" : "enrouleur") + ")"); };
+
+    need("tissu", "Tissu");
+    const horsLaize = TIS.hors[x.key] || null;
+    if (horsLaize) alertes.push("Fenêtre " + x.n + " : " + fr(x.l,0) + " cm de large, le tissu " +
+                                horsLaize.ref + " ne fait que " + fr(horsLaize.laize,0) + " cm de laize");
+    const cTissu = m2tissu * px("tissu");
+
+    let cPiece = 0, pieces = [];
+    if (f === "ENR"){
+      need("mecanisme", "Mécanisme");
+      cPiece = px("mecanisme");
+      pieces.push({n:"Mécanisme", d: nomLigne(f,"mecanisme", modeleDe(o,f,"mecanisme")), q:1, v:cPiece});
+    } else {
+      need("embout", "Embout");
+      cPiece = px("embout");
+      pieces.push({n:"Embout", d: nomLigne(f,"embout",""), q:1, v:cPiece});
+    }
+
+    const pxBar = prixBarres(f);
+    if (!pxBar) manque.push("Prix des profilés (" + (f === "JN" ? "jour et nuit" : "enrouleur") + ")");
+    const cBarTh = L * coef * pxBar;
+    const part = dims.filter(d => d.t === f).reduce((t,d) => t + d.l/100, 0);
+    const cBarRe = part > 0 ? (reel[f].ml * (L / part)) * pxBar : 0;
+
+    let cAcc = 0, acc = [];
+    if (f === "ENR"){
+      const ch = 2 * H * px("chainette"), bo = 2 * px("bouchon"), cl = 2 * px("clip");
+      cAcc = ch + bo + cl;
+      acc = [{n:"Chaînette", q:fr(2*H,2) + " ml", v:ch},
+             {n:"Bouchon", q:"2 u", v:bo},
+             {n:"Clip chaînette", q:"2 u", v:cl}];
+    } else {
+      const ns = x.l >= 200 ? 3 : 2;
+      const su = ns * px("support"), bo = 2 * px("bouchon"), ch = 2 * H * px("chainette");
+      cAcc = su + bo + ch;
+      acc = [{n:"Support", q:ns + " u", v:su},
+             {n:"Bouchon", q:"2 u", v:bo},
+             {n:"Chaînette", q:fr(2*H,2) + " ml", v:ch}];
+    }
+
+    const cout = cTissu + cPiece + cBarTh + cAcc + pose;
+    const pu = puFam(f, o);
+    const vente = m2 * pu;
+    return {x:x, fam:f, m2:m2, m2tissu:m2tissu, hors:horsLaize, pu:pu, vente:vente,
+            cTissu:cTissu, cPiece:cPiece, pieces:pieces, cBarTh:cBarTh, cBarRe:cBarRe,
+            cAcc:cAcc, acc:acc, pose:pose, cout:cout,
+            benef: vente - cout, marge: vente > 0 ? (vente - cout) / vente : 0};
+  });
+
+  const tot = k => stores.reduce((t,s) => t + s[k], 0);
+  const t = orderTotals(o);
+  let jete = 0; fams.forEach(f => { jete += reel[f].jete; });
+  return {
+    stores: stores, dims: dims,
+    cout: tot("cout"), vente: tot("vente"),
+    benef: tot("vente") - tot("cout"),
+    marge: tot("vente") > 0 ? (tot("vente") - tot("cout")) / tot("vente") : 0,
+    coutM2: tot("m2") > 0 ? tot("cout") / tot("m2") : 0,
+    m2: tot("m2"), m2tissu: TIS.total, chuteTissu: TIS.chute, chuteBarre: jete,
+    barTh: tot("cBarTh"), barRe: tot("cBarRe"),
+    posePrix: t.pose, poseLab: t.poseLab,
+    manque: manque.filter((v,i,a) => a.indexOf(v) === i),
+    alertes: alertes.filter((v,i,a) => a.indexOf(v) === i)
+  };
+}
+
+function renderCout(){
+  const out = $("coutBody");
+  const o = ORDERS.find(x => x.id === coutOrderId);
+  if (!o){
+    $("coutOrderName").textContent = "Choisir un bon de commande";
+    $("coutOrderSub").textContent = "Le calcul reprend les mesures et le plan de coupe";
+    out.innerHTML = '<div class="empty">Sélectionnez un bon de commande pour calculer son coût de revient.</div>';
+    return;
+  }
+  const d = new Date(o.date);
+  $("coutOrderName").textContent = (o.nom || "Client sans nom");
+  $("coutOrderSub").textContent = o.num + "  ·  " + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + String(d.getFullYear()).slice(2);
+
+  const C = calcCout(o);
+  if (!C){ out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>'; return; }
+
+  let h = "";
+  if (C.manque.length){
+    h += '<div class="cwarn"><b>Prix manquants dans la nomenclature</b><br>' +
+         C.manque.map(esc).join(", ") + '.<br>Le coût affiché est incomplet tant que ces lignes n’ont pas de prix.</div>';
+  }
+  if (C.alertes.length){
+    h += '<div class="cwarn"><b>Fenêtres impossibles à couper</b><br>' +
+         C.alertes.map(esc).join("<br>") + '.<br>Leur tissu n’est pas compté : le coût de ces fenêtres est sous évalué.</div>';
+  }
+
+  h += '<div class="cbig">' +
+    '<div><b>' + fr(C.cout,0) + '</b><span>COÛT MAD</span></div>' +
+    '<div class="' + (C.benef >= 0 ? "ok" : "ko") + '"><b>' + fr(C.benef,0) + '</b><span>BÉNÉFICE</span></div>' +
+    '<div class="' + (C.marge >= 0 ? "ok" : "ko") + '"><b>' + fr(C.marge*100,0) + ' %</b><span>MARGE</span></div>' +
+  '</div>';
+
+  const li = (n, sub, v, cls) =>
+    '<div class="cl ' + (cls || "") + '"><span class="cn">' + n +
+    (sub ? '<em>' + sub + '</em>' : '') + '</span><span class="cv">' + v + '</span></div>';
+
+  C.stores.forEach((s, i) => {
+    h += '<div class="cst">' +
+      '<h4>Fenêtre ' + s.x.n + '  ·  ' + (s.fam === "JN" ? "jour et nuit" : "enrouleur") + '</h4>' +
+      '<p class="cdim">' + fr(s.x.l,0) + ' × ' + fr(s.x.h,0) + ' cm  ·  ' + fr(s.m2,2) + ' m² facturés  ·  ' +
+        (s.x.ref ? esc(s.x.ref) : "sans tissu") + '</p>' +
+      (s.hors
+        ? li("Tissu", "non calculable : " + fr(s.x.l,0) + " cm de large pour une laize de " +
+             fr(s.hors.laize,0) + " cm", "—", "neg")
+        : li("Tissu", fr(s.m2tissu,2) + " m² consommés", fr(s.cTissu,2))) +
+      li(s.pieces[0].n, s.pieces[0].d && s.pieces[0].d.nom ? esc(s.pieces[0].d.nom) : "1 pièce", fr(s.cPiece,2)) +
+      li("Profilés", "largeur × " + fr(NOM.hyp.coef,4) + " (Monte Carlo)", fr(s.cBarTh,2)) +
+      li("Profilés, plan de coupe réel", "longueur vraiment achetée pour ce bon", fr(s.cBarRe,2), "alt") +
+      s.acc.map(a => li(a.n, a.q, fr(a.v,2))).join("") +
+      (s.pose > 0 ? li("Main d’œuvre de pose", "hypothèse", fr(s.pose,2)) : "") +
+      li("Coût de revient", fr(s.cout / (s.m2 || 1),2) + " MAD/m²", fr(s.cout,2), "tot") +
+      li("Vente", fr(s.pu,0) + " MAD/m²", fr(s.vente,2)) +
+      li("Bénéfice", "marge " + fr(s.marge*100,1) + " %", fr(s.benef,2), s.benef >= 0 ? "pos" : "neg") +
+    '</div>';
+  });
+
+  h += '<div class="cst">' +
+    '<h4>Total du bon</h4>' +
+    '<p class="cdim">' + C.stores.length + ' store' + (C.stores.length > 1 ? 's' : '') + '  ·  ' + fr(C.m2,2) + ' m² facturés</p>' +
+    li("Tissu consommé", fr(C.m2tissu,2) + " m² déroulés", fr(C.m2tissu,2) + " m²") +
+    li("Chute de tissu", "perdue sur ce bon", fr(C.chuteTissu,2) + " m²") +
+    li("Chute de barre", "sous le seuil, jetée", fr(C.chuteBarre,2) + " m") +
+    li("Coût de revient", fr(C.coutM2,2) + " MAD/m²", fr(C.cout,2), "tot") +
+    li("Prix de vente des stores", "", fr(C.vente,2)) +
+    li("Bénéfice", "marge " + fr(C.marge*100,1) + " %", fr(C.benef,2), C.benef >= 0 ? "pos" : "neg") +
+    '<div class="cl" style="margin-top:10px;padding-top:9px;border-top:1px dashed var(--line-strong)">' +
+      '<span class="cn">' + C.poseLab + ' facturée<em>reprise du bon, hors bénéfice et hors marge</em></span>' +
+      '<span class="cv">' + fr(C.posePrix,2) + '</span></div>' +
+    li("Total facturé au client", "stores + " + C.poseLab.toLowerCase(), fr(C.vente + C.posePrix,2), "tot") +
+  '</div>';
+
+  h += '<p class="hint">Le tissu est compté sur les m² réellement déroulés par le plan de coupe, chutes du stock déduites, pas sur la surface de la fenêtre. Les deux lignes de profilés montrent l’écart entre le coefficient de perte du Monte Carlo et le vrai plan de coupe de ce bon.</p>';
+
+  out.innerHTML = h;
+}
+
+$("coutPick").addEventListener("click", () => ouvrirPickBon("cout"));
+
+$("tileCout").addEventListener("click", () => {
+  if (!artAllowed()) return;
+  renderCout();
+  nav("coutSheet");
+  pullBons().then(() => renderCout());
+  pullNom().then(ok => { if (ok) renderCout(); });
+});
+
 /* ============ Bouton Retour du téléphone ============ */
 /* Un cran en arrière au lieu de quitter l'application. */
 function backOneStep(){
   if ($("login").classList.contains("open")) return false;      /* pas connecté : on laisse sortir */
   if ($("confirm").classList.contains("open")){ $("confirm").classList.remove("open"); cfAction = null; return true; }
   if ($("cutPickSheet").classList.contains("open")){ $("cutPickSheet").classList.remove("open"); return true; }
+  if ($("nomPickSheet").classList.contains("open")){ $("nomPickSheet").classList.remove("open"); return true; }
   if ($("refSheet").classList.contains("open")){ closeSheet("refSheet"); return true; }
   if ($("shotSheet").classList.contains("open")){ closeSheet("shotSheet"); return true; }
   if ($("histSheet").classList.contains("open") ||
       $("stockSheet").classList.contains("open") ||
       $("artSheet").classList.contains("open") ||
-      $("cutSheet").classList.contains("open")){ nav("home"); return true; }
+      $("cutSheet").classList.contains("open") ||
+      $("nomSheet").classList.contains("open") ||
+      $("coutSheet").classList.contains("open")){ nav("home"); return true; }
   if (!$("home").classList.contains("open")){ nav("home"); return true; }   /* formulaire */
   return false;                                                  /* accueil : sortie de l'app */
 }
