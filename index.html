@@ -1201,7 +1201,7 @@ select{appearance:none; -webkit-appearance:none}
     <div class="card">
       <div class="card-head"><div class="label">Hypothèses de calcul</div></div>
       <div class="hyp"><span class="hl">Main d'œuvre de pose<small>MAD par store posé</small></span><input id="hypPose" type="number" inputmode="decimal" step="1"></div>
-      <div class="hyp"><span class="hl">Coefficient de perte barre<small>Monte Carlo : 1,0417</small></span><input id="hypCoef" type="number" inputmode="decimal" step="0.0001"></div>
+      <div class="hyp"><span class="hl">Coefficient de perte barre<small>Monte Carlo 1,0417 · mettez 1 pour le coût net, sans perte</small></span><input id="hypCoef" type="number" inputmode="decimal" step="0.0001"></div>
       <div class="hyp"><span class="hl">Longueur d'une barre<small>mètres, à l'achat</small></span><input id="hypBarre" type="number" inputmode="decimal" step="0.1"></div>
       <p class="hint">La livraison n'est pas ici : le coût de revient reprend le prix de pose ou de livraison saisi dans le bon lui même.</p>
     </div>
@@ -2652,6 +2652,7 @@ async function pullBons(){
         if (d && d.ENR && d.JN){
           NOM = d;
           if (!NOM.hyp) NOM.hyp = Object.assign({}, HYP_DEF);
+          nomHypOk();
           LS.set("mst_nom", NOM);
         }
         return;
@@ -3422,7 +3423,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "4.6";
+const APP_VERSION = "4.8";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4374,6 +4375,12 @@ const U_TXT = {ml:"/ml", u:"/u", m2:"/m²"};
 
 const HYP_DEF = {pose:52, coef:1.0417, barre:6};
 
+/* Retrait sur la largeur de la fenêtre pour chaque profilé, en cm.
+   Ce sont exactement les retraits du plan de coupe : on coupe la même
+   longueur qu'à l'atelier, pas la largeur brute de la fenêtre. */
+const CUTDROP = {tube:3, barre:3, cache:0.5, tube32:2, rail1:1.5, rail2:1.5};
+function dropDe(k){ return CUTDROP[k] === undefined ? 0 : CUTDROP[k]; }
+
 function nomVierge(){
   const o = {ENR:[], JN:[], hyp:Object.assign({}, HYP_DEF), v:1};
   ["ENR","JN"].forEach(f => NOM_ROLES[f].forEach(r => {
@@ -4384,6 +4391,19 @@ function nomVierge(){
 let NOM = LS.get("mst_nom", null);
 if (!NOM || !NOM.ENR || !NOM.JN) NOM = nomVierge();
 if (!NOM.hyp) NOM.hyp = Object.assign({}, HYP_DEF);
+/* Une hypothèse ABSENTE reprend sa valeur par défaut. Une hypothèse SAISIE est
+   respectée telle quelle, zéro compris : mettre 0 au coefficient, c'est demander
+   le coût net des profilés, et l'application doit le calculer avec 0. */
+function nomHypOk(){
+  let chg = false;
+  ["pose","coef","barre"].forEach(k => {
+    const v = parseFloat(NOM.hyp[k]);
+    if (isFinite(v)){ if (NOM.hyp[k] !== v){ NOM.hyp[k] = v; chg = true; } }
+    else { NOM.hyp[k] = HYP_DEF[k]; chg = true; }
+  });
+  if (chg) LS.set("mst_nom", NOM);
+}
+nomHypOk();
 let nomFam = "ENR";
 let nomCible = null;      /* ligne en cours de choix d'article */
 
@@ -4413,6 +4433,7 @@ async function pullNom(){
     if (d && d.ENR && d.JN){
       NOM = d;
       if (!NOM.hyp) NOM.hyp = Object.assign({}, HYP_DEF);
+      nomHypOk();
       LS.set("mst_nom", NOM);
       return true;
     }
@@ -4500,7 +4521,7 @@ $("nomList").addEventListener("change", () => nomSave());
   $(id).addEventListener("input", () => {
     const v = parseFloat(String($(id).value).replace(",", "."));
     const k = id === "hypPose" ? "pose" : id === "hypCoef" ? "coef" : "barre";
-    NOM.hyp[k] = isNaN(v) ? HYP_DEF[k] : v;
+    NOM.hyp[k] = isNaN(v) ? HYP_DEF[k] : v;    /* 0 est une valeur, pas une case vide */
     LS.set("mst_nom", NOM);
   });
   $(id).addEventListener("change", () => nomSave());
@@ -4613,10 +4634,28 @@ function prixRole(fam, k, modele){
   const l = nomLigne(fam, k, modele);
   return l && l.prix > 0 ? l.prix : 0;
 }
-/* Somme des prix au ml des profilés d'une famille : c'est le « prix barre » du Monte Carlo */
+/* Somme des prix au ml des profilés d'une famille */
 function prixBarres(fam){
   return (NOM[fam] || []).filter(l => l.q === "barre")
     .reduce((t,l) => t + (l.prix > 0 ? l.prix : 0), 0);
+}
+
+/* Coût des profilés d'un store : chaque profilé est compté sur SA longueur de
+   coupe, largeur de la fenêtre moins son retrait, puis majorée du coefficient. */
+function coutProfiles(fam, lcm, coef){
+  const lignes = (NOM[fam] || []).filter(l => l.q === "barre");
+  let cout = 0, ml = 0, px = 0, lmin = Infinity, lmax = 0;
+  lignes.forEach(l => {
+    const len = Math.max(0, lcm - dropDe(l.k)) / 100;
+    if (len < lmin) lmin = len;
+    if (len > lmax) lmax = len;
+    ml   += len * coef;
+    px   += l.prix > 0 ? l.prix : 0;
+    cout += len * coef * (l.prix > 0 ? l.prix : 0);
+  });
+  if (!lignes.length) lmin = 0;
+  return {cout:cout, ml:ml, px:px, n:lignes.length, lmin:lmin, lmax:lmax,
+          egal: Math.abs(lmax - lmin) < 0.0001};
 }
 
 /* m² de tissu réellement consommés, répartis fenêtre par fenêtre.
@@ -4672,8 +4711,9 @@ function modeleDe(o, fam, k){
 function calcCout(o){
   const dims = ordDims(o);
   if (!dims.length) return null;
-  const coef = NOM.hyp.coef > 0 ? NOM.hyp.coef : HYP_DEF.coef;
-  const pose = NOM.hyp.pose > 0 ? NOM.hyp.pose : 0;
+  /* Aucun repli silencieux : ce qui est affiché est ce qui est calculé. */
+  const coef = isFinite(NOM.hyp.coef) ? NOM.hyp.coef : HYP_DEF.coef;
+  const pose = isFinite(NOM.hyp.pose) ? NOM.hyp.pose : 0;
   const TIS = tissuParStore(dims);
   const fams = ["ENR","JN"].filter(f => dims.some(d => d.t === f));
   const reel = {};
@@ -4707,10 +4747,10 @@ function calcCout(o){
 
     const pxBar = prixBarres(f);
     if (!pxBar) manque.push("Prix des profilés (" + (f === "JN" ? "jour et nuit" : "enrouleur") + ")");
-    const mlTh = L * coef;                                   /* longueur facturée au coefficient */
+    const PR = coutProfiles(f, x.l, coef);
     const part = dims.filter(d => d.t === f).reduce((t,d) => t + d.l/100, 0);
     const mlRe = part > 0 ? reel[f].ml * (L / part) : 0;      /* part de la longueur vraiment achetée */
-    const cBarTh = mlTh * pxBar;
+    const cBarTh = PR.cout;
     const cBarRe = mlRe * pxBar;
 
     let cAcc = 0, acc = [];
@@ -4734,7 +4774,7 @@ function calcCout(o){
     const vente = m2 * pu;
     return {x:x, fam:f, m2:m2, m2tissu:m2tissu, hors:horsLaize, pu:pu, vente:vente,
             cTissu:cTissu, cPiece:cPiece, pieces:pieces, cBarTh:cBarTh, cBarRe:cBarRe,
-            cAcc:cAcc, acc:acc, pose:pose, cout:cout, mlTh:mlTh, mlRe:mlRe, pxBar:pxBar, L:L,
+            cAcc:cAcc, acc:acc, pose:pose, cout:cout, pr:PR, mlRe:mlRe, pxBar:pxBar, L:L,
             benef: vente - cout, marge: vente > 0 ? (vente - cout) / vente : 0};
   });
 
@@ -4748,7 +4788,7 @@ function calcCout(o){
     marge: tot("vente") > 0 ? (tot("vente") - tot("cout")) / tot("vente") : 0,
     coutM2: tot("m2") > 0 ? tot("cout") / tot("m2") : 0,
     m2: tot("m2"), m2tissu: TIS.total, chuteTissu: TIS.chute, chuteBarre: jete,
-    barTh: tot("cBarTh"), barRe: tot("cBarRe"),
+    barTh: tot("cBarTh"), barRe: tot("cBarRe"), coef: coef,
     posePrix: t.pose, poseLab: t.poseLab,
     manque: manque.filter((v,i,a) => a.indexOf(v) === i),
     alertes: alertes.filter((v,i,a) => a.indexOf(v) === i)
@@ -4801,8 +4841,13 @@ function renderCout(){
              fr(s.hors.laize,0) + " cm", "—", "neg")
         : li("Tissu", fr(s.m2tissu,2) + " m² consommés", fr(s.cTissu,2))) +
       li(s.pieces[0].n, s.pieces[0].d && s.pieces[0].d.nom ? esc(s.pieces[0].d.nom) : "1 pièce", fr(s.cPiece,2)) +
-      li("Profilés", fr(s.L,2) + " m × " + fr(NOM.hyp.coef,4) + " = " + fr(s.mlTh,2) +
-                     " ml × " + fr(s.pxBar,2) + " MAD/ml", fr(s.cBarTh,2)) +
+      li("Profilés",
+         (s.pr.egal
+           ? fr(s.x.l,0) + " − " + cm(s.x.l - s.pr.lmin*100) + " cm = " + fr(s.pr.lmin,2) + " m coupés × " +
+             fr(C.coef,4) + " = " + fr(s.pr.lmin * C.coef,2) + " ml × " + fr(s.pr.px,2) + " MAD/ml"
+           : s.pr.n + " profilés coupés de " + cm(s.pr.lmax*100) + " à " + cm(s.pr.lmin*100) + " cm × " +
+             fr(C.coef,4) + " = " + fr(s.pr.ml,2) + " ml, " + fr(s.pr.px,2) + " MAD/ml au total"),
+         fr(s.cBarTh,2)) +
       li("Profilés, plan de coupe réel", fr(s.mlRe,2) + " ml achetés × " + fr(s.pxBar,2) + " MAD/ml",
                      fr(s.cBarRe,2), "alt") +
       s.acc.map(a => li(a.n, a.q, fr(a.v,2))).join("") +
