@@ -3218,7 +3218,7 @@ const PROFILS = {
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "4.2";
+const APP_VERSION = "4.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -3270,7 +3270,7 @@ function famData(fam){
   const drop = fam === "JN" ? FABDROP.JN : FABDROP.ENR;
   const sum = f => v.reduce((t,d) => t + f(d), 0);
   const dep = fam === "JN" ? 2 : 1;
-  const coupeM2 = sum(d => (d.l - drop) * (dep * d.h + CUT.surplus)) / 10000;
+  const coupeM2 = sum(d => (d.l - drop) * (dep * d.h + surplusDe(fam))) / 10000;
   const venteM2 = sum(d => billed(d));
   return {
     nb: v.length,
@@ -3295,7 +3295,7 @@ function famChute(v){
   Object.keys(byRef).forEach(ref => {
     const f = fab(ref);
     const lz = f ? f.laize : CUT_DEF.laize;
-    const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong,
+    const T = planTissu(byRef[ref], lz, CUT.seuilLaize, CUT.seuilLong,
                         (CUT.fabcuts || []).filter(c => (c.ref || "") === ref));
     tot += T.chute;
   });
@@ -3521,7 +3521,9 @@ function etatLabel(k){ const e = ETATS.find(x => x.k === k); return e ? e.label 
 
 /* Seuils de réemploi des chutes de tissu : 50 cm dans les deux sens,
    pour l'enrouleur comme pour le jour et nuit. */
-const CUT_DEF = {laize:320, bar:600, surplus:20, seuilBarre:90, seuilLaize:50, seuilLong:50, v:2};
+/* Longueur déroulée en plus de la hauteur de la fenêtre :
+   12 cm pour l'enrouleur, 10 cm pour le jour et nuit. */
+const CUT_DEF = {laize:320, bar:600, surENR:12, surJN:10, seuilBarre:90, seuilLaize:50, seuilLong:50, v:3};
 const CUT_SAVED = LS.get("mst_cut", {});
 let CUT = Object.assign({}, CUT_DEF, CUT_SAVED);
 /* Les téléphones qui gardaient les anciens seuils passent aux nouveaux. */
@@ -3531,6 +3533,15 @@ if ((CUT_SAVED.v || 0) < 2){
   CUT.v = 2;
   LS.set("mst_cut", CUT);
 }
+/* Le déroulé passe de 20 cm pour tous à 12 cm enrouleur / 10 cm jour et nuit. */
+if ((CUT_SAVED.v || 0) < 3){
+  delete CUT.surplus;
+  CUT.surENR = CUT_DEF.surENR;
+  CUT.surJN  = CUT_DEF.surJN;
+  CUT.v = 3;
+  LS.set("mst_cut", CUT);
+}
+function surplusDe(t){ return t === "JN" ? CUT.surJN : CUT.surENR; }
 let cutOrderId = null;
 let cutMode = null;   /* "tube" | "tissu" */
 
@@ -3580,8 +3591,8 @@ function planBarres(pieces, barLen, offcuts, seuil){
 }
 
 /* --- tissu --- */
-function planTissu(stores, laize, surplus, sLaize, sLong, stock){
-  const need = s => (s.t === "JN" ? 2 * s.h : s.h) + surplus;
+function planTissu(stores, laize, sLaize, sLong, stock){
+  const need = s => (s.t === "JN" ? 2 * s.h : s.h) + surplusDe(s.t);
   const impossible = stores.filter(s => fabW(s) > laize);
   const items = stores.filter(s => fabW(s) <= laize).slice().sort((a,b) => (need(b) - need(a)) || (fabW(b) - fabW(a)));
 
@@ -3834,7 +3845,7 @@ function renderPlan(){
     const multiRef = (o.refs || []).length > 1;
     const fcs   = (CUT.fabcuts || []).filter(c => !multiRef || !c.ref || c.ref === ref);
     const other = (CUT.fabcuts || []).filter(c =>  multiRef &&  c.ref && c.ref !== ref);
-    const T = planTissu(byRef[ref], lz, CUT.surplus, CUT.seuilLaize, CUT.seuilLong, fcs);
+    const T = planTissu(byRef[ref], lz, CUT.seuilLaize, CUT.seuilLong, fcs);
     other.forEach(c => {
       const n = Math.max(0, Math.round(c.qty || 0));
       if (n > 0 && c.w > 0 && c.l > 0)
@@ -3859,7 +3870,7 @@ function renderPlan(){
       b.items.forEach(x => {
         h += '<div class="cutline">' +
           '<span class="cm"><b>Fenêtre ' + x.n + '</b>  <span>' + fr(x.l,0) + ' × ' + fr(x.h,0) + ' cm</span></span>' +
-          '<span class="cv">' + cm(fabW(x)) + ' × ' + fr((x.t === "JN" ? 2*x.h : x.h) + CUT.surplus,0) + ' cm</span>' +
+          '<span class="cv">' + cm(fabW(x)) + ' × ' + fr((x.t === "JN" ? 2*x.h : x.h) + surplusDe(x.t),0) + ' cm</span>' +
         '</div>';
       });
       if (b.restLaize >= 0.5){
@@ -3898,8 +3909,8 @@ function renderPlan(){
 
   h += '<p class="hint" style="margin-top:20px">' + (cutMode === "tube"
        ? 'Une chute de barre est gardée à partir de ' + CUT.seuilBarre + ' cm, en dessous elle est jetée.'
-       : 'Longueur à dérouler = hauteur de la fenêtre + ' + CUT.surplus + ' cm' +
-         (fams.indexOf("JN") >= 0 ? ', et 2 × hauteur + ' + CUT.surplus + ' cm pour le jour et nuit, le tissu faisant une boucle autour du rail' : '') + '.') +
+       : 'Longueur à dérouler = hauteur de la fenêtre + ' + CUT.surENR + ' cm pour l\'enrouleur' +
+         (fams.indexOf("JN") >= 0 ? ', et 2 × hauteur + ' + CUT.surJN + ' cm pour le jour et nuit, le tissu faisant une boucle autour du rail' : '') + '.') +
        '</p>';
   /* bilan des chutes, après le plan, dans un bloc volontairement discret */
   if (bilan.keep.length || bilan.drop.length){
