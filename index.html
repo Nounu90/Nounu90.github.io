@@ -1231,6 +1231,11 @@ select{appearance:none; -webkit-appearance:none}
   </div>
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="card" id="lgTodo" style="margin-bottom:14px">
+      <div class="card-head"><div class="label">Reste à fabriquer</div><div class="badge" id="lgTodoBadge">0</div></div>
+      <div id="lgTodoList"></div>
+      <p class="hint" id="lgTodoHint"></p>
+    </div>
     <div class="lgdate">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
       <input id="logDate" type="date">
@@ -2892,11 +2897,11 @@ function renderHome(){
       : "Aucune fenêtre fabriquée aujourd'hui";
   }
   $("tileArt").hidden = !artAllowed();
-  $("tileNom").hidden = !artAllowed();
-  $("tileCout").hidden = !artAllowed();
-  const nPrix = artAllowed()
+  $("tileNom").hidden = !adminAllowed();
+  $("tileCout").hidden = !adminAllowed();
+  const nPrix = adminAllowed()
     ? (NOM.ENR || []).concat(NOM.JN || []).filter(l => l.prix > 0).length : 0;
-  const nTot = artAllowed() ? (NOM.ENR || []).length + (NOM.JN || []).length : 0;
+  const nTot = adminAllowed() ? (NOM.ENR || []).length + (NOM.JN || []).length : 0;
   $("tileNomSub").textContent = nTot
     ? nPrix + " prix sur " + nTot + " lignes renseignés"
     : "Articles et prix par type de store";
@@ -2917,8 +2922,13 @@ function srcLabel(){
 }
 
 /* ============ Stock ============ */
-/* Le stock des articles est réservé à ces identifiants. */
-const ART_USERS = ["noureddine"];
+/* Le stock des articles est ouvert à l'atelier. */
+const ART_USERS = ["noureddine", "imane", "soufiane"];
+/* La nomenclature et le coût de revient restent à la direction. */
+const ADMIN_USERS = ["noureddine"];
+function adminAllowed(){
+  return !!USER && ADMIN_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
+}
 /* Le plan de coupe n'est pas ouvert à tout le monde. */
 const CUT_INTERDIT = ["ahmed"];
 function cutAllowed(){
@@ -3543,7 +3553,7 @@ function stockTxt(f){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "5.5";
+const APP_VERSION = "5.6";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4516,6 +4526,65 @@ function jourISO(d){
 }
 let logJour = jourISO(new Date());
 
+/* Fenêtres encore à fabriquer, tous bons confondus.
+   Un bon livré ne compte plus : sa fabrication est derrière nous. */
+function resteAFabriquer(){
+  const bons = [];
+  let tot = 0;
+  (ORDERS || []).forEach(o => {
+    if (etatDe(o) === "livre") return;
+    const dims = ordDims(o);
+    if (!dims.length) return;
+    const done = faites(o);
+    const reste = dims.filter(d => done.indexOf(d.key) < 0);
+    if (!reste.length) return;
+    tot += reste.length;
+    bons.push({o:o, tot:dims.length, fait:dims.length - reste.length, reste:reste});
+  });
+  bons.sort((a,b) => {
+    const ta = a.o.ech ? new Date(a.o.ech + "T12:00:00").getTime() : Infinity;
+    const tb = b.o.ech ? new Date(b.o.ech + "T12:00:00").getTime() : Infinity;
+    return ta - tb || new Date(b.o.date || 0) - new Date(a.o.date || 0);
+  });
+  return {bons:bons, total:tot};
+}
+
+function renderTodo(){
+  const R = resteAFabriquer();
+  $("lgTodoBadge").textContent = R.total + " fenêtre" + (R.total > 1 ? "s" : "");
+  $("lgTodoBadge").className = "badge" + (R.total ? " warn" : " ok");
+  const box = $("lgTodoList");
+  if (!R.bons.length){
+    box.innerHTML = '<div class="hint" style="margin:0">Rien en attente : toutes les fenêtres des bons non livrés sont fabriquées.</div>';
+    $("lgTodoHint").textContent = "";
+    return;
+  }
+  box.innerHTML = R.bons.map(b => {
+    const o = b.o;
+    const et = etatDe(o);
+    const dims = b.reste.map(d => fr(d.l,0) + " × " + fr(d.h,0)).join("  ·  ");
+    const segs = [];
+    for (let i = 0; i < b.tot; i++) segs.push('<span class="lgseg' + (i < b.fait ? " on" : "") + '"></span>');
+    return '<div class="lgrow' + (et === "production" ? "" : " off") + '">' +
+      '<div class="lgtop">' +
+        '<span class="lgd">' + esc(o.nom || "Client sans nom") + '</span>' +
+        '<span class="lgb">' + b.reste.length + " / " + b.tot + '</span>' +
+      '</div>' +
+      '<span class="lgsub">' + esc(o.num || "") + '  ·  ' + etatLabel(et) +
+        (o.ech ? '  ·  échéance ' + esc(String(o.ech).split("-").reverse().join("/")) : "") +
+        '<br><b>' + dims + '</b> cm' +
+      '</span>' +
+      '<div class="lgbar">' + segs.join("") + '</div>' +
+    '</div>';
+  }).join("");
+  const enProd = R.bons.filter(b => etatDe(b.o) === "production");
+  const nProd = enProd.reduce((t,b) => t + b.reste.length, 0);
+  $("lgTodoHint").textContent = R.total + " fenêtre" + (R.total > 1 ? "s" : "") +
+    " sur " + R.bons.length + " bon" + (R.bons.length > 1 ? "s" : "") +
+    (nProd ? ",  dont " + nProd + " sur " + enProd.length + " bon" + (enProd.length > 1 ? "s" : "") + " en production" : "") +
+    ".  Les bons livrés ne comptent plus.";
+}
+
 /* Toutes les lignes de journal d'une journée, du plus récent au plus ancien */
 function logDuJour(iso){
   const out = [];
@@ -4529,6 +4598,7 @@ function logDuJour(iso){
 }
 
 function renderLog(){
+  renderTodo();
   $("logDate").value = logJour;
   $("logToday").setAttribute("aria-pressed", String(logJour === jourISO(new Date())));
 
@@ -4885,7 +4955,7 @@ $("nomPickList").addEventListener("click", e => {
 });
 
 $("tileNom").addEventListener("click", () => {
-  if (!artAllowed()) return;
+  if (!adminAllowed()) return;
   renderNom();
   nav("nomSheet");
   if (!ARTICLES.length) syncStock(true).then(() => renderNom());
@@ -5183,7 +5253,7 @@ function renderCout(){
 $("coutPick").addEventListener("click", () => ouvrirPickBon("cout"));
 
 $("tileCout").addEventListener("click", () => {
-  if (!artAllowed()) return;
+  if (!adminAllowed()) return;
   renderCout();
   nav("coutSheet");
   pullBons().then(() => renderCout());
