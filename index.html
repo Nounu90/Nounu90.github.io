@@ -2156,7 +2156,7 @@ $("pcEtat").addEventListener("change", e => {
   b.etat = e.target.value;
   $("pcEtatWrap").className = "etatsel " + b.etat;
   if (S.id === b.id) S.etat = b.etat;
-  persistOrders(); pushBon(b);
+  touche(b); persistOrders(); pushBon(b);
   sheetSituation(b.num, etatLabel(b.etat));
   renderHist();
 });
@@ -2803,7 +2803,14 @@ function setOrder(rec){
 }
 
 /* --- envoi vers la base --- */
+/* Chaque modification d'un bon est horodatée. C'est cette heure, et non l'ordre
+   d'arrivée sur le réseau, qui décide qui gagne quand deux téléphones ont touché
+   le même bon. Sans elle, un vieux brouillon resté en attente sur un téléphone
+   écrasait sans arrêt la version récente des autres. */
+function touche(o){ if (o) o.maj = Date.now(); return o; }
+
 async function pushBon(rec){
+  touche(rec);
   if (!SB || !USER){ markPending(rec.id, true); return false; }
   try {
     const {error} = await SB.from("bons").upsert({
@@ -2929,9 +2936,12 @@ async function pullBons(){
       distants[r.id] = true;
       if (TOMBS.indexOf(r.id) >= 0) return;        /* supprimé ici, pas encore côté base */
       const cur = map[r.id];
-      if (cur && cur.pending) return;              /* le brouillon local n'est pas écrasé */
       const o = Object.assign({}, r.data || {});
       o.id = r.id; o.num = r.num; o.author = r.author;
+      /* On ne garde le local que s'il est vraiment plus récent. Sinon la version
+         distante passe, même si le local attendait encore d'être envoyé. */
+      if (cur && (cur.maj || 0) > (o.maj || 0)) return;
+      if (cur && cur.pending && (cur.maj || 0) >= (o.maj || 0)) return;
       map[r.id] = o;
     });
 
@@ -3686,7 +3696,7 @@ $("histBody").addEventListener("change", e => {
   const o = ORDERS.find(x => x.id === sel.dataset.etat);
   if (!o) return;
   o.etat = sel.value;
-  persistOrders();
+  touche(o); persistOrders();
   const box = sel.closest(".hrow");
   if (box){
     const wrap = sel.closest(".etatsel");
@@ -3817,7 +3827,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "6.6";
+const APP_VERSION = "6.7";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -3940,7 +3950,7 @@ function pcSet(fam, k, v){
 /* Toute saisie dans la fiche est enregistrée et partagée. */
 function pcPush(){
   const b = pcO(); if (!b) return;
-  persistOrders(); pushBon(b);
+  touche(b); persistOrders(); pushBon(b);
 }
 /* valeur retenue pour l'envoi : la saisie de l'atelier, sinon le calcul */
 function pcNum(fam, def, d){
@@ -4111,7 +4121,7 @@ function pcConfirm(){
       btn.textContent = "Envoyé au tableau"; btn.classList.add("done");
       toast(j.updated ? "Ligne mise à jour dans le tableau" : "Ligne ajoutée au tableau");
       b.sheetAt = new Date().toISOString();
-      persistOrders(); pushBon(b);
+      touche(b); persistOrders(); pushBon(b);
       setTimeout(() => {
         btn.textContent = lbl; btn.classList.remove("done"); btn.disabled = false;
       }, 2500);
@@ -4348,7 +4358,7 @@ $("cutFait").addEventListener("click", e => {
   });
   if (o.log.length > 400) o.log = o.log.slice(-400);
 
-  persistOrders();
+  touche(o); persistOrders();
   pushBon(o);                 /* les autres téléphones suivent */
   renderPlan();
   if ($("logSheet").classList.contains("open")) renderLog();
@@ -4682,7 +4692,7 @@ function renderFcSiBesoin(){
 /* Le plan de coupe et le coût de revient partagent la même liste : on redessine
    les deux écrans après chaque changement, celui qui est caché ne coûte rien. */
 function fcMaj(o){
-  if (o){ persistOrders(); pushBon(o); }
+  if (o){ touche(o); persistOrders(); pushBon(o); }
   renderFc();
   renderPlan();
   if ($("coutSheet").classList.contains("open")) renderCout();
@@ -4716,7 +4726,7 @@ document.addEventListener("input", e => {
   o.fabcuts[i][t.dataset.k] = clean === "" ? "" : parseFloat(clean);
   clearTimeout(window._fct);
   window._fct = setTimeout(() => {
-    persistOrders(); pushBon(o);
+    touche(o); persistOrders(); pushBon(o);
     renderPlan();
     if ($("coutSheet").classList.contains("open")) renderCout();
   }, 600);
@@ -5036,7 +5046,7 @@ $("payList").addEventListener("click", e => {
     o.paies.push({id: payUid(), date: g("date").value || jourISO(new Date()),
                   mode: g("mode").value, montant: montant,
                   by: (USER && USER.login) || "", at: Date.now()});
-    persistOrders(); pushBon(o); payPush(o);
+    touche(o); persistOrders(); pushBon(o); payPush(o);
     renderPay(); renderHome();
     toast(paySolde(o) ? "Bon soldé" : "Paiement enregistré, reste " + fr(soldeDe(o),2));
     return;
@@ -5049,7 +5059,7 @@ $("payList").addEventListener("click", e => {
     if (!o) return;
     ask("Retirer ce paiement ?", "La ligne sera aussi retirée de l'onglet Paiements.", () => {
       o.paies = paiements(o).filter(x => x.id !== parts[1]);
-      persistOrders(); pushBon(o); payPush(o);
+      touche(o); persistOrders(); pushBon(o); payPush(o);
       renderPay(); renderHome();
       toast("Paiement retiré");
     });
