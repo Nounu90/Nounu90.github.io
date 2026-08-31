@@ -385,7 +385,15 @@ select{appearance:none; -webkit-appearance:none}
 .pyl{flex:1; min-width:0}
 .pyl b{display:block; font-family:"Archivo",sans-serif; font-size:14.5px; font-weight:600;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.pysub{display:block; font-size:12px; color:var(--muted); margin-top:3px;
+.pyet{
+  display:inline-block; margin-top:5px; font-size:11px; font-weight:600;
+  border-radius:6px; padding:2px 8px; font-family:"Archivo",sans-serif;
+}
+.pyet.devis{background:var(--card2); color:var(--muted)}
+.pyet.production{background:var(--warn-soft); color:var(--warn)}
+.pyet.pret{background:var(--info-soft); color:var(--info)}
+.pyet.livre{background:var(--ok-soft); color:var(--ok)}
+.pysub{display:block; font-size:12px; color:var(--muted); margin-top:4px;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .pyr{flex:none; text-align:right}
 .pyr b{display:block; font-family:"IBM Plex Mono",monospace; font-size:14.5px; font-weight:600}
@@ -750,6 +758,13 @@ select{appearance:none; -webkit-appearance:none}
 }
 .httc em{font-style:normal; font-size:10.5px; font-weight:500; color:var(--muted); margin-left:5px; letter-spacing:.04em}
 .httc i{font-style:normal; font-size:11.5px; font-weight:500; color:var(--muted); margin-left:9px}
+.httc u{
+  text-decoration:none; font-size:10.5px; font-weight:600; color:var(--ok);
+  background:var(--ok-soft); border-radius:5px; padding:2px 6px; margin-left:8px; letter-spacing:.03em;
+}
+/* Un bon entièrement encaissé se voit d'un coup d'œil dans l'historique. */
+.hrow.paye{border-color:var(--ok); border-left:3px solid var(--ok)}
+.hrow.paye .httc{color:var(--ok)}
 .hacts{display:flex; gap:2px; flex:none}
 .hact{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; color:var(--muted); flex:none}
 .hact:hover{background:var(--card2); color:var(--ink)}
@@ -1443,10 +1458,18 @@ select{appearance:none; -webkit-appearance:none}
       <button type="button" data-f="all" aria-pressed="true">Tous</button>
       <button type="button" data-f="mine" aria-pressed="false">Mes bons</button>
       <button type="button" data-f="mois" aria-pressed="false">Ce mois</button>
+      <button type="button" data-f="annee" aria-pressed="false">Cette année</button>
+      <button type="button" data-f="periode" aria-pressed="false">Période</button>
+      <button type="button" data-f="paye" aria-pressed="false">Payés</button>
+      <button type="button" data-f="impaye" aria-pressed="false">Non payés</button>
       <button type="button" data-f="devis" aria-pressed="false">Devis</button>
       <button type="button" data-f="production" aria-pressed="false">En production</button>
       <button type="button" data-f="pret" aria-pressed="false">Prêt</button>
       <button type="button" data-f="livre" aria-pressed="false">Livré</button>
+    </div>
+    <div class="pyper" id="histPeriode" hidden>
+      <input id="histD1" type="date" aria-label="Du">
+      <input id="histD2" type="date" aria-label="Au">
     </div>
     <div class="filters" id="histSort">
       <button type="button" data-s="recent" aria-pressed="true">Plus récents</button>
@@ -3513,12 +3536,26 @@ function echSuffix(o){
   const soon = histSort === "ech" ? " soon" : "";
   return '<span class="hech' + soon + '">' + (o.pose === "Livraison" ? "Livr." : "Pose") + " " + j + '</span>';
 }
+let histDu = "", histAu = "";
+/* Le bon est retenu si sa date tombe dans la fenêtre choisie. */
+function dansPeriodeHist(o){
+  const d = new Date(o.date || 0);
+  if (isNaN(d.getTime())) return false;
+  if (histDu && d < new Date(histDu + "T00:00:00")) return false;
+  if (histAu && d > new Date(histAu + "T23:59:59")) return false;
+  return true;
+}
+
 function renderHist(){
   const all = ORDERS;
   const q = ($("histSearch").value || "").trim().toLowerCase();
   let list = all.filter(o => {
     if (histFilter === "mine" && USER && o.author !== USER.login) return false;
     if (histFilter === "mois" && !ceMois(o)) return false;
+    if (histFilter === "annee" && new Date(o.date || 0).getFullYear() !== new Date().getFullYear()) return false;
+    if (histFilter === "periode" && !dansPeriodeHist(o)) return false;
+    if (histFilter === "paye"   && !paySolde(o)) return false;
+    if (histFilter === "impaye" && paySolde(o)) return false;
     /* Un bon livré n'a plus d'échéance à surveiller, sauf si on le demande. */
     if (histSort === "ech" && histFilter !== "livre" && etatDe(o) === "livre") return false;
     if (ETATS.some(e => e.k === histFilter) && etatDe(o) !== histFilter) return false;
@@ -3538,6 +3575,9 @@ function renderHist(){
     });
   }
   [...$("histSort").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.s === histSort)));
+  [...$("histFilters").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.f === histFilter)));
+  $("histPeriode").hidden = histFilter !== "periode";
+  $("histD1").value = histDu; $("histD2").value = histAu;
 
   $("histSum").textContent = all.length;
   const body = $("histBody");
@@ -3550,7 +3590,8 @@ function renderHist(){
     const t = orderTotals(o);
     const d = new Date(o.date);
     const row = document.createElement("div");
-    row.className = "hrow";
+    const paye = paySolde(o);
+    row.className = "hrow" + (paye ? " paye" : "");
     const et = etatDe(o);
     row.innerHTML =
       '<button class="hmain" data-open="' + o.id + '">' +
@@ -3559,6 +3600,7 @@ function renderHist(){
           ? '<span class="httc">' + fr(prixClient(o, t.prix + t.pose)) + ' MAD' +
             '<em>' + (facture(o) ? "TTC" : "HT") + '</em>' +
             (facture(o) ? '<i>' + fr(t.prix + t.pose) + ' HT</i>' : '<i>sans facture</i>') +
+            (paye ? '<u>payé</u>' : '') +
             '</span>'
           : '') +
         '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
@@ -3587,6 +3629,8 @@ function renderHist(){
 }
 
 $("histSearch").addEventListener("input", renderHist);
+$("histD1").addEventListener("change", e => { histDu = e.target.value; renderHist(); });
+$("histD2").addEventListener("change", e => { histAu = e.target.value; renderHist(); });
 $("histSort").addEventListener("click", e => {
   const b = e.target.closest("button[data-s]");
   if (!b) return;
@@ -3739,14 +3783,21 @@ function stockTxt(f){
    ne sert qu'à son tissu. Même règle pour le plan de coupe et le coût de revient. */
 function chutesPour(o, ref){
   const multiRef = ((o && o.refs) || []).length > 1;
-  return (CUT.fabcuts || []).filter(c => !multiRef || !c.ref || c.ref === ref);
+  return chutesDe(o).filter(c => !multiRef || !c.ref || c.ref === ref);
+}
+/* Les chutes de tissu sont propres à chaque bon : elles voyagent avec lui
+   d'un téléphone à l'autre, et ne se mélangent pas d'un client à l'autre. */
+function chutesDe(o){ return (o && Array.isArray(o.fabcuts)) ? o.fabcuts : []; }
+function bonChutes(){
+  const id = $("coutSheet").classList.contains("open") ? coutOrderId : cutOrderId;
+  return ORDERS.find(x => x.id === id) || null;
 }
 
 /* Retrait sur la largeur de la fenêtre pour la coupe du tissu */
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "6.4";
+const APP_VERSION = "6.5";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4344,6 +4395,7 @@ function renderPlan(){
     $("piecesCard").hidden = true;
     return;
   }
+  renderFcSiBesoin();
   /* La fiche de production suit le bon choisi, sous le plan et son bilan. */
   $("piecesCard").hidden = false;
   renderPieces();
@@ -4421,7 +4473,7 @@ function renderPlan(){
        attribuée à un tissu précis ne sert que pour celui là, et on le dit. */
     const multiRef = (o.refs || []).length > 1;
     const fcs   = chutesPour(o, ref);
-    const other = (CUT.fabcuts || []).filter(c =>  multiRef &&  c.ref && c.ref !== ref);
+    const other = chutesDe(o).filter(c =>  multiRef &&  c.ref && c.ref !== ref);
     const T = planTissu(byRef[ref], lz, CUT.seuilLaize, CUT.seuilLong, fcs);
     other.forEach(c => {
       const n = Math.max(0, Math.round(c.qty || 0));
@@ -4558,11 +4610,9 @@ function renderOff(){
   $("offCount").textContent = n + (n > 1 ? " morceaux" : " morceau");
 }
 
-function renderFc(){
-  const list = CUT.fabcuts || [];
-  /* le bon de référence est celui de l'écran ouvert */
-  const oid = $("coutSheet").classList.contains("open") ? coutOrderId : cutOrderId;
-  const ord = ORDERS.find(x => x.id === oid);
+function renderFc(force){
+  const ord = bonChutes();
+  const list = chutesDe(ord);
   const refs = (ord && ord.refs) || [];
   const box = document.createElement("div");
   list.forEach((c, i) => {
@@ -4585,52 +4635,81 @@ function renderFc(){
     box.appendChild(d);
   });
   const n = list.reduce((t,c) => t + (Math.round(c.qty) || 0), 0);
-  Array.prototype.forEach.call(document.querySelectorAll(".fcList"), el => { el.innerHTML = box.innerHTML; });
+  /* Si l'agent est en train de taper dans une case, on ne touche pas au DOM :
+     le remplacer fermerait le clavier à chaque chiffre. */
+  const focus = document.activeElement;
+  const enSaisie = !force && focus && focus.closest && focus.closest(".fcList");
+  if (!enSaisie){
+    Array.prototype.forEach.call(document.querySelectorAll(".fcList"), el => { el.innerHTML = box.innerHTML; });
+  }
   Array.prototype.forEach.call(document.querySelectorAll(".fcCount"), el => {
     el.textContent = n + (n > 1 ? " morceaux" : " morceau");
   });
 }
+/* On ne redessine la carte des chutes que si elle ne correspond plus au bon,
+   pour ne jamais couper une saisie en cours. */
+let fcBon = null;
+function renderFcSiBesoin(){
+  const o = bonChutes();
+  const id = o ? o.id : "";
+  if (id === fcBon) return;
+  fcBon = id;
+  /* On change de bon : la liste doit suivre, même si une case avait le focus. */
+  const a = document.activeElement;
+  if (a && a.closest && a.closest(".fcList")) a.blur();
+  renderFc(true);
+}
 /* Le plan de coupe et le coût de revient partagent la même liste : on redessine
    les deux écrans après chaque changement, celui qui est caché ne coûte rien. */
-function fcMaj(){
-  cutSave(); renderFc();
+function fcMaj(o){
+  if (o){ persistOrders(); pushBon(o); }
+  renderFc();
   renderPlan();
   if ($("coutSheet").classList.contains("open")) renderCout();
 }
 
 document.addEventListener("click", e => {
   if (e.target.closest(".fcAdd")){
-    CUT.fabcuts = (CUT.fabcuts || []).concat([{ref:"", w:"", l:"", qty:1}]);
-    fcMaj();
+    const o = bonChutes();
+    if (!o){ toast("Choisissez d'abord un bon de commande"); return; }
+    o.fabcuts = chutesDe(o).concat([{ref:"", w:"", l:"", qty:1}]);
+    fcMaj(o);
     return;
   }
   const b = e.target.closest("button[data-fcdel]");
   if (!b || !b.closest(".fcList")) return;
-  CUT.fabcuts.splice(+b.dataset.fcdel, 1);
-  fcMaj();
+  const o = bonChutes();
+  if (!o) return;
+  o.fabcuts = chutesDe(o).slice();
+  o.fabcuts.splice(+b.dataset.fcdel, 1);
+  fcMaj(o);
 });
 document.addEventListener("input", e => {
   const t = e.target;
   if (!t.closest || !t.closest(".fcList")) return;
   const i = t.dataset.fc;
   if (i === undefined) return;
+  const o = bonChutes();
+  if (!o || !chutesDe(o)[i]) return;
   const clean = t.value.replace(/[^0-9.,]/g, "").replace(",", ".");
   if (clean !== t.value) t.value = clean;
-  CUT.fabcuts[i][t.dataset.k] = clean === "" ? "" : parseFloat(clean);
-  cutSave();
+  o.fabcuts[i][t.dataset.k] = clean === "" ? "" : parseFloat(clean);
   clearTimeout(window._fct);
   window._fct = setTimeout(() => {
+    persistOrders(); pushBon(o);
     renderPlan();
     if ($("coutSheet").classList.contains("open")) renderCout();
-  }, 500);
+  }, 600);
 });
 document.addEventListener("change", e => {
   const t = e.target;
   if (!t.closest || !t.closest(".fcList")) return;
   const i = t.dataset.fcref;
   if (i === undefined) return;
-  CUT.fabcuts[i].ref = t.value;
-  fcMaj();
+  const o = bonChutes();
+  if (!o || !chutesDe(o)[i]) return;
+  o.fabcuts[i].ref = t.value;
+  fcMaj(o);
 });
 
 $("offAdd").addEventListener("click", () => {
@@ -4825,9 +4904,11 @@ function renderPay(){
       '<button class="pyhead" type="button" data-py="' + o.id + '">' +
         '<span class="pyl">' +
           '<b>' + esc(o.nom || "Client sans nom") + '</b>' +
+          '<span class="pyet etat-' + etatDe(o) + '">' + etatLabel(etatDe(o)) + '</span>' +
           '<span class="pysub">' + esc(o.num || "") + '  ·  ' + typeLabel(o) +
-            (puFam("ENR", o) ? '  ·  ' + fr(puFam(o.type === "JN" ? "JN" : "ENR", o), 0) + ' MAD/m² HT' : '') +
-            '  ·  ' + etatLabel(etatDe(o)) + '</span>' +
+            (puFam(o.type === "JN" ? "JN" : "ENR", o)
+              ? '  ·  ' + fr(puFam(o.type === "JN" ? "JN" : "ENR", o), 0) + ' MAD/m² HT' : '') +
+            '</span>' +
         '</span>' +
         '<span class="pyr">' +
           '<b>' + fr(d,2) + '</b>' +
@@ -5654,7 +5735,7 @@ function renderCout(){
   $("coutOrderSub").textContent = o.num + "  ·  " + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + String(d.getFullYear()).slice(2);
 
   $("coutFcCard").hidden = false;
-  renderFc();
+  renderFcSiBesoin();
   const C = calcCout(o);
   if (!C){ out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>'; return; }
 
