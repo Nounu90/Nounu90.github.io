@@ -691,6 +691,13 @@ select{appearance:none; -webkit-appearance:none}
 .hech.soon{color:var(--accent); font-weight:600}
 .hnum{font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:500; color:var(--muted); opacity:.75; letter-spacing:.02em; white-space:nowrap}
 .hprice{font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:600; color:var(--accent); white-space:nowrap; flex:none}
+.httc{
+  display:block; margin-top:3px;
+  font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600;
+  color:var(--accent); white-space:nowrap;
+}
+.httc em{font-style:normal; font-size:10.5px; font-weight:500; color:var(--muted); margin-left:5px; letter-spacing:.04em}
+.httc i{font-style:normal; font-size:11.5px; font-weight:500; color:var(--muted); margin-left:9px}
 .hacts{display:flex; gap:2px; flex:none}
 .hact{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; color:var(--muted); flex:none}
 .hact:hover{background:var(--card2); color:var(--ink)}
@@ -3423,10 +3430,14 @@ function renderHist(){
     row.innerHTML =
       '<button class="hmain" data-open="' + o.id + '">' +
         '<span class="hl1"><b><span class="etat-box etat-' + et + '">' + (o.nom || "Client sans nom") + '</span></b></span>' +
+        ((t.prix || t.pose)
+          ? '<span class="httc">' + fr(ttc(t.prix + t.pose)) + ' MAD<em>TTC</em>' +
+            '<i>' + fr(t.prix + t.pose) + ' HT</i></span>'
+          : '') +
         '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
           '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + '</small>' +
           '<span class="hright">' +
-            (t.prix ? '<span class="hprice">' + fr(ttc(t.prix + t.pose)) + ' MAD TTC</span>' : '') +
+
             (t.pose ? '<span class="hpose">' + (t.poseLab === "Livraison" ? "Livr." : "Pose") + ' + ' + fr(t.pose) + '</span>' : '') +
             echSuffix(o) +
             '<span class="hnum">' + o.num + '</span>' +
@@ -3607,7 +3618,7 @@ function chutesPour(o, ref){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "6.0";
+const APP_VERSION = "6.1";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
