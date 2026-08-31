@@ -375,6 +375,40 @@ select{appearance:none; -webkit-appearance:none}
 }
 .sheet-top h2{font-family:"Archivo",sans-serif; font-size:17px; font-weight:600; margin:0; flex:1}
 .sheet-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px; max-width:520px; margin:0 auto; width:100%}
+/* --- découpes de tube et livraison magasin 2 --- */
+.livr{
+  width:100%; display:flex; align-items:center; gap:11px; padding:12px 13px; margin-top:11px;
+  border:1px solid var(--line); border-radius:12px; background:var(--card2); text-align:left; cursor:pointer;
+}
+.livr .lvbox{
+  flex:none; width:22px; height:22px; border-radius:7px; border:2px solid var(--line-strong);
+  display:grid; place-items:center; color:#fff;
+}
+.livr .lvt{flex:1; min-width:0}
+.livr .lvt b{display:block; font-family:"Archivo",sans-serif; font-size:14px; font-weight:600}
+.livr .lvt small{display:block; font-size:12px; color:var(--muted); margin-top:2px}
+.livr.on{background:var(--ok-soft); border-color:var(--ok)}
+.livr.on .lvbox{background:var(--ok); border-color:var(--ok)}
+.livr.on .lvt b{color:var(--ok)}
+/* --- découpes de tubes, un bloc par profilé --- */
+.cpgrp{margin-bottom:15px}
+.cpgrp:last-child{margin-bottom:0}
+.cptitre{
+  display:flex; align-items:baseline; gap:9px; margin:0 2px 8px;
+  font-family:"Archivo",sans-serif; font-size:13px; font-weight:600;
+}
+.cptitre span{flex:1; min-width:0}
+.cptitre em{font-style:normal; font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted); flex:none}
+.cpliv{
+  width:100%; display:flex; align-items:center; gap:9px; margin-top:7px;
+  padding:10px 12px; border-radius:10px; border:1px dashed var(--line-strong);
+  background:transparent; color:var(--muted);
+  font-family:"Archivo",sans-serif; font-weight:600; font-size:12.5px; cursor:pointer; text-align:left;
+}
+.cpliv.on{border-style:solid; border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
+.cpliv.att{opacity:.5}
+.cpliv .fbox{width:19px; height:19px; border-radius:6px; border:1.5px solid currentColor;
+  display:grid; place-items:center; flex:none}
 /* --- paiements --- */
 .pyrow{
   background:var(--card); border:1px solid var(--line); border-left:3px solid var(--warn);
@@ -444,6 +478,11 @@ select{appearance:none; -webkit-appearance:none}
   border-radius:11px; padding:11px 13px; margin-bottom:8px;
 }
 .lgrow.off{border-left-color:var(--line-strong); opacity:.72}
+.lgrow.tube{border-left-color:var(--info)}
+.lgrow.tube .lgb{background:var(--info-soft); color:var(--info)}
+.lgrow.livr{border-left-color:var(--accent)}
+.lgrow.livr .lgb{background:var(--accent-soft); color:var(--accent)}
+.lgrow.off .lgb{background:var(--card2); color:var(--muted)}
 .lgtop{display:flex; align-items:baseline; gap:9px}
 .lgh{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); flex:none}
 .lgd{font-family:"Archivo",sans-serif; font-weight:600; font-size:14px; flex:1; min-width:0}
@@ -1175,6 +1214,13 @@ select{appearance:none; -webkit-appearance:none}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
     </button>
 
+    <div class="card" id="cutTubeCard" style="margin-bottom:14px">
+      <div class="card-head"><div class="label">Découpes à faire</div><div class="badge" id="cutTubeCount">0 / 0</div></div>
+      <div id="cutTube"></div>
+      <p class="hint" id="livrSub" style="margin:10px 2px 0; font-weight:600; color:var(--ink)"></p>
+      <p class="hint">Cochez chaque coupe faite au magasin 1, puis la livraison une fois les profilés portés au magasin 2. Tout apparaît sur les téléphones de l'équipe.</p>
+    </div>
+
     <div class="card" id="cutFaitCard" style="margin-bottom:14px">
       <div class="card-head"><div class="label">Fenêtres fabriquées</div><div class="badge" id="cutFaitCount">0 / 0</div></div>
       <div id="cutFait"></div>
@@ -1362,6 +1408,8 @@ select{appearance:none; -webkit-appearance:none}
       <button id="logToday" type="button" aria-pressed="true">Aujourd'hui</button>
     </div>
     <div class="sumline"><span id="logSumLabel">Fenêtres fabriquées</span><b id="logSum">0</b></div>
+    <div class="sumline"><span>Coupes de profilé</span><b id="logTubes">0</b></div>
+    <div class="sumline"><span>Livraisons au magasin 2</span><b id="logLivr">0</b></div>
     <div id="logList"></div>
     <p class="hint" id="logHint"></p>
   </div>
@@ -3140,10 +3188,15 @@ const ADMIN_USERS = ["noureddine"];
 function adminAllowed(){
   return !!USER && ADMIN_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
 }
-/* Le plan de coupe n'est pas ouvert à tout le monde. */
-const CUT_INTERDIT = ["ahmed"];
+/* Le plan de coupe est ouvert à tous. Ahmed n'y voit que la découpe des tubes :
+   il coupe au magasin 1 et livre au magasin 2, le tissu ne le concerne pas. */
+const CUT_INTERDIT = [];
+const TUBE_SEUL = ["ahmed"];
 function cutAllowed(){
   return !!USER && CUT_INTERDIT.indexOf(String(USER.login || "").toLowerCase()) < 0;
+}
+function tubeSeul(){
+  return !!USER && TUBE_SEUL.indexOf(String(USER.login || "").toLowerCase()) >= 0;
 }
 function artAllowed(){
   return !!USER && ART_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
@@ -3827,7 +3880,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "6.7";
+const APP_VERSION = "7.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4310,6 +4363,46 @@ function renderCut(){
 /* Les fenêtres déjà fabriquées, cochées par l'atelier. */
 function faites(o){ return (o && Array.isArray(o.faites)) ? o.faites : []; }
 
+/* La liste des coupes de profilé, et la livraison au magasin 2. */
+function renderTube(o){
+  const box = $("cutTube");
+  const list = coupesTube(o);
+  const done = tubesFaits(o);
+  const n = list.filter(c => done.indexOf(c.key) >= 0).length;
+  $("cutTubeCount").textContent = n + " / " + list.length;
+  $("cutTubeCount").className = "badge" + (list.length && n === list.length ? " ok" : (n ? " warn" : ""));
+
+  const coche = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  const groupes = profilsDe(o);
+  box.innerHTML = groupes.map(g => {
+    const ok = g.coupes.filter(c => done.indexOf(c.key) >= 0).length;
+    const tout = ok === g.coupes.length;
+    const liv = livreDe(o, g.k);
+    return '<div class="cpgrp">' +
+      '<div class="cptitre"><span>' + esc(g.label) + '</span><em>' + ok + " / " + g.coupes.length + '</em></div>' +
+      g.coupes.map(c => {
+        const on = done.indexOf(c.key) >= 0;
+        return '<button class="fait' + (on ? " on" : "") + '" type="button" data-tube="' + c.key + '">' +
+          '<span class="fbox">' + (on ? coche : "") + '</span>' +
+          '<span class="fdim">' + cm(c.coupe) + ' cm</span>' +
+          '<span class="fsub">fenêtre ' + c.n + '  ·  ' + fr(c.l,0) + ' × ' + fr(c.h,0) + ' cm</span>' +
+        '</button>';
+      }).join("") +
+      '<button class="cpliv' + (liv ? " on" : (tout ? "" : " att")) + '" type="button" data-livre="' + g.k + '">' +
+        '<span class="fbox">' + (liv ? coche : "") + '</span>' +
+        (liv ? "Livré au magasin 2"
+             : (tout ? "Marquer livré au magasin 2"
+                     : "Reste " + (g.coupes.length - ok) + " coupe" + (g.coupes.length - ok > 1 ? "s" : "") + " avant livraison")) +
+      '</button>' +
+    '</div>';
+  }).join("") || '<div class="hint" style="margin:0">Aucune coupe pour ce bon.</div>';
+
+  const nl = groupes.filter(g => livreDe(o, g.k)).length;
+  $("livrSub").textContent = groupes.length
+    ? nl + " profilé" + (nl > 1 ? "s" : "") + " sur " + groupes.length + " livré" + (nl > 1 ? "s" : "") + " au magasin 2"
+    : "";
+}
+
 function renderFait(o, dims){
   const box = $("cutFait");
   const done = faites(o);
@@ -4346,6 +4439,7 @@ $("cutFait").addEventListener("click", e => {
   const d = dims.find(x => x.key === k);
   if (!Array.isArray(o.log)) o.log = [];
   o.log.push({
+    kind: "fab",
     at:   Date.now(),
     by:   (USER && USER.login) || "",
     k:    k,
@@ -4364,6 +4458,70 @@ $("cutFait").addEventListener("click", e => {
   if ($("logSheet").classList.contains("open")) renderLog();
 });
 
+$("cutTube").addEventListener("click", e => {
+  const b = e.target.closest("button[data-tube]");
+  if (!b) return;
+  const o = ORDERS.find(x => x.id === cutOrderId);
+  if (!o) return;
+  const k = b.dataset.tube;
+  const l = tubesFaits(o).slice();
+  const i = l.indexOf(k);
+  const coche = i < 0;
+  if (i >= 0) l.splice(i, 1); else l.push(k);
+  o.tubes = l;
+
+  const list = coupesTube(o);
+  const c = list.find(x => x.key === k);
+  if (!Array.isArray(o.log)) o.log = [];
+  o.log.push({
+    kind: "tube",
+    at:   Date.now(),
+    by:   (USER && USER.login) || "",
+    k:    k,
+    on:   coche,
+    dim:  c ? (cm(c.coupe) + " cm") : "",
+    prof: c ? c.label : "",
+    fen:  c ? (fr(c.l,0) + " × " + fr(c.h,0) + " cm") : "",
+    t:    c ? c.fam : "",
+    fait: list.filter(x => l.indexOf(x.key) >= 0).length,
+    tot:  list.length
+  });
+  if (o.log.length > 400) o.log = o.log.slice(-400);
+
+  touche(o); persistOrders(); pushBon(o);
+  renderTube(o);
+  if ($("logSheet").classList.contains("open")) renderLog();
+});
+
+$("cutTube").addEventListener("click", e => {
+  const b = e.target.closest("button[data-livre]");
+  if (!b) return;
+  const o = ORDERS.find(x => x.id === cutOrderId);
+  if (!o) return;
+  const k = b.dataset.livre;
+  const g = profilsDe(o).find(x => x.k === k);
+  if (!g) return;
+  const done = tubesFaits(o);
+  const tout = g.coupes.every(c => done.indexOf(c.key) >= 0);
+  const etait = livreDe(o, k);
+  if (!etait && !tout){ toast("Toutes les coupes de ce profilé ne sont pas faites"); return; }
+
+  const l = Object.assign({}, livres(o));
+  if (etait) delete l[k]; else l[k] = {at: Date.now(), by: (USER && USER.login) || ""};
+  o.livres = l;
+
+  if (!Array.isArray(o.log)) o.log = [];
+  o.log.push({kind:"livr", at:Date.now(), by:(USER && USER.login) || "", k:k, on:!etait,
+              prof:g.label, t:g.fam, dim:g.coupes.length + " coupes",
+              fait:Object.keys(l).length, tot:profilsDe(o).length});
+  if (o.log.length > 400) o.log = o.log.slice(-400);
+
+  touche(o); persistOrders(); pushBon(o);
+  renderTube(o);
+  if ($("logSheet").classList.contains("open")) renderLog();
+  toast(etait ? "Livraison annulée" : g.label + " livré au magasin 2");
+});
+
 function renderMode(){
   [...$("cutModeSeg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === cutMode)));
   $("cutTubeParams").hidden = cutMode !== "tube";
@@ -4378,6 +4536,38 @@ $("cutModeSeg").addEventListener("click", e => {
   renderMode(); renderPlan();
   $("cutSheet").querySelector(".sheet-body").scrollTop = 0;
 });
+
+/* Toutes les découpes de profilé d'un bon : un profilé, une fenêtre, une coupe.
+   C'est ce que l'atelier du magasin 1 doit produire. */
+function coupesTube(o){
+  const dims = ordDims(o);
+  const fams = ["ENR","JN"].filter(f => dims.some(d => d.t === f));
+  const out = [];
+  fams.forEach(fam => PROFILS[fam].forEach(pr => {
+    dims.filter(d => d.t === fam).forEach(d => {
+      out.push({key: "t:" + fam + ":" + pr.k + ":" + d.key,
+                prof: pr.k, label: pr.label, fam: fam, n: d.n,
+                l: d.l, h: d.h, coupe: d.l - pr.d, ref: d.ref || ""});
+    });
+  }));
+  return out;
+}
+function tubesFaits(o){ return (o && Array.isArray(o.tubes)) ? o.tubes : []; }
+/* La livraison se coche profilé par profilé : le tube 38 peut partir au
+   magasin 2 avant les rails, chacun a sa case. */
+function livres(o){ return (o && o.livres && typeof o.livres === "object") ? o.livres : {}; }
+function livreDe(o, k){ return !!livres(o)[k]; }
+/* Les profilés d'un bon, avec leurs coupes regroupées */
+function profilsDe(o){
+  const list = coupesTube(o);
+  const par = {};
+  list.forEach(c => {
+    const k = c.fam + ":" + c.prof;
+    if (!par[k]) par[k] = {k:k, label:c.label, fam:c.fam, coupes:[]};
+    par[k].coupes.push(c);
+  });
+  return Object.keys(par).map(k => par[k]);
+}
 
 /* Mesures exploitables d'un bon, quantités dépliées, tissu résolu par fenêtre.
    Utilisé par le plan de coupe et par le coût de revient : une seule vérité. */
@@ -4411,6 +4601,7 @@ function renderPlan(){
     $("cutOrderSub").textContent = "Les dimensions sont reprises automatiquement";
     out.innerHTML = '<div class="empty">Sélectionnez un bon de commande pour générer son plan de coupe.</div>';
     $("cutFaitCard").hidden = true;
+    $("cutTubeCard").hidden = true;
     $("piecesCard").hidden = true;
     return;
   }
@@ -4422,17 +4613,29 @@ function renderPlan(){
 
   if (!dims.length){
     out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>';
+    $("cutTubeCard").hidden = true;
     $("piecesCard").hidden = true;
     return;
   }
   renderFcSiBesoin();
   /* La fiche de production suit le bon choisi, sous le plan et son bilan. */
-  $("piecesCard").hidden = false;
-  renderPieces();
+  $("piecesCard").hidden = tubeSeul();
+  if (!tubeSeul()) renderPieces();
 
   /* Suivi de fabrication, partagé avec les autres téléphones */
   $("cutFaitCard").hidden = false;
   renderFait(o, dims);
+
+  /* Ahmed ne voit que la découpe des tubes : ni le tissu, ni la fiche. */
+  const tSeul = tubeSeul();
+  $("cutTubeCard").hidden = false;
+  renderTube(o);
+  $("cutFaitCard").hidden = tSeul;
+  $("cutModeSeg").hidden = tSeul;
+  if (tSeul){
+    cutMode = "tube";
+    $("piecesCard").hidden = true;
+  }
 
   if (!cutMode){
     out.innerHTML = '<div class="empty">Choisissez ci dessus ce que vous voulez couper : les tubes ou le tissu.</div>';
@@ -5153,6 +5356,21 @@ function fabriqueesLe(iso){
   const dernier = {};
   (ORDERS || []).forEach(o => {
     (o.log || []).forEach(e => {
+      if ((e.kind || "fab") !== "fab") return;
+      if (jourISO(e.at) !== iso) return;
+      const cle = o.id + ":" + e.k;
+      if (!dernier[cle] || e.at >= dernier[cle].at) dernier[cle] = e;
+    });
+  });
+  return Object.keys(dernier).filter(k => dernier[k].on).length;
+}
+
+/* Combien de coupes de profilé ont été faites ce jour là, même logique. */
+function coupesLe(iso){
+  const dernier = {};
+  (ORDERS || []).forEach(o => {
+    (o.log || []).forEach(e => {
+      if (e.kind !== "tube") return;
       if (jourISO(e.at) !== iso) return;
       const cle = o.id + ":" + e.k;
       if (!dernier[cle] || e.at >= dernier[cle].at) dernier[cle] = e;
@@ -5173,6 +5391,21 @@ function logDuJour(iso){
   return out.sort((a,b) => b.at - a.at);
 }
 
+/* Profilés réellement livrés ce jour là : c'est le dernier geste qui compte,
+   comme pour les fenêtres et les coupes. */
+function livresLe(iso){
+  const dernier = {};
+  (ORDERS || []).forEach(o => {
+    (o.log || []).forEach(e => {
+      if (e.kind !== "livr") return;
+      if (jourISO(e.at) !== iso) return;
+      const cle = o.id + ":" + e.k;
+      if (!dernier[cle] || e.at >= dernier[cle].at) dernier[cle] = e;
+    });
+  });
+  return Object.keys(dernier).filter(k => dernier[k].on).length;
+}
+
 function renderLog(){
   renderTodo();
   $("logDate").value = logJour;
@@ -5180,9 +5413,13 @@ function renderLog(){
 
   const lignes = logDuJour(logJour);
   const posees = fabriqueesLe(logJour);
+  const nTubes = coupesLe(logJour);
+  const nLivr  = livresLe(logJour);
   $("logSumLabel").textContent = logJour === jourISO(new Date())
     ? "Fenêtres fabriquées aujourd'hui" : "Fenêtres fabriquées ce jour là";
   $("logSum").textContent = posees;
+  $("logTubes").textContent = nTubes;
+  $("logLivr").textContent  = nLivr;
 
   const box = $("logList");
   if (!lignes.length){
@@ -5194,21 +5431,39 @@ function renderLog(){
 
   box.innerHTML = lignes.map(e => {
     const d = new Date(e.at);
+    const kind = e.kind || "fab";
     const reste = Math.max(0, (e.tot || 0) - (e.fait || 0));
     const segs = [];
     for (let i = 0; i < (e.tot || 0); i++) segs.push('<span class="lgseg' + (i < (e.fait||0) ? " on" : "") + '"></span>');
-    return '<div class="lgrow' + (e.on ? "" : " off") + '">' +
+
+    const badge = kind === "tube" ? (e.on ? "coupée" : "décochée")
+                : kind === "livr" ? (e.on ? "livré magasin 2" : "livraison annulée")
+                : (e.on ? "fabriquée" : "décochée");
+    const titre = kind === "livr" ? (e.prof || "Livraison au magasin 2") : (e.dim || "—");
+    const detail = kind === "tube"
+      ? (e.fait || 0) + " sur " + (e.tot || 0) + " coupe" + ((e.fait||0) > 1 ? "s" : "") +
+        (reste ? ",  reste <b>" + reste + "</b> à couper" : ",  <b>toutes les coupes faites</b>")
+      : kind === "livr"
+      ? "Porté au magasin 2  ·  " + (e.fait || 0) + " profilé" + ((e.fait||0) > 1 ? "s" : "") +
+        " sur " + (e.tot || 0) + " livré" + ((e.fait||0) > 1 ? "s" : "") +
+        (e.dim ? "  ·  " + esc(e.dim) : "")
+      : (e.fait || 0) + " sur " + (e.tot || 0) + " fabriquée" + ((e.fait||0) > 1 ? "s" : "") +
+        (reste ? ",  reste <b>" + reste + "</b> à fabriquer" : ",  <b>bon terminé</b>");
+
+    return '<div class="lgrow ' + kind + (e.on ? "" : " off") + '">' +
       '<div class="lgtop">' +
         '<span class="lgh">' + pad(d.getHours()) + ":" + pad(d.getMinutes()) + '</span>' +
-        '<span class="lgd">' + esc(e.dim || "—") + '</span>' +
-        '<span class="lgb">' + (e.on ? "fabriquée" : "décochée") + '</span>' +
+        '<span class="lgd">' + esc(titre) + '</span>' +
+        '<span class="lgb">' + badge + '</span>' +
       '</div>' +
       '<span class="lgsub"><b>' + esc(e.nom) + '</b>' + (e.num ? "  ·  " + esc(e.num) : "") +
-        (e.t ? "  ·  " + (e.t === "JN" ? "jour et nuit" : "enrouleur") : "") +
-        (e.ref ? "  ·  " + esc(e.ref) : "") +
+        (kind === "tube" && e.prof ? "  ·  " + esc(e.prof) : "") +
+        (kind === "livr" && e.t ? "  ·  " + (e.t === "JN" ? "jour et nuit" : "enrouleur") : "") +
+        (kind === "tube" && e.fen ? "  ·  fenêtre " + esc(e.fen) : "") +
+        (kind === "fab" && e.t ? "  ·  " + (e.t === "JN" ? "jour et nuit" : "enrouleur") : "") +
+        (kind === "fab" && e.ref ? "  ·  " + esc(e.ref) : "") +
         (e.by ? "  ·  " + esc(nomDe(e.by)) : "") +
-        '<br>' + (e.fait || 0) + " sur " + (e.tot || 0) + " fabriquée" + ((e.fait||0) > 1 ? "s" : "") +
-        (reste ? ",  reste <b>" + reste + "</b> à fabriquer" : ",  <b>bon terminé</b>") +
+        '<br>' + detail +
       '</span>' +
       '<div class="lgbar">' + segs.join("") + '</div>' +
     '</div>';
