@@ -811,12 +811,16 @@ select{appearance:none; -webkit-appearance:none}
       <div class="field" style="margin-top:9px">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4L11 3.8V3H4v8h.8l9.6 9.6a2 2 0 002.8 0l3.4-3.4a2 2 0 000-2.8z"/><circle cx="7.5" cy="6.5" r="1.2" fill="currentColor"/></svg>
         <input id="prix" inputmode="decimal" placeholder="Prix au m²">
-        <span class="unit">MAD/m²</span>
+        <span class="unit">MAD/m² HT</span>
       </div>
       <div class="field" id="prixJNField" style="margin-top:9px" hidden>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4L11 3.8V3H4v8h.8l9.6 9.6a2 2 0 002.8 0l3.4-3.4a2 2 0 000-2.8z"/><circle cx="7.5" cy="6.5" r="1.2" fill="currentColor"/></svg>
         <input id="prixJN" inputmode="decimal" placeholder="Prix au m² jour et nuit">
-        <span class="unit">MAD/m²</span>
+        <span class="unit">MAD/m² HT</span>
+      </div>
+      <div class="seg" id="segFact" style="margin-top:9px">
+        <button type="button" data-fact="oui" aria-pressed="true">Facturée<span class="sub">TVA 20 %</span></button>
+        <button type="button" data-fact="non" aria-pressed="false">Sans facture<span class="sub">prix HT</span></button>
       </div>
     </section>
 
@@ -913,7 +917,7 @@ select{appearance:none; -webkit-appearance:none}
         <span>TVA 20 %</span><b id="sTVA">0,00 MAD</b>
       </div>
       <div class="price-bar tot" id="totBar" hidden>
-        <span>Total TTC</span><b id="sTot">0,00 MAD</b>
+        <span id="totLab">Total TTC</span><b id="sTot">0,00 MAD</b>
       </div>
       <div id="alerts"></div>
     </section>
@@ -1481,6 +1485,7 @@ function blank(){
     refs:[],
     prix: LS.get("mst_prix", ""),
     prixJN: LS.get("mst_prixjn", ""),
+    fact: LS.get("mst_fact", "oui"),
     posePrix: LS.get("mst_poseprix", ""),
     poseMode: LS.get("mst_posemode", "forfait"),
     pose:"Pose",
@@ -1838,6 +1843,9 @@ function renderDecoupe(){
 const TVA = 0.20;
 function ttc(ht){ return ht * (1 + TVA); }
 function tvaDe(ht){ return ht * TVA; }
+/* Un bon facturé porte la TVA ; un bon sans facture reste au prix HT. */
+function facture(o){ return !o || o.fact !== "non"; }
+function prixClient(o, ht){ return facture(o) ? ttc(ht) : ht; }
 
 function storesTotal(t){
   const tt = t || totals();
@@ -1863,16 +1871,18 @@ function renderRecap(){
       (S.poseMode === "fenetre" && t.nb ? "  ·  " + t.nb + " × " + fr(u) : "");
     $("sPose").textContent = fr(pose) + " MAD";
   }
-  /* HT, puis la TVA, puis ce que le client paie */
+  /* Bon facturé : HT, TVA, TTC. Bon sans facture : un seul total, en HT. */
   const ht = stores + pose;
   const montre = ht > 0;
-  $("htBar").hidden  = !montre;
-  $("tvaBar").hidden = !montre;
+  const avecTva = facture(S);
+  $("htBar").hidden  = !(montre && avecTva);
+  $("tvaBar").hidden = !(montre && avecTva);
   $("totBar").hidden = !montre;
   if (montre){
     $("sHT").textContent  = fr(ht) + " MAD";
     $("sTVA").textContent = fr(tvaDe(ht)) + " MAD";
-    $("sTot").textContent = fr(ttc(ht)) + " MAD";
+    $("totLab").textContent = avecTva ? "Total TTC" : "Total HT";
+    $("sTot").textContent = fr(prixClient(S, ht)) + " MAD";
   }
 
   const box = $("alerts");
@@ -2067,6 +2077,15 @@ function poseTotal(){
   return S.poseMode === "fenetre" ? u * totals().nb : u;
 }
 
+$("segFact").addEventListener("click", e => {
+  const b = e.target.closest("button[data-fact]");
+  if (!b) return;
+  S.fact = b.dataset.fact;
+  LS.set("mst_fact", S.fact);
+  [...$("segFact").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderRecap();
+});
+
 $("segPose").addEventListener("click", e => {
   const b = e.target.closest("button[data-pose]");
   if (!b) return;
@@ -2257,6 +2276,7 @@ function migrate(o){
   if (!o.refs) o.refs = o.ref ? [o.ref] : [];
   o.dims = (o.dims || []).map(d => ({l:d.l||"", h:d.h||"", ref:d.ref||"", note:d.note||"", type:d.type||"", q:d.q||""}));
   if (!o.dims.length) o.dims = [{l:"",h:"",ref:"",note:"",type:"ENR",q:""}];
+  if (o.fact !== "non") o.fact = "oui";
   if (o.pose !== "Livraison") o.pose = "Pose";
   if (o.prix === undefined) o.prix = "";
   if (o.prixJN === undefined) o.prixJN = "";
@@ -2279,6 +2299,7 @@ function newOrder(){
   $("posePrix").value = S.posePrix || ""; renderPoseMode(); renderPrixFields();
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === "ENR")));
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === "Pose")));
+  [...$("segFact").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.fact === (S.fact || "oui"))));
   [...$("segMulti").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.multi === "0")));
   renderAll();
   window.scrollTo({top:0, behavior:"instant"});
@@ -2450,30 +2471,33 @@ function ticket(){
     x.textAlign = "left";
     y += 50;
   }
-  /* HT, TVA, puis le total que paie le client */
+  /* HT, TVA, puis le total que paie le client. Sans facture : le total seul. */
   if (stores > 0 || posT > 0){
     const ht = stores + posT;
+    const avecTva = facture(S);
     x.fillStyle = T.line; x.fillRect(P + 8, y, W - 2*P - 16, 2);
     y += 26;
-    x.fillStyle = T.muted; x.font = "400 24px " + B;
-    x.fillText("Total HT", P + 8, y + 20);
-    x.textAlign = "right";
-    x.fillStyle = T.ink; x.font = "600 28px " + M;
-    x.fillText(fr(ht) + " MAD", W - P - 8, y + 20);
-    x.textAlign = "left";
-    y += 38;
-    x.fillStyle = T.muted; x.font = "400 24px " + B;
-    x.fillText("TVA 20 %", P + 8, y + 20);
-    x.textAlign = "right";
-    x.fillStyle = T.ink; x.font = "600 28px " + M;
-    x.fillText(fr(tvaDe(ht)) + " MAD", W - P - 8, y + 20);
-    x.textAlign = "left";
-    y += 44;
+    if (avecTva){
+      x.fillStyle = T.muted; x.font = "400 24px " + B;
+      x.fillText("Total HT", P + 8, y + 20);
+      x.textAlign = "right";
+      x.fillStyle = T.ink; x.font = "600 28px " + M;
+      x.fillText(fr(ht) + " MAD", W - P - 8, y + 20);
+      x.textAlign = "left";
+      y += 38;
+      x.fillStyle = T.muted; x.font = "400 24px " + B;
+      x.fillText("TVA 20 %", P + 8, y + 20);
+      x.textAlign = "right";
+      x.fillStyle = T.ink; x.font = "600 28px " + M;
+      x.fillText(fr(tvaDe(ht)) + " MAD", W - P - 8, y + 20);
+      x.textAlign = "left";
+      y += 44;
+    }
     x.fillStyle = T.muted; x.font = "600 19px " + A;
-    x.fillText("TOTAL TTC", P + 8, y + 12);
+    x.fillText(avecTva ? "TOTAL TTC" : "TOTAL HT", P + 8, y + 12);
     x.textAlign = "right";
     x.fillStyle = T.accent; x.font = "600 44px " + M;
-    x.fillText(fr(ttc(ht)) + " MAD", W - P - 8, y + 20);
+    x.fillText(fr(prixClient(S, ht)) + " MAD", W - P - 8, y + 20);
     x.textAlign = "left";
     y += 46;
   }
@@ -3434,8 +3458,10 @@ function renderHist(){
       '<button class="hmain" data-open="' + o.id + '">' +
         '<span class="hl1"><b><span class="etat-box etat-' + et + '">' + (o.nom || "Client sans nom") + '</span></b></span>' +
         ((t.prix || t.pose)
-          ? '<span class="httc">' + fr(ttc(t.prix + t.pose)) + ' MAD<em>TTC</em>' +
-            '<i>' + fr(t.prix + t.pose) + ' HT</i></span>'
+          ? '<span class="httc">' + fr(prixClient(o, t.prix + t.pose)) + ' MAD' +
+            '<em>' + (facture(o) ? "TTC" : "HT") + '</em>' +
+            (facture(o) ? '<i>' + fr(t.prix + t.pose) + ' HT</i>' : '<i>sans facture</i>') +
+            '</span>'
           : '') +
         '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
           '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + '</small>' +
@@ -3485,6 +3511,7 @@ function loadOrder(o){
   $("posePrix").value = S.posePrix || ""; renderPoseMode(); renderPrixFields();
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === S.type)));
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === S.pose)));
+  [...$("segFact").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.fact === (S.fact || "oui"))));
   [...$("segMulti").children].forEach(x => x.setAttribute("aria-pressed", String((x.dataset.multi === "1") === !!S.multi)));
   renderAll();
   nav("form");
@@ -3621,7 +3648,7 @@ function chutesPour(o, ref){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "6.2";
+const APP_VERSION = "6.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -5353,8 +5380,10 @@ function renderCout(){
       '<span class="cn">' + C.poseLab + ' facturée<em>reprise du bon, hors bénéfice et hors marge</em></span>' +
       '<span class="cv">' + fr(C.posePrix,2) + '</span></div>' +
     li("Total HT", "stores + " + C.poseLab.toLowerCase(), fr(C.vente + C.posePrix,2)) +
-    li("TVA 20 %", "", fr(tvaDe(C.vente + C.posePrix),2)) +
-    li("Total TTC facturé au client", "ce que le client paie", fr(ttc(C.vente + C.posePrix),2), "tot") +
+    (facture(o)
+      ? li("TVA 20 %", "", fr(tvaDe(C.vente + C.posePrix),2)) +
+        li("Total TTC facturé au client", "ce que le client paie", fr(ttc(C.vente + C.posePrix),2), "tot")
+      : li("Total facturé au client", "bon sans facture, pas de TVA", fr(C.vente + C.posePrix,2), "tot")) +
   '</div>';
 
   h += '<p class="hint">Bénéfice et marge se calculent sur le <b>hors taxe</b> : la TVA n\'est pas un revenu, elle est reversée à l\'État. Le tissu est compté sur les m² réellement déroulés par le plan de coupe, chutes du stock déduites, pas sur la surface de la fenêtre. Chaque profilé a sa ligne, sur sa propre longueur de coupe. La ligne « plan de coupe réel » donne, en regard, ce que ce bon a vraiment sorti du stock.</p>';
