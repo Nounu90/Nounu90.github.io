@@ -2138,6 +2138,10 @@ $("pcList").addEventListener("input", e => {
   pcSet(inp.dataset.fam, inp.dataset.k, v);
   inp.className = v === "" ? "" : "edited";
   pcCheck();
+  /* On enregistre et on partage sans attendre que l'agent quitte la case :
+     sinon une saisie non terminée ne partait jamais vers les autres. */
+  clearTimeout(window._pct);
+  window._pct = setTimeout(pcPush, 700);
 });
 $("pcList").addEventListener("change", () => pcPush());
 $("pcList").addEventListener("click", e => {
@@ -2952,11 +2956,8 @@ async function pullBons(){
       toast("Le bon " + S.num + " vient d'être supprimé par un autre téléphone");
       newOrder(); nav("home");
     }
-    renderHome();
-    if ($("histSheet").classList.contains("open")) renderHist();
-    if ($("cutSheet").classList.contains("open")) renderPlan();
-    if ($("logSheet").classList.contains("open")) renderLog();
-    if ($("paySheet").classList.contains("open")) renderPay();
+    /* Tout est à jour : on redessine, sauf si l'agent est en train de saisir. */
+    if (saisieEnCours()) autoDu = true; else renderTout();
     return true;
   } catch(e){ ONLINE = false; renderHome(); return false; }
 }
@@ -3091,7 +3092,7 @@ function renderHome(){
       : "Encaissements et impayés";
   }
   if (logAllowed()){
-    const nl = logDuJour(jourISO(new Date())).filter(e => e.on).length;
+    const nl = fabriqueesLe(jourISO(new Date()));
     $("tileLogSub").textContent = nl
       ? nl + " fenêtre" + (nl > 1 ? "s" : "") + " fabriquée" + (nl > 1 ? "s" : "") + " aujourd'hui"
       : "Aucune fenêtre fabriquée aujourd'hui";
@@ -3429,6 +3430,35 @@ $("btnSync").addEventListener("click", () => syncStock(false));
 /* ============ Bouton rouge « Actualiser » (toutes les pages) ============ */
 /* Une seule fonction pour tout le monde : on relit la feuille Google,
    on resynchronise les bons, puis on redessine l'écran ouvert. */
+/* L'agent est-il en train de saisir ? On ne redessine jamais sous ses doigts. */
+let dernierGeste = 0;
+["pointerdown","keydown"].forEach(ev =>
+  document.addEventListener(ev, () => { dernierGeste = Date.now(); }, true));
+
+function saisieEnCours(){
+  const a = document.activeElement;
+  if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return true;
+  if (Date.now() - dernierGeste < 4000) return true;      /* il vient de toucher l'écran */
+  if ($("confirm").classList.contains("open")) return true;
+  return false;
+}
+
+/* Redessine TOUS les écrans, pas seulement celui qui est ouvert :
+   l'agent retrouve chaque page à jour en y arrivant. Le formulaire de saisie
+   est volontairement laissé de côté, c'est le travail en cours de l'agent. */
+function renderTout(){
+  const essai = f => { try { f(); } catch(e){} };
+  essai(renderHome);
+  essai(renderHist);
+  essai(renderStock);
+  essai(renderArt);
+  essai(renderCut);
+  essai(renderCout);
+  essai(renderNom);
+  essai(renderLog);
+  essai(renderPay);
+}
+
 function ecranOuvert(){
   const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","paySheet","refSheet","cutPickSheet","nomPickSheet","shotSheet"];
   for (let i = 0; i < ids.length; i++){
@@ -3452,19 +3482,9 @@ async function rafraichirTout(btn){
   try { stockOk = await syncStock(true); } catch(e){}
   try { await syncAll(); } catch(e){}
 
-  try { renderHome(); } catch(e){}
-  const ou = ecranOuvert();
-  try {
-    if (ou === "stockSheet") renderStock();
-    else if (ou === "artSheet") renderArt();
-    else if (ou === "histSheet") renderHist();
-    else if (ou === "cutSheet") renderCut();
-    else if (ou === "nomSheet"){ majPrix = nomPrixDepuisFeuille(); renderNom(); }
-    else if (ou === "coutSheet") renderCout();
-    else if (ou === "logSheet") renderLog();
-    else if (ou === "paySheet") renderPay();
-    else if (ou === "refSheet") renderRefs();
-  } catch(e){}
+  if (ecranOuvert() === "nomSheet"){ try { majPrix = nomPrixDepuisFeuille(); } catch(e){} }
+  renderTout();
+  try { renderRefs(); } catch(e){}
 
   boutons.forEach(b => { b.removeAttribute("data-busy"); const t = b.querySelector("span"); if (t) t.textContent = "Actualiser"; });
   rafraichitEnCours = false;
@@ -3797,7 +3817,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "6.5";
+const APP_VERSION = "6.6";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -5115,6 +5135,22 @@ function renderTodo(){
     ".  Les bons livrés ne comptent plus.";
 }
 
+/* Combien de fenêtres sont fabriquées ce jour là.
+   On ne compte pas les appuis : une fenêtre cochée puis décochée ne compte plus,
+   et une fenêtre cochée deux fois ne compte qu'une. C'est le dernier geste de
+   la journée sur chaque fenêtre qui décide. */
+function fabriqueesLe(iso){
+  const dernier = {};
+  (ORDERS || []).forEach(o => {
+    (o.log || []).forEach(e => {
+      if (jourISO(e.at) !== iso) return;
+      const cle = o.id + ":" + e.k;
+      if (!dernier[cle] || e.at >= dernier[cle].at) dernier[cle] = e;
+    });
+  });
+  return Object.keys(dernier).filter(k => dernier[k].on).length;
+}
+
 /* Toutes les lignes de journal d'une journée, du plus récent au plus ancien */
 function logDuJour(iso){
   const out = [];
@@ -5133,7 +5169,7 @@ function renderLog(){
   $("logToday").setAttribute("aria-pressed", String(logJour === jourISO(new Date())));
 
   const lignes = logDuJour(logJour);
-  const posees = lignes.filter(e => e.on).length;
+  const posees = fabriqueesLe(logJour);
   $("logSumLabel").textContent = logJour === jourISO(new Date())
     ? "Fenêtres fabriquées aujourd'hui" : "Fenêtres fabriquées ce jour là";
   $("logSum").textContent = posees;
@@ -5817,6 +5853,44 @@ $("tileCout").addEventListener("click", () => {
   pullBons().then(() => renderCout());
   pullNom().then(ok => { if (ok) renderCout(); });
 });
+
+/* ============ Rafraîchissement automatique ============ */
+/* Les agents oublient d'appuyer sur Actualiser. L'application va donc chercher
+   les nouveautés toute seule, sans jamais couper une saisie : si l'agent écrit,
+   les données sont quand même récupérées et le redessin attend le tour suivant. */
+const AUTO_BONS   = 60000;    /* les bons : une minute */
+const AUTO_STOCK  = 300000;   /* la feuille Google : cinq minutes */
+let autoEnRoute = false;
+let autoDu = false;           /* un redessin est dû, reporté à cause d'une saisie */
+let dernierStock = 0;
+
+async function autoSync(){
+  if (autoEnRoute) return;
+  if (document.hidden) return;                 /* application en arrière plan */
+  if (!USER || $("login").classList.contains("open")) return;
+  autoEnRoute = true;
+  try {
+    await syncAll();                            /* bons, envois en attente, suppressions */
+    if (Date.now() - dernierStock > AUTO_STOCK){
+      dernierStock = Date.now();
+      await syncStock(true);                    /* stock et prix, en silence */
+    }
+    autoDu = true;
+  } catch(e){}
+  autoEnRoute = false;
+  autoRedessine();
+}
+
+/* Le redessin n'a lieu que quand l'agent a les mains libres. */
+function autoRedessine(){
+  if (!autoDu) return;
+  if (saisieEnCours()) return;                  /* on réessaiera dans une minute */
+  autoDu = false;
+  renderTout();
+}
+
+setInterval(autoSync, AUTO_BONS);
+setInterval(autoRedessine, 5000);               /* dès que l'agent lâche l'écran */
 
 /* ============ Bouton Retour du téléphone ============ */
 /* Un cran en arrière au lieu de quitter l'application. */
