@@ -375,6 +375,55 @@ select{appearance:none; -webkit-appearance:none}
 }
 .sheet-top h2{font-family:"Archivo",sans-serif; font-size:17px; font-weight:600; margin:0; flex:1}
 .sheet-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px; max-width:520px; margin:0 auto; width:100%}
+/* --- paiements --- */
+.pyrow{
+  background:var(--card); border:1px solid var(--line); border-left:3px solid var(--warn);
+  border-radius:12px; margin-bottom:9px; overflow:hidden;
+}
+.pyrow.ok{border-left-color:var(--ok)}
+.pyhead{width:100%; display:flex; align-items:center; gap:10px; padding:12px 13px; text-align:left; background:none}
+.pyl{flex:1; min-width:0}
+.pyl b{display:block; font-family:"Archivo",sans-serif; font-size:14.5px; font-weight:600;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.pysub{display:block; font-size:12px; color:var(--muted); margin-top:3px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.pyr{flex:none; text-align:right}
+.pyr b{display:block; font-family:"IBM Plex Mono",monospace; font-size:14.5px; font-weight:600}
+.pyst{display:block; font-family:"IBM Plex Mono",monospace; font-size:11px; margin-top:3px; color:var(--warn)}
+.pyrow.ok .pyst{color:var(--ok)}
+.pybody{padding:0 13px 13px; border-top:1px solid var(--line)}
+.pyline{display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid var(--line)}
+.pyd{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); flex:none}
+.pym{flex:1; min-width:0; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.pyv{font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:600; flex:none}
+.pydel{flex:none; width:26px; height:26px; border-radius:7px; border:1px solid var(--line);
+  background:var(--card2); color:var(--muted); display:grid; place-items:center; cursor:pointer}
+.pydel:active{background:var(--accent-soft); color:var(--accent); border-color:var(--accent)}
+.pyadd{display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:11px}
+.pyadd input, .pyadd select{
+  border:1px solid var(--line); border-radius:9px; padding:9px 8px; background:var(--card2);
+  color:var(--ink); font-size:13px; font-family:"IBM Plex Mono",monospace; min-width:0;
+}
+.pyadd select{grid-column:1 / -1; font-family:"Archivo",sans-serif}
+.pyadd input:focus, .pyadd select:focus{outline:none; border-color:var(--accent); background:var(--card)}
+.pyok{
+  grid-column:1 / -1; padding:11px; border-radius:10px; border:0; background:var(--accent);
+  color:var(--accent-ink); font-family:"Archivo",sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;
+}
+.pytot{
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px; margin-bottom:13px;
+  background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 10px;
+}
+.pytot div{text-align:center}
+.pytot b{display:block; font-family:"IBM Plex Mono",monospace; font-size:16px; font-weight:600}
+.pytot span{display:block; font-size:10px; color:var(--muted); letter-spacing:.06em; margin-top:3px}
+.pytot .ok b{color:var(--ok)}
+.pytot .ko b{color:var(--warn)}
+.pyper{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:13px}
+.pyper input{
+  border:1px solid var(--line); border-radius:10px; padding:10px; background:var(--card);
+  color:var(--ink); font-family:"IBM Plex Mono",monospace; font-size:13px;
+}
 /* --- journal de fabrication --- */
 .lgday{
   display:flex; align-items:center; gap:10px; margin:16px 0 10px;
@@ -990,6 +1039,11 @@ select{appearance:none; -webkit-appearance:none}
         <span class="tt"><b>Stock des articles</b><small id="tileArtSub">Mécanismes, tubes, accessoires</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
+      <button class="tile" id="tilePay" type="button">
+        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg></span>
+        <span class="tt"><b>Paiements</b><small id="tilePaySub">Encaissements et impayés</small></span>
+        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
       <button class="tile" id="tileLog" type="button">
         <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h9M9 12h9M9 19h9"/><path d="M4.5 5l1 1 2-2M4.5 12l1 1 2-2M4.5 19l1 1 2-2"/></svg></span>
         <span class="tt"><b>Logs</b><small id="tileLogSub">Fenêtres fabriquées, jour par jour</small></span>
@@ -1240,6 +1294,37 @@ select{appearance:none; -webkit-appearance:none}
     <div class="bottom-in">
       <button class="send" data-close="refSheet" type="button" id="refDone">Terminé</button>
     </div>
+  </div>
+</div>
+
+<!-- PAIEMENTS -->
+<div class="sheet" id="paySheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="paySheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Paiements</h2>
+  </div>
+  <div class="sheet-body">
+    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="pytot">
+      <div><b id="payDu">0</b><span>DÛ MAD</span></div>
+      <div class="ok"><b id="payPaye">0</b><span>ENCAISSÉ</span></div>
+      <div class="ko"><b id="payReste">0</b><span>RESTE</span></div>
+    </div>
+    <div class="filters" id="payFiltres">
+      <button type="button" data-f="semaine" aria-pressed="false">Cette semaine</button>
+      <button type="button" data-f="mois" aria-pressed="true">Ce mois</button>
+      <button type="button" data-f="trimestre" aria-pressed="false">Ce trimestre</button>
+      <button type="button" data-f="annee" aria-pressed="false">Cette année</button>
+      <button type="button" data-f="periode" aria-pressed="false">Période</button>
+      <button type="button" data-f="cours" aria-pressed="false">En cours</button>
+      <button type="button" data-f="tous" aria-pressed="false">Tous</button>
+    </div>
+    <div class="pyper" id="payPeriode" hidden>
+      <input id="payD1" type="date" aria-label="Du">
+      <input id="payD2" type="date" aria-label="Au">
+    </div>
+    <div id="payList"></div>
+    <p class="hint" id="payHint"></p>
   </div>
 </div>
 
@@ -2268,7 +2353,7 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
   if (id === "cutPickSheet" || id === "nomPickSheet"){ $(id).classList.remove("open"); return; }
   if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
       id === "cutSheet"  || id === "nomSheet"   || id === "coutSheet" ||
-      id === "logSheet") nav("home");
+      id === "logSheet" || id === "paySheet") nav("home");
   else closeSheet(id);
 }));
 
@@ -2848,6 +2933,7 @@ async function pullBons(){
     if ($("histSheet").classList.contains("open")) renderHist();
     if ($("cutSheet").classList.contains("open")) renderPlan();
     if ($("logSheet").classList.contains("open")) renderLog();
+    if ($("paySheet").classList.contains("open")) renderPay();
     return true;
   } catch(e){ ONLINE = false; renderHome(); return false; }
 }
@@ -2855,6 +2941,7 @@ async function pullBons(){
 async function syncAll(){
   flushSheetDel();
   flushSheetSit();
+  flushPay();
   if (!SB || !USER) return;
   await flushTombs();
   await flushPending();
@@ -2942,7 +3029,7 @@ async function bootAuth(){
 function nav(where){
   armBack();
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -2970,6 +3057,16 @@ function renderHome(){
   renderUserLine();
   $("tileCut").hidden = !cutAllowed();
   $("tileLog").hidden = !logAllowed();
+  $("tilePay").hidden = !payAllowed();
+  if (payAllowed()){
+    const bp = bonsPayables();
+    const nc = bp.filter(o => !paySolde(o)).length;
+    const rst = bp.reduce((s,o) => s + soldeDe(o), 0);
+    $("tilePaySub").textContent = bp.length
+      ? (nc ? nc + " bon" + (nc > 1 ? "s" : "") + " non soldé" + (nc > 1 ? "s" : "") + "  ·  " + fr(rst,0) + " MAD à encaisser"
+            : "Tout est encaissé")
+      : "Encaissements et impayés";
+  }
   if (logAllowed()){
     const nl = logDuJour(jourISO(new Date())).filter(e => e.on).length;
     $("tileLogSub").textContent = nl
@@ -3310,7 +3407,7 @@ $("btnSync").addEventListener("click", () => syncStock(false));
 /* Une seule fonction pour tout le monde : on relit la feuille Google,
    on resynchronise les bons, puis on redessine l'écran ouvert. */
 function ecranOuvert(){
-  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","refSheet","cutPickSheet","nomPickSheet","shotSheet"];
+  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","paySheet","refSheet","cutPickSheet","nomPickSheet","shotSheet"];
   for (let i = 0; i < ids.length; i++){
     const el = $(ids[i]);
     if (el && el.classList.contains("open")) return ids[i];
@@ -3342,6 +3439,7 @@ async function rafraichirTout(btn){
     else if (ou === "nomSheet"){ majPrix = nomPrixDepuisFeuille(); renderNom(); }
     else if (ou === "coutSheet") renderCout();
     else if (ou === "logSheet") renderLog();
+    else if (ou === "paySheet") renderPay();
     else if (ou === "refSheet") renderRefs();
   } catch(e){}
 
@@ -3648,7 +3746,7 @@ function chutesPour(o, ref){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "6.3";
+const APP_VERSION = "6.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4626,6 +4724,244 @@ $("tileCut").addEventListener("click", () => {
 /* identifiant court et unique pour une ligne de nomenclature */
 function nomUid(){ return "n" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
+/* ============ Paiements ============ */
+/* Un bon entre dans les paiements dès qu'il quitte l'état Devis.
+   Les paiements vivent dans le bon lui même : ils suivent la synchronisation
+   des bons entre téléphones, et partent vers l'onglet Paiements de la feuille. */
+const PAY_USERS = ["noureddine", "imane"];
+function payAllowed(){
+  return !!USER && PAY_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
+}
+
+const PAY_MODES = ["Virement", "Chèque", "Espèce"];
+const PAY_TYPES = ["Acompte", "Total", "Reste"];
+
+function payUid(){ return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function paiements(o){ return (o && Array.isArray(o.paies)) ? o.paies : []; }
+
+/* Ce que le client doit : TTC si le bon est facturé, HT sinon. */
+function duDe(o){
+  const t = orderTotals(o);
+  return prixClient(o, t.prix + t.pose);
+}
+function payeDe(o){
+  return paiements(o).reduce((s,p) => s + (parseFloat(p.montant) || 0), 0);
+}
+function soldeDe(o){ return Math.max(0, duDe(o) - payeDe(o)); }
+function paySolde(o){ const d = duDe(o); return d > 0 && payeDe(o) >= d - 0.01; }
+
+/* Les bons concernés : tout sauf les devis, du plus récent au plus ancien */
+function bonsPayables(){
+  return (ORDERS || []).filter(o => etatDe(o) !== "devis")
+    .sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
+}
+
+/* --- filtres de date --- */
+let payFiltre = "mois";
+let payDu = "", payAu = "";
+let payOuvert = {};        /* bons dépliés */
+
+function bornesFiltre(){
+  const n = new Date(); n.setHours(0,0,0,0);
+  if (payFiltre === "semaine"){
+    const j = (n.getDay() + 6) % 7;               /* lundi = 0 */
+    const a = new Date(n); a.setDate(n.getDate() - j);
+    return {a:a, b:null};
+  }
+  if (payFiltre === "mois")      return {a:new Date(n.getFullYear(), n.getMonth(), 1), b:null};
+  if (payFiltre === "trimestre") return {a:new Date(n.getFullYear(), Math.floor(n.getMonth()/3)*3, 1), b:null};
+  if (payFiltre === "annee")     return {a:new Date(n.getFullYear(), 0, 1), b:null};
+  if (payFiltre === "periode"){
+    return {a: payDu ? new Date(payDu + "T00:00:00") : null,
+            b: payAu ? new Date(payAu + "T23:59:59") : null};
+  }
+  return {a:null, b:null};     /* "cours" et "tous" ne filtrent pas sur la date */
+}
+/* Un bon est retenu si l'une de ses dates entre dans la fenêtre :
+   la date du bon, ou la date d'un de ses paiements. */
+function dansFenetre(o){
+  if (payFiltre === "cours") return !paySolde(o);
+  const f = bornesFiltre();
+  if (!f.a && !f.b) return true;
+  const dates = [new Date(o.date || 0)].concat(
+    paiements(o).map(p => new Date(String(p.date || "") + "T12:00:00")));
+  return dates.some(d => {
+    if (isNaN(d.getTime())) return false;
+    if (f.a && d < f.a) return false;
+    if (f.b && d > f.b) return false;
+    return true;
+  });
+}
+
+function renderPay(){
+  const list = bonsPayables().filter(dansFenetre);
+  const du    = list.reduce((s,o) => s + duDe(o), 0);
+  const paye  = list.reduce((s,o) => s + payeDe(o), 0);
+  const reste = list.reduce((s,o) => s + soldeDe(o), 0);
+  const nCours = list.filter(o => !paySolde(o)).length;
+
+  $("payDu").textContent    = fr(du,0);
+  $("payPaye").textContent  = fr(paye,0);
+  $("payReste").textContent = fr(reste,0);
+
+  Array.prototype.forEach.call($("payFiltres").querySelectorAll("button"),
+    b => b.setAttribute("aria-pressed", String(b.dataset.f === payFiltre)));
+  $("payPeriode").hidden = payFiltre !== "periode";
+  $("payD1").value = payDu; $("payD2").value = payAu;
+
+  const box = $("payList");
+  if (!list.length){
+    box.innerHTML = '<div class="empty">Aucun bon sur cette période.<br>' +
+      'Un bon apparaît ici dès qu\'il passe en production, prêt ou livré.</div>';
+    $("payHint").textContent = "";
+    return;
+  }
+
+  box.innerHTML = list.map(o => {
+    const d = duDe(o), p = payeDe(o), r = soldeDe(o), ok = paySolde(o);
+    const ouvert = !!payOuvert[o.id];
+    const lignes = paiements(o).slice().sort((a,b) => String(a.date).localeCompare(String(b.date)));
+    return '<div class="pyrow' + (ok ? " ok" : "") + '">' +
+      '<button class="pyhead" type="button" data-py="' + o.id + '">' +
+        '<span class="pyl">' +
+          '<b>' + esc(o.nom || "Client sans nom") + '</b>' +
+          '<span class="pysub">' + esc(o.num || "") + '  ·  ' + typeLabel(o) +
+            (puFam("ENR", o) ? '  ·  ' + fr(puFam(o.type === "JN" ? "JN" : "ENR", o), 0) + ' MAD/m² HT' : '') +
+            '  ·  ' + etatLabel(etatDe(o)) + '</span>' +
+        '</span>' +
+        '<span class="pyr">' +
+          '<b>' + fr(d,2) + '</b>' +
+          '<span class="pyst">' + (ok ? "soldé" : "reste " + fr(r,2)) + '</span>' +
+        '</span>' +
+      '</button>' +
+      (ouvert
+        ? '<div class="pybody">' +
+            (lignes.length
+              ? lignes.map(x =>
+                  '<div class="pyline">' +
+                    '<span class="pyd">' + esc(dateFR(x.date)) + '</span>' +
+                    '<span class="pym">' + esc(x.mode || "") + '</span>' +
+                    '<span class="pyv">' + fr(parseFloat(x.montant) || 0, 2) + '</span>' +
+                    '<button class="pydel" type="button" data-pydel="' + o.id + ':' + x.id + '" aria-label="Retirer">' +
+                      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
+                    '</button>' +
+                  '</div>').join("")
+              : '<div class="hint" style="margin:0 0 8px">Aucun paiement enregistré.</div>') +
+            '<div class="pyadd">' +
+              '<input type="date" data-pynew="date" data-o="' + o.id + '" value="' + jourISO(new Date()) + '">' +
+              '<select data-pynew="mode" data-o="' + o.id + '">' +
+                PAY_MODES.map(m => PAY_TYPES.map(t =>
+                  '<option value="' + m + ' ' + t.toLowerCase() + '">' + m + ' ' + t.toLowerCase() + '</option>').join("")).join("") +
+              '</select>' +
+              '<input type="number" inputmode="decimal" step="0.01" data-pynew="montant" data-o="' + o.id + '" placeholder="Montant" value="' + (r > 0 ? Math.round(r*100)/100 : "") + '">' +
+              '<button class="pyok" type="button" data-pyadd="' + o.id + '">Ajouter</button>' +
+            '</div>' +
+          '</div>'
+        : '') +
+    '</div>';
+  }).join("");
+
+  $("payHint").textContent = list.length + " bon" + (list.length > 1 ? "s" : "") +
+    (nCours ? ",  " + nCours + " non soldé" + (nCours > 1 ? "s" : "") : ",  tous soldés") +
+    ".  Le total dû suit le bon : TTC s'il est facturé, HT sinon.";
+}
+
+function typeLabel(o){
+  return o.type === "MIX" ? "Enrouleur + Jour et nuit"
+       : o.type === "JN"  ? "Jour et nuit" : "Enrouleur";
+}
+function dateFR(iso){
+  const s = String(iso || "");
+  return s.length === 10 ? s.split("-").reverse().join("/") : s;
+}
+
+/* --- envoi vers l'onglet Paiements de la feuille --- */
+function payLignes(o){
+  const d = duDe(o), p = payeDe(o), r = soldeDe(o);
+  const etat = paySolde(o) ? "Soldé" : "En cours";
+  const pu = puFam(o.type === "JN" ? "JN" : "ENR", o);
+  return paiements(o).map(x => ({
+    id: x.id,
+    values: [dateFR(x.date), o.nom || "", o.num || "", typeLabel(o), pu || "",
+             x.mode || "", parseFloat(x.montant) || 0,
+             Math.round(d*100)/100, Math.round(p*100)/100, Math.round(r*100)/100, etat]
+  }));
+}
+let PAYDEL = LS.get("mst_paydel", {});     /* envois en attente de réseau */
+function payPush(o){
+  if (!o || !o.num) return Promise.resolve();
+  const url = hookUrl();
+  PAYDEL[o.num] = payLignes(o);
+  LS.set("mst_paydel", PAYDEL);
+  if (!url) return Promise.resolve();
+  return flushPay();
+}
+function flushPay(){
+  const url = hookUrl();
+  const nums = Object.keys(PAYDEL || {});
+  if (!url || !nums.length) return Promise.resolve();
+  return Promise.all(nums.map(num =>
+    fetch(url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+                body: JSON.stringify({action:"paiements", key:num, rows:PAYDEL[num]})})
+      .then(r => r.text())
+      .then(t => { const j = JSON.parse(t); if (j && j.ok) delete PAYDEL[num]; })
+      .catch(() => {})
+  )).then(() => { LS.set("mst_paydel", PAYDEL); });
+}
+
+/* --- interactions --- */
+$("payFiltres").addEventListener("click", e => {
+  const b = e.target.closest("button[data-f]");
+  if (!b) return;
+  payFiltre = b.dataset.f;
+  renderPay();
+});
+$("payD1").addEventListener("change", e => { payDu = e.target.value; renderPay(); });
+$("payD2").addEventListener("change", e => { payAu = e.target.value; renderPay(); });
+
+$("payList").addEventListener("click", e => {
+  const h = e.target.closest("button[data-py]");
+  if (h){ payOuvert[h.dataset.py] = !payOuvert[h.dataset.py]; renderPay(); return; }
+
+  const a = e.target.closest("button[data-pyadd]");
+  if (a){
+    const id = a.dataset.pyadd;
+    const o = ORDERS.find(x => x.id === id);
+    if (!o) return;
+    const g = k => $("payList").querySelector('[data-pynew="' + k + '"][data-o="' + id + '"]');
+    const montant = parseFloat(String(g("montant").value).replace(",", ".")) || 0;
+    if (montant <= 0){ toast("Saisissez le montant du paiement"); return; }
+    if (!Array.isArray(o.paies)) o.paies = [];
+    o.paies.push({id: payUid(), date: g("date").value || jourISO(new Date()),
+                  mode: g("mode").value, montant: montant,
+                  by: (USER && USER.login) || "", at: Date.now()});
+    persistOrders(); pushBon(o); payPush(o);
+    renderPay(); renderHome();
+    toast(paySolde(o) ? "Bon soldé" : "Paiement enregistré, reste " + fr(soldeDe(o),2));
+    return;
+  }
+
+  const d = e.target.closest("button[data-pydel]");
+  if (d){
+    const parts = d.dataset.pydel.split(":");
+    const o = ORDERS.find(x => x.id === parts[0]);
+    if (!o) return;
+    ask("Retirer ce paiement ?", "La ligne sera aussi retirée de l'onglet Paiements.", () => {
+      o.paies = paiements(o).filter(x => x.id !== parts[1]);
+      persistOrders(); pushBon(o); payPush(o);
+      renderPay(); renderHome();
+      toast("Paiement retiré");
+    });
+  }
+});
+
+$("tilePay").addEventListener("click", () => {
+  if (!payAllowed()) return;
+  renderPay();
+  nav("paySheet");
+  pullBons().then(() => renderPay());
+});
+
 /* ============ Logs : journal de fabrication ============ */
 /* Chaque coche dans « Fenêtres fabriquées » laisse une ligne, gardée dans le
    bon lui même : elle voyage donc vers les autres téléphones avec le bon. */
@@ -5416,7 +5752,8 @@ function backOneStep(){
       $("cutSheet").classList.contains("open") ||
       $("nomSheet").classList.contains("open") ||
       $("coutSheet").classList.contains("open") ||
-      $("logSheet").classList.contains("open")){ nav("home"); return true; }
+      $("logSheet").classList.contains("open") ||
+      $("paySheet").classList.contains("open")){ nav("home"); return true; }
   if (!$("home").classList.contains("open")){ nav("home"); return true; }   /* formulaire */
   return false;                                                  /* accueil : sortie de l'app */
 }
