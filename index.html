@@ -4257,7 +4257,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "7.6";
+const APP_VERSION = "7.7";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -5007,9 +5007,10 @@ function renderPlan(){
   $("cutFaitCard").hidden = false;
   renderFait(o, dims);
 
-  /* La liste des découpes de profilé n'a pas de sens pour qui ne coupe pas de tube */
-  $("cutTubeCard").hidden = fSeul;
-  if (!fSeul) renderTube(o);
+  /* Tout le monde suit l'avancement des découpes d'ahmed, en vert au fur et à
+     mesure. Seul le plan de coupe des barres est réservé à ceux qui coupent. */
+  $("cutTubeCard").hidden = false;
+  renderTube(o);
   $("cutFaitCard").hidden = tSeul;
   if (tSeul) $("piecesCard").hidden = true;
 
