@@ -505,6 +505,47 @@ select{appearance:none; -webkit-appearance:none}
   color:var(--ink); font-family:"IBM Plex Mono",monospace; font-size:13px;
 }
 /* --- journal de fabrication --- */
+/* --- journal du jour : le résumé, puis qui a fait quoi --- */
+.lgstat{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px}
+.lgstat > div{padding:12px 8px; border-radius:12px; background:var(--card2);
+  border:1px solid var(--line); text-align:center}
+.lgstat b{display:block; font-family:"IBM Plex Mono",monospace; font-size:22px;
+  font-weight:600; color:var(--ink); line-height:1.1}
+.lgstat small{display:block; font-family:"Archivo",sans-serif; font-size:9.5px;
+  font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted);
+  margin-top:5px; line-height:1.3}
+.lgstat .v b{color:var(--ok)}
+.lgstat .i b{color:var(--info)}
+.lgstat .a b{color:var(--accent)}
+.lgstat > div.nul b{color:var(--line-strong)}
+/* la carte d'un agent */
+.agcard{border:1px solid var(--line); border-radius:13px; background:var(--card);
+  margin-bottom:11px; overflow:hidden}
+.aghead{display:flex; align-items:center; gap:11px; padding:12px 14px;
+  background:var(--card2); border-bottom:1px solid var(--line)}
+.agini{width:34px; height:34px; flex:none; border-radius:50%; display:grid;
+  place-items:center; background:var(--accent); color:#fff;
+  font-family:"Archivo",sans-serif; font-weight:700; font-size:14px}
+.agnom{flex:1; min-width:0}
+.agnom b{display:block; font-family:"Archivo",sans-serif; font-size:14px; font-weight:600}
+.agnom small{display:block; font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.35}
+.agtot{flex:none; font-family:"IBM Plex Mono",monospace; font-size:15px;
+  font-weight:600; color:var(--accent)}
+.agline{display:grid; grid-template-columns:38px 9px 1fr auto; gap:9px;
+  align-items:baseline; padding:9px 14px; border-top:1px solid var(--line)}
+.agline:first-child{border-top:0}
+.agh{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted)}
+.agdot{width:7px; height:7px; border-radius:50%; background:var(--muted); align-self:center}
+.agdot.bon{background:var(--accent)}
+.agdot.fab{background:var(--ok)}
+.agdot.tube{background:var(--info)}
+.agdot.etat{background:var(--warn)}
+.agdot.paie{background:var(--ok)}
+.agt{min-width:0; font-size:12.5px; line-height:1.4}
+.agt b{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink)}
+.agt small{display:block; font-size:11px; color:var(--muted); margin-top:1px}
+.agv{font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:600;
+  color:var(--ok); white-space:nowrap}
 .lgday{
   display:flex; align-items:center; gap:10px; margin:16px 0 10px;
   font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.08em;
@@ -1471,20 +1512,25 @@ select{appearance:none; -webkit-appearance:none}
   </div>
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
-    <div class="card" id="lgTodo" style="margin-bottom:14px">
-      <div class="card-head"><div class="label">Reste à fabriquer</div><div class="badge" id="lgTodoBadge">0</div></div>
-      <div id="lgTodoList"></div>
-      <p class="hint" id="lgTodoHint"></p>
-    </div>
     <div class="lgdate">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
       <input id="logDate" type="date">
       <button id="logToday" type="button" aria-pressed="true">Aujourd'hui</button>
     </div>
-    <div class="sumline"><span id="logSumLabel">Fenêtres fabriquées</span><b id="logSum">0</b></div>
-    <div class="sumline"><span>Découpes livrées au magasin 2</span><b id="logTubes">0</b></div>
+    <p class="hint" id="logJourLab" style="margin:0 2px 11px; font-family:Archivo,sans-serif; font-weight:600; color:var(--ink)"></p>
+    <div class="lgstat" id="logStat"></div>
+    <div class="sumline"><span>Encaissé ce jour là</span><b id="logCash">0</b></div>
+    <div class="seg" id="logVue" style="margin-bottom:14px">
+      <button type="button" data-v="agent" aria-pressed="true">Par agent</button>
+      <button type="button" data-v="heure" aria-pressed="false">Chronologie</button>
+    </div>
     <div id="logList"></div>
     <p class="hint" id="logHint"></p>
+    <div class="card" id="lgTodo" style="margin-top:18px">
+      <div class="card-head"><div class="label">Reste à fabriquer</div><div class="badge" id="lgTodoBadge">0</div></div>
+      <div id="lgTodoList"></div>
+      <p class="hint" id="lgTodoHint"></p>
+    </div>
   </div>
 </div>
 
@@ -1732,9 +1778,13 @@ function blank(){
 function moisStamp(d){
   return pad(d.getMonth() + 1) + "-" + String(d.getFullYear()).slice(2);
 }
-/* Le dernier numéro du mois déjà pris, tous agents confondus. */
+/* Les bons se numérotent par année, sur trois chiffres : BC-2026-001.
+   Le compteur repart à 001 au 1er janvier. */
+function numPrefixe(d){ return "BC-" + (d || new Date()).getFullYear() + "-"; }
+function pad3(n){ return String(n).padStart(3, "0"); }
+/* Le dernier numéro de l'année déjà pris, tous agents confondus. */
 function lastNum(){
-  const pref = "BC-" + moisStamp(new Date()) + "-";
+  const pref = numPrefixe();
   let liste = [];
   try { liste = ORDERS || []; } catch(e){ liste = LS.get("mst_orders", []) || []; }
   let n = 0, best = "";
@@ -1754,7 +1804,7 @@ function numPris(num, id){
 }
 
 function nextNum(){
-  const pref = "BC-" + moisStamp(new Date()) + "-";
+  const pref = numPrefixe();
   /* Le rang se déduit des bons déjà enregistrés : ouvrir un formulaire sans
      l'enregistrer ne consomme donc aucun numéro. */
   let liste = [];
@@ -1766,7 +1816,7 @@ function nextNum(){
     const k = parseInt(v.slice(pref.length), 10);
     if (k > n) n = k;
   });
-  return pref + pad(n + 1);
+  return pref + pad3(n + 1);
 }
 function pad(n){ return String(n).padStart(2,"0"); }
 function fr(n, d){ return Number(n).toFixed(d === undefined ? 2 : d).replace(".", ","); }
@@ -2160,7 +2210,7 @@ function renderProgress(){
   const dern = lastNum();
   $("numHint").textContent = known
     ? "Bon déjà enregistré"
-    : (dern ? "Dernier bon du mois : " + dern : "Premier bon du mois");
+    : (dern ? "Dernier bon de l'année : " + dern : "Premier bon de l'année");
   $("formTitle").textContent = known ? "Modifier le bon" : "Nouveau bon de commande";
   $("btnDraft").textContent = S.status === "sent" ? "Enregistrer les modifications" : "Enregistrer brouillon";
 }
@@ -2300,6 +2350,7 @@ $("pcEtat").addEventListener("change", e => {
   b.etat = e.target.value;
   $("pcEtatWrap").className = "etatsel " + b.etat;
   if (S.id === b.id) S.etat = b.etat;
+  noteEtat(b);
   touche(b); persistOrders(); pushBon(b);
   sheetSituation(b.num, etatLabel(b.etat));
   renderHist();
@@ -2524,7 +2575,7 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
   if (id === "cutPickSheet" || id === "nomPickSheet"){ $(id).classList.remove("open"); return; }
   if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
       id === "cutSheet"  || id === "nomSheet"   || id === "coutSheet" ||
-      id === "logSheet" || id === "paySheet") nav("home");
+      id === "logSheet" || id === "paySheet" || id === "triSheet") nav("home");
   else closeSheet(id);
 }));
 
@@ -3043,6 +3094,60 @@ function flushSheetNum(){
   )).then(() => { LS.set("mst_sheetnum", SHEETNUM); });
 }
 
+/* --- le sens inverse : un numéro changé à la main dans la feuille --- */
+/* La colonne Z garde la clé du bon, sous la forme « numéro-ENR » ou « numéro-JN ».
+   La colonne C montre le numéro. Si les deux ne disent plus la même chose, c'est
+   que quelqu'un a réécrit la colonne C dans la feuille : on prend son mot, on
+   renomme le bon ici, et on demande au script de remettre la clé d'aplomb. */
+let dernierNums = 0;
+const NUM_DELAI = 300000;      /* pas plus d'une lecture toutes les 5 minutes */
+
+function gvizUrl(gid){
+  return "https://docs.google.com/spreadsheets/d/" + SHEET_ID +
+         "/gviz/tq?tqx=out:csv&gid=" + gid + "&mst=" + Date.now();
+}
+/* « BC-2026-001-ENR » redonne « BC-2026-001 » */
+function numDeCle(k){
+  const v = String(k || "");
+  const m = /^(.*)-(ENR|JN)$/.exec(v);
+  return m ? m[1] : "";
+}
+
+async function syncNums(force){
+  if (!force && Date.now() - dernierNums < NUM_DELAI) return false;
+  dernierNums = Date.now();
+  const gids = Object.keys(SHEET_GIDS).map(k => SHEET_GIDS[k]);
+  let change = 0;
+  for (const gid of gids){
+    let rows = null;
+    try {
+      const res = await fetch(gvizUrl(gid), {cache:"no-store"});
+      if (!res.ok) throw new Error("http " + res.status);
+      rows = parseCSV(await res.text());
+    } catch(e){ return false; }          /* pas de réseau : on réessaiera */
+    rows.forEach(r => {
+      const vu  = String(r[2] || "").trim();        /* colonne C : le numéro affiché */
+      const cle = numDeCle(r[25]);                  /* colonne Z : la clé */
+      if (!vu || !cle || vu === cle) return;
+      const o = (ORDERS || []).find(x => String(x.num || "") === cle);
+      if (!o) return;
+      if ((ORDERS || []).some(x => x.id !== o.id && String(x.num || "") === vu)) return;
+      o.num = vu;
+      touche(o);
+      pushBon(o);
+      sheetRenum(cle, vu).then(() => payPush(o));
+      change++;
+    });
+  }
+  if (change){
+    persistOrders();
+    toast(change > 1 ? change + " bons renommés depuis la feuille"
+                     : "Un bon a été renommé depuis la feuille");
+    renderTout();
+  }
+  return true;
+}
+
 /* --- suppression de la ligne dans le tableau de production --- */
 /* Le script Google retire la ligne entière : aucun trou entre deux lignes. */
 let SHEETDEL = LS.get("mst_sheetdel", []);
@@ -3156,6 +3261,7 @@ async function syncAll(){
   await flushTombs();
   await flushPending();
   await pullBons();
+  syncNums();                 /* renommages faits directement dans la feuille */
 }
 
 /* --- connexion --- */
@@ -3306,7 +3412,7 @@ function renderHome(){
   const dern = lastNum();
   const rang = dern ? dern.slice(dern.lastIndexOf("-") + 1) : "";
   $("tileNewSub").textContent = "Numéro " + S.num +
-    (dern ? "  ·  dernier n° " + rang : "  ·  premier du mois");
+    (dern ? "  ·  dernier n° " + rang : "  ·  premier de l'année");
   $("tileHistSub").textContent = all.length
     ? all.length + (all.length > 1 ? " bons enregistrés" : " bon enregistré") + (drafts ? "  ·  " + drafts + " brouillon" + (drafts > 1 ? "s" : "") : "")
     : "Aucun bon enregistré";
@@ -3774,10 +3880,9 @@ function echTime(o){
   const t = new Date(String(o.ech) + "T12:00:00").getTime();
   return isNaN(t) ? NaN : t;
 }
-/* Un bon du mois en cours : d'abord son numéro, sinon sa date */
+/* Un bon du mois en cours. Le numéro ne porte plus le mois, on lit la date. */
 function ceMois(o){
-  const now = new Date(), stamp = moisStamp(now);
-  if (o && o.num && String(o.num).indexOf("BC-" + stamp + "-") === 0) return true;
+  const now = new Date();
   const d = new Date(o && o.date || 0);
   return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
 }
@@ -3939,6 +4044,7 @@ $("histBody").addEventListener("change", e => {
   const o = ORDERS.find(x => x.id === sel.dataset.etat);
   if (!o) return;
   o.etat = sel.value;
+  noteEtat(o);
   touche(o); persistOrders();
   const box = sel.closest(".hrow");
   if (box){
@@ -4101,7 +4207,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "7.2";
+const APP_VERSION = "7.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4579,6 +4685,16 @@ function renderCut(){
   renderFc();
   renderMode();
   renderPlan();
+}
+
+/* Chaque changement d'état laisse une trace : c'est ainsi que le journal du
+   jour sait quelles commandes sont passées en livré, et par qui. */
+function noteEtat(o){
+  if (!o) return;
+  if (!Array.isArray(o.log)) o.log = [];
+  o.log.push({kind:"etat", at:Date.now(), by:(USER && USER.login) || "", k:"etat",
+              on:true, etat:o.etat, lab:etatLabel(o.etat)});
+  if (o.log.length > 400) o.log = o.log.slice(-400);
 }
 
 /* Les fenêtres déjà fabriquées, cochées par l'atelier. */
@@ -5725,76 +5841,188 @@ function livresLe(iso){
   return Object.keys(dernier).filter(k => dernier[k].on).length;
 }
 
+/* Tout ce qui s'est passé un jour donné, remis à plat et attribué à quelqu'un :
+   bons créés, fenêtres fabriquées, découpes livrées, commandes passées en livré,
+   paiements encaissés. Une seule liste, deux façons de la lire. */
+function evenementsDuJour(iso){
+  const out = [];
+  (ORDERS || []).forEach(o => {
+    /* le bon lui même, le jour où il a été créé */
+    if (o.status === "sent" && jourISO(o.date) === iso){
+      const t = orderTotals(o);
+      out.push({at:new Date(o.date).getTime(), by:o.author || "", type:"bon",
+                titre:o.num || "Bon sans numéro",
+                sous:(o.nom || "Client sans nom") + "  ·  " + t.nb + " store" + (t.nb > 1 ? "s" : ""),
+                val:(t.prix || t.pose) ? fr(prixClient(o, t.prix + t.pose), 0) + " MAD" : ""});
+    }
+    /* le journal : c'est le dernier geste de la journée qui compte */
+    const dernier = {};
+    (o.log || []).forEach(e => {
+      if (jourISO(e.at) !== iso) return;
+      const kind = e.kind || "fab";
+      const cle = kind + ":" + e.k;
+      if (!dernier[cle] || e.at >= dernier[cle].at) dernier[cle] = e;
+    });
+    Object.keys(dernier).forEach(k => {
+      const e = dernier[k];
+      const kind = e.kind || "fab";
+      if (kind === "etat"){
+        out.push({at:e.at, by:e.by || "", type:"etat",
+                  titre:e.lab || etatLabel(e.etat), etat:e.etat,
+                  sous:(o.nom || "Client sans nom") + "  ·  " + (o.num || ""), val:""});
+        return;
+      }
+      if (!e.on) return;
+      if (kind === "fab"){
+        out.push({at:e.at, by:e.by || "", type:"fab", titre:e.dim || "",
+                  sous:(o.nom || "") + "  ·  " + (o.num || "") +
+                       (e.ref ? "  ·  " + e.ref : ""), val:""});
+      } else if (kind === "tube" || kind === "livr"){
+        out.push({at:e.at, by:e.by || "", type:"tube", titre:e.dim || "",
+                  sous:(e.prof ? e.prof + "  ·  " : "") + (o.nom || "") + "  ·  " + (o.num || ""),
+                  val:""});
+      }
+    });
+    /* les paiements, à leur date de paiement */
+    paiements(o).forEach(p => {
+      if (String(p.date || "") !== iso) return;
+      const m = parseFloat(p.montant) || 0;
+      out.push({at:p.at || new Date(iso + "T12:00:00").getTime(), by:p.by || "", type:"paie",
+                titre:p.mode || "Paiement",
+                sous:(o.nom || "Client sans nom") + "  ·  " + (o.num || ""),
+                val:fr(m, 2) + " MAD", montant:m});
+    });
+  });
+  return out.sort((a,b) => b.at - a.at);
+}
+
+let logVue = LS.get("mst_logvue", "agent");
+
 function renderLog(){
   renderTodo();
   $("logDate").value = logJour;
-  $("logToday").setAttribute("aria-pressed", String(logJour === jourISO(new Date())));
+  const auj = logJour === jourISO(new Date());
+  $("logToday").setAttribute("aria-pressed", String(auj));
 
-  const lignes = logDuJour(logJour);
-  const posees = fabriqueesLe(logJour);
-  const nTubes = coupesLe(logJour);
-  $("logSumLabel").textContent = logJour === jourISO(new Date())
-    ? "Fenêtres fabriquées aujourd'hui" : "Fenêtres fabriquées ce jour là";
-  $("logSum").textContent = posees;
-  $("logTubes").textContent = nTubes;
+  const ev = evenementsDuJour(logJour);
+  const n = t => ev.filter(x => x.type === t).length;
+  const nBons  = n("bon");
+  const nFab   = n("fab");
+  const nTube  = n("tube");
+  const nLivre = ev.filter(x => x.type === "etat" && x.etat === "livre").length;
+  const cash   = ev.filter(x => x.type === "paie").reduce((s,x) => s + (x.montant || 0), 0);
+
+  const a = new Date(logJour + "T12:00:00");
+  const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+  const MOIS  = ["janvier","février","mars","avril","mai","juin","juillet","août",
+                 "septembre","octobre","novembre","décembre"];
+  $("logJourLab").textContent = (auj ? "Aujourd'hui  ·  " : "") +
+    JOURS[a.getDay()] + " " + a.getDate() + " " + MOIS[a.getMonth()] + " " + a.getFullYear();
+
+  const tuile = (v, un, plus, cls) =>
+    '<div class="' + cls + (v ? "" : " nul") + '"><b>' + v + '</b><small>' +
+    (v > 1 ? plus : un) + '</small></div>';
+  $("logStat").innerHTML =
+    tuile(nBons,  "bon créé",             "bons créés",            "a") +
+    tuile(nFab,   "fenêtre fabriquée",    "fenêtres fabriquées",   "v") +
+    tuile(nTube,  "découpe au magasin 2", "découpes au magasin 2", "i") +
+    tuile(nLivre, "commande livrée",      "commandes livrées",     "a");
+  $("logCash").textContent = fr(cash, 2) + " MAD";
+
+  Array.prototype.forEach.call($("logVue").children,
+    b => b.setAttribute("aria-pressed", String(b.dataset.v === logVue)));
 
   const box = $("logList");
-  if (!lignes.length){
-    box.innerHTML = '<div class="empty">Aucune fenêtre cochée ce jour là.<br>' +
-      'Les lignes apparaissent dès qu\'un agent coche une fenêtre dans le plan de coupe.</div>';
+  if (!ev.length){
+    box.innerHTML = '<div class="empty">Rien ce jour là.<br>' +
+      'Bons créés, fenêtres fabriquées, découpes livrées, commandes livrées et ' +
+      'paiements apparaissent ici dès qu\'un agent les enregistre.</div>';
     $("logHint").textContent = "";
     return;
   }
 
-  box.innerHTML = lignes.map(e => {
-    const d = new Date(e.at);
-    const kind = e.kind || "fab";
-    const reste = Math.max(0, (e.tot || 0) - (e.fait || 0));
-    const segs = [];
-    for (let i = 0; i < (e.tot || 0); i++) segs.push('<span class="lgseg' + (i < (e.fait||0) ? " on" : "") + '"></span>');
+  box.innerHTML = logVue === "agent" ? vueAgent(ev) : vueHeure(ev);
 
-    const badge = kind === "tube" ? (e.on ? "livrée magasin 2" : "décochée")
-                : kind === "livr" ? (e.on ? "livré magasin 2" : "livraison annulée")
-                : (e.on ? "fabriquée" : "décochée");
-    const titre = e.dim || (kind === "livr" ? "Livraison au magasin 2" : "—");
-    const detail = kind === "tube"
-      ? (e.fait || 0) + " sur " + (e.tot || 0) + " découpe" + ((e.fait||0) > 1 ? "s" : "") +
-        " au magasin 2" +
-        (reste ? ",  reste <b>" + reste + "</b> à livrer" : ",  <b>bon entièrement livré</b>")
-      : kind === "livr"
-      ? "Portée au magasin 2  ·  " + (e.fait || 0) + " pièce" + ((e.fait||0) > 1 ? "s" : "") +
-        " sur " + (e.tot || 0) + " livrée" + ((e.fait||0) > 1 ? "s" : "") +
-        (reste ? ",  reste <b>" + reste + "</b> à livrer" : ",  <b>bon entièrement livré</b>")
-      : (e.fait || 0) + " sur " + (e.tot || 0) + " fabriquée" + ((e.fait||0) > 1 ? "s" : "") +
-        (reste ? ",  reste <b>" + reste + "</b> à fabriquer" : ",  <b>bon terminé</b>");
-
-    return '<div class="lgrow ' + kind + (e.on ? "" : " off") + '">' +
-      '<div class="lgtop">' +
-        '<span class="lgh">' + pad(d.getHours()) + ":" + pad(d.getMinutes()) + '</span>' +
-        '<span class="lgd">' + esc(titre) + '</span>' +
-        '<span class="lgb">' + badge + '</span>' +
-      '</div>' +
-      '<span class="lgsub"><b>' + esc(e.nom) + '</b>' + (e.num ? "  ·  " + esc(e.num) : "") +
-        (kind === "tube" && e.prof ? "  ·  " + esc(e.prof) : "") +
-        (kind === "livr" && e.prof ? "  ·  " + esc(e.prof) : "") +
-        (kind === "livr" && e.t ? "  ·  " + (e.t === "JN" ? "jour et nuit" : "enrouleur") : "") +
-        ((kind === "tube" || kind === "livr") && e.fen ? "  ·  fenêtre " + esc(e.fen) : "") +
-        (kind === "fab" && e.t ? "  ·  " + (e.t === "JN" ? "jour et nuit" : "enrouleur") : "") +
-        (kind === "fab" && e.ref ? "  ·  " + esc(e.ref) : "") +
-        (e.by ? "  ·  " + esc(nomDe(e.by)) : "") +
-        '<br>' + detail +
-      '</span>' +
-      '<div class="lgbar">' + segs.join("") + '</div>' +
-    '</div>';
-  }).join("");
-
-  const bons = lignes.map(e => e.id).filter((v,i,a) => a.indexOf(v) === i).length;
-  const agents = lignes.map(e => e.by).filter(Boolean).filter((v,i,a) => a.indexOf(v) === i);
-  $("logHint").textContent = lignes.length + " ligne" + (lignes.length > 1 ? "s" : "") +
-    " sur " + bons + " bon" + (bons > 1 ? "s" : "") +
-    (agents.length ? ",  " + agents.map(nomDe).join(" et ") : "") +
-    ".  Le journal est partagé : chaque appui d'un agent apparaît ici.";
+  const agents = ev.map(x => x.by).filter(Boolean).filter((v,i,z) => z.indexOf(v) === i);
+  $("logHint").textContent = ev.length + " opération" + (ev.length > 1 ? "s" : "") +
+    (agents.length ? "  ·  " + agents.map(nomDe).join(", ") : "") +
+    ".  Une découpe cochée veut dire coupée et portée au magasin 2.";
 }
+
+function ligneEv(x, avecHeure){
+  const d = new Date(x.at);
+  return '<div class="agline">' +
+    '<span class="agh">' + (avecHeure ? pad(d.getHours()) + ":" + pad(d.getMinutes()) : "") + '</span>' +
+    '<span class="agdot ' + x.type + '"></span>' +
+    '<span class="agt"><b>' + esc(x.titre) + '</b>' +
+      (x.sous ? '<small>' + esc(x.sous) + '</small>' : '') + '</span>' +
+    '<span class="agv">' + esc(x.val || "") + '</span>' +
+  '</div>';
+}
+
+/* Qui a fait quoi : une carte par agent, la plus chargée en premier. */
+function vueAgent(ev){
+  const par = {};
+  ev.forEach(x => {
+    const k = x.by || "?";
+    if (!par[k]) par[k] = [];
+    par[k].push(x);
+  });
+  const ORDRE = ["bon", "fab", "tube", "etat", "paie"];
+  const LABS = {
+    bon:  ["bon créé",           "bons créés"],
+    fab:  ["fenêtre fabriquée",  "fenêtres fabriquées"],
+    tube: ["découpe livrée",     "découpes livrées"],
+    etat: ["changement d'état",  "changements d'état"],
+    paie: ["paiement",           "paiements"]
+  };
+  return Object.keys(par)
+    .sort((a,b) => par[b].length - par[a].length)
+    .map(k => {
+      const list = par[k];
+      const nom = k === "?" ? "Sans agent" : nomDe(k);
+      const cpt = {};
+      list.forEach(x => { cpt[x.type] = (cpt[x.type] || 0) + 1; });
+      const resume = ORDRE.filter(t => cpt[t]).map(t =>
+        cpt[t] + " " + LABS[t][cpt[t] > 1 ? 1 : 0]).join("  ·  ");
+      const enc = list.filter(x => x.type === "paie").reduce((s,x) => s + (x.montant || 0), 0);
+      return '<div class="agcard">' +
+        '<div class="aghead">' +
+          '<span class="agini">' + esc(nom.slice(0,1).toUpperCase()) + '</span>' +
+          '<span class="agnom"><b>' + esc(nom) + '</b><small>' + esc(resume) +
+            (enc ? '  ·  ' + fr(enc,0) + ' MAD encaissés' : '') + '</small></span>' +
+          '<span class="agtot">' + list.length + '</span>' +
+        '</div>' +
+        list.map(x => ligneEv(x, true)).join("") +
+      '</div>';
+    }).join("");
+}
+
+/* La journée dans l'ordre, du plus récent au plus ancien. */
+function vueHeure(ev){
+  return '<div class="agcard">' +
+    ev.map(x => {
+      const d = new Date(x.at);
+      const qui = x.by ? nomDe(x.by) : "";
+      return '<div class="agline">' +
+        '<span class="agh">' + pad(d.getHours()) + ":" + pad(d.getMinutes()) + '</span>' +
+        '<span class="agdot ' + x.type + '"></span>' +
+        '<span class="agt"><b>' + esc(x.titre) + '</b>' +
+          '<small>' + esc(x.sous) + (qui ? '  ·  ' + esc(qui) : '') + '</small></span>' +
+        '<span class="agv">' + esc(x.val || "") + '</span>' +
+      '</div>';
+    }).join("") +
+  '</div>';
+}
+
+$("logVue").addEventListener("click", e => {
+  const b = e.target.closest("button[data-v]");
+  if (!b) return;
+  logVue = b.dataset.v;
+  LS.set("mst_logvue", logVue);
+  renderLog();
+});
+
 
 $("logDate").addEventListener("change", e => {
   logJour = e.target.value || jourISO(new Date());
