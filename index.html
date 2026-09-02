@@ -409,7 +409,45 @@ select{appearance:none; -webkit-appearance:none}
 .cpliv.att{opacity:.5}
 .cpliv .fbox{width:19px; height:19px; border-radius:6px; border:1.5px solid currentColor;
   display:grid; place-items:center; flex:none}
+/* quand l'agent n'a pas le droit de cocher, la liste reste lisible mais figée */
+.cpro .fait{cursor:default}
+.cpro .fait:not(.on){opacity:.72}
+/* le rappel des deux états en haut de la carte */
+.cpbil{display:flex; gap:8px; margin:0 0 13px}
+.cpbil > div{flex:1; text-align:center; padding:9px 4px; border-radius:11px;
+  background:var(--card2); border:1px solid var(--line)}
+.cpbil b{display:block; font-family:"IBM Plex Mono",monospace; font-size:19px; font-weight:600; color:var(--ink)}
+.cpbil small{display:block; font-size:10px; font-weight:700; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--muted); margin-top:3px}
+.cpbil .v b{color:var(--ok)}
+.cpbil .w b{color:var(--warn)}
 /* --- paiements --- */
+/* --- encaissements du trimestre : banque d'un côté, espèce de l'autre --- */
+.trtab{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card)}
+.trh, .trr{display:grid; grid-template-columns:1fr 84px 84px; gap:8px; padding:10px 12px; align-items:baseline}
+.trh{background:var(--card2); border-bottom:1px solid var(--line)}
+.trh span{font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
+.trh span+span, .trr b+b{text-align:right}
+.trr{border-bottom:1px solid var(--line)}
+.trr:last-child{border-bottom:0}
+.trr .trn{min-width:0}
+.trr .trn u{display:block; text-decoration:none; font-family:"IBM Plex Mono",monospace;
+  font-size:13px; font-weight:600; color:var(--ink)}
+.trr .trn small{display:block; font-size:11px; color:var(--muted); margin-top:2px; line-height:1.35}
+.trr b{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600; color:var(--ink)}
+.trr b.zero{color:var(--line-strong); font-weight:400}
+.trtag{display:inline-block; margin-top:4px; padding:1px 6px; border-radius:5px;
+  font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase}
+.trtag.att{background:var(--warn-soft,#FAEFDD); color:var(--warn)}
+.trtag.nof{background:var(--card2); color:var(--muted)}
+.trtot{display:grid; grid-template-columns:1fr 84px 84px; gap:8px; padding:12px;
+  margin-top:12px; border-radius:12px; background:var(--accent-soft)}
+.trtot span{font-family:"Archivo",sans-serif; font-size:11px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
+.trtot b{font-family:"IBM Plex Mono",monospace; font-size:14px; font-weight:600;
+  color:var(--accent); text-align:right}
 .pyrow{
   background:var(--card); border:1px solid var(--line); border-left:3px solid var(--warn);
   border-radius:12px; margin-bottom:9px; overflow:hidden;
@@ -845,6 +883,16 @@ select{appearance:none; -webkit-appearance:none}
   font-family:"Archivo",sans-serif; font-weight:500; transition:opacity .22s, transform .22s; max-width:88vw; text-align:center;
 }
 .toast.show{opacity:1; transform:translate(-50%,0)}
+/* --- bandeau réseau : visible sur toutes les pages tant que ça ne passe pas --- */
+.netbar{
+  position:fixed; bottom:0; left:0; right:0; z-index:65;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:8px 14px calc(8px + env(safe-area-inset-bottom));
+  background:var(--warn); color:#fff;
+  font-family:"Archivo",sans-serif; font-size:12px; font-weight:600; text-align:center;
+}
+.netbar.ko{background:var(--accent)}
+.netbar svg{flex:none}
 @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
 </style>
 </head>
@@ -1098,6 +1146,10 @@ select{appearance:none; -webkit-appearance:none}
         <span class="tt"><b>Paiements</b><small id="tilePaySub">Encaissements et impayés</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
+      <button class="tile" id="tileTri" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v14H3z"/><path d="M3 10h18M9 10v9"/></svg>
+        <span class="tt"><b>Encaissements du trimestre</b><small id="tileTriSub">Banque et espèce, bon par bon</small></span>
+      </button>
       <button class="tile" id="tileLog" type="button">
         <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h9M9 12h9M9 19h9"/><path d="M4.5 5l1 1 2-2M4.5 12l1 1 2-2M4.5 19l1 1 2-2"/></svg></span>
         <span class="tt"><b>Logs</b><small id="tileLogSub">Fenêtres fabriquées, jour par jour</small></span>
@@ -1216,9 +1268,10 @@ select{appearance:none; -webkit-appearance:none}
 
     <div class="card" id="cutTubeCard" style="margin-bottom:14px">
       <div class="card-head"><div class="label">Découpes à faire</div><div class="badge" id="cutTubeCount">0 / 0</div></div>
+      <div class="cpbil" id="cutBilan"></div>
       <div id="cutTube"></div>
       <p class="hint" id="livrSub" style="margin:10px 2px 0; font-weight:600; color:var(--ink)"></p>
-      <p class="hint">Cochez chaque coupe faite au magasin 1, puis la livraison une fois les profilés portés au magasin 2. Tout apparaît sur les téléphones de l'équipe.</p>
+      <p class="hint" id="cutTubeHint"></p>
     </div>
 
     <div class="card" id="cutFaitCard" style="margin-bottom:14px">
@@ -1389,6 +1442,27 @@ select{appearance:none; -webkit-appearance:none}
   </div>
 </div>
 
+<!-- ENCAISSEMENTS DU TRIMESTRE -->
+<div class="sheet" id="triSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="triSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Encaissements du trimestre</h2>
+  </div>
+  <div class="sheet-body">
+    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="filters" id="triTrim">
+      <button type="button" data-t="1">T1 jan-mar</button>
+      <button type="button" data-t="2">T2 avr-jun</button>
+      <button type="button" data-t="3">T3 jui-sep</button>
+      <button type="button" data-t="4">T4 oct-déc</button>
+    </div>
+    <div class="filters" id="triAns"></div>
+    <div class="trtab" id="triTab"></div>
+    <div class="trtot" id="triTot"></div>
+    <p class="hint" id="triHint"></p>
+  </div>
+</div>
+
 <!-- JOURNAL DE FABRICATION -->
 <div class="sheet" id="logSheet">
   <div class="sheet-top">
@@ -1408,8 +1482,7 @@ select{appearance:none; -webkit-appearance:none}
       <button id="logToday" type="button" aria-pressed="true">Aujourd'hui</button>
     </div>
     <div class="sumline"><span id="logSumLabel">Fenêtres fabriquées</span><b id="logSum">0</b></div>
-    <div class="sumline"><span>Coupes de profilé</span><b id="logTubes">0</b></div>
-    <div class="sumline"><span>Livraisons au magasin 2</span><b id="logLivr">0</b></div>
+    <div class="sumline"><span>Découpes livrées au magasin 2</span><b id="logTubes">0</b></div>
     <div id="logList"></div>
     <p class="hint" id="logHint"></p>
   </div>
@@ -1527,6 +1600,7 @@ select{appearance:none; -webkit-appearance:none}
   </div>
 </div>
 
+<div class="netbar" id="netBar" hidden></div>
 <div class="toast" id="toast"></div>
 
 <script src="supabase.js"></script>
@@ -2099,7 +2173,14 @@ function renderAll(){
 $("nom").addEventListener("input", e => { S.nom = e.target.value; renderProgress(); });
 $("tel").addEventListener("input", e => { S.tel = e.target.value; renderProgress(); });
 $("adresse").addEventListener("input", e => { S.adresse = e.target.value; });
-$("ech").addEventListener("change", e => { S.ech = e.target.value; renderEch(); });
+$("ech").addEventListener("change", e => {
+  if (echVerrou()){
+    e.target.value = S.ech || "";
+    toast("L'échéance de ce bon a été fixée à sa création");
+    return;
+  }
+  S.ech = e.target.value; renderEch();
+});
 
 /* --- lien GPS --- */
 $("gps").addEventListener("input", e => { S.gps = e.target.value.trim(); renderGps(); });
@@ -2141,8 +2222,23 @@ $("gpsHere").addEventListener("click", () => {
   }, {enableHighAccuracy:true, timeout:12000, maximumAge:60000});
 });
 /* Le libellé rappelle s'il s'agit d'une pose ou d'une livraison. */
+/* La date d'échéance se fixe à la création. Une fois le bon enregistré, seul
+   l'atelier de la direction peut encore la déplacer : soufiane la voit mais ne
+   la change plus, sinon les plannings bougent sous les pieds de l'équipe. */
+const ECH_FIGE = ["soufiane"];
+function echVerrou(){
+  if (!USER) return false;
+  if (ECH_FIGE.indexOf(String(USER.login || "").toLowerCase()) < 0) return false;
+  return !!S && ORDERS.some(o => o.id === S.id);   /* le bon existe déjà */
+}
 function renderEch(){
   $("echLab").textContent = S.ech ? (S.pose === "Livraison" ? "Livraison" : "Pose") : "Échéance";
+  const inp = $("ech");
+  const fige = echVerrou();
+  inp.disabled = fige;
+  inp.title = fige ? "L'échéance a été fixée à la création du bon" : "";
+  const box = inp.closest(".field") || inp.parentElement;
+  if (box) box.style.opacity = fige ? ".6" : "";
 }
 function echFR(){
   if (!S.ech) return "";
@@ -2859,7 +2955,7 @@ function touche(o){ if (o) o.maj = Date.now(); return o; }
 
 async function pushBon(rec){
   touche(rec);
-  if (!SB || !USER){ markPending(rec.id, true); return false; }
+  if (!SB || !USER){ markPending(rec.id, true); avertirHorsLigne(); return false; }
   try {
     const {error} = await SB.from("bons").upsert({
       id: rec.id, num: rec.num, author: rec.author || USER.login,
@@ -2867,11 +2963,14 @@ async function pushBon(rec){
     });
     if (error) throw error;
     markPending(rec.id, false);
-    renderHome();
+    ONLINE = true;
+    renderHome(); renderNet();
     return true;
   } catch(e){
     markPending(rec.id, true);
+    ONLINE = false;
     renderHome();
+    avertirHorsLigne();
     return false;
   }
 }
@@ -2915,6 +3014,33 @@ function flushSheetSit(){
       .then(t => { const j = JSON.parse(t); if (j && j.ok) delete SHEETSIT[num]; })
       .catch(() => {})
   )).then(() => { LS.set("mst_sheetsit", SHEETSIT); });
+}
+
+/* --- renumérotation d'un bon --- */
+/* La direction peut remplacer BC-08-26-02 par F2026001 : le numéro change ici,
+   dans la base, et dans la feuille (tableau de production et onglet Paiements).
+   La demande est mise en file d'attente comme les autres écritures : si le
+   réseau manque, elle part au prochain passage. */
+let SHEETNUM = LS.get("mst_sheetnum", []);
+
+function sheetRenum(from, to){
+  if (!from || !to || from === to) return Promise.resolve();
+  SHEETNUM.push({from:from, to:to});
+  LS.set("mst_sheetnum", SHEETNUM.slice(-100));
+  return flushSheetNum();
+}
+function flushSheetNum(){
+  const url = hookUrl();
+  if (!url || !SHEETNUM.length) return Promise.resolve();
+  const list = SHEETNUM.slice();
+  return Promise.all(list.map(r =>
+    fetch(url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+                body: JSON.stringify({action:"renum", key:r.from, value:r.to})})
+      .then(x => x.text())
+      .then(t => { const j = JSON.parse(t);
+                   if (j && j.ok) SHEETNUM = SHEETNUM.filter(x => !(x.from === r.from && x.to === r.to)); })
+      .catch(() => {})
+  )).then(() => { LS.set("mst_sheetnum", SHEETNUM); });
 }
 
 /* --- suppression de la ligne dans le tableau de production --- */
@@ -3015,14 +3141,16 @@ async function pullBons(){
       newOrder(); nav("home");
     }
     /* Tout est à jour : on redessine, sauf si l'agent est en train de saisir. */
+    renderNet();
     if (saisieEnCours()) autoDu = true; else renderTout();
     return true;
-  } catch(e){ ONLINE = false; renderHome(); return false; }
+  } catch(e){ ONLINE = false; renderHome(); renderNet(); return false; }
 }
 
 async function syncAll(){
   flushSheetDel();
   flushSheetSit();
+  flushSheetNum();
   flushPay();
   if (!SB || !USER) return;
   await flushTombs();
@@ -3074,6 +3202,55 @@ function logout(){
   });
 }
 
+/* --- réseau --- */
+/* Le téléphone travaille hors ligne sans rien perdre : tout est écrit sur
+   l'appareil et mis en file d'attente. On le dit à l'agent au lieu de le
+   laisser croire que son geste est parti. */
+function estEnLigne(){
+  return navigator.onLine !== false && (ONLINE || !USER);
+}
+function enAttente(){
+  return ORDERS.filter(o => o.pending).length
+       + Object.keys(SHEETSIT || {}).length
+       + Object.keys(PAYDEL || {}).length
+       + (SHEETDEL || []).length
+       + (SHEETNUM || []).length;
+}
+function renderNet(){
+  const el = $("netBar");
+  if (!el) return;
+  const coupe = navigator.onLine === false || (!!USER && !ONLINE);
+  const att = enAttente();
+  if (!coupe && !att){ el.hidden = true; return; }
+  el.hidden = false;
+  el.className = "netbar" + (coupe ? "" : " ko");
+  el.innerHTML = coupe
+    ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 3l18 18"/><path d="M5 12.5a11 11 0 015-2.9M2 8.8A16 16 0 016.5 6M12 20h.01M8.5 16.4a6 6 0 015.6-1.1M17.6 13a11 11 0 00-2.2-1.6M22 8.8a16 16 0 00-6.6-3.5"/></svg>' +
+      'Hors ligne' + (att ? '  ·  ' + att + ' envoi' + (att > 1 ? 's' : '') + ' en attente' : '') +
+      '  ·  rien n\'est perdu'
+    : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg>' +
+      att + ' envoi' + (att > 1 ? 's' : '') + ' en attente, synchronisation en cours';
+}
+
+/* Un seul avertissement à la fois, sinon l'agent voit dix bulles de suite. */
+let dernierAvis = 0;
+function avertirHorsLigne(){
+  renderNet();
+  if (Date.now() - dernierAvis < 8000) return;
+  dernierAvis = Date.now();
+  toast("Hors ligne : c'est enregistré sur ce téléphone, l'envoi partira dès le retour du réseau");
+}
+
+window.addEventListener("offline", () => {
+  ONLINE = false; renderNet(); renderUserLine();
+  toast("Connexion perdue. Vous pouvez continuer, tout sera envoyé au retour du réseau");
+});
+window.addEventListener("online", () => {
+  renderNet();
+  toast("Connexion revenue, synchronisation...");
+  syncAll().then(() => { syncStock(true); renderNet(); renderUserLine(); renderTout(); });
+});
+
 function renderUserLine(){
   const el = $("userLine");
   if (!el) return;
@@ -3111,7 +3288,7 @@ async function bootAuth(){
 function nav(where){
   armBack();
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -3140,6 +3317,13 @@ function renderHome(){
   $("tileCut").hidden = !cutAllowed();
   $("tileLog").hidden = !logAllowed();
   $("tilePay").hidden = !payAllowed();
+  $("tileTri").hidden = !adminAllowed();
+  if (adminAllowed()){
+    const t = triTotaux(triAn, triNo);
+    $("tileTriSub").textContent = t.n
+      ? fr(t.banque,0) + " banque  ·  " + fr(t.espece,0) + " espèce  ·  T" + triNo + " " + triAn
+      : "Aucun encaissement sur T" + triNo + " " + triAn;
+  }
   if (payAllowed()){
     const bp = bonsPayables();
     const nc = bp.filter(o => !paySolde(o)).length;
@@ -3520,6 +3704,8 @@ function renderTout(){
   essai(renderNom);
   essai(renderLog);
   essai(renderPay);
+  essai(renderTri);
+  essai(renderNet);
 }
 
 function ecranOuvert(){
@@ -3704,6 +3890,10 @@ function renderHist(){
         '</span>' +
         '<span style="display:flex; align-items:center; gap:6px">' +
           (o.pending ? '<span class="badge warn">À envoyer</span>' : '') +
+          (adminAllowed()
+            ? '<button class="hact" data-num="' + o.id + '" aria-label="Renommer le bon">' +
+              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'
+            : '') +
           '<button class="hact danger" data-del="' + o.id + '" aria-label="Supprimer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>' +
         '</span>' +
       '</span>';
@@ -3762,9 +3952,40 @@ $("histBody").addEventListener("change", e => {
   toast(etatLabel(o.etat) + "  ·  " + (o.nom || "client"));
 });
 
+/* Renommer un bon : BC-08-26-02 devient F2026001, ou tout autre libellé.
+   Le numéro sert de clé partout, alors on le change aussi dans la feuille et on
+   renvoie les paiements sous le nouveau nom. */
+function renommeBon(o){
+  if (!o || !adminAllowed()) return;
+  const ancien = o.num || "";
+  const v = window.prompt("Nouveau numéro ou nom du bon.\nExemple : F2026001", ancien);
+  if (v === null) return;
+  const neuf = v.trim();
+  if (!neuf){ toast("Le numéro ne peut pas être vide"); return; }
+  if (neuf === ancien) return;
+  if (ORDERS.some(x => x.id !== o.id && String(x.num || "") === neuf)){
+    toast("Un autre bon porte déjà ce numéro"); return;
+  }
+  ask("Renommer le bon ?",
+      ancien + "  deviendra  " + neuf + ". Le changement suit sur tous les téléphones, " +
+      "dans le tableau de production et dans l'onglet Paiements.", () => {
+    o.num = neuf;
+    /* les écritures encore en attente changent de clé elles aussi */
+    if (SHEETSIT[ancien] !== undefined){ SHEETSIT[neuf] = SHEETSIT[ancien]; delete SHEETSIT[ancien]; LS.set("mst_sheetsit", SHEETSIT); }
+    if (PAYDEL[ancien] !== undefined){ PAYDEL[neuf] = PAYDEL[ancien]; delete PAYDEL[ancien]; LS.set("mst_paydel", PAYDEL); }
+    touche(o); persistOrders(); pushBon(o);
+    sheetRenum(ancien, neuf).then(() => payPush(o));
+    if (S && S.id === o.id) S.num = neuf;
+    renderHist(); renderHome(); renderPay(); renderTri();
+    toast("Bon renommé en " + neuf);
+  });
+}
+
 $("histBody").addEventListener("click", e => {
   const open = e.target.closest("button[data-open]");
   const del  = e.target.closest("button[data-del]");
+  const num  = e.target.closest("button[data-num]");
+  if (num){ renommeBon(ORDERS.find(x => x.id === num.dataset.num)); return; }
   if (open){
     const o = ORDERS.find(x => x.id === open.dataset.open);
     if (o){ loadOrder(o); toast("Bon " + o.num + " ouvert"); }
@@ -3880,7 +4101,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "7.0";
+const APP_VERSION = "7.2";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4366,41 +4587,44 @@ function faites(o){ return (o && Array.isArray(o.faites)) ? o.faites : []; }
 /* La liste des coupes de profilé, et la livraison au magasin 2. */
 function renderTube(o){
   const box = $("cutTube");
-  const list = coupesTube(o);
   const done = tubesFaits(o);
-  const n = list.filter(c => done.indexOf(c.key) >= 0).length;
-  $("cutTubeCount").textContent = n + " / " + list.length;
-  $("cutTubeCount").className = "badge" + (list.length && n === list.length ? " ok" : (n ? " warn" : ""));
+  const b = bilanTube(o);
+  const droit = tubeEdit();
+  $("cutTubeCount").textContent = b.livre + " / " + b.tot;
+  $("cutTubeCount").className = "badge" + (b.tot && b.livre === b.tot ? " ok" : (b.livre ? " warn" : ""));
+
+  $("cutBilan").innerHTML = b.tot
+    ? '<div class="w"><b>' + b.reste + '</b><small>à couper</small></div>' +
+      '<div class="v"><b>' + b.livre + '</b><small>au magasin 2</small></div>'
+    : "";
 
   const coche = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
   const groupes = profilsDe(o);
+  box.className = droit ? "" : "cpro";
   box.innerHTML = groupes.map(g => {
     const ok = g.coupes.filter(c => done.indexOf(c.key) >= 0).length;
-    const tout = ok === g.coupes.length;
-    const liv = livreDe(o, g.k);
     return '<div class="cpgrp">' +
-      '<div class="cptitre"><span>' + esc(g.label) + '</span><em>' + ok + " / " + g.coupes.length + '</em></div>' +
+      '<div class="cptitre"><span>' + esc(g.label) + '</span><em>' + ok + " / " + g.coupes.length + ' au magasin 2</em></div>' +
       g.coupes.map(c => {
         const on = done.indexOf(c.key) >= 0;
         return '<button class="fait' + (on ? " on" : "") + '" type="button" data-tube="' + c.key + '">' +
           '<span class="fbox">' + (on ? coche : "") + '</span>' +
           '<span class="fdim">' + cm(c.coupe) + ' cm</span>' +
-          '<span class="fsub">fenêtre ' + c.n + '  ·  ' + fr(c.l,0) + ' × ' + fr(c.h,0) + ' cm</span>' +
+          '<span class="fsub">fenêtre ' + c.n + '  ·  ' + fr(c.l,0) + ' × ' + fr(c.h,0) + ' cm' +
+            (on ? '  ·  livrée au magasin 2' : '') + '</span>' +
         '</button>';
       }).join("") +
-      '<button class="cpliv' + (liv ? " on" : (tout ? "" : " att")) + '" type="button" data-livre="' + g.k + '">' +
-        '<span class="fbox">' + (liv ? coche : "") + '</span>' +
-        (liv ? "Livré au magasin 2"
-             : (tout ? "Marquer livré au magasin 2"
-                     : "Reste " + (g.coupes.length - ok) + " coupe" + (g.coupes.length - ok > 1 ? "s" : "") + " avant livraison")) +
-      '</button>' +
     '</div>';
   }).join("") || '<div class="hint" style="margin:0">Aucune coupe pour ce bon.</div>';
 
-  const nl = groupes.filter(g => livreDe(o, g.k)).length;
-  $("livrSub").textContent = groupes.length
-    ? nl + " profilé" + (nl > 1 ? "s" : "") + " sur " + groupes.length + " livré" + (nl > 1 ? "s" : "") + " au magasin 2"
+  $("livrSub").textContent = b.tot
+    ? (b.reste ? b.reste + " découpe" + (b.reste > 1 ? "s" : "") + " sur " + b.tot +
+                 " pas encore livrée" + (b.reste > 1 ? "s" : "") + " au magasin 2"
+               : "Tout le bon est au magasin 2")
     : "";
+  $("cutTubeHint").textContent = droit
+    ? "Cochez une découpe une fois qu'elle est coupée ET portée au magasin 2. Vous pouvez n'en livrer qu'une partie, les autres restent en clair. Tout apparaît sur les téléphones de l'équipe."
+    : "Seul Ahmed coche les découpes. La liste se met à jour toute seule sur votre téléphone.";
 }
 
 function renderFait(o, dims){
@@ -4463,6 +4687,7 @@ $("cutTube").addEventListener("click", e => {
   if (!b) return;
   const o = ORDERS.find(x => x.id === cutOrderId);
   if (!o) return;
+  if (!tubeEdit()){ toast("Seul Ahmed peut cocher les découpes de profilé"); return; }
   const k = b.dataset.tube;
   const l = tubesFaits(o).slice();
   const i = l.indexOf(k);
@@ -4474,11 +4699,7 @@ $("cutTube").addEventListener("click", e => {
   const c = list.find(x => x.key === k);
   if (!Array.isArray(o.log)) o.log = [];
   o.log.push({
-    kind: "tube",
-    at:   Date.now(),
-    by:   (USER && USER.login) || "",
-    k:    k,
-    on:   coche,
+    kind: "tube", at: Date.now(), by: (USER && USER.login) || "", k: k, on: coche,
     dim:  c ? (cm(c.coupe) + " cm") : "",
     prof: c ? c.label : "",
     fen:  c ? (fr(c.l,0) + " × " + fr(c.h,0) + " cm") : "",
@@ -4491,35 +4712,6 @@ $("cutTube").addEventListener("click", e => {
   touche(o); persistOrders(); pushBon(o);
   renderTube(o);
   if ($("logSheet").classList.contains("open")) renderLog();
-});
-
-$("cutTube").addEventListener("click", e => {
-  const b = e.target.closest("button[data-livre]");
-  if (!b) return;
-  const o = ORDERS.find(x => x.id === cutOrderId);
-  if (!o) return;
-  const k = b.dataset.livre;
-  const g = profilsDe(o).find(x => x.k === k);
-  if (!g) return;
-  const done = tubesFaits(o);
-  const tout = g.coupes.every(c => done.indexOf(c.key) >= 0);
-  const etait = livreDe(o, k);
-  if (!etait && !tout){ toast("Toutes les coupes de ce profilé ne sont pas faites"); return; }
-
-  const l = Object.assign({}, livres(o));
-  if (etait) delete l[k]; else l[k] = {at: Date.now(), by: (USER && USER.login) || ""};
-  o.livres = l;
-
-  if (!Array.isArray(o.log)) o.log = [];
-  o.log.push({kind:"livr", at:Date.now(), by:(USER && USER.login) || "", k:k, on:!etait,
-              prof:g.label, t:g.fam, dim:g.coupes.length + " coupes",
-              fait:Object.keys(l).length, tot:profilsDe(o).length});
-  if (o.log.length > 400) o.log = o.log.slice(-400);
-
-  touche(o); persistOrders(); pushBon(o);
-  renderTube(o);
-  if ($("logSheet").classList.contains("open")) renderLog();
-  toast(etait ? "Livraison annulée" : g.label + " livré au magasin 2");
 });
 
 function renderMode(){
@@ -4553,10 +4745,21 @@ function coupesTube(o){
   return out;
 }
 function tubesFaits(o){ return (o && Array.isArray(o.tubes)) ? o.tubes : []; }
-/* La livraison se coche profilé par profilé : le tube 38 peut partir au
-   magasin 2 avant les rails, chacun a sa case. */
-function livres(o){ return (o && o.livres && typeof o.livres === "object") ? o.livres : {}; }
-function livreDe(o, k){ return !!livres(o)[k]; }
+/* Une découpe cochée veut dire deux choses à la fois : elle est coupée ET elle
+   est partie au magasin 2. Ahmed en livre souvent une partie seulement : sur un
+   bon de 8 fenêtres il peut n'en avoir coché que 3, les autres restent en clair.
+   Lui seul coche et décoche, tout le monde voit. */
+const TUBE_EDIT = ["ahmed"];
+function tubeEdit(){
+  return !!USER && TUBE_EDIT.indexOf(String(USER.login || "").toLowerCase()) >= 0;
+}
+/* Où en est le bon : ce qui reste à faire, ce qui est déjà au magasin 2. */
+function bilanTube(o){
+  const list = coupesTube(o);
+  const done = tubesFaits(o);
+  const livre = list.filter(c => done.indexOf(c.key) >= 0).length;
+  return {tot:list.length, livre:livre, reste:list.length - livre};
+}
 /* Les profilés d'un bon, avec leurs coupes regroupées */
 function profilsDe(o){
   const list = coupesTube(o);
@@ -5276,6 +5479,122 @@ $("tilePay").addEventListener("click", () => {
   pullBons().then(() => renderPay());
 });
 
+/* ============ Encaissements du trimestre ============ */
+/* La question posée : sur ce trimestre, combien est entré par la banque
+   (virement et chèque) et combien en espèce, bon par bon. Les acomptes des
+   commandes pas encore livrées comptent aussi : ils pèsent sur la TVA du
+   trimestre, alors ils sont marqués mais jamais écartés. */
+const MOIS_T = {1:[0,2], 2:[3,5], 3:[6,8], 4:[9,11]};
+let triAn = new Date().getFullYear();
+let triNo = Math.floor(new Date().getMonth() / 3) + 1;
+
+function estBanque(mode){
+  const m = String(mode || "").toLowerCase();
+  return m.indexOf("virement") === 0 || m.indexOf("chèque") === 0 || m.indexOf("cheque") === 0;
+}
+function estEspece(mode){
+  return String(mode || "").toLowerCase().indexOf("esp") === 0;
+}
+function dansTrimestre(iso, an, t){
+  const s = String(iso || "");
+  if (s.length < 7) return false;
+  const y = +s.slice(0,4), m = +s.slice(5,7) - 1;
+  if (y !== an || isNaN(m)) return false;
+  return m >= MOIS_T[t][0] && m <= MOIS_T[t][1];
+}
+
+/* Une ligne par bon ayant encaissé quelque chose sur le trimestre. */
+function triLignes(an, t){
+  const out = [];
+  (ORDERS || []).forEach(o => {
+    const p = paiements(o).filter(x => dansTrimestre(x.date, an, t));
+    if (!p.length) return;
+    const banque = p.filter(x => estBanque(x.mode)).reduce((a,x) => a + (parseFloat(x.montant) || 0), 0);
+    const espece = p.filter(x => estEspece(x.mode)).reduce((a,x) => a + (parseFloat(x.montant) || 0), 0);
+    const autre  = p.reduce((a,x) => a + (parseFloat(x.montant) || 0), 0) - banque - espece;
+    out.push({o:o, banque:banque, espece:espece + autre, n:p.length});
+  });
+  return out.sort((a,b) => String(a.o.num || "").localeCompare(String(b.o.num || "")));
+}
+function triTotaux(an, t){
+  const l = triLignes(an, t);
+  return {n:l.length,
+          banque: l.reduce((s,x) => s + x.banque, 0),
+          espece: l.reduce((s,x) => s + x.espece, 0)};
+}
+/* Les années où il s'est passé quelque chose, pour le sélecteur. */
+function triAnnees(){
+  const ans = {};
+  ans[new Date().getFullYear()] = true;
+  (ORDERS || []).forEach(o => paiements(o).forEach(p => {
+    const y = String(p.date || "").slice(0,4);
+    if (y.length === 4) ans[+y] = true;
+  }));
+  return Object.keys(ans).map(Number).sort((a,b) => b - a);
+}
+
+function renderTri(){
+  if (!adminAllowed()) return;
+  Array.prototype.forEach.call($("triTrim").querySelectorAll("button"),
+    b => b.setAttribute("aria-pressed", String(+b.dataset.t === triNo)));
+  $("triAns").innerHTML = triAnnees().map(y =>
+    '<button type="button" data-y="' + y + '" aria-pressed="' + (y === triAn) + '">' + y + '</button>').join("");
+
+  const lignes = triLignes(triAn, triNo);
+  const tot = triTotaux(triAn, triNo);
+  const zero = v => v ? '' : ' class="zero"';
+
+  $("triTab").innerHTML =
+    '<div class="trh"><span>Bon / facture</span><span>Banque</span><span>Espèce</span></div>' +
+    (lignes.length
+      ? lignes.map(x => {
+          const et = etatDe(x.o);
+          const att = et !== "livre";
+          return '<div class="trr">' +
+            '<span class="trn"><u>' + esc(x.o.num || "sans numéro") + '</u>' +
+              '<small>' + esc(x.o.nom || "Client sans nom") +
+                (x.n > 1 ? '  ·  ' + x.n + ' paiements' : '') + '</small>' +
+              (att ? '<span class="trtag att">' + etatLabel(et) + '</span>' : '') +
+              (facture(x.o) ? '' : '<span class="trtag nof">sans facture</span>') +
+            '</span>' +
+            '<b' + zero(x.banque) + '>' + fr(x.banque, 2) + '</b>' +
+            '<b' + zero(x.espece) + '>' + fr(x.espece, 2) + '</b>' +
+          '</div>';
+        }).join("")
+      : '<div class="trr"><span class="trn"><small>Aucun encaissement sur ce trimestre.</small></span><b class="zero">0,00</b><b class="zero">0,00</b></div>');
+
+  $("triTot").innerHTML =
+    '<span>Total T' + triNo + ' ' + triAn + '</span>' +
+    '<b>' + fr(tot.banque, 2) + '</b><b>' + fr(tot.espece, 2) + '</b>' +
+    '<span>Total encaissé</span><b style="grid-column:2 / span 2">' + fr(tot.banque + tot.espece, 2) + ' MAD</b>';
+
+  const enAttente = lignes.filter(x => etatDe(x.o) !== "livre").length;
+  $("triHint").textContent = lignes.length
+    ? lignes.length + " bon" + (lignes.length > 1 ? "s" : "") + " encaissé" + (lignes.length > 1 ? "s" : "") +
+      " sur le trimestre" +
+      (enAttente ? ",  dont " + enAttente + " pas encore livré" + (enAttente > 1 ? "s" : "") +
+                   " : ce sont des acomptes, la facture suivra." : ".") +
+      "  Banque = virement et chèque.  Les montants viennent de la page Paiements."
+    : "Les montants viennent de la page Paiements. Rien n'a encore été encaissé sur ce trimestre.";
+}
+
+$("triTrim").addEventListener("click", e => {
+  const b = e.target.closest("button[data-t]");
+  if (!b) return;
+  triNo = +b.dataset.t; renderTri(); renderHome();
+});
+$("triAns").addEventListener("click", e => {
+  const b = e.target.closest("button[data-y]");
+  if (!b) return;
+  triAn = +b.dataset.y; renderTri(); renderHome();
+});
+$("tileTri").addEventListener("click", () => {
+  if (!adminAllowed()) return;
+  renderTri();
+  nav("triSheet");
+  pullBons().then(() => renderTri());
+});
+
 /* ============ Logs : journal de fabrication ============ */
 /* Chaque coche dans « Fenêtres fabriquées » laisse une ligne, gardée dans le
    bon lui même : elle voyage donc vers les autres téléphones avec le bon. */
@@ -5391,7 +5710,7 @@ function logDuJour(iso){
   return out.sort((a,b) => b.at - a.at);
 }
 
-/* Profilés réellement livrés ce jour là : c'est le dernier geste qui compte,
+/* Pièces réellement livrées ce jour là : c'est le dernier geste qui compte,
    comme pour les fenêtres et les coupes. */
 function livresLe(iso){
   const dernier = {};
@@ -5414,12 +5733,10 @@ function renderLog(){
   const lignes = logDuJour(logJour);
   const posees = fabriqueesLe(logJour);
   const nTubes = coupesLe(logJour);
-  const nLivr  = livresLe(logJour);
   $("logSumLabel").textContent = logJour === jourISO(new Date())
     ? "Fenêtres fabriquées aujourd'hui" : "Fenêtres fabriquées ce jour là";
   $("logSum").textContent = posees;
   $("logTubes").textContent = nTubes;
-  $("logLivr").textContent  = nLivr;
 
   const box = $("logList");
   if (!lignes.length){
@@ -5436,17 +5753,18 @@ function renderLog(){
     const segs = [];
     for (let i = 0; i < (e.tot || 0); i++) segs.push('<span class="lgseg' + (i < (e.fait||0) ? " on" : "") + '"></span>');
 
-    const badge = kind === "tube" ? (e.on ? "coupée" : "décochée")
+    const badge = kind === "tube" ? (e.on ? "livrée magasin 2" : "décochée")
                 : kind === "livr" ? (e.on ? "livré magasin 2" : "livraison annulée")
                 : (e.on ? "fabriquée" : "décochée");
-    const titre = kind === "livr" ? (e.prof || "Livraison au magasin 2") : (e.dim || "—");
+    const titre = e.dim || (kind === "livr" ? "Livraison au magasin 2" : "—");
     const detail = kind === "tube"
-      ? (e.fait || 0) + " sur " + (e.tot || 0) + " coupe" + ((e.fait||0) > 1 ? "s" : "") +
-        (reste ? ",  reste <b>" + reste + "</b> à couper" : ",  <b>toutes les coupes faites</b>")
+      ? (e.fait || 0) + " sur " + (e.tot || 0) + " découpe" + ((e.fait||0) > 1 ? "s" : "") +
+        " au magasin 2" +
+        (reste ? ",  reste <b>" + reste + "</b> à livrer" : ",  <b>bon entièrement livré</b>")
       : kind === "livr"
-      ? "Porté au magasin 2  ·  " + (e.fait || 0) + " profilé" + ((e.fait||0) > 1 ? "s" : "") +
-        " sur " + (e.tot || 0) + " livré" + ((e.fait||0) > 1 ? "s" : "") +
-        (e.dim ? "  ·  " + esc(e.dim) : "")
+      ? "Portée au magasin 2  ·  " + (e.fait || 0) + " pièce" + ((e.fait||0) > 1 ? "s" : "") +
+        " sur " + (e.tot || 0) + " livrée" + ((e.fait||0) > 1 ? "s" : "") +
+        (reste ? ",  reste <b>" + reste + "</b> à livrer" : ",  <b>bon entièrement livré</b>")
       : (e.fait || 0) + " sur " + (e.tot || 0) + " fabriquée" + ((e.fait||0) > 1 ? "s" : "") +
         (reste ? ",  reste <b>" + reste + "</b> à fabriquer" : ",  <b>bon terminé</b>");
 
@@ -5458,8 +5776,9 @@ function renderLog(){
       '</div>' +
       '<span class="lgsub"><b>' + esc(e.nom) + '</b>' + (e.num ? "  ·  " + esc(e.num) : "") +
         (kind === "tube" && e.prof ? "  ·  " + esc(e.prof) : "") +
+        (kind === "livr" && e.prof ? "  ·  " + esc(e.prof) : "") +
         (kind === "livr" && e.t ? "  ·  " + (e.t === "JN" ? "jour et nuit" : "enrouleur") : "") +
-        (kind === "tube" && e.fen ? "  ·  fenêtre " + esc(e.fen) : "") +
+        ((kind === "tube" || kind === "livr") && e.fen ? "  ·  fenêtre " + esc(e.fen) : "") +
         (kind === "fab" && e.t ? "  ·  " + (e.t === "JN" ? "jour et nuit" : "enrouleur") : "") +
         (kind === "fab" && e.ref ? "  ·  " + esc(e.ref) : "") +
         (e.by ? "  ·  " + esc(nomDe(e.by)) : "") +
@@ -6209,9 +6528,14 @@ window.addEventListener("popstate", () => {
   /* mise à jour du stock en arrière plan, sans bloquer l'application */
   setTimeout(() => syncStock(true), 400);
   /* et à chaque retour sur l'application */
+  /* retour sur l'application : on rattrape tout ce qui attendait */
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden){ syncStock(true); syncAll(); }
+    if (document.hidden) return;
+    renderNet();
+    syncStock(true);
+    syncAll().then(() => { renderNet(); renderUserLine(); });
   });
+  window.addEventListener("pageshow", () => { renderNet(); });
 })();
 </script>
 
