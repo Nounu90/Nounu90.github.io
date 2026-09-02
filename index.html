@@ -4257,7 +4257,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "7.7";
+const APP_VERSION = "7.8";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4616,10 +4616,27 @@ function planBarres(pieces, barLen, offcuts, seuil){
   let neuves = 0;
   const left = rest0.slice();
   let guard = 0;
+  /* Ce qu'une longueur donnée peut avaler, en prenant les plus grandes pièces
+     d'abord. « left » est déjà trié du plus long au plus court. */
+  const avale = (len) => {
+    let rest = len, n = 0;
+    for (let i = 0; i < left.length; i++){
+      if (left[i].w <= rest + 0.001){ rest -= left[i].w; n++; }
+    }
+    return {rest:rest, n:n};
+  };
   while (left.length && guard++ < 500){
-    const big = left[0].w;
     let cont;
-    const si = stock.findIndex(x => x.len >= big);
+    /* On épuise d'abord les chutes de l'atelier. On retient celle qui laisse le
+       moins de perte une fois remplie, pas seulement celle qui accepte la plus
+       longue pièce : une chute de 120 cm doit servir pour une coupe de 117 cm,
+       même si la commande contient aussi une coupe de 197 cm. */
+    let si = -1, perte = Infinity;
+    for (let i = 0; i < stock.length; i++){
+      const r = avale(stock[i].len);
+      if (!r.n) continue;
+      if (r.rest < perte - 0.001){ si = i; perte = r.rest; }
+    }
     if (si >= 0){ const c = stock.splice(si,1)[0]; cont = {type:"chute", label:c.label, len:c.len, cuts:[]}; }
     else { neuves++; cont = {type:"neuve", label:"Barre " + neuves, len:barLen, cuts:[]}; }
     let rest = cont.len;
