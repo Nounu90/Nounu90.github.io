@@ -3506,12 +3506,20 @@ function adminAllowed(){
 /* Le plan de coupe est ouvert à tous. Ahmed n'y voit que la découpe des tubes :
    il coupe au magasin 1 et livre au magasin 2, le tissu ne le concerne pas. */
 const CUT_INTERDIT = [];
-const TUBE_SEUL = ["ahmed"];
+const TUBE_SEUL = ["ahmed"];        /* ne voit que la découpe des tubes */
+const FAB_SEUL  = ["soufiane"];     /* ne voit que la découpe du tissu */
 function cutAllowed(){
   return !!USER && CUT_INTERDIT.indexOf(String(USER.login || "").toLowerCase()) < 0;
 }
 function tubeSeul(){
   return !!USER && TUBE_SEUL.indexOf(String(USER.login || "").toLowerCase()) >= 0;
+}
+function fabSeul(){
+  return !!USER && FAB_SEUL.indexOf(String(USER.login || "").toLowerCase()) >= 0;
+}
+/* Le mode imposé à cet agent, ou rien s'il a le choix. */
+function modeImpose(){
+  return tubeSeul() ? "tube" : (fabSeul() ? "tissu" : "");
 }
 function artAllowed(){
   return !!USER && ART_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
@@ -4249,7 +4257,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "7.5";
+const APP_VERSION = "7.6";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4873,10 +4881,11 @@ $("cutTube").addEventListener("click", e => {
 });
 
 function renderMode(){
-  if (tubeSeul()) cutMode = "tube";
+  const impose = modeImpose();
+  if (impose) cutMode = impose;
   [...$("cutModeSeg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === cutMode)));
-  $("cutModeSeg").hidden = tubeSeul();
-  $("cutTubeParams").hidden = cutMode !== "tube";
+  $("cutModeSeg").hidden = !!impose;
+  $("cutTubeParams").hidden = cutMode !== "tube" || fabSeul();
   $("cutFabParams").hidden = cutMode !== "tissu" || tubeSeul();
 }
 
@@ -4959,10 +4968,14 @@ function renderPlan(){
   const out = $("cutOut");
   const all = ORDERS;
   const tSeul = tubeSeul();
-  /* Ahmed ne voit que la découpe des tubes : le choix du mode disparaît pour lui
-     dès l'ouverture de la page, quel que soit le bon. */
-  $("cutModeSeg").hidden = tSeul;
-  if (tSeul){ cutMode = "tube"; $("cutFabParams").hidden = true; }
+  const fSeul = fabSeul();
+  /* Chacun son poste : ahmed ne voit que les tubes, soufiane que le tissu.
+     Le choix du mode disparaît dès l'ouverture de la page, quel que soit le bon. */
+  const impose = modeImpose();
+  $("cutModeSeg").hidden = !!impose;
+  if (impose) cutMode = impose;
+  if (tSeul) $("cutFabParams").hidden = true;
+  if (fSeul) $("cutTubeParams").hidden = true;
   const o = all.find(x => x.id === cutOrderId);
   if (!o){
     $("cutOrderName").textContent = "Choisir un bon de commande";
@@ -4994,8 +5007,9 @@ function renderPlan(){
   $("cutFaitCard").hidden = false;
   renderFait(o, dims);
 
-  $("cutTubeCard").hidden = false;
-  renderTube(o);
+  /* La liste des découpes de profilé n'a pas de sens pour qui ne coupe pas de tube */
+  $("cutTubeCard").hidden = fSeul;
+  if (!fSeul) renderTube(o);
   $("cutFaitCard").hidden = tSeul;
   if (tSeul) $("piecesCard").hidden = true;
 
@@ -5420,9 +5434,9 @@ $("tileArt").addEventListener("click", () => {
 });
 $("tileCut").addEventListener("click", () => {
   if (!cutAllowed()) return;
-  /* L'atelier commence par les tubes : c'est le mode par défaut, personne ne
-     tombe sur un écran qui demande de choisir. */
-  cutMode = CUT.mode || "tube";
+  /* Le mode imposé gagne toujours ; sinon on reprend le dernier choix, et à
+     défaut les tubes : personne ne tombe sur un écran qui demande de choisir. */
+  cutMode = modeImpose() || CUT.mode || "tube";
   renderCut(); nav("cutSheet"); pullBons().then(() => renderCut());
 });
 
