@@ -468,6 +468,16 @@ select{appearance:none; -webkit-appearance:none}
 .pyet.production{background:var(--warn-soft); color:var(--warn)}
 .pyet.pret{background:var(--info-soft); color:var(--info)}
 .pyet.livre{background:var(--ok-soft); color:var(--ok)}
+/* nom du client, date du bon, et le lien WhatsApp */
+.pynom{display:flex; align-items:baseline; gap:8px; min-width:0}
+.pynom b{flex:1; min-width:0}
+.pydate{flex:none; font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted)}
+.pywa{
+  display:inline-flex; align-items:center; gap:5px; margin:5px 0 0 7px;
+  padding:3px 9px; border-radius:6px; background:var(--ok-soft); color:var(--ok);
+  font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+}
+.pywa svg{flex:none}
 .pysub{display:block; font-size:12px; color:var(--muted); margin-top:4px;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .pyr{flex:none; text-align:right}
@@ -866,6 +876,8 @@ select{appearance:none; -webkit-appearance:none}
 /* Les repères du bon tiennent sur une ligne qui se replie, plus en colonne à droite :
    la ligne de l'agent garde toute la largeur de la carte. */
 .hright{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; margin-top:3px}
+.hstores{display:block; margin-top:6px; font-family:"Archivo",sans-serif; font-size:12.5px;
+  font-weight:600; color:var(--ink); line-height:1.5}
 .hech{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500; color:var(--muted); white-space:nowrap}
 .hright:empty{display:none}
 .hpose{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500; color:var(--ink); white-space:nowrap}
@@ -1483,6 +1495,13 @@ select{appearance:none; -webkit-appearance:none}
     <div class="pyper" id="payPeriode" hidden>
       <input id="payD1" type="date" aria-label="Du">
       <input id="payD2" type="date" aria-label="Au">
+    </div>
+    <div class="filters" id="payEtats">
+      <button type="button" data-e="tous" aria-pressed="true">Toutes situations</button>
+      <button type="button" data-e="devis" aria-pressed="false">Devis</button>
+      <button type="button" data-e="production" aria-pressed="false">En production</button>
+      <button type="button" data-e="pret" aria-pressed="false">Prêt</button>
+      <button type="button" data-e="livre" aria-pressed="false">Livré</button>
     </div>
     <div id="payList"></div>
     <p class="hint" id="payHint"></p>
@@ -3908,6 +3927,22 @@ function orderTotals(o){
           poseLab: o.pose === "Livraison" ? "Livraison" : "Pose"};
 }
 
+/* « 2 stores enrouleurs · 1 store jour et nuit » plutôt que « 3 stores » :
+   d'un coup d'oeil on sait ce qu'il y a à fabriquer. */
+function storesParType(o){
+  const n = {ENR:0, JN:0};
+  (o && o.dims || []).forEach(d => {
+    const l = parseFloat(d.l), h = parseFloat(d.h);
+    if (!(l > 0 && h > 0)) return;
+    const t = o.type === "MIX" ? (d.type === "JN" ? "JN" : "ENR") : (o.type === "JN" ? "JN" : "ENR");
+    n[t] += qtyRow(d);
+  });
+  const out = [];
+  if (n.ENR) out.push(n.ENR + " store" + (n.ENR > 1 ? "s" : "") + " enrouleur" + (n.ENR > 1 ? "s" : ""));
+  if (n.JN)  out.push(n.JN + " store" + (n.JN > 1 ? "s" : "") + " jour et nuit");
+  return out;
+}
+
 /* Rappel de l'échéance dans la liste des bons */
 function echSuffix(o){
   if (!o || !o.ech) return "";
@@ -3983,14 +4018,15 @@ function renderHist(){
             (paye ? '<u>payé</u>' : '') +
             '</span>'
           : '') +
-        '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
-          '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + '</small>' +
+        '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + '</small>' +
           '<span class="hright">' +
 
             (t.pose ? '<span class="hpose">' + (t.poseLab === "Livraison" ? "Livr." : "Pose") + ' + ' + fr(t.pose) + '</span>' : '') +
             echSuffix(o) +
             '<span class="hnum">' + o.num + '</span>' +
-          '</span></span>' +
+          '</span>' +
+          '<span class="hstores">' + (storesParType(o).map(esc).join("<br>") || "Aucun store") + '</span>' +
+        '</span>' +
       '</button>' +
       '<span class="hside">' +
         '<span class="etatsel ' + et + '">' +
@@ -4213,7 +4249,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "7.4";
+const APP_VERSION = "7.5";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4552,7 +4588,7 @@ if ((CUT_SAVED.v || 0) < 3){
 }
 function surplusDe(t){ return t === "JN" ? CUT.surJN : CUT.surENR; }
 let cutOrderId = null;
-let cutMode = null;   /* "tube" | "tissu" */
+let cutMode = "tube";   /* "tube" | "tissu" */
 
 function cm(v){ return fr(v, Math.abs(v % 1) > 0.001 ? 1 : 0); }
 
@@ -5384,7 +5420,10 @@ $("tileArt").addEventListener("click", () => {
 });
 $("tileCut").addEventListener("click", () => {
   if (!cutAllowed()) return;
-  cutMode = CUT.mode || null; renderCut(); nav("cutSheet"); pullBons().then(() => renderCut());
+  /* L'atelier commence par les tubes : c'est le mode par défaut, personne ne
+     tombe sur un écran qui demande de choisir. */
+  cutMode = CUT.mode || "tube";
+  renderCut(); nav("cutSheet"); pullBons().then(() => renderCut());
 });
 
 
@@ -5419,12 +5458,13 @@ function paySolde(o){ const d = duDe(o); return d > 0 && payeDe(o) >= d - 0.01; 
 
 /* Les bons concernés : tout sauf les devis, du plus récent au plus ancien */
 function bonsPayables(){
-  return (ORDERS || []).filter(o => etatDe(o) !== "devis")
+  return (ORDERS || []).filter(o => etatDe(o) !== "devis" || payEtat === "devis")
     .sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
 }
 
 /* --- filtres de date --- */
 let payFiltre = "mois";
+let payEtat = "tous";          /* filtre par situation du bon */
 let payDu = "", payAu = "";
 let payOuvert = {};        /* bons dépliés */
 
@@ -5461,7 +5501,8 @@ function dansFenetre(o){
 }
 
 function renderPay(){
-  const list = bonsPayables().filter(dansFenetre);
+  const list = bonsPayables().filter(dansFenetre)
+    .filter(o => payEtat === "tous" || etatDe(o) === payEtat);
   const du    = list.reduce((s,o) => s + duDe(o), 0);
   const paye  = list.reduce((s,o) => s + payeDe(o), 0);
   const reste = list.reduce((s,o) => s + soldeDe(o), 0);
@@ -5473,6 +5514,8 @@ function renderPay(){
 
   Array.prototype.forEach.call($("payFiltres").querySelectorAll("button"),
     b => b.setAttribute("aria-pressed", String(b.dataset.f === payFiltre)));
+  Array.prototype.forEach.call($("payEtats").querySelectorAll("button"),
+    b => b.setAttribute("aria-pressed", String(b.dataset.e === payEtat)));
   $("payPeriode").hidden = payFiltre !== "periode";
   $("payD1").value = payDu; $("payD2").value = payAu;
 
@@ -5488,11 +5531,19 @@ function renderPay(){
     const d = duDe(o), p = payeDe(o), r = soldeDe(o), ok = paySolde(o);
     const ouvert = !!payOuvert[o.id];
     const lignes = paiements(o).slice().sort((a,b) => String(a.date).localeCompare(String(b.date)));
-    return '<div class="pyrow' + (ok ? " ok" : "") + '">' +
+      const wa = telWa(o.tel);
+      const dbon = new Date(o.date || 0);
+      const dlab = isNaN(dbon.getTime()) ? "" :
+        pad(dbon.getDate()) + "/" + pad(dbon.getMonth()+1) + "/" + dbon.getFullYear();
+      return '<div class="pyrow' + (ok ? " ok" : "") + '">' +
       '<button class="pyhead" type="button" data-py="' + o.id + '">' +
         '<span class="pyl">' +
-          '<b>' + esc(o.nom || "Client sans nom") + '</b>' +
+          '<span class="pynom"><b>' + esc(o.nom || "Client sans nom") + '</b>' +
+            (dlab ? '<span class="pydate">' + dlab + '</span>' : '') + '</span>' +
           '<span class="pyet etat-' + etatDe(o) + '">' + etatLabel(etatDe(o)) + '</span>' +
+          (wa ? '<span class="pywa" data-wa="' + esc(wa) + '" role="link" tabindex="0">' +
+                  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/><path d="M8.6 9.4c0 3.3 2.7 6 6 6"/></svg>' +
+                  esc(telAffiche(o.tel)) + '</span>' : '') +
           '<span class="pysub">' + esc(o.num || "") + '  ·  ' + typeLabel(o) +
             (puFam(o.type === "JN" ? "JN" : "ENR", o)
               ? '  ·  ' + fr(puFam(o.type === "JN" ? "JN" : "ENR", o), 0) + ' MAD/m² HT' : '') +
@@ -5533,6 +5584,24 @@ function renderPay(){
   $("payHint").textContent = list.length + " bon" + (list.length > 1 ? "s" : "") +
     (nCours ? ",  " + nCours + " non soldé" + (nCours > 1 ? "s" : "") : ",  tous soldés") +
     ".  Le total dû suit le bon : TTC s'il est facturé, HT sinon.";
+}
+
+/* 0699554433 devient wa.me/212699554433 : un appui ouvre la conversation
+   WhatsApp du client, sans passer par les contacts du téléphone. */
+function telWa(tel){
+  let t = String(tel || "").replace(/[^0-9+]/g, "");
+  if (!t) return "";
+  t = t.replace(/^\+/, "");
+  if (t.indexOf("00") === 0) t = t.slice(2);
+  if (t.indexOf("212") === 0) t = t.slice(3);
+  t = t.replace(/^0+/, "");
+  if (t.length < 8) return "";
+  return "https://wa.me/212" + t;
+}
+function telAffiche(tel){
+  const t = String(tel || "").replace(/[^0-9]/g, "");
+  if (t.length === 10) return t.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, "$1 $2 $3 $4 $5");
+  return String(tel || "").trim();
 }
 
 function typeLabel(o){
@@ -5585,10 +5654,23 @@ $("payFiltres").addEventListener("click", e => {
   payFiltre = b.dataset.f;
   renderPay();
 });
+$("payEtats").addEventListener("click", e => {
+  const b = e.target.closest("button[data-e]");
+  if (!b) return;
+  payEtat = b.dataset.e;
+  renderPay();
+});
 $("payD1").addEventListener("change", e => { payDu = e.target.value; renderPay(); });
 $("payD2").addEventListener("change", e => { payAu = e.target.value; renderPay(); });
 
 $("payList").addEventListener("click", e => {
+  /* le numéro ouvre WhatsApp, il ne déplie pas la ligne */
+  const w = e.target.closest("[data-wa]");
+  if (w){
+    e.preventDefault(); e.stopPropagation();
+    window.open(w.dataset.wa, "_blank", "noopener");
+    return;
+  }
   const h = e.target.closest("button[data-py]");
   if (h){ payOuvert[h.dataset.py] = !payOuvert[h.dataset.py]; renderPay(); return; }
 
