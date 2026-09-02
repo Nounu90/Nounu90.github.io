@@ -128,6 +128,9 @@ select{appearance:none; -webkit-appearance:none}
 .hint{font-size:12.5px; color:var(--muted); margin:8px 2px 0; line-height:1.5}
 
 /* ---------- type toggle ---------- */
+/* Sans ceci, une règle display: du composant l'emporte sur l'attribut hidden
+   et un bloc censé être caché reste à l'écran. */
+[hidden]{display:none !important}
 .seg{display:grid; grid-template-columns:1fr 1fr; gap:8px}
 .seg button{
   padding:13px 10px; border-radius:11px; border:1px solid var(--line); background:var(--card2);
@@ -881,6 +884,9 @@ select{appearance:none; -webkit-appearance:none}
   background:var(--ok-soft); border-radius:5px; padding:2px 6px; margin-left:8px; letter-spacing:.03em;
 }
 /* Un bon entièrement encaissé se voit d'un coup d'œil dans l'historique. */
+/* La liste de choix montre où en est chaque bon pour l'agent qui la regarde */
+.hrow.pkok{border-color:var(--ok); border-left:3px solid var(--ok)}
+.hrow.pkatt{border-color:var(--warn); border-left:3px solid var(--warn)}
 .hrow.paye{border-color:var(--ok); border-left:3px solid var(--ok)}
 .hrow.paye .httc{color:var(--ok)}
 .hacts{display:flex; gap:2px; flex:none}
@@ -4207,7 +4213,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "7.3";
+const APP_VERSION = "7.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4831,9 +4837,11 @@ $("cutTube").addEventListener("click", e => {
 });
 
 function renderMode(){
+  if (tubeSeul()) cutMode = "tube";
   [...$("cutModeSeg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === cutMode)));
+  $("cutModeSeg").hidden = tubeSeul();
   $("cutTubeParams").hidden = cutMode !== "tube";
-  $("cutFabParams").hidden = cutMode !== "tissu";
+  $("cutFabParams").hidden = cutMode !== "tissu" || tubeSeul();
 }
 
 $("cutModeSeg").addEventListener("click", e => {
@@ -4914,6 +4922,11 @@ function ordDims(o){
 function renderPlan(){
   const out = $("cutOut");
   const all = ORDERS;
+  const tSeul = tubeSeul();
+  /* Ahmed ne voit que la découpe des tubes : le choix du mode disparaît pour lui
+     dès l'ouverture de la page, quel que soit le bon. */
+  $("cutModeSeg").hidden = tSeul;
+  if (tSeul){ cutMode = "tube"; $("cutFabParams").hidden = true; }
   const o = all.find(x => x.id === cutOrderId);
   if (!o){
     $("cutOrderName").textContent = "Choisir un bon de commande";
@@ -4945,16 +4958,10 @@ function renderPlan(){
   $("cutFaitCard").hidden = false;
   renderFait(o, dims);
 
-  /* Ahmed ne voit que la découpe des tubes : ni le tissu, ni la fiche. */
-  const tSeul = tubeSeul();
   $("cutTubeCard").hidden = false;
   renderTube(o);
   $("cutFaitCard").hidden = tSeul;
-  $("cutModeSeg").hidden = tSeul;
-  if (tSeul){
-    cutMode = "tube";
-    $("piecesCard").hidden = true;
-  }
+  if (tSeul) $("piecesCard").hidden = true;
 
   if (!cutMode){
     out.innerHTML = '<div class="empty">Choisissez ci dessus ce que vous voulez couper : les tubes ou le tissu.</div>';
@@ -5298,6 +5305,30 @@ $("cutBar").addEventListener("input", e => {
 });
 
 /* --- choix du bon --- */
+/* Ce que l'agent a besoin de savoir avant d'ouvrir un bon : où il en est de SON
+   travail. Ahmed compte ses découpes, l'atelier compte ses fenêtres. Vert quand
+   c'est fini, orange quand il reste à faire. */
+function pickEtat(o){
+  if (!o || o.status !== "sent") return null;
+  if (tubeSeul()){
+    const b = bilanTube(o);
+    if (!b.tot) return null;
+    return {ok: b.livre === b.tot,
+            txt: b.livre + " / " + b.tot,
+            sous: b.reste ? "reste " + b.reste + " découpe" + (b.reste > 1 ? "s" : "") + " à couper"
+                          : "toutes les découpes sont au magasin 2"};
+  }
+  const dims = ordDims(o);
+  if (!dims.length) return null;
+  const done = faites(o);
+  const n = dims.filter(d => done.indexOf(d.key) >= 0).length;
+  const reste = dims.length - n;
+  return {ok: reste === 0,
+          txt: n + " / " + dims.length,
+          sous: reste ? "reste " + reste + " fenêtre" + (reste > 1 ? "s" : "") + " à fabriquer"
+                      : "toutes les fenêtres sont fabriquées"};
+}
+
 let pickCible = "cut";
 function ouvrirPickBon(cible){
   pickCible = cible || "cut";
@@ -5310,15 +5341,20 @@ function ouvrirPickBon(cible){
   all.forEach(o => {
     const t = orderTotals(o);
     const d = new Date(o.date);
+    const et = pickEtat(o);
     const btn = document.createElement("button");
-    btn.className = "hrow";
+    btn.className = "hrow" + (et ? (et.ok ? " pkok" : " pkatt") : "");
     btn.style.width = "100%";
     btn.dataset.cut = o.id;
     btn.innerHTML =
-      '<span class="hmain"><span class="hl1"><b>' + (o.nom || "Client sans nom") + '</b>' +
-      '<span class="badge ' + (o.status === "sent" ? "ok" : "") + '">' + (o.status === "sent" ? "Envoyé" : "Brouillon") + '</span></span>' +
-      '<span class="hl2"><small>' + o.num + '  ·  ' + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
-      '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') + '</small></span></span>';
+      '<span class="hmain"><span class="hl1"><b>' + esc(o.nom || "Client sans nom") + '</b>' +
+      (et ? '<span class="badge ' + (et.ok ? "ok" : "warn") + '">' + et.txt + '</span>'
+          : '<span class="badge ' + (o.status === "sent" ? "ok" : "") + '">' +
+            (o.status === "sent" ? "Envoyé" : "Brouillon") + '</span>') +
+      '</span>' +
+      '<span class="hl2"><small>' + esc(o.num) + '  ·  ' + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
+      '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') +
+      (et ? '<br>' + et.sous : '') + '</small></span></span>';
     body.appendChild(btn);
   });
   armBack();
