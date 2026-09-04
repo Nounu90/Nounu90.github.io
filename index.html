@@ -544,6 +544,13 @@ select{appearance:none; -webkit-appearance:none}
 .pyline.recu .pyv{color:var(--ok)}
 .pyline{display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid var(--line)}
 .pyd{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); flex:none}
+/* la date reste modifiable après enregistrement : une erreur de saisie se
+   corrige sans avoir à supprimer puis recréer le paiement */
+input.pyd{
+  border:1px solid var(--line); border-radius:7px; padding:5px 6px; background:var(--card2);
+  color:var(--ink); font-size:11.5px; width:104px; min-width:0;
+}
+input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)}
 .pym{flex:1; min-width:0; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .pyv{font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:600; flex:none}
 .pydel{flex:none; width:26px; height:26px; border-radius:7px; border:1px solid var(--line);
@@ -4637,7 +4644,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "8.1";
+const APP_VERSION = "8.2";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6095,7 +6102,8 @@ function renderPay(){
                         (x.recu ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : '') +
                         '</button>'
                       : (x.recu ? '<span class="pyok2 on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>' : '')) +
-                    '<span class="pyd">' + esc(dateFR(x.date)) + '</span>' +
+                    '<input class="pyd" type="date" data-pydate="' + o.id + ':' + x.id + '" ' +
+                      'value="' + esc(String(x.date || "")) + '" aria-label="Date du paiement">' +
                     '<span class="pym">' + esc(x.mode || "") + '</span>' +
                     '<span class="pyv">' + fr(parseFloat(x.montant) || 0, 2) + '</span>' +
                     '<button class="pydel" type="button" data-pydel="' + o.id + ':' + x.id + '" aria-label="Retirer">' +
@@ -6205,6 +6213,24 @@ $("payEtats").addEventListener("click", e => {
 });
 $("payD1").addEventListener("change", e => { payDu = e.target.value; renderPay(); });
 $("payD2").addEventListener("change", e => { payAu = e.target.value; renderPay(); });
+
+$("payList").addEventListener("change", e => {
+  const d = e.target.closest("input[data-pydate]");
+  if (!d) return;
+  const [oid, pid] = d.dataset.pydate.split(":");
+  const o = ORDERS.find(x => x.id === oid);
+  if (!o) return;
+  const p = paiements(o).find(x => x.id === pid);
+  if (!p) return;
+  const neuf = d.value || "";
+  if (!neuf){ d.value = p.date || ""; toast("La date ne peut pas être vide"); return; }
+  if (neuf === p.date) return;
+  const avant = p.date;
+  p.date = neuf;
+  touche(o); persistOrders(); pushBon(o); payPush(o);
+  renderPay(); renderTri(); renderLog();
+  toast("Paiement du " + dateFR(avant) + " reporté au " + dateFR(neuf));
+});
 
 $("payList").addEventListener("click", e => {
   /* confirmation d'un encaissement, avant tout autre geste sur la ligne */
