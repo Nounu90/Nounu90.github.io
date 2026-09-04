@@ -372,6 +372,9 @@ select{appearance:none; -webkit-appearance:none}
 .sheet.open{display:flex}
 /* un sélecteur s'ouvre par dessus l'écran qui l'appelle, quel que soit l'ordre du document */
 .sheet.pick{z-index:60}
+/* même chose pour une feuille appelée depuis une autre : sans ça elle s'ouvre
+   dessous et l'agent croit que le bouton n'a rien fait */
+.sheet.over{z-index:58}
 .sheet-top{
   position:sticky; top:0; background:var(--card); border-bottom:1px solid var(--line);
   display:flex; align-items:center; gap:12px; padding:14px 16px;
@@ -1559,7 +1562,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 </div>
 
 <!-- RESUME D'UNE COMMANDE, A ENVOYER AU GROUPE -->
-<div class="sheet" id="resSheet">
+<div class="sheet over" id="resSheet">
   <div class="sheet-top">
     <button class="icon-btn" data-close="resSheet" aria-label="Fermer">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -2509,7 +2512,7 @@ function gpsCoords(){
 $("gpsGo").addEventListener("click", () => {
   const u = gpsUrl();
   if (!u) return toast("Collez d'abord un lien Maps ou des coordonnées");
-  window.open(u, "_blank", "noopener");
+  ouvrirLien(u);
 });
 $("gpsHere").addEventListener("click", () => {
   if (!navigator.geolocation) return toast("Ce téléphone ne donne pas la position");
@@ -2787,6 +2790,24 @@ photosEl.addEventListener("click", e => {
 
 /* ============ Toast ============ */
 let tt;
+/* Dans une application installée sur l'écran d'accueil, window.open reste souvent
+   sans effet : Android n'ouvre rien et l'agent croit que le bouton est mort.
+   Un vrai lien cliqué par le code passe, lui, dans tous les cas. */
+function ouvrirLien(url){
+  if (!url) return;
+  try {
+    const a = document.createElement("a");
+    a.href = url; a.target = "_blank"; a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 0);
+    return;
+  } catch(e){}
+  try { window.open(url, "_blank", "noopener"); return; } catch(e){}
+  try { location.href = url; } catch(e){}
+}
+
 function toast(msg){
   const el = $("toast");
   el.textContent = msg; el.classList.add("show");
@@ -4686,7 +4707,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "8.4";
+const APP_VERSION = "8.6";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -5164,25 +5185,38 @@ function planTissu(stores, laize, sLaize, sLong, stock){
   pieces.sort((a,b) => (a.w * a.len) - (b.w * b.len));
 
   const bands = [];
-  items.forEach(s => {
-    const nd = need(s);
-    /* 1. une bande déjà ouverte qui accepte la largeur et la longueur */
+  /* La bande ouverte qui va le mieux, parmi celles d'une source donnée. */
+  const meilleure = (s, nd, src) => {
     let best = null, diff = Infinity;
     bands.forEach(b => {
+      if (b.src !== src) return;
       if (b.used + fabW(s) > b.width + 0.001) return;
       if (b.src === "chute" && Math.max(b.unroll, nd) > b.maxLen + 0.001) return;
       const d = Math.abs(b.unroll - nd);
       if (d < diff){ diff = d; best = b; }
     });
-    if (best){ best.items.push(s); best.used += fabW(s); best.unroll = Math.max(best.unroll, nd); return; }
-    /* 2. la plus petite chute en stock qui convient */
+    return best;
+  };
+  const pose = (b, s, nd) => { b.items.push(s); b.used += fabW(s); b.unroll = Math.max(b.unroll, nd); };
+
+  items.forEach(s => {
+    const nd = need(s);
+    /* 1. une chute déjà entamée qui accepte encore cette fenêtre */
+    let b = meilleure(s, nd, "chute");
+    if (b){ pose(b, s, nd); return; }
+    /* 2. la plus petite chute du magasin qui convient. Elle passe avant le
+       rouleau, et avant de garnir le côté d'une bande déjà déroulée : sinon les
+       chutes du magasin ne servent jamais et s'empilent à l'atelier. */
     const pi = pieces.findIndex(pc => pc.w >= fabW(s) - 0.001 && pc.len >= nd - 0.001);
     if (pi >= 0){
       const pc = pieces.splice(pi, 1)[0];
       bands.push({items:[s], used:fabW(s), unroll:nd, src:"chute", width:pc.w, maxLen:pc.len, label:pc.label});
       return;
     }
-    /* 3. sinon on déroule le rouleau */
+    /* 3. le côté libre d'une bande déjà déroulée */
+    b = meilleure(s, nd, "rouleau");
+    if (b){ pose(b, s, nd); return; }
+    /* 4. sinon on déroule le rouleau */
     bands.push({items:[s], used:fabW(s), unroll:nd, src:"rouleau", width:laize, maxLen:Infinity});
   });
 
@@ -6325,7 +6359,7 @@ $("payList").addEventListener("click", e => {
   const w = e.target.closest("[data-wa]");
   if (w){
     e.preventDefault(); e.stopPropagation();
-    window.open(w.dataset.wa, "_blank", "noopener");
+    ouvrirLien(w.dataset.wa);
     return;
   }
   const h = e.target.closest("button[data-py]");
@@ -6526,17 +6560,29 @@ function resumeTexte(o){
 async function ouvrirResume(o){
   if (!o) return;
   resO = o;
-  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch(e){}
-  const c = resumeImage(o);
-  if (resUrl) URL.revokeObjectURL(resUrl);
-  resUrl = c.toDataURL("image/png");
-  $("resImg").src = resUrl;
+  /* L'agent doit voir tout de suite que son appui a été pris en compte : la
+     feuille s'ouvre avant le dessin, qui prend un instant sur un vieux téléphone. */
   $("resTitre").textContent = "Résumé " + (o.num || "");
-  resBlob = null;
-  c.toBlob(b => { resBlob = b; }, "image/png");
-  $("resHint").textContent = "« Envoyer au groupe » ouvre le partage du téléphone : " +
-    "choisissez WhatsApp puis le groupe MSTORECASA. L'image et le texte partent ensemble.";
+  $("resImg").removeAttribute("src");
+  $("resHint").textContent = "Préparation de l'image...";
   openSheet("resSheet");
+  try {
+    /* on n'attend les polices qu'un court instant : sur certains téléphones
+       cette promesse ne se résout jamais et l'écran restait vide */
+    if (document.fonts && document.fonts.ready){
+      await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 900))]);
+    }
+    const c = resumeImage(o);
+    resUrl = c.toDataURL("image/png");
+    $("resImg").src = resUrl;
+    resBlob = null;
+    c.toBlob(b => { resBlob = b; }, "image/png");
+    $("resHint").textContent = "« Envoyer au groupe » ouvre le partage du téléphone : " +
+      "choisissez WhatsApp puis le groupe MSTORECASA. L'image et le texte partent ensemble.";
+  } catch(e){
+    $("resHint").textContent = "L'image n'a pas pu être préparée : " + (e && e.message ? e.message : "erreur inconnue");
+    toast("Résumé impossible à préparer");
+  }
 }
 
 function resNom(o){
@@ -6581,7 +6627,7 @@ $("resSave").addEventListener("click", async () => {
 });
 
 $("resGroupe").addEventListener("click", () => {
-  window.open(GROUPE_WA, "_blank", "noopener");
+  ouvrirLien(GROUPE_WA);
 });
 
 /* ============ Clients ============ */
@@ -6788,7 +6834,7 @@ $("cliList").addEventListener("click", e => {
 $("cliOneSheet").addEventListener("click", e => {
   const w = e.target.closest("[data-wa]");
   if (!w) return;
-  window.open(w.dataset.wa, "_blank", "noopener");
+  ouvrirLien(w.dataset.wa);
 });
 $("tileCli").addEventListener("click", () => {
   cliQ = ""; cliFiltre = "tous"; $("cliSearch").value = "";

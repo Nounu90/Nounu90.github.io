@@ -1,5 +1,5 @@
 /* MSTORECASA - service worker */
-const V = "mstorecasa-v40";
+const V = "mstorecasa-v42";
 const CORE = [
   "./", "./index.html", "./manifest.json", "./supabase.js",
   "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png"
