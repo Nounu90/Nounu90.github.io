@@ -2558,8 +2558,10 @@ $("pcList").addEventListener("input", e => {
   const inp = e.target.closest("input[data-k]");
   if (!inp) return;
   const v = inp.value.trim();
-  pcSet(inp.dataset.fam, inp.dataset.k, v);
+  const fam = inp.dataset.fam, k = inp.dataset.k;
+  pcSet(fam, k, v);
   inp.className = v === "" ? "" : "edited";
+  if (k === "tissuCoupe" || k === "tissuVente") majChutes(fam);
   pcCheck();
   /* On enregistre et on partage sans attendre que l'agent quitte la case :
      sinon une saisie non terminée ne partait jamais vers les autres. */
@@ -4644,7 +4646,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "8.2";
+const APP_VERSION = "8.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4685,14 +4687,32 @@ const TISSU_DEF = {
   ENR: [
     {k:"tissuCoupe", label:"Tissu m² coupé", u:"m²", auto:d => d.coupeM2},
     {k:"tissuVente", label:"Tissu m² vente", u:"m²", auto:d => d.venteM2},
-    {k:"chutes",     label:"Chutes",         u:"m²", auto:d => d.chuteM2}
+    {k:"chutes",     label:"Chutes",         u:"m²", auto:(d, fam) => chuteAuto(d, fam)}
   ],
   JN: [
     {k:"tissuCoupe", label:"Tissu m² coupé", u:"m²", auto:d => d.coupeM2},
     {k:"tissuVente", label:"Tissu m² vente", u:"m²", auto:d => d.venteM2},
-    {k:"chutes",     label:"Chutes",         u:"m²", auto:d => d.chuteM2}
+    {k:"chutes",     label:"Chutes",         u:"m²", auto:(d, fam) => chuteAuto(d, fam)}
   ]
 };
+
+/* Les chutes se déduisent des deux cases du dessus : coupé moins vente. Si
+   l'atelier corrige le m² coupé, le total des chutes suit tout de suite.
+   Un résultat négatif veut dire qu'on a puisé dans les chutes du stock : on
+   retombe alors sur les chutes réellement produites par le plan de coupe. */
+function tissuVal(fam, k, d){
+  const man = pcVal(fam, k);
+  if (man !== null){
+    const n = parseFloat(String(man).replace(",", "."));
+    if (!isNaN(n)) return n;
+  }
+  const def = TISSU_DEF[fam].find(x => x.k === k);
+  return def && def.auto ? def.auto(d, fam) : 0;
+}
+function chuteAuto(d, fam){
+  const ecart = tissuVal(fam, "tissuCoupe", d) - tissuVal(fam, "tissuVente", d);
+  return ecart > 0 ? ecart : (d.chuteM2 || 0);
+}
 const FAM_LABEL = {ENR:"Store enrouleur", JN:"Store jour et nuit"};
 
 /* Mesures d'une famille de stores d'un bon */
@@ -4807,7 +4827,18 @@ function pcNum(fam, def, d){
     return isNaN(n) ? String(man) : n;
   }
   if (!def.auto) return "";
-  return Math.round(def.auto(d) * 100) / 100;
+  return Math.round(def.auto(d, fam) * 100) / 100;
+}
+
+/* Le total des chutes se réécrit seul quand le m² coupé ou vendu change.
+   On ne redessine pas la fiche : le clavier resterait ouvert sur une case vide. */
+function majChutes(fam){
+  const d = pcData[fam] || famData(fam);
+  const inp = $("pcList").querySelector('input[data-fam="' + fam + '"][data-k="chutes"]');
+  if (!inp) return;
+  if (pcVal(fam, "chutes") !== null) return;      /* l'atelier a mis sa propre valeur */
+  inp.value = fr(Math.round(chuteAuto(d, fam) * 100) / 100);
+  inp.className = "auto";
 }
 
 /* Ce qui manque encore pour pouvoir envoyer la fiche */
@@ -4817,7 +4848,7 @@ function pcManquants(){
     const d = pcData[fam] || famData(fam);
     TISSU_DEF[fam].concat(PIECES_DEF[fam]).forEach(def => {
       const man = pcVal(fam, def.k);
-      const auto = def.auto ? def.auto(d) : null;
+      const auto = def.auto ? def.auto(d, fam) : null;
       if (man === null && auto === null) out.push({fam:fam, k:def.k, label:def.label});
     });
   });
@@ -4846,7 +4877,7 @@ function renderPieces(){
     const grp = (title, defs) =>
       '<div class="pcgrp"><span>' + title + '</span>' +
       defs.map(def => {
-        const a   = def.auto ? Math.round(def.auto(d) * 100) / 100 : null;
+        const a   = def.auto ? Math.round(def.auto(d, fam) * 100) / 100 : null;
         const man = pcVal(fam, def.k);
         const val = man !== null ? esc(String(man)) : (a !== null ? fr(a) : "");
         const cls = man !== null ? "edited" : (a !== null ? "auto" : "");
