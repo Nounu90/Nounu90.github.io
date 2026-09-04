@@ -425,6 +425,56 @@ select{appearance:none; -webkit-appearance:none}
 .cpbil .v b{color:var(--ok)}
 .cpbil .w b{color:var(--warn)}
 /* --- paiements --- */
+/* --- carte de rappel du bon, en tête du plan de coupe --- */
+.cutinfo{border:1px solid var(--line); border-radius:13px; background:var(--card);
+  margin-bottom:14px; overflow:hidden}
+.cutinfo .cih{display:flex; gap:8px; padding:12px 8px; background:var(--card2);
+  border-bottom:1px solid var(--line)}
+.cutinfo .cih > div{flex:1; text-align:center; min-width:0}
+.cutinfo .cih b{display:block; font-family:"IBM Plex Mono",monospace; font-size:16px;
+  font-weight:600; color:var(--ink)}
+.cutinfo .cih small{display:block; font-family:"Archivo",sans-serif; font-size:9.5px;
+  font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-top:4px}
+.ciline{display:flex; justify-content:space-between; gap:10px; padding:8px 13px;
+  border-top:1px solid var(--line); font-size:12.5px; color:var(--muted)}
+.ciline:first-child{border-top:0}
+.ciline b{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink); white-space:nowrap}
+.ciline b.ok{color:var(--ok)}
+.ciline b.att{color:var(--warn)}
+.citis{padding:10px 13px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:6px}
+.citis span{font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600;
+  padding:3px 9px; border-radius:6px; background:var(--accent-soft); color:var(--accent)}
+/* --- clients : fiche et historique --- */
+.clrow{width:100%; display:flex; align-items:center; gap:11px; padding:12px 13px;
+  background:var(--card); border:1px solid var(--line); border-radius:12px;
+  margin-bottom:9px; text-align:left}
+.clrow.dette{border-left:3px solid var(--warn)}
+.clini{width:36px; height:36px; flex:none; border-radius:50%; display:grid; place-items:center;
+  background:var(--accent-soft); color:var(--accent);
+  font-family:"Archivo",sans-serif; font-weight:700; font-size:15px}
+.cll{flex:1; min-width:0}
+.cll b{display:block; font-family:"Archivo",sans-serif; font-size:14.5px; font-weight:600;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.cll small{display:block; font-size:12px; color:var(--muted); margin-top:3px}
+.clr{flex:none; text-align:right}
+.clr b{display:block; font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:600}
+.clr small{display:block; font-family:"IBM Plex Mono",monospace; font-size:11px;
+  color:var(--warn); margin-top:3px}
+.clfhead{padding:14px; border-radius:13px; background:var(--accent-soft); margin-bottom:14px}
+.clfhead b{display:block; font-family:"Archivo",sans-serif; font-size:17px; font-weight:600; color:var(--accent)}
+.clfhead small{display:block; font-size:12.5px; color:var(--accent); margin-top:4px; opacity:.85}
+.clbon{border:1px solid var(--line); border-radius:12px; background:var(--card); margin-bottom:10px; overflow:hidden}
+.clbon.paye{border-color:var(--ok)}
+.clbhead{display:flex; align-items:baseline; gap:9px; padding:11px 13px; background:var(--card2);
+  border-bottom:1px solid var(--line)}
+.clbhead b{flex:1; min-width:0; font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600}
+.clbody{padding:11px 13px}
+.clline{display:flex; justify-content:space-between; gap:10px; font-size:12.5px;
+  padding:3px 0; color:var(--muted)}
+.clline b{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink)}
+.clpay{display:flex; justify-content:space-between; gap:10px; font-size:12px;
+  padding:4px 0; border-top:1px dashed var(--line); margin-top:6px; color:var(--muted)}
+.clpay b{font-family:"IBM Plex Mono",monospace; color:var(--ok)}
 /* --- encaissements du trimestre : banque d'un côté, espèce de l'autre --- */
 .trtab{border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card)}
 .trh, .trr{display:grid; grid-template-columns:1fr 84px 84px; gap:8px; padding:10px 12px; align-items:baseline}
@@ -485,6 +535,13 @@ select{appearance:none; -webkit-appearance:none}
 .pyst{display:block; font-family:"IBM Plex Mono",monospace; font-size:11px; margin-top:3px; color:var(--warn)}
 .pyrow.ok .pyst{color:var(--ok)}
 .pybody{padding:0 13px 13px; border-top:1px solid var(--line)}
+/* case de confirmation d'encaissement, réservée à la direction */
+.pyok2{
+  flex:none; width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+  border:1.5px dashed var(--line-strong); background:transparent; color:var(--muted); cursor:pointer;
+}
+.pyok2.on{border-style:solid; border-color:var(--ok); background:var(--ok); color:#fff}
+.pyline.recu .pyv{color:var(--ok)}
 .pyline{display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid var(--line)}
 .pyd{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); flex:none}
 .pym{flex:1; min-width:0; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -876,6 +933,24 @@ select{appearance:none; -webkit-appearance:none}
 /* Les repères du bon tiennent sur une ligne qui se replie, plus en colonne à droite :
    la ligne de l'agent garde toute la largeur de la carte. */
 .hright{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; margin-top:3px}
+/* marqueurs de fin de dossier et de saisie SAGE */
+.hmark{display:flex; flex-direction:column; gap:6px; flex:none; align-items:center}
+.hchk{
+  width:34px; height:34px; border-radius:10px; border:1.5px dashed var(--line-strong);
+  background:transparent; color:var(--muted); display:grid; place-items:center; cursor:pointer;
+  font-family:"Archivo",sans-serif; font-size:9px; font-weight:700; letter-spacing:.04em; line-height:1;
+}
+.hchk.on{border-style:solid; border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
+.hchk.sage.on{border-color:var(--info); background:var(--info-soft); color:var(--info)}
+.hchk.bloque{opacity:.35}
+/* avancement de l'atelier sur la ligne du bon */
+.hprog{display:inline-flex; align-items:center; gap:4px; padding:1px 7px; border-radius:6px;
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600;
+  background:var(--card2); color:var(--muted); white-space:nowrap}
+.hprog.ok{background:var(--ok-soft); color:var(--ok)}
+.hprog.att{background:var(--warn-soft,#FAEFDD); color:var(--warn)}
+.hrow.fini{opacity:.62}
+.hrow.fini .hl1 b{text-decoration:line-through}
 .hstores{display:block; margin-top:6px; font-family:"Archivo",sans-serif; font-size:12.5px;
   font-weight:600; color:var(--ink); line-height:1.5}
 .hech{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500; color:var(--muted); white-space:nowrap}
@@ -984,6 +1059,9 @@ select{appearance:none; -webkit-appearance:none}
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>
         <input id="nom" type="text" placeholder="Nom du client" autocomplete="name">
+        <button class="fbtn" type="button" id="cliPick" aria-label="Reprendre un client connu">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.4 2.9-5.2 6.5-5.2s6.5 1.8 6.5 5.2"/><path d="M17 8.5a3 3 0 010 5"/></svg>
+        </button>
       </div>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h4l2 5-3 2a13 13 0 006 6l2-3 5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z"/></svg>
@@ -1027,6 +1105,11 @@ select{appearance:none; -webkit-appearance:none}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4L11 3.8V3H4v8h.8l9.6 9.6a2 2 0 002.8 0l3.4-3.4a2 2 0 000-2.8z"/><circle cx="7.5" cy="6.5" r="1.2" fill="currentColor"/></svg>
         <input id="prixJN" inputmode="decimal" placeholder="Prix au m² jour et nuit">
         <span class="unit">MAD/m² HT</span>
+      </div>
+      <div class="field" style="margin-top:9px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5L5 19"/><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+        <input id="remise" inputmode="decimal" placeholder="Remise">
+        <span class="unit">% HT</span>
       </div>
       <div class="seg" id="segFact" style="margin-top:9px">
         <button type="button" data-fact="oui" aria-pressed="true">Facturée<span class="sub">TVA 20 %</span></button>
@@ -1120,6 +1203,9 @@ select{appearance:none; -webkit-appearance:none}
       <div class="price-bar sub" id="poseBar" hidden>
         <span id="poseLab">Pose</span><b id="sPose">0,00 MAD</b>
       </div>
+      <div class="price-bar sub" id="remBar" hidden>
+        <span id="remLab">Remise</span><b id="sRem">0,00 MAD</b>
+      </div>
       <div class="price-bar" id="htBar" hidden>
         <span>Total HT</span><b id="sHT">0,00 MAD</b>
       </div>
@@ -1199,6 +1285,10 @@ select{appearance:none; -webkit-appearance:none}
         <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span>
         <span class="tt"><b>Stock des articles</b><small id="tileArtSub">Mécanismes, tubes, accessoires</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="tile" id="tileCli" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.4 2.9-5.2 6.5-5.2s6.5 1.8 6.5 5.2"/><path d="M17 8.5a3 3 0 010 5M19.5 6a6 6 0 010 10"/></svg>
+        <span class="tt"><b>Clients</b><small id="tileCliSub">Historique et paiements par client</small></span>
       </button>
       <button class="tile" id="tilePay" type="button">
         <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg></span>
@@ -1325,6 +1415,8 @@ select{appearance:none; -webkit-appearance:none}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
     </button>
 
+    <div class="cutinfo" id="cutInfo" hidden></div>
+
     <div class="card" id="cutTubeCard" style="margin-bottom:14px">
       <div class="card-head"><div class="label">Découpes à faire</div><div class="badge" id="cutTubeCount">0 / 0</div></div>
       <div class="cpbil" id="cutBilan"></div>
@@ -1407,7 +1499,13 @@ select{appearance:none; -webkit-appearance:none}
     </button>
     <h2>Choisir un bon</h2>
   </div>
-  <div class="sheet-body" id="cutPickBody"></div>
+  <div class="sheet-body">
+    <div class="field" style="margin-bottom:12px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="pickSearch" type="search" placeholder="Nom du client ou numéro de bon" autocomplete="off">
+    </div>
+    <div id="cutPickBody"></div>
+  </div>
 </div>
 
 <!-- CONFIRMATION -->
@@ -1505,6 +1603,55 @@ select{appearance:none; -webkit-appearance:none}
     </div>
     <div id="payList"></div>
     <p class="hint" id="payHint"></p>
+  </div>
+</div>
+
+<!-- REPRENDRE UN CLIENT -->
+<div class="sheet pick" id="cliPickSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="cliPickSheet" aria-label="Retour">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2>Reprendre un client</h2>
+  </div>
+  <div class="sheet-body">
+    <div class="field" style="margin-bottom:12px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="cliPickSearch" type="search" placeholder="Nom du client ou téléphone" autocomplete="off">
+    </div>
+    <div id="cliPickBody"></div>
+    <p class="hint">Le nom, le téléphone, l'adresse et le lien GPS du dernier bon de ce client sont repris. Vous pouvez les corriger ensuite.</p>
+  </div>
+</div>
+
+<!-- CLIENTS -->
+<div class="sheet" id="cliSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="cliSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Clients</h2>
+  </div>
+  <div class="sheet-body">
+    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="field" style="margin-bottom:12px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="cliSearch" type="search" placeholder="Nom du client ou téléphone" autocomplete="off">
+    </div>
+    <div class="sumline"><span id="cliSumLab">Clients</span><b id="cliSum">0</b></div>
+    <div id="cliList"></div>
+    <p class="hint" id="cliHint"></p>
+  </div>
+</div>
+
+<!-- FICHE D'UN CLIENT -->
+<div class="sheet" id="cliOneSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="cliOneSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2 id="cliOneTitre">Client</h2>
+  </div>
+  <div class="sheet-body">
+    <div class="clfhead" id="cliOneHead"></div>
+    <div id="cliOneList"></div>
+    <p class="hint" id="cliOneHint"></p>
   </div>
 </div>
 
@@ -1641,7 +1788,7 @@ select{appearance:none; -webkit-appearance:none}
   </div>
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
-    <div class="sumline"><span>Bons enregistrés</span><b id="histSum">0</b></div>
+    <div class="sumline"><span id="histSumLab">Bons enregistrés</span><b id="histSum">0</b></div>
     <div class="field" style="margin-bottom:12px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
       <input id="histSearch" type="search" placeholder="Client, numéro ou référence tissu" autocomplete="off">
@@ -1662,6 +1809,13 @@ select{appearance:none; -webkit-appearance:none}
     <div class="pyper" id="histPeriode" hidden>
       <input id="histD1" type="date" aria-label="Du">
       <input id="histD2" type="date" aria-label="Au">
+    </div>
+    <div class="filters" id="histDossier" hidden>
+      <button type="button" data-d="tous" aria-pressed="true">Tous les dossiers</button>
+      <button type="button" data-d="encours" aria-pressed="false">En cours</button>
+      <button type="button" data-d="fini" aria-pressed="false">Terminés</button>
+      <button type="button" data-d="sage" aria-pressed="false">Saisis SAGE</button>
+      <button type="button" data-d="pasage" aria-pressed="false">Pas encore SAGE</button>
     </div>
     <div class="filters" id="histSort">
       <button type="button" data-s="recent" aria-pressed="true">Plus récents</button>
@@ -1779,7 +1933,7 @@ function blank(){
     id: "d" + Date.now(),
     num: nextNum(),
     date: new Date().toISOString(),
-    nom:"", tel:"", adresse:"", gps:"", ech:"",
+    nom:"", tel:"", adresse:"", gps:"", ech:"", remise:"",
     type:"ENR",
     multi:false,
     dims:[{l:"",h:"",ref:"",note:"",type:"ENR",q:""}],
@@ -1907,6 +2061,20 @@ function validDims(){
   return out;
 }
 /* Prix au m² d'une famille. Hors mode mixte, un seul prix vaut pour tout. */
+/* Remise commerciale, en pourcentage du total HT. */
+function remisePct(o){
+  const src = o || S;
+  const v = parseFloat(String(src.remise === undefined ? "" : src.remise).replace(",", ".")) || 0;
+  return Math.max(0, Math.min(100, v));
+}
+function remiseDe(o, brut){ return brut * remisePct(o) / 100; }
+/* Le total HT d'un bon, remise déduite. C'est la base de la TVA et du bénéfice. */
+function htDe(o){
+  const t = orderTotals(o);
+  const brut = t.prix + t.pose;
+  return brut - remiseDe(o, brut);
+}
+
 function puFam(fam, o){
   const src = o || S;
   const v = (src.type === "MIX" && fam === "JN") ? src.prixJN : src.prix;
@@ -2177,8 +2345,15 @@ function renderRecap(){
     $("sPose").textContent = fr(pose) + " MAD";
   }
   /* Bon facturé : HT, TVA, TTC. Bon sans facture : un seul total, en HT. */
-  const ht = stores + pose;
-  const montre = ht > 0;
+  const brut = stores + pose;
+  const rem = remiseDe(S, brut);
+  const ht = brut - rem;
+  const montre = brut > 0;
+  $("remBar").hidden = !(montre && rem > 0);
+  if (rem > 0){
+    $("remLab").textContent = "Remise " + String(fr(remisePct(S), 2)).replace(",00", "") + " %";
+    $("sRem").textContent = "\u2212 " + fr(rem) + " MAD";
+  }
   const avecTva = facture(S);
   $("htBar").hidden  = !(montre && avecTva);
   $("tvaBar").hidden = !(montre && avecTva);
@@ -2248,6 +2423,12 @@ function renderAll(){
 $("nom").addEventListener("input", e => { S.nom = e.target.value; renderProgress(); });
 $("tel").addEventListener("input", e => { S.tel = e.target.value; renderProgress(); });
 $("adresse").addEventListener("input", e => { S.adresse = e.target.value; });
+$("remise").addEventListener("input", e => {
+  const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
+  if (clean !== e.target.value) e.target.value = clean;
+  S.remise = clean;
+  renderRecap();
+});
 $("ech").addEventListener("change", e => {
   if (echVerrou()){
     e.target.value = S.ech || "";
@@ -2592,14 +2773,48 @@ $("btnDraft").addEventListener("click", () => {
   }
 });
 
+/* ============ Retour en deux temps ============ */
+/* Le plan de coupe et le formulaire ouvert depuis l'historique reviennent
+   d'abord à la liste des bons, puis seulement à l'accueil. */
+let formVenu = "";        /* "hist" quand le formulaire a été ouvert depuis l'historique */
+
+function quitteCut(){
+  /* Le bon est oublié : en revenant sur la page, on rechoisit le client. */
+  cutOrderId = "";
+  try { renderCut(); } catch(e){}
+}
+/* Retour du plan de coupe : d'abord la liste des bons, ensuite l'accueil. */
+function retourCut(){
+  if (cutOrderId){
+    quitteCut();
+    ouvrirPickBon("cut");
+    return;
+  }
+  $("cutPickSheet").classList.remove("open");
+  nav("home");
+}
+/* Retour du formulaire : vers l'historique s'il vient de là. */
+function retourForm(){
+  if (formVenu === "hist"){
+    formVenu = "";
+    nav("histSheet");
+    renderHist();
+    return;
+  }
+  nav("home");
+}
+
 /* ============ History ============ */
 function openSheet(id){ armBack(); $(id).classList.add("open"); document.body.style.overflow = "hidden"; }
 function closeSheet(id){ $(id).classList.remove("open"); document.body.style.overflow = ""; }
 document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => {
   const id = b.dataset.close;
-  if (id === "cutPickSheet" || id === "nomPickSheet"){ $(id).classList.remove("open"); return; }
+  if (id === "cutPickSheet"){ $(id).classList.remove("open"); nav("home"); return; }
+  if (id === "nomPickSheet" || id === "cliPickSheet"){ $(id).classList.remove("open"); return; }
+  if (id === "cutSheet"){ retourCut(); return; }
+  if (id === "cliOneSheet"){ nav("cliSheet"); renderCli(); return; }
   if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
-      id === "cutSheet"  || id === "nomSheet"   || id === "coutSheet" ||
+      id === "nomSheet"   || id === "coutSheet" || id === "cliSheet" ||
       id === "logSheet" || id === "paySheet" || id === "triSheet") nav("home");
   else closeSheet(id);
 }));
@@ -2613,6 +2828,7 @@ function migrate(o){
   if (o.prix === undefined) o.prix = "";
   if (o.prixJN === undefined) o.prixJN = "";
   if (o.posePrix === undefined) o.posePrix = "";
+  if (o.remise === undefined) o.remise = "";
   if (o.poseMode !== "fenetre") o.poseMode = "forfait";
   if (o.multi === undefined) o.multi = (o.refs || []).length > 1;
   o.dims.forEach(d => { if (!d.type) d.type = o.type === "MIX" ? "ENR" : o.type; });
@@ -2626,9 +2842,11 @@ function migrate(o){
 
 function newOrder(){
   S = blank();
-  $("nom").value = ""; $("tel").value = ""; $("adresse").value = ""; $("notes").value = ""; $("ech").value = ""; $("gps").value = ""; renderGps();
+  $("nom").value = ""; $("tel").value = ""; $("adresse").value = ""; $("notes").value = "";
+  $("ech").value = ""; $("gps").value = ""; $("remise").value = ""; renderGps();
   $("prix").value = S.prix || ""; $("prixJN").value = S.prixJN || "";
-  $("posePrix").value = S.posePrix || ""; renderPoseMode(); renderPrixFields();
+  $("posePrix").value = S.posePrix || ""; $("remise").value = S.remise || "";
+  renderPoseMode(); renderPrixFields();
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === "ENR")));
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === "Pose")));
   [...$("segFact").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.fact === (S.fact || "oui"))));
@@ -2637,8 +2855,8 @@ function newOrder(){
   window.scrollTo({top:0, behavior:"instant"});
 }
 
-$("btnHistory").addEventListener("click", () => nav("home"));
-$("btnNew").addEventListener("click", () => { newOrderSynced(); nav("form"); });
+$("btnHistory").addEventListener("click", retourForm);
+$("btnNew").addEventListener("click", () => { formVenu = ""; newOrderSynced(); nav("form"); });
 
 /* ============ Screenshot du bon ============ */
 const T = { ink:"#191315", muted:"#6F6569", line:"#E4DDDE", accent:"#D5001F", soft:"#FCEAEC", card:"#F7F4F4" };
@@ -2805,10 +3023,21 @@ function ticket(){
   }
   /* HT, TVA, puis le total que paie le client. Sans facture : le total seul. */
   if (stores > 0 || posT > 0){
-    const ht = stores + posT;
+    const brut = stores + posT;
+    const rem = remiseDe(S, brut);
+    const ht = brut - rem;
     const avecTva = facture(S);
     x.fillStyle = T.line; x.fillRect(P + 8, y, W - 2*P - 16, 2);
     y += 26;
+    if (rem > 0){
+      x.fillStyle = T.muted; x.font = "400 24px " + B;
+      x.fillText("Remise " + String(fr(remisePct(S), 2)).replace(",00", "") + " %", P + 8, y + 20);
+      x.textAlign = "right";
+      x.fillStyle = T.accent; x.font = "600 28px " + M;
+      x.fillText("\u2212 " + fr(rem) + " MAD", W - P - 8, y + 20);
+      x.textAlign = "left";
+      y += 38;
+    }
     if (avecTva){
       x.fillStyle = T.muted; x.font = "400 24px " + B;
       x.fillText("Total HT", P + 8, y + 20);
@@ -3029,8 +3258,30 @@ function setOrder(rec){
    écrasait sans arrêt la version récente des autres. */
 function touche(o){ if (o) o.maj = Date.now(); return o; }
 
-async function pushBon(rec){
+/* Deux appuis rapides sur deux cases lançaient deux envois en parallèle : celui
+   parti en premier pouvait arriver en dernier, et le second téléphone recevait
+   l'état d'avant. Chaque bon a maintenant sa file : un envoi à la fois, dans
+   l'ordre. Et si un envoi attend déjà, on ne l'empile pas deux fois, celui qui
+   attend partira avec l'état à jour. */
+const pushFile = {};      /* id -> dernier envoi enchaîné */
+const pushAttente = {};   /* id -> envoi déjà en file, pas encore parti */
+
+function pushBon(rec){
+  if (!rec || !rec.id) return Promise.resolve(false);
+  const id = rec.id;
   touche(rec);
+  if (pushAttente[id]) return pushAttente[id];
+  const avant = pushFile[id] || Promise.resolve();
+  const p = avant.catch(() => {}).then(() => {
+    delete pushAttente[id];
+    return pushMaintenant(rec);
+  });
+  pushAttente[id] = p;
+  pushFile[id] = p.catch(() => {});
+  return p;
+}
+
+async function pushMaintenant(rec){
   if (!SB || !USER){ markPending(rec.id, true); avertirHorsLigne(); return false; }
   try {
     const {error} = await SB.from("bons").upsert({
@@ -3419,7 +3670,7 @@ async function bootAuth(){
 function nav(where){
   armBack();
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -3448,6 +3699,10 @@ function renderHome(){
   $("tileCut").hidden = !cutAllowed();
   $("tileLog").hidden = !logAllowed();
   $("tilePay").hidden = !payAllowed();
+  const nCli = clients().length;
+  $("tileCliSub").textContent = nCli
+    ? nCli + " client" + (nCli > 1 ? "s" : "") + "  ·  historique et paiements"
+    : "Historique et paiements par client";
   $("tileTri").hidden = !adminAllowed();
   if (adminAllowed()){
     const t = triTotaux(triAn, triNo);
@@ -3845,6 +4100,7 @@ function renderTout(){
   essai(renderPay);
   essai(renderTri);
   essai(renderNet);
+  essai(renderCli);
 }
 
 function ecranOuvert(){
@@ -3931,7 +4187,8 @@ function orderTotals(o){
   const pp = parseFloat(String(o.posePrix || "").replace(",", ".")) || 0;
   const pose = pp > 0 ? (o.poseMode === "fenetre" ? pp * v.length : pp) : 0;
   const prix = v.reduce((t,d) => t + (Math.max(d.l,MINCM) * Math.max(d.h,MINCM))/10000 * puFam(d.t, o), 0);
-  return {nb:v.length, prix: prix, pose:pose,
+  const m2 = v.reduce((t,d) => t + (Math.max(d.l,MINCM) * Math.max(d.h,MINCM))/10000, 0);
+  return {nb:v.length, prix: prix, pose:pose, m2: m2,
           poseLab: o.pose === "Livraison" ? "Livraison" : "Pose"};
 }
 
@@ -3949,6 +4206,22 @@ function storesParType(o){
   if (n.ENR) out.push(n.ENR + " store" + (n.ENR > 1 ? "s" : "") + " enrouleur" + (n.ENR > 1 ? "s" : ""));
   if (n.JN)  out.push(n.JN + " store" + (n.JN > 1 ? "s" : "") + " jour et nuit");
   return out;
+}
+
+/* Un bon peut être classé quand il est livré et intégralement payé. */
+function finPossible(o){ return etatDe(o) === "livre" && paySolde(o); }
+function estFini(o){ return !!(o && o.fini); }
+function estSage(o){ return !!(o && o.sage); }
+
+/* Où en sont ahmed et soufiane sur ce bon. */
+function avancement(o){
+  const dims = ordDims(o);
+  const done = faites(o);
+  const b = bilanTube(o);
+  return {
+    fen: {fait: dims.filter(d => done.indexOf(d.key) >= 0).length, tot: dims.length},
+    tube: {fait: b.livre, tot: b.tot}
+  };
 }
 
 /* Rappel de l'échéance dans la liste des bons */
@@ -3969,10 +4242,25 @@ function dansPeriodeHist(o){
   return true;
 }
 
+let histDossier = "tous";
+
 function renderHist(){
   const all = ORDERS;
   const q = ($("histSearch").value || "").trim().toLowerCase();
+  /* La rangée « dossiers » ne concerne que la direction et le bureau. */
+  const dossierVu = finAllowed() || sageAllowed();
+  $("histDossier").hidden = !dossierVu;
+  if (!dossierVu) histDossier = "tous";
+  Array.prototype.forEach.call($("histDossier").querySelectorAll("button"), b => {
+    b.setAttribute("aria-pressed", String(b.dataset.d === histDossier));
+    if (b.dataset.d === "sage" || b.dataset.d === "pasage") b.hidden = !sageAllowed();
+    if (b.dataset.d === "fini" || b.dataset.d === "encours") b.hidden = !finAllowed();
+  });
   let list = all.filter(o => {
+    if (histDossier === "fini"    && !estFini(o)) return false;
+    if (histDossier === "encours" && estFini(o)) return false;
+    if (histDossier === "sage"    && !estSage(o)) return false;
+    if (histDossier === "pasage"  && estSage(o)) return false;
     if (histFilter === "mine" && USER && o.author !== USER.login) return false;
     if (histFilter === "mois" && !ceMois(o)) return false;
     if (histFilter === "annee" && new Date(o.date || 0).getFullYear() !== new Date().getFullYear()) return false;
@@ -4002,7 +4290,14 @@ function renderHist(){
   $("histPeriode").hidden = histFilter !== "periode";
   $("histD1").value = histDu; $("histD2").value = histAu;
 
-  $("histSum").textContent = all.length;
+  if (finAllowed()){
+    const ouverts = all.filter(o => !estFini(o)).length;
+    $("histSum").textContent = ouverts + " / " + all.length;
+    $("histSumLab").textContent = "Dossiers en cours";
+  } else {
+    $("histSum").textContent = all.length;
+    $("histSumLab").textContent = "Bons enregistrés";
+  }
   const body = $("histBody");
   body.innerHTML = "";
   if (!list.length){
@@ -4012,17 +4307,18 @@ function renderHist(){
   list.forEach(o => {
     const t = orderTotals(o);
     const d = new Date(o.date);
+    const av = avancement(o);
     const row = document.createElement("div");
     const paye = paySolde(o);
-    row.className = "hrow" + (paye ? " paye" : "");
+    row.className = "hrow" + (paye ? " paye" : "") + (estFini(o) ? " fini" : "");
     const et = etatDe(o);
     row.innerHTML =
       '<button class="hmain" data-open="' + o.id + '">' +
         '<span class="hl1"><b><span class="etat-box etat-' + et + '">' + (o.nom || "Client sans nom") + '</span></b></span>' +
         ((t.prix || t.pose)
-          ? '<span class="httc">' + fr(prixClient(o, t.prix + t.pose)) + ' MAD' +
+          ? '<span class="httc">' + fr(prixClient(o, htDe(o))) + ' MAD' +
             '<em>' + (facture(o) ? "TTC" : "HT") + '</em>' +
-            (facture(o) ? '<i>' + fr(t.prix + t.pose) + ' HT</i>' : '<i>sans facture</i>') +
+            (facture(o) ? '<i>' + fr(htDe(o)) + ' HT</i>' : '<i>sans facture</i>') +
             (paye ? '<u>payé</u>' : '') +
             '</span>'
           : '') +
@@ -4033,6 +4329,14 @@ function renderHist(){
             echSuffix(o) +
             '<span class="hnum">' + o.num + '</span>' +
           '</span>' +
+          (av.tube.tot || av.fen.tot
+            ? '<span class="hl2" style="margin-top:6px">' +
+              (av.tube.tot ? '<span class="hprog ' + (av.tube.fait === av.tube.tot ? "ok" : "att") + '">' +
+                 'tubes ' + av.tube.fait + '/' + av.tube.tot + '</span>  ' : '') +
+              (av.fen.tot ? '<span class="hprog ' + (av.fen.fait === av.fen.tot ? "ok" : "att") + '">' +
+                 'fenêtres ' + av.fen.fait + '/' + av.fen.tot + '</span>' : '') +
+              '</span>'
+            : '') +
           '<span class="hstores">' + (storesParType(o).map(esc).join("<br>") || "Aucun store") + '</span>' +
         '</span>' +
       '</button>' +
@@ -4043,6 +4347,21 @@ function renderHist(){
           '</select>' +
           '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>' +
         '</span>' +
+        (finAllowed() || sageAllowed()
+          ? '<span class="hmark">' +
+            (finAllowed()
+              ? '<button class="hchk' + (estFini(o) ? " on" : "") + (finPossible(o) ? "" : " bloque") +
+                '" type="button" data-fini="' + o.id + '" title="Dossier terminé">' +
+                (estFini(o)
+                  ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+                  : 'FIN') + '</button>'
+              : '') +
+            (sageAllowed()
+              ? '<button class="hchk sage' + (estSage(o) ? " on" : "") +
+                '" type="button" data-sage="' + o.id + '" title="Saisi dans SAGE">SAGE</button>'
+              : '') +
+            '</span>'
+          : '') +
         '<span style="display:flex; align-items:center; gap:6px">' +
           (o.pending ? '<span class="badge warn">À envoyer</span>' : '') +
           (adminAllowed()
@@ -4066,6 +4385,12 @@ $("histSort").addEventListener("click", e => {
   LS.set("mst_histsort", histSort);
   renderHist();
 });
+$("histDossier").addEventListener("click", e => {
+  const b = e.target.closest("button[data-d]");
+  if (!b) return;
+  histDossier = b.dataset.d;
+  renderHist();
+});
 $("histFilters").addEventListener("click", e => {
   const b = e.target.closest("button[data-f]");
   if (!b) return;
@@ -4078,7 +4403,8 @@ function loadOrder(o){
   S = migrate(JSON.parse(JSON.stringify(o)));
   $("nom").value = S.nom || ""; $("tel").value = S.tel || ""; $("adresse").value = S.adresse || ""; $("ech").value = S.ech || ""; $("gps").value = S.gps || ""; renderGps();
   $("notes").value = S.notes || ""; $("prix").value = S.prix || ""; $("prixJN").value = S.prixJN || "";
-  $("posePrix").value = S.posePrix || ""; renderPoseMode(); renderPrixFields();
+  $("posePrix").value = S.posePrix || ""; $("remise").value = S.remise || "";
+  renderPoseMode(); renderPrixFields();
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === S.type)));
   [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === S.pose)));
   [...$("segFact").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.fact === (S.fact || "oui"))));
@@ -4141,10 +4467,37 @@ $("histBody").addEventListener("click", e => {
   const open = e.target.closest("button[data-open]");
   const del  = e.target.closest("button[data-del]");
   const num  = e.target.closest("button[data-num]");
+  const fin  = e.target.closest("button[data-fini]");
+  const sage = e.target.closest("button[data-sage]");
+
+  if (fin){
+    const o = ORDERS.find(x => x.id === fin.dataset.fini);
+    if (!o || !finAllowed()) return;
+    if (!estFini(o) && !finPossible(o)){
+      toast(etatDe(o) !== "livre"
+        ? "Ce bon n'est pas encore livré"
+        : "Le client n'a pas soldé ce bon");
+      return;
+    }
+    if (estFini(o)) delete o.fini; else o.fini = {at: Date.now(), by: (USER && USER.login) || ""};
+    touche(o); persistOrders(); pushBon(o);
+    renderHist(); renderHome();
+    toast(estFini(o) ? "Dossier " + o.num + " classé terminé" : "Dossier " + o.num + " rouvert");
+    return;
+  }
+  if (sage){
+    const o = ORDERS.find(x => x.id === sage.dataset.sage);
+    if (!o || !sageAllowed()) return;
+    if (estSage(o)) delete o.sage; else o.sage = {at: Date.now(), by: (USER && USER.login) || ""};
+    touche(o); persistOrders(); pushBon(o);
+    renderHist();
+    toast(estSage(o) ? o.num + " marqué saisi dans SAGE" : o.num + " retiré de SAGE");
+    return;
+  }
   if (num){ renommeBon(ORDERS.find(x => x.id === num.dataset.num)); return; }
   if (open){
     const o = ORDERS.find(x => x.id === open.dataset.open);
-    if (o){ loadOrder(o); toast("Bon " + o.num + " ouvert"); }
+    if (o){ formVenu = "hist"; loadOrder(o); toast("Bon " + o.num + " ouvert"); }
   } else if (del){
     const o = ORDERS.find(x => x.id === del.dataset.del);
     if (!o) return;
@@ -4257,7 +4610,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "7.8";
+const APP_VERSION = "8.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -4268,24 +4621,28 @@ function hookUrl(){ return LS.get("mst_hook", "") || HOOK_DEFAULT; }
    auto = valeur proposée par le programme, l'agent peut la corriger.
    sans auto = case vide, remplie par l'atelier.
    L'ordre suit exactement les colonnes du tableau de production. */
+/* Les quantités se déduisent du nombre de stores : un mécanisme par store,
+   deux bouchons par mécanisme, deux freins par bouchon. Côté jour et nuit,
+   un embout par fenêtre et deux bouchons inférieurs par embout.
+   L'atelier peut toujours corriger une case. */
 const PIECES_DEF = {
   ENR: [
-    {k:"mecanisme", label:"Mécanisme",          u:"u",
+    {k:"mecanisme", label:"Mécanisme",          u:"u",  auto:d => d.nb,
      opts:["Mécanisme 38 normal", "Mécanisme 38 PRO", "Mécanisme 40"]},
     {k:"tube",      label:"Tube",               u:"ml", auto:d => d.coupeMl,
      opts:["Tube 38", "Tube 40"]},
     {k:"barre",     label:"Barre de charge",    u:"ml", auto:d => d.coupeMl},
     {k:"chainette", label:"Chaînette",          u:"ml"},
-    {k:"bouchon",   label:"Bouchon",            u:"u"},
-    {k:"frein",     label:"Frein",              u:"u"}
+    {k:"bouchon",   label:"Bouchon",            u:"u",  auto:d => d.nb * 2},
+    {k:"frein",     label:"Frein",              u:"u",  auto:d => d.nb * 4}
   ],
   JN: [
     {k:"cache",      label:"Cache",              u:"ml", auto:d => d.cacheMl},
     {k:"tube32",     label:"Triangle 32",        u:"ml", auto:d => d.tube32Ml},
     {k:"barre",      label:"Barre de charge",    u:"ml", auto:d => d.barreMl},
-    {k:"embout",     label:"Embout J/N",         u:"u"},
+    {k:"embout",     label:"Embout J/N",         u:"u",  auto:d => d.nb},
     {k:"support",    label:"Support",            u:"u"},
-    {k:"bouchonInf", label:"Bouchon inférieur",  u:"u"},
+    {k:"bouchonInf", label:"Bouchon inférieur",  u:"u",  auto:d => d.nb * 2},
     {k:"chainette",  label:"Chaînette",          u:"ml"}
   ]
 };
@@ -4298,7 +4655,8 @@ const TISSU_DEF = {
   ],
   JN: [
     {k:"tissuCoupe", label:"Tissu m² coupé", u:"m²", auto:d => d.coupeM2},
-    {k:"tissuVente", label:"Tissu m² vente", u:"m²", auto:d => d.venteM2}
+    {k:"tissuVente", label:"Tissu m² vente", u:"m²", auto:d => d.venteM2},
+    {k:"chutes",     label:"Chutes",         u:"m²", auto:d => d.chuteM2}
   ]
 };
 const FAM_LABEL = {ENR:"Store enrouleur", JN:"Store jour et nuit"};
@@ -4309,8 +4667,14 @@ function famData(fam){
   const drop = fam === "JN" ? FABDROP.JN : FABDROP.ENR;
   const sum = f => v.reduce((t,d) => t + f(d), 0);
   const dep = fam === "JN" ? 2 : 1;
-  const coupeM2 = sum(d => (d.l - drop) * (dep * d.h + surplusDe(fam))) / 10000;
+  /* Ce que la fenêtre consomme sur le rouleau, hors plan de coupe */
+  const bruteM2 = sum(d => (d.l - drop) * (dep * d.h + surplusDe(fam))) / 10000;
   const venteM2 = sum(d => billed(d));
+  /* Le vrai m² coupé, c'est ce que le plan déroule du rouleau : les fenêtres
+     plus les chutes, celles qu'on garde comme celles qu'on jette. Ce qui a été
+     pris dans une chute du stock n'est pas déroulé, donc pas compté. */
+  const pl = famPlan(v);
+  const coupeM2 = pl.rouleau > 0 ? pl.rouleau : bruteM2;
   return {
     nb: v.length,
     dims: v,
@@ -4321,25 +4685,33 @@ function famData(fam){
     hMl2:     2 * sum(d => d.h) / 100,
     supports: sum(d => d.l >= 200 ? 3 : 2),
     coupeM2: coupeM2,
+    bruteM2: bruteM2,
     venteM2: venteM2,
-    chuteM2: famChute(v)
+    /* Chute = ce qu'on a déroulé moins ce qu'on facture. Quand le résultat est
+       négatif, c'est que la production a puisé dans les chutes du stock : on ne
+       compte alors que les chutes réellement produites par cette commande. */
+    chuteM2: (coupeM2 - venteM2) > 0 ? (coupeM2 - venteM2) : pl.chute
   };
 }
 
-/* Chute réelle, calculée avec le même plan de coupe que l'écran dédié */
-function famChute(v){
+/* Le plan de coupe réel de cette famille, référence par référence.
+   « rouleau » = ce qui sort du rouleau neuf, chutes comprises.
+   « chute »  = ce qui ne sert pas à une fenêtre, gardé ou jeté. */
+function famPlan(v){
   const byRef = {};
   v.forEach(x => { const k = x.ref || "?"; (byRef[k] = byRef[k] || []).push(x); });
-  let tot = 0;
+  let chute = 0, rouleau = 0;
   Object.keys(byRef).forEach(ref => {
     const f = fab(ref);
     const lz = f ? f.laize : CUT_DEF.laize;
     const T = planTissu(byRef[ref], lz, CUT.seuilLaize, CUT.seuilLong,
                         chutesPour(pcO() || S, ref));
-    tot += T.chute;
+    chute += T.chute;
+    rouleau += T.conso;      /* déjà limité aux bandes déroulées du rouleau */
   });
-  return tot;
+  return {chute:chute, rouleau:rouleau};
 }
+function famChute(v){ return famPlan(v).chute; }
 
 /* ---------- Fiche de production : pièces utilisées ---------- */
 let pcData = {};      /* mesures courantes par famille, refaites à chaque rendu */
@@ -4360,10 +4732,21 @@ function modelVal(fam, def){
   const v = o ? o[def.k] : "";
   return def.opts.indexOf(v) >= 0 ? v : def.opts[0];
 }
+/* Le modèle choisi doit être écrit sur le bon affiché dans le plan de coupe.
+   Il partait sur le formulaire en cours, un autre objet : le choix « Mécanisme
+   PRO » ou « Tube 40 » n'arrivait donc jamais dans la feuille. */
 function modelSet(fam, k, v){
-  if (!S.modeles) S.modeles = {};
-  if (!S.modeles[fam]) S.modeles[fam] = {};
-  S.modeles[fam][k] = v;
+  const b = pcO();
+  if (!b) return;
+  if (!b.modeles || typeof b.modeles !== "object") b.modeles = {};
+  if (!b.modeles[fam]) b.modeles[fam] = {};
+  b.modeles[fam][k] = v;
+  if (S && S.id === b.id){
+    if (!S.modeles) S.modeles = {};
+    if (!S.modeles[fam]) S.modeles[fam] = {};
+    S.modeles[fam][k] = v;
+  }
+  touche(b); persistOrders(); pushBon(b);
 }
 function pcVal(fam, k){
   const b = pcO(); if (!b) return null;
@@ -4764,6 +5147,34 @@ function noteEtat(o){
   if (o.log.length > 400) o.log = o.log.slice(-400);
 }
 
+/* Ce que l'atelier a besoin de savoir sur le bon avant de couper : combien de
+   stores, combien de m², quels tissus, et où en est le paiement. */
+function renderCutInfo(o){
+  const box = $("cutInfo");
+  if (!o){ box.hidden = true; return; }
+  const t = orderTotals(o);
+  const brut = t.prix + t.pose;
+  const rem = remiseDe(o, brut);
+  const du = duDe(o), pay = payeDe(o), rst = soldeDe(o);
+  const refs = [...new Set(ordDims(o).map(x => x.ref).filter(Boolean))];
+  box.hidden = false;
+  box.innerHTML =
+    '<div class="cih">' +
+      '<div><b>' + t.nb + '</b><small>store' + (t.nb > 1 ? "s" : "") + '</small></div>' +
+      '<div><b>' + fr(t.m2 || 0, 2) + '</b><small>m² facturés</small></div>' +
+      '<div><b>' + fr(du, 0) + '</b><small>' + (facture(o) ? "MAD TTC" : "MAD HT") + '</small></div>' +
+    '</div>' +
+    storesParType(o).map(x => '<div class="ciline"><span>' + esc(x) + '</span></div>').join("") +
+    (t.prix ? '<div class="ciline"><span>Stores HT</span><b>' + fr(t.prix, 2) + '</b></div>' : '') +
+    (t.pose ? '<div class="ciline"><span>' + t.poseLab + '</span><b>' + fr(t.pose, 2) + '</b></div>' : '') +
+    (rem > 0 ? '<div class="ciline"><span>Remise ' + String(fr(remisePct(o), 2)).replace(",00", "") +
+               ' %</span><b>\u2212 ' + fr(rem, 2) + '</b></div>' : '') +
+    '<div class="ciline"><span>Déjà payé</span><b class="ok">' + fr(pay, 2) + ' MAD</b></div>' +
+    '<div class="ciline"><span>' + (rst > 0.01 ? "Reste à payer" : "Soldé") + '</span>' +
+      '<b class="' + (rst > 0.01 ? "att" : "ok") + '">' + fr(rst, 2) + ' MAD</b></div>' +
+    (refs.length ? '<div class="citis">' + refs.map(r => '<span>' + esc(r) + '</span>').join("") + '</div>' : '');
+}
+
 /* Les fenêtres déjà fabriquées, cochées par l'atelier. */
 function faites(o){ return (o && Array.isArray(o.faites)) ? o.faites : []; }
 
@@ -4998,6 +5409,7 @@ function renderPlan(){
     $("cutOrderName").textContent = "Choisir un bon de commande";
     $("cutOrderSub").textContent = "Les dimensions sont reprises automatiquement";
     out.innerHTML = '<div class="empty">Sélectionnez un bon de commande pour générer son plan de coupe.</div>';
+    $("cutInfo").hidden = true;
     $("cutFaitCard").hidden = true;
     $("cutTubeCard").hidden = true;
     $("piecesCard").hidden = true;
@@ -5006,6 +5418,7 @@ function renderPlan(){
   const d = new Date(o.date);
   $("cutOrderName").textContent = (o.nom || "Client sans nom");
   $("cutOrderSub").textContent = o.num + "  ·  " + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + String(d.getFullYear()).slice(2);
+  renderCutInfo(o);
 
   const dims = ordDims(o);
 
@@ -5398,13 +5811,30 @@ function pickEtat(o){
 }
 
 let pickCible = "cut";
+let pickQ = "";
 function ouvrirPickBon(cible){
   pickCible = cible || "cut";
-  const all = ORDERS;
+  pickQ = "";
+  const inp = $("pickSearch");
+  if (inp) inp.value = "";
+  dessinePick();
+  armBack();
+  $("cutPickSheet").classList.add("open");
+}
+
+function dessinePick(){
+  const q = pickQ.trim().toLowerCase();
+  const all = (ORDERS || []).filter(o => {
+    if (!q) return true;
+    return (String(o.nom || "") + " " + String(o.num || "") + " " +
+            String(o.tel || "")).toLowerCase().indexOf(q) >= 0;
+  });
   const body = $("cutPickBody");
   body.innerHTML = "";
   if (!all.length){
-    body.innerHTML = '<div class="empty">Aucun bon enregistré.<br>Créez et enregistrez un bon, puis revenez ici.</div>';
+    body.innerHTML = '<div class="empty">' + (q
+      ? "Aucun bon ne correspond à cette recherche."
+      : "Aucun bon enregistré.<br>Créez et enregistrez un bon, puis revenez ici.") + '</div>';
   }
   all.forEach(o => {
     const t = orderTotals(o);
@@ -5425,9 +5855,9 @@ function ouvrirPickBon(cible){
       (et ? '<br>' + et.sous : '') + '</small></span></span>';
     body.appendChild(btn);
   });
-  armBack();
-  $("cutPickSheet").classList.add("open");
 }
+
+$("pickSearch").addEventListener("input", e => { pickQ = e.target.value; dessinePick(); });
 $("cutPick").addEventListener("click", () => ouvrirPickBon("cut"));
 $("cutPickBody").addEventListener("click", e => {
   const b = e.target.closest("[data-cut]");
@@ -5455,7 +5885,10 @@ $("tileCut").addEventListener("click", () => {
   /* Le mode imposé gagne toujours ; sinon on reprend le dernier choix, et à
      défaut les tubes : personne ne tombe sur un écran qui demande de choisir. */
   cutMode = modeImpose() || CUT.mode || "tube";
-  renderCut(); nav("cutSheet"); pullBons().then(() => renderCut());
+  renderCut(); nav("cutSheet");
+  /* Aucun bon en mémoire : on demande tout de suite lequel. */
+  if (!cutOrderId) ouvrirPickBon("cut");
+  pullBons().then(() => renderCut());
 });
 
 
@@ -5467,10 +5900,24 @@ function nomUid(){ return "n" + Date.now().toString(36) + Math.random().toString
    Les paiements vivent dans le bon lui même : ils suivent la synchronisation
    des bons entre téléphones, et partent vers l'onglet Paiements de la feuille. */
 const PAY_USERS = ["noureddine", "imane"];
+/* Qui peut classer un bon comme terminé, et qui suit la saisie SAGE */
+const FIN_USERS  = ["noureddine", "imane"];
+const SAGE_USERS = ["noureddine"];
+function finAllowed(){
+  return !!USER && FIN_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
+}
+function sageAllowed(){
+  return !!USER && SAGE_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
+}
 function payAllowed(){
   return !!USER && PAY_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
 }
 
+/* Seule la direction confirme que l'argent est bien arrivé. */
+const PAY_CONFIRM = ["noureddine"];
+function payConfirmAllowed(){
+  return !!USER && PAY_CONFIRM.indexOf(String(USER.login || "").toLowerCase()) >= 0;
+}
 const PAY_MODES = ["Virement", "Chèque", "Espèce"];
 const PAY_TYPES = ["Acompte", "Total", "Reste"];
 
@@ -5480,7 +5927,7 @@ function paiements(o){ return (o && Array.isArray(o.paies)) ? o.paies : []; }
 /* Ce que le client doit : TTC si le bon est facturé, HT sinon. */
 function duDe(o){
   const t = orderTotals(o);
-  return prixClient(o, t.prix + t.pose);
+  return prixClient(o, htDe(o));
 }
 function payeDe(o){
   return paiements(o).reduce((s,p) => s + (parseFloat(p.montant) || 0), 0);
@@ -5590,7 +6037,14 @@ function renderPay(){
         ? '<div class="pybody">' +
             (lignes.length
               ? lignes.map(x =>
-                  '<div class="pyline">' +
+                  '<div class="pyline' + (x.recu ? " recu" : "") + '">' +
+                    (payConfirmAllowed()
+                      ? '<button class="pyok2' + (x.recu ? " on" : "") + '" type="button" ' +
+                        'data-pyrecu="' + o.id + ':' + x.id + '" ' +
+                        'title="' + (x.recu ? "Encaissement confirmé" : "Confirmer la réception") + '">' +
+                        (x.recu ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : '') +
+                        '</button>'
+                      : (x.recu ? '<span class="pyok2 on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>' : '')) +
                     '<span class="pyd">' + esc(dateFR(x.date)) + '</span>' +
                     '<span class="pym">' + esc(x.mode || "") + '</span>' +
                     '<span class="pyv">' + fr(parseFloat(x.montant) || 0, 2) + '</span>' +
@@ -5613,8 +6067,12 @@ function renderPay(){
     '</div>';
   }).join("");
 
+  const aConfirmer = list.reduce((n,o) =>
+    n + paiements(o).filter(x => !x.recu).length, 0);
   $("payHint").textContent = list.length + " bon" + (list.length > 1 ? "s" : "") +
     (nCours ? ",  " + nCours + " non soldé" + (nCours > 1 ? "s" : "") : ",  tous soldés") +
+    (payConfirmAllowed() && aConfirmer
+      ? ".  " + aConfirmer + " encaissement" + (aConfirmer > 1 ? "s" : "") + " à confirmer" : "") +
     ".  Le total dû suit le bon : TTC s'il est facturé, HT sinon.";
 }
 
@@ -5653,7 +6111,7 @@ function payLignes(o){
   return paiements(o).map(x => ({
     id: x.id,
     values: [dateFR(x.date), o.nom || "", o.num || "", typeLabel(o), pu || "",
-             x.mode || "", parseFloat(x.montant) || 0,
+             (x.mode || "") + (x.recu ? " (reçu)" : ""), parseFloat(x.montant) || 0,
              Math.round(d*100)/100, Math.round(p*100)/100, Math.round(r*100)/100, etat]
   }));
 }
@@ -5696,6 +6154,23 @@ $("payD1").addEventListener("change", e => { payDu = e.target.value; renderPay()
 $("payD2").addEventListener("change", e => { payAu = e.target.value; renderPay(); });
 
 $("payList").addEventListener("click", e => {
+  /* confirmation d'un encaissement, avant tout autre geste sur la ligne */
+  const cf = e.target.closest("button[data-pyrecu]");
+  if (cf){
+    e.preventDefault(); e.stopPropagation();
+    if (!payConfirmAllowed()) return;
+    const [oid, pid] = cf.dataset.pyrecu.split(":");
+    const o = ORDERS.find(x => x.id === oid);
+    if (!o) return;
+    const p = paiements(o).find(x => x.id === pid);
+    if (!p) return;
+    if (p.recu) delete p.recu;
+    else p.recu = {at: Date.now(), by: (USER && USER.login) || ""};
+    touche(o); persistOrders(); pushBon(o); payPush(o);
+    renderPay();
+    toast(p.recu ? "Encaissement confirmé" : "Confirmation retirée");
+    return;
+  }
   /* le numéro ouvre WhatsApp, il ne déplie pas la ligne */
   const w = e.target.closest("[data-wa]");
   if (w){
@@ -5743,6 +6218,190 @@ $("tilePay").addEventListener("click", () => {
   renderPay();
   nav("paySheet");
   pullBons().then(() => renderPay());
+});
+
+/* ============ Clients ============ */
+/* Un client n'est pas une fiche à part : il se déduit des bons. Deux bons au
+   même nom sont le même client, quelle que soit la casse ou les espaces. */
+function cleClient(nom){
+  return String(nom || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+function clients(){
+  const par = {};
+  (ORDERS || []).forEach(o => {
+    const k = cleClient(o.nom);
+    if (!k) return;
+    if (!par[k]) par[k] = {cle:k, nom:String(o.nom).trim(), tel:"", bons:[]};
+    par[k].bons.push(o);
+    if (!par[k].tel && o.tel) par[k].tel = o.tel;
+    /* on garde l'orthographe du bon le plus récent */
+    if (new Date(o.date || 0) > new Date(par[k].dern || 0)){
+      par[k].dern = o.date; par[k].nom = String(o.nom).trim();
+    }
+  });
+  return Object.keys(par).map(k => {
+    const c = par[k];
+    c.bons.sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
+    c.n = c.bons.length;
+    c.du = c.bons.reduce((t,o) => t + duDe(o), 0);
+    c.paye = c.bons.reduce((t,o) => t + payeDe(o), 0);
+    c.reste = c.bons.reduce((t,o) => t + soldeDe(o), 0);
+    c.stores = c.bons.reduce((t,o) => t + orderTotals(o).nb, 0);
+    return c;
+  }).sort((a,b) => new Date(b.dern || 0) - new Date(a.dern || 0));
+}
+
+let cliQ = "", cliOuvert = "";
+
+function cliFiltres(){
+  const q = cliQ.trim().toLowerCase();
+  return clients().filter(c => !q ||
+    (c.nom + " " + (c.tel || "")).toLowerCase().indexOf(q) >= 0);
+}
+
+function renderCli(){
+  const list = cliFiltres();
+  const tous = clients();
+  $("cliSum").textContent = tous.length;
+  $("cliSumLab").textContent = tous.length > 1 ? "Clients" : "Client";
+  const box = $("cliList");
+  if (!list.length){
+    box.innerHTML = '<div class="empty">' + (cliQ
+      ? "Aucun client ne correspond."
+      : "Aucun client pour le moment.<br>Ils apparaissent dès qu'un bon porte un nom.") + '</div>';
+    $("cliHint").textContent = "";
+    return;
+  }
+  box.innerHTML = list.map(c =>
+    '<button class="clrow' + (c.reste > 0.01 ? " dette" : "") + '" type="button" data-cli="' + esc(c.cle) + '">' +
+      '<span class="clini">' + esc(c.nom.slice(0,1).toUpperCase()) + '</span>' +
+      '<span class="cll"><b>' + esc(c.nom) + '</b>' +
+        '<small>' + c.n + " bon" + (c.n > 1 ? "s" : "") + "  ·  " + c.stores + " store" + (c.stores > 1 ? "s" : "") +
+          (c.tel ? "  ·  " + esc(telAffiche(c.tel)) : "") + '</small></span>' +
+      '<span class="clr"><b>' + fr(c.du, 0) + ' MAD</b>' +
+        (c.reste > 0.01 ? '<small>reste ' + fr(c.reste, 0) + '</small>' : '') + '</span>' +
+    '</button>').join("");
+  const dus = list.filter(c => c.reste > 0.01).length;
+  $("cliHint").textContent = list.length + " client" + (list.length > 1 ? "s" : "") +
+    (dus ? ",  " + dus + " avec un solde à encaisser" : ",  tous soldés") + ".";
+}
+
+function renderCliOne(){
+  const c = clients().find(x => x.cle === cliOuvert);
+  if (!c){ nav("cliSheet"); renderCli(); return; }
+  $("cliOneTitre").textContent = c.nom;
+  const wa = telWa(c.tel);
+  $("cliOneHead").innerHTML =
+    '<b>' + esc(c.nom) + '</b>' +
+    '<small>' + c.n + " bon" + (c.n > 1 ? "s" : "") + "  ·  " + c.stores + " store" + (c.stores > 1 ? "s" : "") +
+      "  ·  " + fr(c.du, 2) + " MAD au total" +
+      (c.reste > 0.01 ? "  ·  reste " + fr(c.reste, 2) + " MAD" : "  ·  tout est encaissé") + '</small>' +
+    (c.tel ? '<span class="pywa" data-wa="' + esc(wa) + '" role="link" tabindex="0">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/><path d="M8.6 9.4c0 3.3 2.7 6 6 6"/></svg>' +
+        esc(telAffiche(c.tel)) + '</span>' : '');
+
+  $("cliOneList").innerHTML = c.bons.map(o => {
+    const t = orderTotals(o);
+    const d = new Date(o.date || 0);
+    const brut = t.prix + t.pose;
+    const rem = remiseDe(o, brut);
+    const du = duDe(o), pay = payeDe(o), rst = soldeDe(o);
+    const lignes = paiements(o).slice().sort((a,b) => String(a.date).localeCompare(String(b.date)));
+    return '<div class="clbon' + (paySolde(o) ? " paye" : "") + '">' +
+      '<div class="clbhead"><b>' + esc(o.num || "") + '</b>' +
+        '<span class="pyet etat-' + etatDe(o) + '">' + etatLabel(etatDe(o)) + '</span>' +
+        '<span class="agh">' + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + d.getFullYear() + '</span>' +
+      '</div>' +
+      '<div class="clbody">' +
+        (storesParType(o).map(x => '<div class="clline"><span>' + esc(x) + '</span></div>').join("")) +
+        '<div class="clline"><span>Tissu</span><b>' + fr(t.m2 || 0, 2) + ' m²</b></div>' +
+        (t.prix ? '<div class="clline"><span>Stores HT</span><b>' + fr(t.prix, 2) + '</b></div>' : '') +
+        (t.pose ? '<div class="clline"><span>' + t.poseLab + '</span><b>' + fr(t.pose, 2) + '</b></div>' : '') +
+        (rem > 0 ? '<div class="clline"><span>Remise ' + String(fr(remisePct(o), 2)).replace(",00", "") +
+                   ' %</span><b>\u2212 ' + fr(rem, 2) + '</b></div>' : '') +
+        '<div class="clline"><span>' + (facture(o) ? "Total TTC" : "Total HT") + '</span><b>' + fr(du, 2) + ' MAD</b></div>' +
+        (lignes.length
+          ? lignes.map(x => '<div class="clpay"><span>' + esc(dateFR(x.date)) + "  ·  " + esc(x.mode || "") +
+              '</span><b>' + fr(parseFloat(x.montant) || 0, 2) + '</b></div>').join("")
+          : '<div class="clpay"><span>Aucun paiement</span><b>0,00</b></div>') +
+        '<div class="clline" style="margin-top:6px"><span>' +
+          (rst > 0.01 ? "Reste à payer" : "Soldé") + '</span><b style="color:var(--' +
+          (rst > 0.01 ? "warn" : "ok") + ')">' + fr(rst, 2) + ' MAD</b></div>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+  $("cliOneHint").textContent = "Du plus récent au plus ancien.  " +
+    fr(c.paye, 2) + " MAD encaissés sur " + fr(c.du, 2) + " MAD.";
+}
+
+/* --- reprendre un client connu dans le formulaire --- */
+let cliPickQ = "";
+function ouvrirCliPick(){
+  cliPickQ = "";
+  $("cliPickSearch").value = "";
+  dessineCliPick();
+  armBack();
+  $("cliPickSheet").classList.add("open");
+}
+function dessineCliPick(){
+  const q = cliPickQ.trim().toLowerCase();
+  const list = clients().filter(c => !q ||
+    (c.nom + " " + (c.tel || "")).toLowerCase().indexOf(q) >= 0);
+  const box = $("cliPickBody");
+  if (!list.length){
+    box.innerHTML = '<div class="empty">' + (q ? "Aucun client ne correspond."
+      : "Aucun client connu pour l'instant.") + '</div>';
+    return;
+  }
+  box.innerHTML = list.map(c => {
+    const d = new Date(c.dern || 0);
+    return '<button class="clrow" type="button" data-clipick="' + esc(c.cle) + '">' +
+      '<span class="clini">' + esc(c.nom.slice(0,1).toUpperCase()) + '</span>' +
+      '<span class="cll"><b>' + esc(c.nom) + '</b><small>' +
+        c.n + " bon" + (c.n > 1 ? "s" : "") +
+        (c.tel ? "  ·  " + esc(telAffiche(c.tel)) : "") +
+        (c.dern ? "  ·  dernier le " + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + d.getFullYear() : "") +
+      '</small></span></button>';
+  }).join("");
+}
+$("cliPick").addEventListener("click", ouvrirCliPick);
+$("cliPickSearch").addEventListener("input", e => { cliPickQ = e.target.value; dessineCliPick(); });
+$("cliPickBody").addEventListener("click", e => {
+  const b = e.target.closest("button[data-clipick]");
+  if (!b) return;
+  const c = clients().find(x => x.cle === b.dataset.clipick);
+  if (!c) return;
+  const dernier = c.bons[0] || {};
+  S.nom = c.nom;
+  S.tel     = dernier.tel || "";
+  S.adresse = dernier.adresse || "";
+  S.gps     = dernier.gps || "";
+  $("nom").value = S.nom;
+  $("tel").value = S.tel || "";
+  $("adresse").value = S.adresse || "";
+  $("gps").value = S.gps || "";
+  renderGps(); renderProgress();
+  $("cliPickSheet").classList.remove("open");
+  toast("Client " + c.nom + " repris");
+});
+
+$("cliSearch").addEventListener("input", e => { cliQ = e.target.value; renderCli(); });
+$("cliList").addEventListener("click", e => {
+  const b = e.target.closest("button[data-cli]");
+  if (!b) return;
+  cliOuvert = b.dataset.cli;
+  renderCliOne();
+  nav("cliOneSheet");
+});
+$("cliOneSheet").addEventListener("click", e => {
+  const w = e.target.closest("[data-wa]");
+  if (!w) return;
+  window.open(w.dataset.wa, "_blank", "noopener");
+});
+$("tileCli").addEventListener("click", () => {
+  cliQ = ""; $("cliSearch").value = "";
+  renderCli(); nav("cliSheet");
+  pullBons().then(() => renderCli());
 });
 
 /* ============ Encaissements du trimestre ============ */
@@ -6003,7 +6662,7 @@ function evenementsDuJour(iso){
       out.push({at:new Date(o.date).getTime(), by:o.author || "", type:"bon",
                 titre:o.num || "Bon sans numéro",
                 sous:(o.nom || "Client sans nom") + "  ·  " + t.nb + " store" + (t.nb > 1 ? "s" : ""),
-                val:(t.prix || t.pose) ? fr(prixClient(o, t.prix + t.pose), 0) + " MAD" : ""});
+                val:(t.prix || t.pose) ? fr(prixClient(o, htDe(o)), 0) + " MAD" : ""});
     }
     /* le journal : c'est le dernier geste de la journée qui compte */
     const dernier = {};
@@ -6859,19 +7518,27 @@ setInterval(autoRedessine, 5000);               /* dès que l'agent lâche l'éc
 function backOneStep(){
   if ($("login").classList.contains("open")) return false;      /* pas connecté : on laisse sortir */
   if ($("confirm").classList.contains("open")){ $("confirm").classList.remove("open"); cfAction = null; return true; }
-  if ($("cutPickSheet").classList.contains("open")){ $("cutPickSheet").classList.remove("open"); return true; }
+  if ($("cutPickSheet").classList.contains("open")){
+    $("cutPickSheet").classList.remove("open");
+    if (!$("cutSheet").classList.contains("open")) nav("home");
+    return true;
+  }
   if ($("nomPickSheet").classList.contains("open")){ $("nomPickSheet").classList.remove("open"); return true; }
+  if ($("cliPickSheet").classList.contains("open")){ $("cliPickSheet").classList.remove("open"); return true; }
   if ($("refSheet").classList.contains("open")){ closeSheet("refSheet"); return true; }
   if ($("shotSheet").classList.contains("open")){ closeSheet("shotSheet"); return true; }
+  if ($("cliOneSheet").classList.contains("open")){ nav("cliSheet"); renderCli(); return true; }
+  if ($("cutSheet").classList.contains("open")){ retourCut(); return true; }
   if ($("histSheet").classList.contains("open") ||
       $("stockSheet").classList.contains("open") ||
       $("artSheet").classList.contains("open") ||
-      $("cutSheet").classList.contains("open") ||
       $("nomSheet").classList.contains("open") ||
       $("coutSheet").classList.contains("open") ||
       $("logSheet").classList.contains("open") ||
+      $("triSheet").classList.contains("open") ||
+      $("cliSheet").classList.contains("open") ||
       $("paySheet").classList.contains("open")){ nav("home"); return true; }
-  if (!$("home").classList.contains("open")){ nav("home"); return true; }   /* formulaire */
+  if (!$("home").classList.contains("open")){ retourForm(); return true; }   /* formulaire */
   return false;                                                  /* accueil : sortie de l'app */
 }
 
@@ -6887,7 +7554,8 @@ window.addEventListener("popstate", () => {
   if (cached && cached.list && cached.list.length){ CATALOGUE = cached.list; SRC = cached.src; }
   $("sheetUrl").value = LS.get("mst_sheeturl", "");
   $("prix").value = S.prix || ""; $("prixJN").value = S.prixJN || "";
-  $("posePrix").value = S.posePrix || ""; renderPoseMode(); renderPrixFields();
+  $("posePrix").value = S.posePrix || ""; $("remise").value = S.remise || "";
+  renderPoseMode(); renderPrixFields();
   renderAll();
   renderStock();
   renderArt();
