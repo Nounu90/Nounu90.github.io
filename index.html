@@ -951,6 +951,10 @@ select{appearance:none; -webkit-appearance:none}
 .hprog.att{background:var(--warn-soft,#FAEFDD); color:var(--warn)}
 .hrow.fini{opacity:.62}
 .hrow.fini .hl1 b{text-decoration:line-through}
+/* l'échéance rappelée dans la liste des bons, en rouge */
+.pkech{display:inline-block; margin-top:4px; font-family:"IBM Plex Mono",monospace;
+  font-size:12px; font-weight:600; color:var(--accent)}
+.pkech.tard{background:var(--accent-soft); border-radius:5px; padding:1px 7px}
 .hstores{display:block; margin-top:6px; font-family:"Archivo",sans-serif; font-size:12.5px;
   font-weight:600; color:var(--ink); line-height:1.5}
 .hech{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:500; color:var(--muted); white-space:nowrap}
@@ -1581,6 +1585,13 @@ select{appearance:none; -webkit-appearance:none}
       <div class="ok"><b id="payPaye">0</b><span>ENCAISSÉ</span></div>
       <div class="ko"><b id="payReste">0</b><span>RESTE</span></div>
     </div>
+    <div class="field" style="margin-bottom:12px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="paySearch" type="search" placeholder="Nom du client ou numéro de bon" autocomplete="off">
+      <button class="fbtn" type="button" id="payCliPick" aria-label="Choisir un client">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.4 2.9-5.2 6.5-5.2s6.5 1.8 6.5 5.2"/><path d="M17 8.5a3 3 0 010 5"/></svg>
+      </button>
+    </div>
     <div class="filters" id="payFiltres">
       <button type="button" data-f="semaine" aria-pressed="false">Cette semaine</button>
       <button type="button" data-f="mois" aria-pressed="true">Ce mois</button>
@@ -1635,6 +1646,11 @@ select{appearance:none; -webkit-appearance:none}
     <div class="field" style="margin-bottom:12px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
       <input id="cliSearch" type="search" placeholder="Nom du client ou téléphone" autocomplete="off">
+    </div>
+    <div class="filters" id="cliFiltres">
+      <button type="button" data-c="tous" aria-pressed="true">Tous</button>
+      <button type="button" data-c="doit" aria-pressed="false">Reste à payer</button>
+      <button type="button" data-c="solde" aria-pressed="false">Tout payé</button>
     </div>
     <div class="sumline"><span id="cliSumLab">Clients</span><b id="cliSum">0</b></div>
     <div id="cliList"></div>
@@ -3699,9 +3715,11 @@ function renderHome(){
   $("tileCut").hidden = !cutAllowed();
   $("tileLog").hidden = !logAllowed();
   $("tilePay").hidden = !payAllowed();
-  const nCli = clients().length;
-  $("tileCliSub").textContent = nCli
-    ? nCli + " client" + (nCli > 1 ? "s" : "") + "  ·  historique et paiements"
+  const tousCli = clients();
+  const cliDus = tousCli.filter(c => c.reste > 0.01);
+  $("tileCliSub").textContent = tousCli.length
+    ? tousCli.length + " client" + (tousCli.length > 1 ? "s" : "") +
+      (cliDus.length ? "  ·  " + cliDus.length + " avec un reste à payer" : "  ·  tous soldés")
     : "Historique et paiements par client";
   $("tileTri").hidden = !adminAllowed();
   if (adminAllowed()){
@@ -4208,6 +4226,15 @@ function storesParType(o){
   return out;
 }
 
+/* Échéance dépassée alors que le bon n'est pas livré. */
+function echRetard(o){
+  const t = echTime(o);
+  if (isNaN(t)) return false;
+  if (etatDe(o) === "livre") return false;
+  const auj = new Date(); auj.setHours(0,0,0,0);
+  return t < auj.getTime();
+}
+
 /* Un bon peut être classé quand il est livré et intégralement payé. */
 function finPossible(o){ return etatDe(o) === "livre" && paySolde(o); }
 function estFini(o){ return !!(o && o.fini); }
@@ -4610,7 +4637,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "8.0";
+const APP_VERSION = "8.1";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -5822,12 +5849,27 @@ function ouvrirPickBon(cible){
   $("cutPickSheet").classList.add("open");
 }
 
+/* L'atelier veut voir en premier ce qu'il lui reste à faire, et parmi ça, ce qui
+   arrive à échéance le plus tôt. Les bons terminés descendent en bas. */
+function pickRang(o){
+  if (estFini(o)) return 2;
+  const et = pickEtat(o);
+  return (et && et.ok) ? 1 : 0;
+}
 function dessinePick(){
   const q = pickQ.trim().toLowerCase();
   const all = (ORDERS || []).filter(o => {
     if (!q) return true;
     return (String(o.nom || "") + " " + String(o.num || "") + " " +
             String(o.tel || "")).toLowerCase().indexOf(q) >= 0;
+  }).slice().sort((a,b) => {
+    const ra = pickRang(a), rb = pickRang(b);
+    if (ra !== rb) return ra - rb;
+    const ta = echTime(a), tb = echTime(b);
+    if (!isNaN(ta) && !isNaN(tb) && ta !== tb) return ta - tb;
+    if (!isNaN(ta) && isNaN(tb)) return -1;
+    if (isNaN(ta) && !isNaN(tb)) return 1;
+    return new Date(b.date || 0) - new Date(a.date || 0);
   });
   const body = $("cutPickBody");
   body.innerHTML = "";
@@ -5852,6 +5894,10 @@ function dessinePick(){
       '</span>' +
       '<span class="hl2"><small>' + esc(o.num) + '  ·  ' + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
       '  ·  ' + t.nb + ' store' + (t.nb > 1 ? 's' : '') +
+      (o.ech ? '<br><span class="pkech' + (echRetard(o) ? " tard" : "") + '">' +
+               (o.pose === "Livraison" ? "Livraison" : "Pose") + " le " +
+               esc(String(o.ech).split("-").reverse().join("/")) +
+               (echRetard(o) ? "  ·  en retard" : "") + '</span>' : '') +
       (et ? '<br>' + et.sous : '') + '</small></span></span>';
     body.appendChild(btn);
   });
@@ -5944,6 +5990,7 @@ function bonsPayables(){
 /* --- filtres de date --- */
 let payFiltre = "mois";
 let payEtat = "tous";          /* filtre par situation du bon */
+let payQ = "";                 /* recherche par client ou numéro */
 let payDu = "", payAu = "";
 let payOuvert = {};        /* bons dépliés */
 
@@ -5980,8 +6027,11 @@ function dansFenetre(o){
 }
 
 function renderPay(){
+  const q = payQ.trim().toLowerCase();
   const list = bonsPayables().filter(dansFenetre)
-    .filter(o => payEtat === "tous" || etatDe(o) === payEtat);
+    .filter(o => payEtat === "tous" || etatDe(o) === payEtat)
+    .filter(o => !q || (String(o.nom || "") + " " + String(o.num || "") + " " +
+                        String(o.tel || "")).toLowerCase().indexOf(q) >= 0);
   const du    = list.reduce((s,o) => s + duDe(o), 0);
   const paye  = list.reduce((s,o) => s + payeDe(o), 0);
   const reste = list.reduce((s,o) => s + soldeDe(o), 0);
@@ -6069,7 +6119,8 @@ function renderPay(){
 
   const aConfirmer = list.reduce((n,o) =>
     n + paiements(o).filter(x => !x.recu).length, 0);
-  $("payHint").textContent = list.length + " bon" + (list.length > 1 ? "s" : "") +
+  $("payHint").textContent = (q ? 'Recherche « ' + payQ.trim() + ' » : ' : "") +
+    list.length + " bon" + (list.length > 1 ? "s" : "") +
     (nCours ? ",  " + nCours + " non soldé" + (nCours > 1 ? "s" : "") : ",  tous soldés") +
     (payConfirmAllowed() && aConfirmer
       ? ".  " + aConfirmer + " encaissement" + (aConfirmer > 1 ? "s" : "") + " à confirmer" : "") +
@@ -6144,6 +6195,8 @@ $("payFiltres").addEventListener("click", e => {
   payFiltre = b.dataset.f;
   renderPay();
 });
+$("paySearch").addEventListener("input", e => { payQ = e.target.value; renderPay(); });
+$("payCliPick").addEventListener("click", () => ouvrirCliPick("pay"));
 $("payEtats").addEventListener("click", e => {
   const b = e.target.closest("button[data-e]");
   if (!b) return;
@@ -6248,27 +6301,40 @@ function clients(){
     c.reste = c.bons.reduce((t,o) => t + soldeDe(o), 0);
     c.stores = c.bons.reduce((t,o) => t + orderTotals(o).nb, 0);
     return c;
-  }).sort((a,b) => new Date(b.dern || 0) - new Date(a.dern || 0));
+  }).sort((a,b) => a.nom.localeCompare(b.nom, "fr", {sensitivity:"base"}));
 }
 
-let cliQ = "", cliOuvert = "";
+let cliQ = "", cliOuvert = "", cliFiltre = "tous";
 
 function cliFiltres(){
   const q = cliQ.trim().toLowerCase();
-  return clients().filter(c => !q ||
-    (c.nom + " " + (c.tel || "")).toLowerCase().indexOf(q) >= 0);
+  return clients()
+    .filter(c => cliFiltre === "tous" ||
+                 (cliFiltre === "doit"  && c.reste > 0.01) ||
+                 (cliFiltre === "solde" && c.reste <= 0.01))
+    .filter(c => !q || (c.nom + " " + (c.tel || "")).toLowerCase().indexOf(q) >= 0);
 }
 
 function renderCli(){
   const list = cliFiltres();
   const tous = clients();
-  $("cliSum").textContent = tous.length;
-  $("cliSumLab").textContent = tous.length > 1 ? "Clients" : "Client";
+  const doivent = tous.filter(c => c.reste > 0.01);
+  Array.prototype.forEach.call($("cliFiltres").querySelectorAll("button"),
+    b => b.setAttribute("aria-pressed", String(b.dataset.c === cliFiltre)));
+  if (cliFiltre === "doit"){
+    $("cliSum").textContent = fr(doivent.reduce((t,c) => t + c.reste, 0), 0) + " MAD";
+    $("cliSumLab").textContent = "Reste à encaisser";
+  } else {
+    $("cliSum").textContent = tous.length;
+    $("cliSumLab").textContent = tous.length > 1 ? "Clients" : "Client";
+  }
   const box = $("cliList");
   if (!list.length){
     box.innerHTML = '<div class="empty">' + (cliQ
       ? "Aucun client ne correspond."
-      : "Aucun client pour le moment.<br>Ils apparaissent dès qu'un bon porte un nom.") + '</div>';
+      : (cliFiltre === "doit" ? "Tous les clients ont soldé leurs bons."
+       : cliFiltre === "solde" ? "Aucun client entièrement soldé."
+       : "Aucun client pour le moment.<br>Ils apparaissent dès qu'un bon porte un nom.")) + '</div>';
     $("cliHint").textContent = "";
     return;
   }
@@ -6283,6 +6349,7 @@ function renderCli(){
     '</button>').join("");
   const dus = list.filter(c => c.reste > 0.01).length;
   $("cliHint").textContent = list.length + " client" + (list.length > 1 ? "s" : "") +
+    " par ordre alphabétique" +
     (dus ? ",  " + dus + " avec un solde à encaisser" : ",  tous soldés") + ".";
 }
 
@@ -6335,8 +6402,9 @@ function renderCliOne(){
 }
 
 /* --- reprendre un client connu dans le formulaire --- */
-let cliPickQ = "";
-function ouvrirCliPick(){
+let cliPickQ = "", cliPickPour = "form";
+function ouvrirCliPick(pour){
+  cliPickPour = pour || "form";
   cliPickQ = "";
   $("cliPickSearch").value = "";
   dessineCliPick();
@@ -6371,6 +6439,13 @@ $("cliPickBody").addEventListener("click", e => {
   if (!b) return;
   const c = clients().find(x => x.cle === b.dataset.clipick);
   if (!c) return;
+  if (cliPickPour === "pay"){
+    payQ = c.nom;
+    $("paySearch").value = c.nom;
+    $("cliPickSheet").classList.remove("open");
+    renderPay();
+    return;
+  }
   const dernier = c.bons[0] || {};
   S.nom = c.nom;
   S.tel     = dernier.tel || "";
@@ -6385,6 +6460,12 @@ $("cliPickBody").addEventListener("click", e => {
   toast("Client " + c.nom + " repris");
 });
 
+$("cliFiltres").addEventListener("click", e => {
+  const b = e.target.closest("button[data-c]");
+  if (!b) return;
+  cliFiltre = b.dataset.c;
+  renderCli();
+});
 $("cliSearch").addEventListener("input", e => { cliQ = e.target.value; renderCli(); });
 $("cliList").addEventListener("click", e => {
   const b = e.target.closest("button[data-cli]");
@@ -6399,7 +6480,7 @@ $("cliOneSheet").addEventListener("click", e => {
   window.open(w.dataset.wa, "_blank", "noopener");
 });
 $("tileCli").addEventListener("click", () => {
-  cliQ = ""; $("cliSearch").value = "";
+  cliQ = ""; cliFiltre = "tous"; $("cliSearch").value = "";
   renderCli(); nav("cliSheet");
   pullBons().then(() => renderCli());
 });
