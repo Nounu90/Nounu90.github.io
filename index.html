@@ -949,6 +949,8 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 }
 .hchk.on{border-style:solid; border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
 .hchk.sage.on{border-color:var(--info); background:var(--info-soft); color:var(--info)}
+.hchk.grp{border-style:solid; border-color:var(--ok); color:var(--ok)}
+.hchk.grp:active{background:var(--ok-soft)}
 .hchk.bloque{opacity:.35}
 /* avancement de l'atelier sur la ligne du bon */
 .hprog{display:inline-flex; align-items:center; gap:4px; padding:1px 7px; border-radius:6px;
@@ -1553,6 +1555,31 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
     </div>
     <p class="hint">Sur téléphone, un appui long sur l'image permet aussi de l'enregistrer dans la galerie ou de l'envoyer sur WhatsApp.</p>
     <button class="btn" id="btnNew" style="width:100%; margin-top:14px">Nouveau bon de commande</button>
+  </div>
+</div>
+
+<!-- RESUME D'UNE COMMANDE, A ENVOYER AU GROUPE -->
+<div class="sheet" id="resSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="resSheet" aria-label="Fermer">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <h2 id="resTitre">Résumé</h2>
+  </div>
+  <div class="sheet-body">
+    <img class="shot-img" id="resImg" alt="Résumé de la commande">
+    <div class="shot-actions">
+      <button class="btn primary" id="resShare">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/><path d="M8.6 9.4c0 3.3 2.7 6 6 6"/></svg>
+        Envoyer au groupe
+      </button>
+      <button class="btn" id="resSave">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Enregistrer
+      </button>
+    </div>
+    <button class="btn" id="resGroupe" style="width:100%; margin-top:10px">Ouvrir le groupe WhatsApp</button>
+    <p class="hint" id="resHint"></p>
   </div>
 </div>
 
@@ -2884,7 +2911,8 @@ $("btnHistory").addEventListener("click", retourForm);
 $("btnNew").addEventListener("click", () => { formVenu = ""; newOrderSynced(); nav("form"); });
 
 /* ============ Screenshot du bon ============ */
-const T = { ink:"#191315", muted:"#6F6569", line:"#E4DDDE", accent:"#D5001F", soft:"#FCEAEC", card:"#F7F4F4" };
+const T = { ink:"#191315", muted:"#6F6569", line:"#E4DDDE", accent:"#D5001F", soft:"#FCEAEC", card:"#F7F4F4",
+             ok:"#0F7A46", warn:"#8F5400" };
 
 function ticket(){
   const W = 1080, P = 64;
@@ -4396,6 +4424,11 @@ function renderHist(){
               ? '<button class="hchk sage' + (estSage(o) ? " on" : "") +
                 '" type="button" data-sage="' + o.id + '" title="Saisi dans SAGE">SAGE</button>'
               : '') +
+            (finAllowed()
+              ? '<button class="hchk grp" type="button" data-resume="' + o.id + '" title="Résumé pour le groupe">' +
+                '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/><path d="M8.6 9.4c0 3.3 2.7 6 6 6"/></svg>' +
+                '</button>'
+              : '') +
             '</span>'
           : '') +
         '<span style="display:flex; align-items:center; gap:6px">' +
@@ -4505,6 +4538,13 @@ $("histBody").addEventListener("click", e => {
   const num  = e.target.closest("button[data-num]");
   const fin  = e.target.closest("button[data-fini]");
   const sage = e.target.closest("button[data-sage]");
+  const res  = e.target.closest("button[data-resume]");
+
+  if (res){
+    const o = ORDERS.find(x => x.id === res.dataset.resume);
+    if (o) ouvrirResume(o);
+    return;
+  }
 
   if (fin){
     const o = ORDERS.find(x => x.id === fin.dataset.fini);
@@ -4646,7 +4686,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "8.3";
+const APP_VERSION = "8.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6330,6 +6370,220 @@ $("tilePay").addEventListener("click", () => {
   pullBons().then(() => renderPay());
 });
 
+/* ============ Résumé d'une commande, pour le groupe WhatsApp ============ */
+/* Une image qui tient dans un message : où en est la découpe, où en est la
+   fabrication, et où en est le paiement. */
+const GROUPE_WA = "https://chat.whatsapp.com/GIhfGPm2mtvBQCQMsPG3yc?s=cl&p=a&mlu=4&ilr=4";
+let resBlob = null, resUrl = null, resO = null;
+
+function resumeImage(o){
+  const W = 1080, P = 60;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = 2400;
+  const x = c.getContext("2d");
+  x.fillStyle = "#FFFFFF"; x.fillRect(0, 0, W, c.height);
+  const A = 'Archivo, sans-serif', B = '"IBM Plex Sans", sans-serif', M = '"IBM Plex Mono", monospace';
+  x.textBaseline = "alphabetic";
+  let y = 0;
+
+  const t = orderTotals(o);
+  const brut = t.prix + t.pose;
+  const rem = remiseDe(o, brut);
+  const du = duDe(o), pay = payeDe(o), rst = soldeDe(o);
+  const av = avancement(o);
+  const d = new Date(o.date || 0);
+
+  /* bandeau */
+  x.fillStyle = T.accent; x.fillRect(0, 0, W, 150);
+  x.fillStyle = "#FFFFFF";
+  x.font = "700 40px " + A; x.fillText("MSTORECASA", P, 62);
+  x.font = "400 26px " + B; x.fillText("Suivi de commande", P, 102);
+  x.textAlign = "right";
+  x.font = "600 34px " + M; x.fillText(o.num || "", W - P, 62);
+  x.font = "400 24px " + B;
+  x.fillText(pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + d.getFullYear(), W - P, 102);
+  x.textAlign = "left";
+  y = 150;
+
+  /* client et état */
+  y += 60;
+  x.fillStyle = T.ink; x.font = "600 44px " + A;
+  x.fillText(String(o.nom || "Client sans nom").slice(0, 26), P, y);
+  y += 44;
+  x.fillStyle = T.muted; x.font = "400 26px " + B;
+  const lignes = storesParType(o);
+  x.fillText(lignes.join("   ·   ") + "   ·   " + etatLabel(etatDe(o)), P, y);
+  y += 46;
+
+  /* une barre d'avancement, avec son compte */
+  const barre = (titre, fait, tot, couleur) => {
+    if (!tot) return;
+    y += 34;
+    x.fillStyle = T.ink; x.font = "600 30px " + A; x.fillText(titre, P, y);
+    x.textAlign = "right";
+    x.fillStyle = fait === tot ? T.ok : T.warn; x.font = "600 32px " + M;
+    x.fillText(fait + " / " + tot, W - P, y);
+    x.textAlign = "left";
+    y += 18;
+    const bw = W - 2*P, h = 18;
+    x.fillStyle = T.line; x.fillRect(P, y, bw, h);
+    x.fillStyle = couleur; x.fillRect(P, y, bw * (fait / tot), h);
+    y += h + 16;
+  };
+  x.fillStyle = T.line; x.fillRect(P, y, W - 2*P, 2); y += 6;
+  barre("Découpes livrées au magasin 2", av.tube.fait, av.tube.tot, T.ok);
+  barre("Fenêtres fabriquées", av.fen.fait, av.fen.tot, T.accent);
+
+  /* les mesures, avec ce qui est fait */
+  const dims = ordDims(o);
+  const done = faites(o);
+  if (dims.length){
+    y += 26;
+    x.fillStyle = T.muted; x.font = "600 22px " + A;
+    x.fillText("MESURES", P, y);
+    y += 12;
+    dims.slice(0, 14).forEach(dm => {
+      y += 40;
+      const ok = done.indexOf(dm.key) >= 0;
+      x.fillStyle = ok ? T.ok : T.line;
+      x.beginPath(); x.arc(P + 11, y - 9, 11, 0, 6.3); x.fill();
+      x.fillStyle = ok ? T.ok : T.ink; x.font = "600 30px " + M;
+      x.fillText(fr(dm.l,0) + " × " + fr(dm.h,0) + " cm", P + 38, y);
+      x.fillStyle = T.muted; x.font = "400 24px " + B;
+      x.fillText((dm.t === "JN" ? "jour et nuit" : "enrouleur") + (dm.ref ? "  ·  " + dm.ref : ""), P + 330, y);
+    });
+    if (dims.length > 14){
+      y += 36;
+      x.fillStyle = T.muted; x.font = "400 24px " + B;
+      x.fillText("et " + (dims.length - 14) + " autres mesures", P + 38, y);
+    }
+    y += 22;
+  }
+
+  /* l'argent */
+  y += 26;
+  x.fillStyle = T.line; x.fillRect(P, y, W - 2*P, 2); y += 10;
+  const ligne = (lab, val, gras, couleur) => {
+    y += 44;
+    x.fillStyle = gras ? T.ink : T.muted;
+    x.font = (gras ? "600 30px " : "400 27px ") + (gras ? A : B);
+    x.fillText(lab, P, y);
+    x.textAlign = "right";
+    x.fillStyle = couleur || T.ink;
+    x.font = (gras ? "600 34px " : "400 30px ") + M;
+    x.fillText(val, W - P, y);
+    x.textAlign = "left";
+  };
+  if (t.prix) ligne("Stores HT", fr(t.prix, 2));
+  if (t.pose) ligne(t.poseLab, fr(t.pose, 2));
+  if (rem > 0) ligne("Remise " + String(fr(remisePct(o), 2)).replace(",00", "") + " %", "\u2212 " + fr(rem, 2), false, T.accent);
+  ligne(facture(o) ? "Total TTC" : "Total HT", fr(du, 2) + " MAD", true);
+
+  const pl = paiements(o).slice().sort((a,b) => String(a.date).localeCompare(String(b.date)));
+  y += 16;
+  if (pl.length){
+    pl.slice(0, 8).forEach(pp => {
+      ligne(dateFR(pp.date) + "  ·  " + (pp.mode || "") + (pp.recu ? "  ·  reçu" : ""),
+            fr(parseFloat(pp.montant) || 0, 2), false, T.ok);
+    });
+  } else {
+    ligne("Aucun paiement enregistré", "0,00", false, T.muted);
+  }
+  ligne("Payé", fr(pay, 2) + " MAD", true, T.ok);
+  ligne(rst > 0.01 ? "Reste à payer" : "Soldé", fr(rst, 2) + " MAD", true, rst > 0.01 ? T.warn : T.ok);
+
+  /* pied */
+  y += 60;
+  x.fillStyle = T.line; x.fillRect(P, y, W - 2*P, 2);
+  y += 40;
+  const now = new Date();
+  x.fillStyle = T.muted; x.font = "400 22px " + B;
+  x.fillText("Édité le " + pad(now.getDate()) + "/" + pad(now.getMonth()+1) + "/" + now.getFullYear() +
+             " à " + pad(now.getHours()) + ":" + pad(now.getMinutes()) +
+             (USER ? "  par " + nomDe(USER.login) : ""), P, y);
+  y += 30;
+
+  /* on recoupe le canevas à la hauteur utile */
+  const fin = document.createElement("canvas");
+  fin.width = W; fin.height = Math.max(600, Math.round(y));
+  fin.getContext("2d").drawImage(c, 0, 0);
+  return fin;
+}
+
+function resumeTexte(o){
+  const av = avancement(o);
+  const rst = soldeDe(o);
+  return [
+    (o.num || "") + "  ·  " + (o.nom || "Client sans nom"),
+    storesParType(o).join(" · ") + "  ·  " + etatLabel(etatDe(o)),
+    "Découpes magasin 2 : " + av.tube.fait + "/" + av.tube.tot,
+    "Fenêtres fabriquées : " + av.fen.fait + "/" + av.fen.tot,
+    "Total " + fr(duDe(o), 2) + " MAD  ·  payé " + fr(payeDe(o), 2) +
+      (rst > 0.01 ? "  ·  reste " + fr(rst, 2) : "  ·  soldé")
+  ].join("\n");
+}
+
+async function ouvrirResume(o){
+  if (!o) return;
+  resO = o;
+  try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch(e){}
+  const c = resumeImage(o);
+  if (resUrl) URL.revokeObjectURL(resUrl);
+  resUrl = c.toDataURL("image/png");
+  $("resImg").src = resUrl;
+  $("resTitre").textContent = "Résumé " + (o.num || "");
+  resBlob = null;
+  c.toBlob(b => { resBlob = b; }, "image/png");
+  $("resHint").textContent = "« Envoyer au groupe » ouvre le partage du téléphone : " +
+    "choisissez WhatsApp puis le groupe MSTORECASA. L'image et le texte partent ensemble.";
+  openSheet("resSheet");
+}
+
+function resNom(o){
+  return "resume-" + String((o && o.num) || "bon").replace(/[^\w-]+/g, "") + ".png";
+}
+
+$("resShare").addEventListener("click", async () => {
+  const o = resO;
+  if (!o) return;
+  const texte = resumeTexte(o);
+  try {
+    if (resBlob && navigator.canShare){
+      const f = new File([resBlob], resNom(o), {type:"image/png"});
+      if (navigator.canShare({files:[f]})){
+        await navigator.share({files:[f], title:"MSTORECASA " + (o.num || ""), text:texte});
+        return;
+      }
+    }
+    if (navigator.share){
+      await navigator.share({title:"MSTORECASA " + (o.num || ""), text:texte});
+      toast("Image non partageable ici : enregistrez la puis joignez la");
+      return;
+    }
+    toast("Partage indisponible : enregistrez l'image puis envoyez la");
+  } catch(e){ /* annulé par l'agent */ }
+});
+
+$("resSave").addEventListener("click", async () => {
+  const o = resO;
+  if (!o) return;
+  const nom = resNom(o);
+  if (DL && resBlob){
+    try { await DL.save({filename:nom, data:resBlob}); toast("Image enregistrée"); return; }
+    catch(e){ if (e && e.code === "declined") return; }
+  }
+  try {
+    const a = document.createElement("a");
+    a.href = resUrl; a.download = nom;
+    document.body.appendChild(a); a.click(); a.remove();
+    toast("Image enregistrée");
+  } catch(e){ toast("Appui long sur l'image pour l'enregistrer"); }
+});
+
+$("resGroupe").addEventListener("click", () => {
+  window.open(GROUPE_WA, "_blank", "noopener");
+});
+
 /* ============ Clients ============ */
 /* Un client n'est pas une fiche à part : il se déduit des bons. Deux bons au
    même nom sont le même client, quelle que soit la casse ou les espaces. */
@@ -7665,6 +7919,7 @@ function backOneStep(){
   if ($("cliPickSheet").classList.contains("open")){ $("cliPickSheet").classList.remove("open"); return true; }
   if ($("refSheet").classList.contains("open")){ closeSheet("refSheet"); return true; }
   if ($("shotSheet").classList.contains("open")){ closeSheet("shotSheet"); return true; }
+  if ($("resSheet").classList.contains("open")){ closeSheet("resSheet"); return true; }
   if ($("cliOneSheet").classList.contains("open")){ nav("cliSheet"); renderCli(); return true; }
   if ($("cutSheet").classList.contains("open")){ retourCut(); return true; }
   if ($("histSheet").classList.contains("open") ||
