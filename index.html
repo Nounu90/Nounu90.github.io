@@ -254,6 +254,8 @@ select{appearance:none; -webkit-appearance:none}
   font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted)}
 .pcrow{display:flex; align-items:center; gap:8px; padding:5px 12px}
 .pcrow > label{flex:1; font-size:13.5px; color:var(--ink); line-height:1.3}
+.pcrow > label em{display:block; font-style:normal; font-size:10.5px; color:var(--muted);
+  font-family:"IBM Plex Mono",monospace; margin-top:1px}
 .pcrow input{
   width:88px; text-align:right; border:1px solid var(--line); background:var(--card2);
   border-radius:9px; padding:8px 9px; font-family:"IBM Plex Mono",monospace;
@@ -261,6 +263,8 @@ select{appearance:none; -webkit-appearance:none}
 .pcrow input:focus{outline:none; border-color:var(--accent); background:var(--card)}
 .pcrow input.auto{background:var(--accent-soft); border-color:transparent; color:var(--accent)}
 .pcrow input.edited{background:var(--card); border-color:var(--accent)}
+.pcrow input.fixe{background:var(--card2); border:1px dashed var(--line-strong);
+  color:var(--muted); font-weight:500; cursor:default}
 .pcrow > u{flex:none; width:22px; text-decoration:none; font-family:"IBM Plex Mono",monospace;
   font-size:11px; color:var(--muted)}
 .pcetat{padding:0 0 12px; border-bottom:1px solid var(--line); margin-bottom:12px}
@@ -2738,6 +2742,7 @@ $("pcList").addEventListener("input", e => {
   pcSet(fam, k, v);
   inp.className = v === "" ? "" : "edited";
   if (k === "tissuCoupe" || k === "tissuVente") majChutes(fam);
+  if (k === "tissuCoupe") majMl(fam);
   pcCheck();
   /* On enregistre et on partage sans attendre que l'agent quitte la case :
      sinon une saisie non terminée ne partait jamais vers les autres. */
@@ -5018,7 +5023,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "9.2";
+const APP_VERSION = "9.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -5065,7 +5070,8 @@ const TISSU_DEF = {
     {k:"tissuCoupe",   label:"Tissu m² coupé", u:"m²", auto:d => d.coupeM2},
     /* Le tissu jour et nuit s'achète et se compte au mètre linéaire : l'atelier
        a besoin de la longueur déroulée, pas seulement de la surface. */
-    {k:"tissuCoupeMl", label:"Tissu ml coupé", u:"ml", auto:d => d.tissuMl},
+    {k:"tissuCoupeMl", label:"Tissu ml coupé", u:"ml", fixe:true,
+     auto:(d, fam) => mlAuto(d, fam)},
     {k:"tissuVente",   label:"Tissu m² vente", u:"m²", auto:d => d.venteM2},
     {k:"chutes",       label:"Chutes",         u:"m²", auto:(d, fam) => chuteAuto(d, fam)}
   ]
@@ -5083,6 +5089,14 @@ function tissuVal(fam, k, d){
   }
   const def = TISSU_DEF[fam].find(x => x.k === k);
   return def && def.auto ? def.auto(d, fam) : 0;
+}
+/* Le mètre linéaire déroulé n'est pas une saisie : c'est le m² coupé divisé
+   par la laize du rouleau. Si l'atelier corrige la surface, la longueur suit
+   toute seule, et les deux chiffres ne peuvent jamais se contredire. */
+function mlAuto(d, fam){
+  const lz = ((d && d.laize > 0) ? d.laize : CUT_DEF.laize) / 100;
+  if (!(lz > 0)) return 0;
+  return tissuVal(fam, "tissuCoupe", d) / lz;
 }
 function chuteAuto(d, fam){
   const ecart = tissuVal(fam, "tissuCoupe", d) - tissuVal(fam, "tissuVente", d);
@@ -5108,6 +5122,11 @@ function famData(fam){
      le plan ne dit rien : on retombe sur la longueur brute des fenêtres. */
   const bruteMl = sum(d => dep * d.h + surplusDe(fam)) / 100;
   const tissuMl = pl.ml > 0 ? pl.ml : bruteMl;
+  /* La laize du rouleau employé par cette famille, en cm : c'est elle qui
+     convertit une surface en longueur déroulée. */
+  const lzs = v.map(d => { const f = fab(d.ref); return f && f.laize > 0 ? f.laize : 0; })
+               .filter(Boolean);
+  const laize = lzs.length ? lzs[0] : CUT_DEF.laize;
   return {
     nb: v.length,
     dims: v,
@@ -5119,6 +5138,7 @@ function famData(fam){
     supports: sum(d => d.l >= 200 ? 3 : 2),
     coupeM2: coupeM2,
     tissuMl: tissuMl,
+    laize: laize,
     bruteM2: bruteM2,
     venteM2: venteM2,
     /* Chute = ce qu'on a déroulé moins ce qu'on facture. Quand le résultat est
@@ -5202,7 +5222,9 @@ function pcPush(){
 }
 /* valeur retenue pour l'envoi : la saisie de l'atelier, sinon le calcul */
 function pcNum(fam, def, d){
-  const man = pcVal(fam, def.k);
+  /* Une case verrouillée se recalcule toujours : même une ancienne valeur
+     saisie à la main ne peut plus la faire mentir. */
+  const man = def.fixe ? null : pcVal(fam, def.k);
   if (man !== null){
     const n = parseFloat(String(man).replace(",", "."));
     return isNaN(n) ? String(man) : n;
@@ -5220,6 +5242,15 @@ function majChutes(fam){
   if (pcVal(fam, "chutes") !== null) return;      /* l'atelier a mis sa propre valeur */
   inp.value = fr(Math.round(chuteAuto(d, fam) * 100) / 100);
   inp.className = "auto";
+}
+
+/* Le ml déroulé suit le m² coupé sans redessiner la fiche, comme les chutes. */
+function majMl(fam){
+  const inp = $("pcList").querySelector('input[data-fam="' + fam + '"][data-k="tissuCoupeMl"]');
+  if (!inp) return;
+  const d = pcData[fam] || famData(fam);
+  inp.value = fr(Math.round(mlAuto(d, fam) * 100) / 100);
+  inp.className = "fixe";
 }
 
 /* Ce qui manque encore pour pouvoir envoyer la fiche */
@@ -5259,11 +5290,14 @@ function renderPieces(){
       '<div class="pcgrp"><span>' + title + '</span>' +
       defs.map(def => {
         const a   = def.auto ? Math.round(def.auto(d, fam) * 100) / 100 : null;
-        const man = pcVal(fam, def.k);
+        const man = def.fixe ? null : pcVal(fam, def.k);
         const val = man !== null ? esc(String(man)) : (a !== null ? fr(a) : "");
-        const cls = man !== null ? "edited" : (a !== null ? "auto" : "");
-        const row = '<div class="pcrow"><label>' + def.label + '</label>' +
+        const cls = def.fixe ? "fixe" : (man !== null ? "edited" : (a !== null ? "auto" : ""));
+        const lab = def.fixe && def.k === "tissuCoupeMl"
+          ? def.label + ' <em>laize ' + fr(d.laize, 0) + ' cm</em>' : def.label;
+        const row = '<div class="pcrow"><label>' + lab + '</label>' +
           '<input type="text" inputmode="decimal" class="' + cls + '" value="' + val + '"' +
+          (def.fixe ? ' readonly tabindex="-1" title="Calculé : m² coupé divisé par la laize"' : '') +
           ' data-fam="' + fam + '" data-k="' + def.k + '"' +
           ' placeholder="' + (a !== null ? "" : "—") + '"><u>' + def.u + '</u></div>';
         if (!def.opts) return row;
