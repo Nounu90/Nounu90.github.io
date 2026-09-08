@@ -452,8 +452,27 @@ select{appearance:none; -webkit-appearance:none}
   margin-bottom:11px; overflow:hidden}
 .dkcard.fini{opacity:.66}
 .dkcard.ouvert{border-color:var(--accent)}
-.dkhead{width:100%; text-align:left; padding:13px 14px; background:none; display:block}
+.dkhead{display:flex; align-items:flex-start; gap:10px; padding:13px 14px}
+.dkopen{flex:1; min-width:0; text-align:left; background:none; padding:0}
+.dkmark{flex:none; display:flex; flex-direction:column; gap:6px; align-items:center}
+.dkpct{width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
+  font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:600;
+  border:2px solid var(--line-strong); color:var(--muted)}
+.dkpct.mi{border-color:var(--warn); color:var(--warn)}
+.dkpct.ok{border-color:var(--ok); color:var(--ok); background:var(--ok-soft)}
+.dkmes{display:grid; grid-template-columns:22px 1fr auto; gap:8px; align-items:baseline;
+  padding:5px 0; border-top:1px solid var(--line); font-size:12.5px}
+.dkmes:first-of-type{border-top:0}
+.dkmes i{font-style:normal; width:9px; height:9px; border-radius:50%; background:var(--line-strong);
+  display:inline-block; align-self:center}
+.dkmes i.on{background:var(--ok)}
+.dkmes b{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink)}
+.dkmes small{display:block; color:var(--muted); font-size:11px; margin-top:1px}
+.dkmes em{font-style:normal; font-family:"IBM Plex Mono",monospace; color:var(--muted); font-size:11.5px}
+.dkmanque{margin:0; padding:0 0 0 17px; font-size:12.5px; color:var(--warn); line-height:1.7}
 .dkcard.ouvert .dkhead{background:var(--accent-soft)}
+.dkcard.ouvert .dkpct{background:var(--card)}
+.dkcard.ouvert .dkpct.ok{background:var(--ok-soft)}
 .dkl1{display:flex; align-items:baseline; gap:9px}
 .dkl1 b{flex:1; min-width:0; font-family:"Archivo",sans-serif; font-size:15.5px; font-weight:600;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -4829,7 +4848,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "8.7";
+const APP_VERSION = "8.8";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6793,8 +6812,7 @@ function docListe(){
     if (docDossier === "pasage"  && estSage(o)) return false;
     if (docDossier === "banque"  && !bonAVerifier(o)) return false;
     if (!q) return true;
-    return [o.nom, o.num, o.tel, o.ice, o.author, (o.refs || []).join(" ")]
-      .join(" ").toLowerCase().indexOf(q) >= 0;
+    return docFoin(o).indexOf(q.replace("×", "x")) >= 0;
   }).sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
 }
 
@@ -6821,6 +6839,57 @@ function ficheCoupe(o){
   return out;
 }
 
+/* Un dossier complet, c'est un bon renseigné jusqu'au bout : les coordonnées du
+   client, le prix, l'atelier terminé, la fiche envoyée, le client payé et vérifié,
+   la saisie comptable faite. Le pourcentage dit d'un coup d'oeil où ça bloque. */
+function completude(o){
+  const t = orderTotals(o);
+  const av = avancement(o);
+  const dims = ordDims(o);
+  const pts = [
+    ["Téléphone du client",        !!String(o.tel || "").trim()],
+    ["Adresse du client",          !!String(o.adresse || "").trim()],
+    ["ICE du client",              !!String(o.ice || "").trim()],
+    ["Échéance",                   !!o.ech],
+    ["Prix au m²",                 t.prix > 0],
+    ["Tissu choisi sur chaque mesure", dims.length > 0 && dims.every(d => !!d.ref)],
+    ["Fiche de production envoyée", !!o.sheetAt],
+    ["Découpes livrées au magasin 2", av.tube.tot > 0 && av.tube.fait === av.tube.tot],
+    ["Fenêtres fabriquées",        av.fen.tot > 0 && av.fen.fait === av.fen.tot],
+    ["Commande livrée",            etatDe(o) === "livre"],
+    ["Paiement soldé",             paySolde(o)],
+    ["Virements vus en banque",    paiements(o).length > 0 && paiements(o).every(p => !!p.recu)],
+    ["Saisi dans SAGE",            estSage(o)]
+  ];
+  const faits = pts.filter(p => p[1]).length;
+  return {faits:faits, total:pts.length,
+          pct: Math.round(faits * 100 / pts.length),
+          manque: pts.filter(p => !p[1]).map(p => p[0])};
+}
+
+/* Tout ce sur quoi la recherche doit mordre : le texte, mais aussi les mesures,
+   les surfaces et les montants, en virgule comme en point. */
+function docFoin(o){
+  const t = orderTotals(o);
+  const nums = [];
+  const pousse = v => {
+    if (!isFinite(v)) return;
+    nums.push(v.toFixed(2), v.toFixed(2).replace(".", ","), String(Math.round(v)));
+  };
+  (o.dims || []).forEach(d => {
+    const l = parseFloat(d.l), h = parseFloat(d.h);
+    if (l > 0) nums.push(String(Math.round(l)));
+    if (h > 0) nums.push(String(Math.round(h)));
+    if (l > 0 && h > 0) nums.push(Math.round(l) + "x" + Math.round(h), Math.round(l) + "×" + Math.round(h));
+  });
+  pousse(t.m2 || 0);
+  pousse(t.prix || 0);
+  pousse(duDe(o));
+  pousse(htDe(o));
+  return [o.nom, o.num, o.tel, o.ice, o.author, (o.refs || []).join(" ")]
+    .concat(nums).join(" ").toLowerCase();
+}
+
 function docCarte(o){
   const t = orderTotals(o);
   const d = new Date(o.date || 0);
@@ -6837,8 +6906,10 @@ function docCarte(o){
   const r = (lab, val, cls) => '<div class="dkr"><span>' + lab + '</span><b' +
                                (cls ? ' class="' + cls + '"' : '') + '>' + val + '</b></div>';
 
+  const cp = completude(o);
   let h = '<div class="dkcard' + (estFini(o) ? " fini" : "") + (ouvert ? " ouvert" : "") + '">' +
-    '<button class="dkhead" type="button" data-doc="' + o.id + '">' +
+    '<div class="dkhead">' +
+    '<button class="dkopen" type="button" data-doc="' + o.id + '">' +
       '<span class="dkl1"><b>' + esc(o.nom || "Client sans nom") + '</b>' +
         '<em>' + fr(du, 2) + '</em></span>' +
       '<span class="dkl2">' +
@@ -6861,7 +6932,19 @@ function docCarte(o){
                  esc(String(o.ech).split("-").reverse().join("/")) + '</b>' : '') +
         (rst > 0.01 ? '  ·  reste <b>' + fr(rst, 2) + ' MAD</b>' : '  ·  <b>soldé</b>') +
       '</span>' +
-    '</button>';
+    '</button>' +
+    '<span class="dkmark">' +
+      '<span class="dkpct' + (cp.pct === 100 ? " ok" : (cp.pct >= 50 ? " mi" : "")) + '" ' +
+        'title="' + cp.faits + ' points sur ' + cp.total + ' renseignés">' + cp.pct + '%</span>' +
+      '<button class="hchk sage' + (estSage(o) ? " on" : "") + '" type="button" ' +
+        'data-docsage="' + o.id + '" title="Saisi dans SAGE">SAGE</button>' +
+      '<button class="hchk' + (estFini(o) ? " on" : "") + (finPossible(o) ? "" : " bloque") + '" type="button" ' +
+        'data-docfin="' + o.id + '" title="Dossier terminé">' +
+        (estFini(o)
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+          : 'FIN') + '</button>' +
+    '</span>' +
+    '</div>';
 
   if (!ouvert) return h + '</div>';
 
@@ -6882,6 +6965,30 @@ function docCarte(o){
     (o.adresse ? r("Adresse", esc(o.adresse)) : "") +
     (o.notes ? r("Remarque", esc(o.notes)) : "") +
   '</div>';
+
+  /* --- toutes les mesures, une par une --- */
+  const dims = ordDims(o);
+  const done = faites(o);
+  h += '<div class="dkbloc"><h4>Mesures  ·  ' + dims.length + '</h4>';
+  if (!dims.length) h += '<div class="dkr"><span>Aucune mesure exploitable</span></div>';
+  dims.forEach(dm => {
+    const ok = done.indexOf(dm.key) >= 0;
+    const m2 = (Math.max(dm.l, MINCM) * Math.max(dm.h, MINCM)) / 10000;
+    h += '<div class="dkmes"><i class="' + (ok ? "on" : "") + '"></i>' +
+      '<span><b>' + fr(dm.l,0) + ' × ' + fr(dm.h,0) + ' cm</b>' +
+        '<small>fenêtre ' + dm.n + '  ·  ' + (dm.t === "JN" ? "jour et nuit" : "enrouleur") +
+        (dm.ref ? '  ·  ' + esc(dm.ref) : '  ·  sans tissu') +
+        (ok ? '  ·  fabriquée' : '') + '</small></span>' +
+      '<em>' + fr(m2, 2) + ' m²</em></div>';
+  });
+  h += '</div>';
+
+  /* --- ce qu'il reste à renseigner --- */
+  if (cp.manque.length){
+    h += '<div class="dkbloc"><h4>Il manque  ·  ' + cp.manque.length + ' point' +
+      (cp.manque.length > 1 ? 's' : '') + ' sur ' + cp.total + '</h4>' +
+      '<ul class="dkmanque">' + cp.manque.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul></div>';
+  }
 
   /* --- l'atelier --- */
   h += '<div class="dkbloc"><h4>Atelier</h4>' +
@@ -6907,6 +7014,30 @@ function docCarte(o){
                           (x.v === "" ? "—" : (typeof x.v === "number" ? fr(x.v, 2) : esc(String(x.v)))) + " " + x.u)).join("") +
     '</div>';
   });
+  h += '</div>';
+
+  /* --- coût de revient et bénéfice --- */
+  const C = calcCout(o);
+  h += '<div class="dkbloc"><h4>Coût de revient</h4>';
+  if (!C){
+    h += '<div class="dkr"><span>Aucune dimension exploitable</span></div>';
+  } else if (C.manque && C.manque.length){
+    h += '<div class="dkr"><span>Prix manquants dans la nomenclature</span><b class="att">incomplet</b></div>' +
+         '<div class="dkr"><span>' + esc(C.manque.join(", ")) + '</span></div>';
+  }
+  if (C){
+    h += r("Tissu déroulé", fr(C.m2tissu, 2) + " m²") +
+      (C.m2stock > 0 ? r("Tissu repris du stock", fr(C.m2stock, 2) + " m²", "ok") : "") +
+      r("Chute de tissu", fr(C.chuteTissu, 2) + " m²") +
+      r("Chute de barre", fr(C.chuteBarre, 2) + " m") +
+      '<div class="dkr gros"><span>Coût de revient</span><b>' + fr(C.cout, 2) + ' MAD</b></div>' +
+      r("Soit au m²", fr(C.coutM2, 2) + " MAD/m²") +
+      r("Vente des stores HT", fr(C.vente, 2)) +
+      '<div class="dkr gros"><span>Bénéfice</span><b class="' + (C.benef >= 0 ? "ok" : "acc") + '">' +
+        fr(C.benef, 2) + ' MAD</b></div>' +
+      r("Marge", fr(C.marge * 100, 1) + " %", C.marge >= 0 ? "ok" : "acc") +
+      r(C.poseLab + " facturée", fr(C.posePrix, 2) + "  ·  hors bénéfice");
+  }
   h += '</div>';
 
   /* --- les paiements --- */
@@ -6954,10 +7085,6 @@ function docCarte(o){
       '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/><path d="M8.6 9.4c0 3.3 2.7 6 6 6"/></svg>' +
       (wa ? "Client" : "Sans numéro") + '</button>' +
     '<button type="button" data-docres="' + o.id + '">Résumé groupe</button>' +
-    '<button type="button" class="sage' + (estSage(o) ? " on" : "") + '" data-docsage="' + o.id + '">' +
-      (estSage(o) ? "Saisi SAGE" : "Marquer SAGE") + '</button>' +
-    '<button type="button" class="' + (estFini(o) ? "on" : (finPossible(o) ? "" : "bloque")) +
-      '" data-docfin="' + o.id + '">' + (estFini(o) ? "Terminé" : "Classer terminé") + '</button>' +
   '</div>';
 
   return h + '</div></div>';
