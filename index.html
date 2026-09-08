@@ -1029,6 +1029,10 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 }
 .hchk.on{border-style:solid; border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
 .hchk.sage.on{border-color:var(--info); background:var(--info-soft); color:var(--info)}
+/* l'état de la fiche des pièces, avant même d'ouvrir le dossier */
+.hchk.pcs{font-size:10px}
+.hchk.pcs.att{border-style:solid; border-color:var(--warn); background:var(--warn-soft,#FAEFDD); color:var(--warn)}
+.hchk.pcs.on{border-style:solid; border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
 .hchk.grp{border-style:solid; border-color:var(--ok); color:var(--ok)}
 .hchk.grp:active{background:var(--ok-soft)}
 .hchk.bloque{opacity:.35}
@@ -4848,7 +4852,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "8.8";
+const APP_VERSION = "8.9";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6839,6 +6843,29 @@ function ficheCoupe(o){
   return out;
 }
 
+/* La fiche « Pièces utilisées » est remplie par l'atelier. Les cases calculées
+   par le programme ne comptent pas : seules celles qu'il faut saisir à la main
+   disent si soufiane a terminé son travail de fiche. */
+function piecesEtat(o){
+  const avant = cutOrderId, avantData = pcData;
+  cutOrderId = o.id;
+  const manque = [];
+  let tot = 0, remplis = 0;
+  try {
+    famsPresent().forEach(fam => {
+      const d = famData(fam);
+      TISSU_DEF[fam].concat(PIECES_DEF[fam]).forEach(def => {
+        if (def.auto) return;                 /* calculée, rien à saisir */
+        tot++;
+        if (pcVal(fam, def.k) !== null) remplis++;
+        else manque.push(def.label + " (" + (fam === "JN" ? "jour et nuit" : "enrouleur") + ")");
+      });
+    });
+  } catch(e){}
+  cutOrderId = avant; pcData = avantData;
+  return {tot:tot, remplis:remplis, manque:manque, ok: tot > 0 && remplis === tot};
+}
+
 /* Un dossier complet, c'est un bon renseigné jusqu'au bout : les coordonnées du
    client, le prix, l'atelier terminé, la fiche envoyée, le client payé et vérifié,
    la saisie comptable faite. Le pourcentage dit d'un coup d'oeil où ça bloque. */
@@ -6846,13 +6873,12 @@ function completude(o){
   const t = orderTotals(o);
   const av = avancement(o);
   const dims = ordDims(o);
+  const pc = piecesEtat(o);
   const pts = [
     ["Téléphone du client",        !!String(o.tel || "").trim()],
-    ["Adresse du client",          !!String(o.adresse || "").trim()],
-    ["ICE du client",              !!String(o.ice || "").trim()],
-    ["Échéance",                   !!o.ech],
     ["Prix au m²",                 t.prix > 0],
     ["Tissu choisi sur chaque mesure", dims.length > 0 && dims.every(d => !!d.ref)],
+    ["Pièces utilisées remplies",  pc.ok],
     ["Fiche de production envoyée", !!o.sheetAt],
     ["Découpes livrées au magasin 2", av.tube.tot > 0 && av.tube.fait === av.tube.tot],
     ["Fenêtres fabriquées",        av.fen.tot > 0 && av.fen.fait === av.fen.tot],
@@ -6907,6 +6933,7 @@ function docCarte(o){
                                (cls ? ' class="' + cls + '"' : '') + '>' + val + '</b></div>';
 
   const cp = completude(o);
+  const pe = piecesEtat(o);
   let h = '<div class="dkcard' + (estFini(o) ? " fini" : "") + (ouvert ? " ouvert" : "") + '">' +
     '<div class="dkhead">' +
     '<button class="dkopen" type="button" data-doc="' + o.id + '">' +
@@ -6919,6 +6946,8 @@ function docCarte(o){
         (estSage(o) ? chip("SAGE", "inf") : "") +
         (estFini(o) ? chip("terminé", "ok") : "") +
         (nv ? chip(nv + " à vérifier", "att") : "") +
+        (pe.tot ? chip(pe.ok ? "pièces ok" : "pièces " + pe.remplis + "/" + pe.tot,
+                       pe.ok ? "ok" : "att") : "") +
         (av.tube.tot ? chip("tubes " + av.tube.fait + "/" + av.tube.tot,
                             av.tube.fait === av.tube.tot ? "ok" : "att") : "") +
         (av.fen.tot ? chip("fenêtres " + av.fen.fait + "/" + av.fen.tot,
@@ -6936,6 +6965,11 @@ function docCarte(o){
     '<span class="dkmark">' +
       '<span class="dkpct' + (cp.pct === 100 ? " ok" : (cp.pct >= 50 ? " mi" : "")) + '" ' +
         'title="' + cp.faits + ' points sur ' + cp.total + ' renseignés">' + cp.pct + '%</span>' +
+      '<button class="hchk pcs' + (pe.ok ? " on" : (pe.tot ? " att" : "")) + '" type="button" ' +
+        'data-docpcs="' + o.id + '" title="Pièces utilisées">' +
+        (pe.ok
+          ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+          : (pe.tot ? pe.remplis + "/" + pe.tot : "—")) + '</button>' +
       '<button class="hchk sage' + (estSage(o) ? " on" : "") + '" type="button" ' +
         'data-docsage="' + o.id + '" title="Saisi dans SAGE">SAGE</button>' +
       '<button class="hchk' + (estFini(o) ? " on" : "") + (finPossible(o) ? "" : " bloque") + '" type="button" ' +
@@ -7004,7 +7038,11 @@ function docCarte(o){
 
   /* --- le plan de coupe --- */
   const fc = ficheCoupe(o);
-  h += '<div class="dkbloc"><h4>Plan de coupe et pièces</h4>';
+  h += '<div class="dkbloc"><h4>Plan de coupe et pièces' +
+       (pe.tot ? '  ·  ' + (pe.ok ? "fiche complète" : "il manque " + pe.manque.length + " case" +
+                                     (pe.manque.length > 1 ? "s" : "")) : "") + '</h4>' +
+       (pe.tot && !pe.ok ? '<ul class="dkmanque">' +
+          pe.manque.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>' : '');
   if (!fc.length) h += '<div class="dkr"><span>Aucune dimension exploitable</span></div>';
   fc.forEach(f => {
     h += '<div class="dkfam"><span>' + (f.fam === "JN" ? "Jour et nuit" : "Enrouleur") +
@@ -7151,6 +7189,16 @@ $("docList").addEventListener("click", e => {
     touche(o); persistOrders(); pushBon(o); payPush(o);
     renderDoc(); renderPay();
     toast(p.recu ? "Paiement vu sur le compte" : "Vérification retirée");
+    return;
+  }
+  const pcs = e.target.closest("button[data-docpcs]");
+  if (pcs){
+    const o = ORDERS.find(x => x.id === pcs.dataset.docpcs);
+    if (!o) return;
+    const e2 = piecesEtat(o);
+    toast(!e2.tot ? "Aucune pièce à saisir sur ce bon"
+        : e2.ok  ? "Pièces utilisées : tout est rempli"
+        : "Il manque : " + e2.manque.join(", "));
     return;
   }
   const wa = e.target.closest("button[data-docwa]");
