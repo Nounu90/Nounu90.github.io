@@ -4585,8 +4585,23 @@ function echRetard(o){
   return t < auj.getTime();
 }
 
-/* Un bon peut être classé quand il est livré et intégralement payé. */
-function finPossible(o){ return etatDe(o) === "livre" && paySolde(o); }
+/* Un bon ne se classe terminé que lorsque le dossier est complet à 100 % :
+   livré et payé, mais aussi fiche envoyée, atelier fini, virements vus en
+   banque et saisie comptable faite. Le pourcentage est la règle. */
+function finPossible(o){
+  try { return completude(o).pct === 100; }
+  catch(e){ return etatDe(o) === "livre" && paySolde(o); }
+}
+/* Ce qui empêche de classer, dit en une phrase. */
+function finRefus(o){
+  let c = null;
+  try { c = completude(o); } catch(e){}
+  if (!c || !c.manque.length) return "Ce dossier n'est pas encore complet";
+  const m = c.manque;
+  const liste = m.slice(0, 2).join(", ") +
+    (m.length > 2 ? " et " + (m.length - 2) + " autre" + (m.length > 3 ? "s" : "") : "");
+  return "Dossier à " + c.pct + " % : il manque " + liste;
+}
 function estFini(o){ return !!(o && o.fini); }
 function estSage(o){ return !!(o && o.sage); }
 
@@ -4871,12 +4886,7 @@ $("histBody").addEventListener("click", e => {
   if (fin){
     const o = ORDERS.find(x => x.id === fin.dataset.fini);
     if (!o || !finAllowed()) return;
-    if (!estFini(o) && !finPossible(o)){
-      toast(etatDe(o) !== "livre"
-        ? "Ce bon n'est pas encore livré"
-        : "Le client n'a pas soldé ce bon");
-      return;
-    }
+    if (!estFini(o) && !finPossible(o)){ toast(finRefus(o)); return; }
     if (estFini(o)) delete o.fini; else o.fini = {at: Date.now(), by: (USER && USER.login) || ""};
     touche(o); persistOrders(); pushBon(o);
     renderHist(); renderHome();
@@ -5008,7 +5018,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "9.1";
+const APP_VERSION = "9.2";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -5052,9 +5062,12 @@ const TISSU_DEF = {
     {k:"chutes",     label:"Chutes",         u:"m²", auto:(d, fam) => chuteAuto(d, fam)}
   ],
   JN: [
-    {k:"tissuCoupe", label:"Tissu m² coupé", u:"m²", auto:d => d.coupeM2},
-    {k:"tissuVente", label:"Tissu m² vente", u:"m²", auto:d => d.venteM2},
-    {k:"chutes",     label:"Chutes",         u:"m²", auto:(d, fam) => chuteAuto(d, fam)}
+    {k:"tissuCoupe",   label:"Tissu m² coupé", u:"m²", auto:d => d.coupeM2},
+    /* Le tissu jour et nuit s'achète et se compte au mètre linéaire : l'atelier
+       a besoin de la longueur déroulée, pas seulement de la surface. */
+    {k:"tissuCoupeMl", label:"Tissu ml coupé", u:"ml", auto:d => d.tissuMl},
+    {k:"tissuVente",   label:"Tissu m² vente", u:"m²", auto:d => d.venteM2},
+    {k:"chutes",       label:"Chutes",         u:"m²", auto:(d, fam) => chuteAuto(d, fam)}
   ]
 };
 
@@ -5091,6 +5104,10 @@ function famData(fam){
      pris dans une chute du stock n'est pas déroulé, donc pas compté. */
   const pl = famPlan(v);
   const coupeM2 = pl.rouleau > 0 ? pl.rouleau : bruteM2;
+  /* Longueur déroulée du rouleau, en mètres. Tant qu'aucun tissu n'est choisi,
+     le plan ne dit rien : on retombe sur la longueur brute des fenêtres. */
+  const bruteMl = sum(d => dep * d.h + surplusDe(fam)) / 100;
+  const tissuMl = pl.ml > 0 ? pl.ml : bruteMl;
   return {
     nb: v.length,
     dims: v,
@@ -5101,6 +5118,7 @@ function famData(fam){
     hMl2:     2 * sum(d => d.h) / 100,
     supports: sum(d => d.l >= 200 ? 3 : 2),
     coupeM2: coupeM2,
+    tissuMl: tissuMl,
     bruteM2: bruteM2,
     venteM2: venteM2,
     /* Chute = ce qu'on a déroulé moins ce qu'on facture. Quand le résultat est
@@ -5116,7 +5134,7 @@ function famData(fam){
 function famPlan(v){
   const byRef = {};
   v.forEach(x => { const k = x.ref || "?"; (byRef[k] = byRef[k] || []).push(x); });
-  let chute = 0, rouleau = 0;
+  let chute = 0, rouleau = 0, ml = 0;
   Object.keys(byRef).forEach(ref => {
     const f = fab(ref);
     const lz = f ? f.laize : CUT_DEF.laize;
@@ -5124,8 +5142,9 @@ function famPlan(v){
                         chutesPour(pcO() || S, ref));
     chute += T.chute;
     rouleau += T.conso;      /* déjà limité aux bandes déroulées du rouleau */
+    ml += T.ml;
   });
-  return {chute:chute, rouleau:rouleau};
+  return {chute:chute, rouleau:rouleau, ml:ml};
 }
 function famChute(v){ return famPlan(v).chute; }
 
@@ -5321,9 +5340,10 @@ function pcRow(fam){
     return head.concat([T("tissuCoupe"), T("tissuVente"),
       P("mecanisme"), P("tube"), P("barre"),
       P("chainette"), P("bouchon"), P("frein"), T("chutes")]);
+  /* Le ml coupé s'ajoute en bout de ligne : aucune colonne existante ne bouge. */
   return head.concat([T("tissuCoupe"), T("tissuVente"),
     P("cache"), P("tube32"), P("barre"), P("embout"),
-    P("support"), P("bouchonInf"), P("chainette")]);
+    P("support"), P("bouchonInf"), P("chainette"), T("tissuCoupeMl")]);
 }
 
 function askHook(){
@@ -5554,7 +5574,10 @@ function planTissu(stores, laize, sLaize, sLong, stock){
   });
   const roll = bands.filter(b => b.src === "rouleau");
   const conso = roll.reduce((t,b) => t + b.conso, 0);
-  return {bands:bands, impossible:impossible, conso:conso, unused:unused,
+  /* Ce que le rouleau perd en longueur, toutes bandes déroulées confondues.
+     C'est la mesure que l'atelier lit sur le rouleau, en mètres. */
+  const ml = roll.reduce((t,b) => t + b.unroll, 0) / 100;
+  return {bands:bands, impossible:impossible, conso:conso, unused:unused, ml:ml,
           nbRoll: roll.length, nbStock: bands.length - roll.length,
           stockUsed: bands.filter(b => b.src === "chute").reduce((t,b) => t + b.conso, 0),
           utile: bands.reduce((t,b) => t + b.utile, 0),
@@ -7097,6 +7120,11 @@ function docCarte(o){
   const cp = completude(o);
   const pe = piecesEtat(o);
   const note = String(o.dnote || "").trim();
+  /* Le prix au m², lisible sans ouvrir la fiche. Un bon mixte en porte deux. */
+  const puE = puFam("ENR", o), puJ = puFam("JN", o);
+  const puTxt = o.type === "MIX"
+    ? ((puE || puJ) ? fr(puE, 2) + " / " + fr(puJ, 2) + " MAD/m²" : "")
+    : (puE ? fr(puE, 2) + " MAD/m²" : "");
   let h = '<div class="dkcard' + (estFini(o) ? " fini" : "") + (ouvert ? " ouvert" : "") + '">' +
     '<div class="dkhead">' +
     '<button class="dkopen" type="button" data-doc="' + o.id + '">' +
@@ -7118,7 +7146,8 @@ function docCarte(o){
                            av.fen.fait === av.fen.tot ? "ok" : "att") : "") +
       '</span>' +
       '<span class="dkl3">' + esc(storesParType(o).join("  ·  ")) +
-        '  ·  ' + fr(t.m2 || 0, 2) + ' m²<br>' +
+        '  ·  ' + fr(t.m2 || 0, 2) + ' m²' +
+        (puTxt ? '  ·  <b>' + puTxt + '</b>' : '  ·  <b>prix au m² manquant</b>') + '<br>' +
         (o.author ? esc(nomDe(o.author)) + "  ·  " : "") +
         pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + d.getFullYear() +
         (o.ech ? '  ·  <b>' + (o.pose === "Livraison" ? "Livraison" : "Pose") + " " +
@@ -7436,10 +7465,7 @@ $("docList").addEventListener("click", e => {
   if (fn){
     const o = ORDERS.find(x => x.id === fn.dataset.docfin);
     if (!o) return;
-    if (!estFini(o) && !finPossible(o)){
-      toast(etatDe(o) !== "livre" ? "Ce bon n'est pas encore livré" : "Le client n'a pas soldé ce bon");
-      return;
-    }
+    if (!estFini(o) && !finPossible(o)){ toast(finRefus(o)); return; }
     if (estFini(o)) delete o.fini; else o.fini = {at: Date.now(), by: (USER && USER.login) || ""};
     touche(o); persistOrders(); pushBon(o);
     renderDoc(); renderHist(); renderHome();
