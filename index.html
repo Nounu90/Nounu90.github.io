@@ -470,6 +470,12 @@ select{appearance:none; -webkit-appearance:none}
 .dkmes small{display:block; color:var(--muted); font-size:11px; margin-top:1px}
 .dkmes em{font-style:normal; font-family:"IBM Plex Mono",monospace; color:var(--muted); font-size:11.5px}
 .dkmanque{margin:0; padding:0 0 0 17px; font-size:12.5px; color:var(--warn); line-height:1.7}
+/* la note de la direction sur un dossier */
+.dknote{width:100%; min-height:96px; resize:vertical; border:1px solid var(--line);
+  border-radius:11px; padding:11px 12px; background:var(--card2); color:var(--ink);
+  font-family:"IBM Plex Sans",sans-serif; font-size:13.5px; line-height:1.55}
+.dknote:focus{outline:none; border-color:var(--accent); background:var(--card)}
+.dknsub{margin:7px 2px 0; font-size:11.5px; color:var(--muted)}
 .dkcard.ouvert .dkhead{background:var(--accent-soft)}
 .dkcard.ouvert .dkpct{background:var(--card)}
 .dkcard.ouvert .dkpct.ok{background:var(--ok-soft)}
@@ -1029,9 +1035,10 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 }
 .hchk.on{border-style:solid; border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
 .hchk.sage.on{border-color:var(--info); background:var(--info-soft); color:var(--info)}
-/* l'état de la fiche des pièces, avant même d'ouvrir le dossier */
-.hchk.pcs{font-size:10px}
-.hchk.pcs.att{border-style:solid; border-color:var(--warn); background:var(--warn-soft,#FAEFDD); color:var(--warn)}
+/* l'état de la fiche des pièces, avant même d'ouvrir le dossier :
+   O vert quand tout est rempli, X rouge quand il manque une case */
+.hchk.pcs{font-family:"Archivo",sans-serif; font-size:17px; font-weight:700; letter-spacing:0}
+.hchk.pcs.ko{border-style:solid; border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
 .hchk.pcs.on{border-style:solid; border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
 .hchk.grp{border-style:solid; border-color:var(--ok); color:var(--ok)}
 .hchk.grp:active{background:var(--ok-soft)}
@@ -4852,7 +4859,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "8.9";
+const APP_VERSION = "9.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6934,6 +6941,7 @@ function docCarte(o){
 
   const cp = completude(o);
   const pe = piecesEtat(o);
+  const note = String(o.dnote || "").trim();
   let h = '<div class="dkcard' + (estFini(o) ? " fini" : "") + (ouvert ? " ouvert" : "") + '">' +
     '<div class="dkhead">' +
     '<button class="dkopen" type="button" data-doc="' + o.id + '">' +
@@ -6946,8 +6954,8 @@ function docCarte(o){
         (estSage(o) ? chip("SAGE", "inf") : "") +
         (estFini(o) ? chip("terminé", "ok") : "") +
         (nv ? chip(nv + " à vérifier", "att") : "") +
-        (pe.tot ? chip(pe.ok ? "pièces ok" : "pièces " + pe.remplis + "/" + pe.tot,
-                       pe.ok ? "ok" : "att") : "") +
+        (pe.tot ? chip(pe.ok ? "pièces ok" : "pièces à remplir", pe.ok ? "ok" : "acc") : "") +
+        (note ? chip("note", "inf") : "") +
         (av.tube.tot ? chip("tubes " + av.tube.fait + "/" + av.tube.tot,
                             av.tube.fait === av.tube.tot ? "ok" : "att") : "") +
         (av.fen.tot ? chip("fenêtres " + av.fen.fait + "/" + av.fen.tot,
@@ -6965,11 +6973,9 @@ function docCarte(o){
     '<span class="dkmark">' +
       '<span class="dkpct' + (cp.pct === 100 ? " ok" : (cp.pct >= 50 ? " mi" : "")) + '" ' +
         'title="' + cp.faits + ' points sur ' + cp.total + ' renseignés">' + cp.pct + '%</span>' +
-      '<button class="hchk pcs' + (pe.ok ? " on" : (pe.tot ? " att" : "")) + '" type="button" ' +
+      '<button class="hchk pcs' + (pe.ok ? " on" : (pe.tot ? " ko" : "")) + '" type="button" ' +
         'data-docpcs="' + o.id + '" title="Pièces utilisées">' +
-        (pe.ok
-          ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
-          : (pe.tot ? pe.remplis + "/" + pe.tot : "—")) + '</button>' +
+        (pe.ok ? "O" : (pe.tot ? "X" : "—")) + '</button>' +
       '<button class="hchk sage' + (estSage(o) ? " on" : "") + '" type="button" ' +
         'data-docsage="' + o.id + '" title="Saisi dans SAGE">SAGE</button>' +
       '<button class="hchk' + (estFini(o) ? " on" : "") + (finPossible(o) ? "" : " bloque") + '" type="button" ' +
@@ -7116,6 +7122,16 @@ function docCarte(o){
   });
   h += '</div></div>';
 
+  /* --- la note, en dernier --- */
+  h += '<div class="dkbloc"><h4>Note</h4>' +
+    '<textarea class="dknote" data-dnote="' + o.id + '" rows="4" ' +
+      'placeholder="Ce qu\'il faut savoir sur ce dossier : accord avec le client, retard, litige, rappel..."' +
+      '>' + esc(o.dnote || "") + '</textarea>' +
+    '<p class="dknsub">' + (note
+      ? "Enregistrée sur ce dossier. Visible ici seulement."
+      : "Rien pour l'instant. Ce que vous écrivez reste sur ce dossier.") + '</p>' +
+  '</div>';
+
   /* --- les gestes --- */
   const wa = telWa(o.tel);
   h += '<div class="dkact">' +
@@ -7162,6 +7178,30 @@ function renderDoc(){
     (reste > 0.01 ? ",  " + fr(reste, 2) + " MAD à encaisser" : ",  tout est encaissé") +
     ".  Appuyez sur une fiche pour tout voir.";
 }
+
+/* La note s'enregistre pendant la frappe, mais la liste n'est pas redessinée :
+   sinon le clavier se referme à chaque lettre. Le rendu se fait à la sortie. */
+let dnoteT = null;
+$("docList").addEventListener("input", e => {
+  const ta = e.target.closest("textarea[data-dnote]");
+  if (!ta) return;
+  const o = ORDERS.find(x => x.id === ta.dataset.dnote);
+  if (!o) return;
+  o.dnote = ta.value;
+  clearTimeout(dnoteT);
+  dnoteT = setTimeout(() => { touche(o); persistOrders(); pushBon(o); }, 700);
+});
+$("docList").addEventListener("focusout", e => {
+  const ta = e.target.closest("textarea[data-dnote]");
+  if (!ta) return;
+  const o = ORDERS.find(x => x.id === ta.dataset.dnote);
+  if (!o) return;
+  clearTimeout(dnoteT);
+  touche(o); persistOrders(); pushBon(o);
+  /* On redessine après la sortie du champ, pas pendant : refaire le contenu
+     au milieu de l'événement casse le navigateur en pleine main. */
+  setTimeout(renderDoc, 0);
+});
 
 $("docSearch").addEventListener("input", e => { docQ = e.target.value; renderDoc(); });
 $("docD1").addEventListener("change", e => { docD1 = e.target.value; renderDoc(); });
