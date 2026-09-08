@@ -493,6 +493,11 @@ select{appearance:none; -webkit-appearance:none}
 .dktag.inf{background:var(--info-soft); color:var(--info)}
 .dkl3{display:block; margin-top:7px; font-size:12.5px; color:var(--muted); line-height:1.5}
 .dkl3 b{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink)}
+.dkapercu{display:block; margin-top:9px; padding:8px 10px; border-radius:10px;
+  background:var(--info-soft); color:var(--info); font-size:12px; line-height:1.5;
+  border-left:3px solid var(--info); white-space:pre-wrap; word-break:break-word}
+.hchk.ren{color:var(--muted)}
+.hchk.ren:active{color:var(--accent); border-color:var(--accent)}
 .dkbody{border-top:1px solid var(--line)}
 .dkbloc{border-top:1px solid var(--line); padding:12px 14px}
 .dkbloc:first-child{border-top:0}
@@ -1803,6 +1808,8 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <button type="button" data-d="sage" aria-pressed="false">Saisis SAGE</button>
       <button type="button" data-d="pasage" aria-pressed="false">Pas encore SAGE</button>
       <button type="button" data-d="banque" aria-pressed="false">Virements à vérifier</button>
+      <button type="button" data-d="note" aria-pressed="false">Avec note</button>
+      <button type="button" data-d="hors" aria-pressed="false">Pas dans le tableau</button>
     </div>
     <div class="lgstat" id="docStat"></div>
     <div id="docList"></div>
@@ -3638,6 +3645,137 @@ async function syncNums(force){
   return true;
 }
 
+/* --- les fiches de production ne doivent jamais se perdre --- */
+/* Avant, la fiche partait au tableau au moment du bouton et rien de plus : si le
+   réseau manquait, un message passait et le bon restait absent de la feuille
+   sans que personne ne le sache. Maintenant la fiche est mise en file, renvoyée
+   à chaque synchronisation, et l'application relit la feuille pour retrouver
+   d'elle même les bons qui n'y sont pas. */
+let SHEETROWS = LS.get("mst_sheetrows", {});
+
+function sheetQueue(payload){
+  if (!payload || !payload.key) return Promise.resolve(0);
+  SHEETROWS[payload.key] = payload;
+  LS.set("mst_sheetrows", SHEETROWS);
+  return flushSheetRows();
+}
+function flushSheetRows(){
+  const url = hookUrl();
+  const cles = Object.keys(SHEETROWS || {});
+  if (!url || !cles.length) return Promise.resolve(0);
+  let envoyes = 0;
+  return Promise.all(cles.map(k =>
+    fetch(url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+                body: JSON.stringify(SHEETROWS[k])})
+      .then(r => r.text())
+      .then(t => { const j = JSON.parse(t);
+                   if (j && j.ok){ delete SHEETROWS[k]; envoyes++; marqueEnvoye(k); } })
+      .catch(() => {})
+  )).then(() => { LS.set("mst_sheetrows", SHEETROWS); return envoyes; });
+}
+/* La fiche est arrivée : le bon porte la date d'envoi, comme si l'atelier
+   venait d'appuyer sur le bouton. */
+function marqueEnvoye(num){
+  const o = (ORDERS || []).find(x => String(x.num || "") === num);
+  if (!o) return;
+  o.sheetAt = new Date().toISOString();
+  touche(o); persistOrders(); pushBon(o);
+}
+
+/* La fiche de production d'un bon quelconque, sans passer par l'écran :
+   on prête le bon au plan de coupe le temps du calcul, puis on le rend. */
+function fichePayload(o){
+  if (!o || !o.num) return null;
+  const avant = cutOrderId, avantData = pcData;
+  cutOrderId = o.id; pcData = {};
+  let p = null;
+  try {
+    const fams = famsPresent();
+    if (fams.length) p = {
+      key: o.num, bon: o.num, client: o.nom || "",
+      auteur: (USER && USER.login) || "",
+      rows: fams.map(f => ({sheet:f, gid:SHEET_GIDS[f], values:pcRow(f)}))
+    };
+  } catch(e){ p = null; }
+  cutOrderId = avant; pcData = avantData;
+  return p;
+}
+
+/* --- vérification : rien ne manque dans le tableau de production --- */
+/* On relit les clés de la colonne Z des deux onglets. Tout bon dont la fiche
+   est complète mais dont la ligne n'est pas dans la feuille repart tout seul. */
+let dernierVerif = 0;
+const VERIF_DELAI = 300000;      /* pas plus d'une relecture toutes les 5 minutes */
+let SHEETVUS = null;             /* les numéros vus dans la feuille au dernier passage */
+
+async function clesFeuille(){
+  const gids = Object.keys(SHEET_GIDS).map(k => SHEET_GIDS[k]);
+  const vus = {};
+  for (const gid of gids){
+    let rows = null;
+    try {
+      const res = await fetch(gvizUrl(gid), {cache:"no-store"});
+      if (!res.ok) throw new Error("http " + res.status);
+      rows = parseCSV(await res.text());
+    } catch(e){ return null; }
+    rows.forEach(r => {
+      const cle = numDeCle(r[25]);
+      if (cle) vus[cle] = true;
+      const vu = String(r[2] || "").trim();
+      if (vu) vus[vu] = true;
+    });
+  }
+  return vus;
+}
+
+async function verifSheet(force){
+  if (!hookUrl()) return false;
+  if (!force && Date.now() - dernierVerif < VERIF_DELAI) return false;
+  dernierVerif = Date.now();
+  const vus = await clesFeuille();
+  if (!vus) return false;
+  SHEETVUS = vus;
+  let n = 0;
+  (ORDERS || []).forEach(o => {
+    const num = String(o.num || "");
+    if (!num || vus[num]) return;
+    if (SHEETROWS[num]) return;
+    if (SHEETDEL.indexOf(num) >= 0) return;        /* on est en train de l'effacer */
+    /* On renvoie un bon dont la fiche est complète, ou un bon déjà parti une
+       fois au tableau : dans ce cas là, sa disparition est une vraie perte. */
+    if (!o.sheetAt){
+      let pe = null;
+      try { pe = piecesEtat(o); } catch(e){ return; }
+      if (!pe || !pe.ok) return;                   /* fiche pas encore remplie */
+    }
+    const p = fichePayload(o);
+    if (!p) return;
+    SHEETROWS[num] = p; n++;
+  });
+  if (n){
+    LS.set("mst_sheetrows", SHEETROWS);
+    const envoyes = await flushSheetRows();
+    if (envoyes) toast(envoyes > 1
+      ? envoyes + " fiches manquantes remises dans le tableau"
+      : "Une fiche manquante a été remise dans le tableau");
+    renderTout();
+  }
+  return true;
+}
+
+/* Ce bon est il absent du tableau de production ? */
+function sheetManquant(o){
+  const num = String((o && o.num) || "");
+  if (!num) return false;
+  if (SHEETROWS[num]) return true;
+  if (!SHEETVUS) return false;
+  if (SHEETVUS[num]) return false;
+  if (o.sheetAt) return true;                      /* parti une fois, plus là */
+  let pe = null;
+  try { pe = piecesEtat(o); } catch(e){ return false; }
+  return !!(pe && pe.ok);
+}
+
 /* --- suppression de la ligne dans le tableau de production --- */
 /* Le script Google retire la ligne entière : aucun trou entre deux lignes. */
 let SHEETDEL = LS.get("mst_sheetdel", []);
@@ -3746,12 +3884,14 @@ async function syncAll(){
   flushSheetDel();
   flushSheetSit();
   flushSheetNum();
+  flushSheetRows();
   flushPay();
   if (!SB || !USER) return;
   await flushTombs();
   await flushPending();
   await pullBons();
   syncNums();                 /* renommages faits directement dans la feuille */
+  verifSheet();               /* et personne ne manque dans le tableau */
 }
 
 /* --- connexion --- */
@@ -4352,6 +4492,7 @@ async function rafraichirTout(btn){
   let stockOk = false;
   try { stockOk = await syncStock(true); } catch(e){}
   try { await syncAll(); } catch(e){}
+  try { await verifSheet(true); } catch(e){}
 
   if (ecranOuvert() === "nomSheet"){ try { majPrix = nomPrixDepuisFeuille(); } catch(e){} }
   renderTout();
@@ -4700,7 +4841,15 @@ function renommeBon(o){
     touche(o); persistOrders(); pushBon(o);
     sheetRenum(ancien, neuf).then(() => payPush(o));
     if (S && S.id === o.id) S.num = neuf;
+    /* la fiche encore en file d'attente change de clé elle aussi */
+    if (SHEETROWS[ancien]){
+      const p = SHEETROWS[ancien]; delete SHEETROWS[ancien];
+      p.key = neuf; p.bon = neuf;
+      SHEETROWS[neuf] = p; LS.set("mst_sheetrows", SHEETROWS);
+    }
+    if (SHEETVUS && SHEETVUS[ancien]){ delete SHEETVUS[ancien]; SHEETVUS[neuf] = true; }
     renderHist(); renderHome(); renderPay(); renderTri();
+    try { renderDoc(); } catch(err){}
     toast("Bon renommé en " + neuf);
   });
 }
@@ -4859,7 +5008,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "9.0";
+const APP_VERSION = "9.1";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -5218,8 +5367,12 @@ function pcConfirm(){
       }, 2500);
     })
     .catch(e => {
-      btn.disabled = false; btn.textContent = lbl;
-      toast("Envoi impossible : " + (e.message || "réseau"));
+      /* le réseau a manqué : la fiche reste en file et partira toute seule */
+      btn.disabled = false;
+      sheetQueue(payload);
+      btn.textContent = "Gardée, part au retour du réseau";
+      toast("Pas de réseau : la fiche part dès que la connexion revient");
+      setTimeout(() => { btn.textContent = lbl; }, 3000);
     });
 }
 
@@ -6822,6 +6975,8 @@ function docListe(){
     if (docDossier === "sage"    && !estSage(o)) return false;
     if (docDossier === "pasage"  && estSage(o)) return false;
     if (docDossier === "banque"  && !bonAVerifier(o)) return false;
+    if (docDossier === "note"    && !String(o.dnote || "").trim()) return false;
+    if (docDossier === "hors"    && !sheetManquant(o)) return false;
     if (!q) return true;
     return docFoin(o).indexOf(q.replace("×", "x")) >= 0;
   }).sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
@@ -6919,7 +7074,7 @@ function docFoin(o){
   pousse(t.prix || 0);
   pousse(duDe(o));
   pousse(htDe(o));
-  return [o.nom, o.num, o.tel, o.ice, o.author, (o.refs || []).join(" ")]
+  return [o.nom, o.num, o.tel, o.ice, o.author, o.dnote || "", (o.refs || []).join(" ")]
     .concat(nums).join(" ").toLowerCase();
 }
 
@@ -6956,6 +7111,7 @@ function docCarte(o){
         (nv ? chip(nv + " à vérifier", "att") : "") +
         (pe.tot ? chip(pe.ok ? "pièces ok" : "pièces à remplir", pe.ok ? "ok" : "acc") : "") +
         (note ? chip("note", "inf") : "") +
+        (sheetManquant(o) ? chip("pas au tableau", "att") : "") +
         (av.tube.tot ? chip("tubes " + av.tube.fait + "/" + av.tube.tot,
                             av.tube.fait === av.tube.tot ? "ok" : "att") : "") +
         (av.fen.tot ? chip("fenêtres " + av.fen.fait + "/" + av.fen.tot,
@@ -6969,6 +7125,10 @@ function docCarte(o){
                  esc(String(o.ech).split("-").reverse().join("/")) + '</b>' : '') +
         (rst > 0.01 ? '  ·  reste <b>' + fr(rst, 2) + ' MAD</b>' : '  ·  <b>soldé</b>') +
       '</span>' +
+      (note && !ouvert
+        ? '<span class="dkapercu">' +
+          esc(note.length > 220 ? note.slice(0, 220) + "\u2026" : note) + '</span>'
+        : '') +
     '</button>' +
     '<span class="dkmark">' +
       '<span class="dkpct' + (cp.pct === 100 ? " ok" : (cp.pct >= 50 ? " mi" : "")) + '" ' +
@@ -6983,6 +7143,8 @@ function docCarte(o){
         (estFini(o)
           ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
           : 'FIN') + '</button>' +
+      '<button class="hchk ren" type="button" data-docnum="' + o.id + '" ' +
+        'title="Renommer le bon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>' +
     '</span>' +
     '</div>';
 
@@ -7158,9 +7320,20 @@ function renderDoc(){
   const reste = list.reduce((t,o) => t + soldeDe(o), 0);
   const aVerif = list.reduce((n,o) => n + paiements(o).filter(p => !payVu(p)).length, 0);
   const ouverts = list.filter(o => !estFini(o)).length;
+  /* Combien de fenêtres sont sorties de l'atelier, séparées par famille. */
+  let fENR = 0, fJN = 0;
+  list.forEach(o => {
+    const done = faites(o);
+    ordDims(o).forEach(d => {
+      if (done.indexOf(d.key) < 0) return;
+      if (d.t === "JN") fJN++; else fENR++;
+    });
+  });
   const tuile = (v, lab, cls) =>
     '<div class="' + cls + (v ? "" : " nul") + '"><b>' + v + '</b><small>' + lab + '</small></div>';
   $("docStat").innerHTML =
+    tuile(fENR, "fenêtres enrouleur fabriquées", "v") +
+    tuile(fJN, "fenêtres jour et nuit fabriquées", "v") +
     tuile(list.length, "dossiers", "a") +
     tuile(ouverts, "en cours", "i") +
     tuile(fr(reste, 0), "reste à encaisser", "w") +
@@ -7218,6 +7391,8 @@ $("docDossier").addEventListener("click", e => {
 });
 
 $("docList").addEventListener("click", e => {
+  const dnum = e.target.closest("button[data-docnum]");
+  if (dnum){ renommeBon(ORDERS.find(x => x.id === dnum.dataset.docnum)); return; }
   const bank = e.target.closest("button[data-bank]");
   if (bank){
     const [oid, pid] = bank.dataset.bank.split(":");
