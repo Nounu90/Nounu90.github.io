@@ -5154,7 +5154,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "9.6";
+const APP_VERSION = "9.7";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8059,8 +8059,8 @@ const REMU = {
   imanePct:  4,            /* % du CA produit HT de chaque commande */
   imaneMin:  1200,         /* minimum garanti sur le mois */
   soufBase:  3200,         /* salaire de base */
-  parFenetre: 40,          /* au delà de 4 fenêtres, la société paie à la fenêtre */
-  seuilFen:  4
+  parFenetre: 40,          /* à partir de 4 fenêtres, la société paie à la fenêtre */
+  seuilFen:  3             /* au dessus de ce nombre, on bascule au tarif par fenêtre */
 };
 const IMANE = "imane", SOUFIANE = "soufiane";
 
@@ -8084,9 +8084,9 @@ function produitHT(o){
 }
 
 /* Ce que la pose d'un bon rapporte au poseur.
-   Quatre fenêtres ou moins : c'est le prix de pose porté par le bon de
-   commande, encaissé du client, tel quel. Au delà de quatre fenêtres, la
-   société paie 40 MAD par fenêtre posée. */
+   Jusqu'à trois fenêtres : c'est le prix de pose porté par le bon de commande,
+   encaissé du client, tel quel. À partir de quatre fenêtres, la société paie
+   40 MAD par fenêtre posée. */
 function poseFacturee(o){ return orderTotals(o).pose; }
 
 function posePrime(o){
@@ -8202,7 +8202,7 @@ function renderRemu(){
       ' %</b> du produit HT de chaque commande encaissée, minimum <b>' + REMU.imaneMin + ' MAD</b>.<br>' +
       'Soufiane : <b>' + REMU.soufBase + ' MAD</b> de base. Jusqu\'à ' + REMU.seuilFen +
       ' fenêtres, il encaisse le <b>prix de pose porté par le bon de commande</b>. ' +
-      'Au delà de ' + REMU.seuilFen + ' fenêtres, la société paie <b>' + REMU.parFenetre +
+      'À partir de ' + (REMU.seuilFen + 1) + ' fenêtres, la société paie <b>' + REMU.parFenetre +
       ' MAD</b> par fenêtre posée. Les commandes en livraison ne comptent pas.' +
     '</div>';
 
