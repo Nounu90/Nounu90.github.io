@@ -676,6 +676,55 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   border:1px solid var(--line); border-radius:10px; padding:10px; background:var(--card);
   color:var(--ink); font-family:"IBM Plex Mono",monospace; font-size:13px;
 }
+/* --- rémunération : un bloc par personne, le détail dessous --- */
+.rmtop{display:grid; grid-template-columns:1fr auto; gap:8px; margin-bottom:14px}
+.rmtop input{border:1px solid var(--line); border-radius:10px; padding:10px; background:var(--card);
+  color:var(--ink); font-family:"IBM Plex Mono",monospace; font-size:13px; width:100%}
+.rmnow{border:1px solid var(--line); border-radius:10px; padding:0 14px; background:var(--card2);
+  color:var(--ink); font-family:"Archivo",sans-serif; font-size:12px; font-weight:600; white-space:nowrap}
+.rmcard{border:1px solid var(--line); border-radius:14px; background:var(--card);
+  overflow:hidden; margin-bottom:14px}
+.rmhead{display:flex; align-items:center; gap:11px; padding:13px 14px; background:var(--card2);
+  border-bottom:1px solid var(--line)}
+.rmini{flex:none; width:36px; height:36px; border-radius:50%; display:grid; place-items:center;
+  background:var(--accent-soft); color:var(--accent); font-family:"Archivo",sans-serif;
+  font-weight:700; font-size:15px}
+.rmnom{flex:1; min-width:0}
+.rmnom b{display:block; font-family:"Archivo",sans-serif; font-size:15px; font-weight:600; color:var(--ink)}
+.rmnom small{display:block; font-size:11.5px; color:var(--muted); margin-top:1px}
+.rmtot{flex:none; text-align:right; font-family:"IBM Plex Mono",monospace; font-weight:600;
+  font-size:17px; color:var(--ok); font-variant-numeric:tabular-nums}
+.rmtot em{display:block; font-style:normal; font-size:9.5px; font-weight:700; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--muted); font-family:"Archivo",sans-serif; margin-top:2px}
+.rmr{display:flex; justify-content:space-between; gap:10px; padding:7px 14px; font-size:13px;
+  color:var(--muted); border-top:1px solid var(--line)}
+.rmr b{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink); white-space:nowrap}
+.rmr.gros{background:var(--card2)}
+.rmr.gros span, .rmr.gros b{color:var(--ink); font-weight:700}
+.rmr .att{color:var(--warn)}
+.rmr .ok{color:var(--ok)}
+.rmsub{padding:11px 14px 4px; border-top:1px solid var(--line);
+  font-family:"Archivo",sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted)}
+.rmline{display:grid; grid-template-columns:1fr auto; gap:4px 10px; padding:9px 14px;
+  border-top:1px solid var(--hair,var(--line))}
+.rmline .n{font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:600; color:var(--ink)}
+.rmline .v{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600;
+  color:var(--ok); text-align:right; white-space:nowrap}
+.rmline .v.nul{color:var(--muted)}
+.rmline .s{grid-column:1 / -1; font-size:11.5px; color:var(--muted); line-height:1.45}
+.rmkm{display:inline-block; border:1px solid var(--line); border-radius:7px; padding:1px 7px;
+  font-family:"Archivo",sans-serif; font-size:10px; font-weight:700; color:var(--muted);
+  background:var(--card2); margin-left:6px}
+.rmkm.loin{border-color:var(--info); color:var(--info); background:var(--info-soft)}
+.rmwarn{color:var(--warn)}
+.rmvide{padding:14px; font-size:12.5px; color:var(--muted); border-top:1px solid var(--line)}
+.rmregles{border:1px solid var(--line); border-radius:12px; background:var(--card2);
+  padding:12px 14px; font-size:12px; color:var(--muted); line-height:1.6}
+.rmregles h3{margin:0 0 7px; font-family:"Archivo",sans-serif; font-size:10px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
+.rmregles b{color:var(--ink); font-family:"IBM Plex Mono",monospace; font-weight:600}
+
 /* --- journal de fabrication --- */
 /* --- journal du jour : le résumé, puis qui a fait quoi --- */
 .lgstat{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px}
@@ -695,6 +744,8 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .lgstat .i b{color:var(--info)}
 .lgstat .a b{color:var(--accent)}
 .lgstat > div.nul b, .lgstat > button.nul b{color:var(--line-strong)}
+.lgstat > .full{grid-column:1 / -1}
+.lgstat > .full b{font-size:27px}
 /* la carte d'un agent */
 .agcard{border:1px solid var(--line); border-radius:13px; background:var(--card);
   margin-bottom:11px; overflow:hidden}
@@ -1297,6 +1348,11 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <button type="button" data-pm="forfait" aria-pressed="true">Forfait</button>
         <button type="button" data-pm="fenetre" aria-pressed="false">Par fenêtre</button>
       </div>
+      <div class="seg" id="segKm" style="margin-top:9px">
+        <button type="button" data-km="0" aria-pressed="true">Moins de 10 km</button>
+        <button type="button" data-km="1" aria-pressed="false">Plus de 10 km</button>
+      </div>
+      <p class="hint" id="kmNote" style="margin:7px 2px 0">La distance décide du forfait de pose versé au poseur.</p>
       <div style="height:9px"></div>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
@@ -1421,6 +1477,11 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <button class="tile" id="tilePay" type="button">
         <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg></span>
         <span class="tt"><b>Paiements</b><small id="tilePaySub">Encaissements et impayés</small></span>
+        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="tile" id="tileRemu" type="button">
+        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M16 6H10a3 3 0 000 6h4a3 3 0 010 6H8"/></svg></span>
+        <span class="tt"><b>Rémunération</b><small id="tileRemuSub">Salaires et primes du mois</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
       <button class="tile" id="tileTri" type="button">
@@ -1865,6 +1926,23 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   </div>
 </div>
 
+<!-- RÉMUNÉRATION : SALAIRES ET PRIMES DU MOIS -->
+<div class="sheet" id="remuSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="remuSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Rémunération</h2>
+  </div>
+  <div class="sheet-body">
+    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="rmtop">
+      <input id="remuMois" type="month" aria-label="Mois">
+      <button class="rmnow" id="remuNow" type="button">Ce mois</button>
+    </div>
+    <div id="remuBody"></div>
+    <p class="hint" id="remuHint"></p>
+  </div>
+</div>
+
 <!-- ENCAISSEMENTS DU TRIMESTRE -->
 <div class="sheet" id="triSheet">
   <div class="sheet-top">
@@ -2154,6 +2232,7 @@ function blank(){
     posePrix: LS.get("mst_poseprix", ""),
     poseMode: LS.get("mst_posemode", "forfait"),
     pose:"Pose",
+    loin:false,
     notes:"",
     photos:[],
     pieces:{},
@@ -2785,6 +2864,12 @@ $("posePrix").addEventListener("input", e => {
   LS.set("mst_poseprix", clean);
   renderRecap();
 });
+$("segKm").addEventListener("click", e => {
+  const b = e.target.closest("button[data-km]");
+  if (!b) return;
+  S.loin = b.dataset.km === "1";
+  renderPoseMode(); renderRecap();
+});
 $("segPoseMode").addEventListener("click", e => {
   const b = e.target.closest("button[data-pm]");
   if (!b) return;
@@ -2795,6 +2880,10 @@ $("segPoseMode").addEventListener("click", e => {
 /* Le libellé du champ suit Pose ou Livraison. */
 function renderPoseMode(){
   [...$("segPoseMode").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pm === (S.poseMode === "fenetre" ? "fenetre" : "forfait"))));
+  [...$("segKm").children].forEach(x => x.setAttribute("aria-pressed", String((x.dataset.km === "1") === !!S.loin)));
+  const pose = S.pose !== "Livraison";
+  $("segKm").hidden = !pose;
+  $("kmNote").hidden = !pose;
   $("posePrix").placeholder = "Prix de la " + (S.pose === "Livraison" ? "livraison" : "pose");
 }
 /* Montant facturé pour la pose ou la livraison */
@@ -2981,6 +3070,7 @@ const CHAMPS_SUIVIS = [
   ["gps","lien GPS"], ["notes","remarque"], ["ech","échéance"],
   ["type","type de store"], ["prix","prix au m²"], ["prixJN","prix au m² jour et nuit"],
   ["pose","mode de pose"], ["posePrix","prix de la pose"], ["poseMode","calcul de la pose"],
+  ["loin","distance du chantier"],
   ["remise","remise"], ["fact","facture"]
 ];
 function diffBon(a, b){
@@ -4079,7 +4169,7 @@ async function bootAuth(){
 function nav(where){
   armBack();
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet","remuSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -4125,6 +4215,7 @@ function renderHome(){
       (cliDus.length ? "  ·  " + cliDus.length + " avec un reste à payer" : "  ·  tous soldés")
     : "Historique et paiements par client";
   $("tileTri").hidden = !adminAllowed();
+  $("tileRemu").hidden = !adminAllowed();
   if (adminAllowed()){
     const t = triTotaux(triAn, triNo);
     $("tileTriSub").textContent = t.n
@@ -4526,6 +4617,7 @@ function renderTout(){
   essai(renderNet);
   essai(renderCli);
   essai(renderDoc);
+  essai(renderRemu);
 }
 
 function ecranOuvert(){
@@ -5083,7 +5175,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "9.4";
+const APP_VERSION = "9.5";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -7482,12 +7574,19 @@ function renderDoc(){
   const surTuile = DOC_TUILES.indexOf(docDossier) >= 0;
   const base = surTuile ? docListe(true) : list;
   let fENR = 0, fJN = 0, m2E = 0, m2J = 0;
+  let caE = 0, caJ = 0, caTot = 0;
   base.forEach(o => {
     const f = fabPar(o);
     fENR += f.ENR; fJN += f.JN;
     if (etatDe(o) === "devis") return;      /* un devis n'est pas vendu */
     const m = m2Par(o);
     m2E += m.ENR; m2J += m.JN;
+    /* Chiffre d'affaires produit, remise déduite, famille par famille.
+       Le total ajoute la pose facturée : c'est le HT complet du bon. */
+    const k = 1 - remisePct(o) / 100;
+    caE += m.ENR * puFam("ENR", o) * k;
+    caJ += m.JN  * puFam("JN",  o) * k;
+    caTot += htDe(o);
   });
   const aVerif = base.reduce((n,o) => n + paiements(o).filter(p => !payVu(p)).length, 0);
 
@@ -7497,10 +7596,13 @@ function renderDoc(){
        : '<div class="' + cls + (v ? "" : " nul") + '">') +
     '<b>' + v + '</b><small>' + lab + '</small>' + (t ? '</button>' : '</div>');
   $("docStat").innerHTML =
-    tuile(fENR, "fenêtres enrouleur fabriquées", "v", "fenr") +
-    tuile(fJN, "fenêtres jour et nuit fabriquées", "v", "fjn") +
+    '<div class="full v"><b>' + fr(caTot, 2) + '</b><small>chiffre d\'affaires HT, pose comprise</small></div>' +
+    tuile(fr(caE, 2), "CA enrouleur HT", "v") +
+    tuile(fr(caJ, 2), "CA jour et nuit HT", "v") +
     tuile(fr(m2E, 2), "m² enrouleur vendus", "a", "m2enr") +
     tuile(fr(m2J, 2), "m² jour et nuit vendus", "a", "m2jn") +
+    tuile(fENR, "fenêtres enrouleur fabriquées", "i", "fenr") +
+    tuile(fJN, "fenêtres jour et nuit fabriquées", "i", "fjn") +
     tuile(list.length, "dossiers", "a") +
     tuile(ouverts, "en cours", "i") +
     tuile(fr(reste, 0), "reste à encaisser", "w") +
@@ -7967,6 +8069,210 @@ $("tileTri").addEventListener("click", () => {
   renderTri();
   nav("triSheet");
   pullBons().then(() => renderTri());
+});
+
+/* ============ Rémunération : salaires et primes du mois ============ */
+/* Imane prend les commandes et touche un pourcentage du produit vendu.
+   Soufiane pose et touche le forfait de pose, selon la distance et le nombre
+   de fenêtres. Tout se lit ici, mois par mois, bon par bon. */
+const REMU = {
+  imaneBase: 500,          /* fixe mensuel */
+  imanePct:  4,            /* % du CA produit HT de chaque commande */
+  imaneMin:  1200,         /* minimum garanti sur le mois */
+  soufBase:  3200,         /* salaire de base */
+  parFenetre: 40,          /* au delà de 4 fenêtres, la société paie à la fenêtre */
+  seuilFen:  4,
+  grille: {
+    proche: {petit:100, moyen:150},   /* moins de 10 km */
+    loin:   {petit:150, moyen:200}    /* plus de 10 km  */
+  }
+};
+const IMANE = "imane", SOUFIANE = "soufiane";
+
+function moisISO(d){
+  const x = d instanceof Date ? d : new Date(d);
+  return x.getFullYear() + "-" + pad(x.getMonth() + 1);
+}
+let remuMois = moisISO(new Date());
+
+function bonsDuMois(iso){
+  return (ORDERS || []).filter(o =>
+    o.status === "sent" && moisISO(o.date || 0) === iso
+  ).sort((a,b) => new Date(a.date || 0) - new Date(b.date || 0));
+}
+
+/* Le produit vendu HT d'un bon, pose exclue et remise déduite :
+   c'est la base de la commission d'Imane. */
+function produitHT(o){
+  const t = orderTotals(o);
+  return t.prix * (1 - remisePct(o) / 100);
+}
+
+/* Ce que la pose d'un bon rapporte au poseur.
+   Quatre fenêtres ou moins : forfait encaissé du client, selon la distance.
+   Au delà : la société paie à la fenêtre. */
+function posePrime(o){
+  const n = orderTotals(o).nb;
+  const pose = o.pose !== "Livraison";
+  if (!pose || !n) return {n:n, montant:0, mode:"", grille:0, hors:true};
+  if (n > REMU.seuilFen)
+    return {n:n, montant: n * REMU.parFenetre, mode:"societe", grille:0, hors:false};
+  const g = o.loin ? REMU.grille.loin : REMU.grille.proche;
+  const m = n <= 2 ? g.petit : g.moyen;
+  return {n:n, montant:m, mode:"client", grille:m, hors:false};
+}
+/* Ce qui a réellement été facturé au client pour la pose, pour comparer. */
+function poseFacturee(o){
+  return orderTotals(o).pose;
+}
+
+function remuImane(iso){
+  /* Un devis n'est pas une commande prise : il n'ouvre pas de commission. */
+  const bons = bonsDuMois(iso).filter(o =>
+    String(o.author || "").toLowerCase() === IMANE && etatDe(o) !== "devis");
+  const lignes = bons.map(o => {
+    const ht = produitHT(o);
+    const paye = paySolde(o);
+    return {o:o, ht:ht, com: ht * REMU.imanePct / 100, paye:paye};
+  });
+  const acquise = lignes.filter(l => l.paye).reduce((t,l) => t + l.com, 0);
+  const attente = lignes.filter(l => !l.paye).reduce((t,l) => t + l.com, 0);
+  const brut = REMU.imaneBase + acquise;
+  const total = Math.max(brut, REMU.imaneMin);
+  return {lignes:lignes, acquise:acquise, attente:attente, brut:brut, total:total,
+          minApplique: total > brut + 0.001};
+}
+
+function remuSoufiane(iso){
+  const lignes = bonsDuMois(iso)
+    .filter(o => etatDe(o) !== "devis" && o.pose !== "Livraison")
+    .map(o => {
+      const p = posePrime(o);
+      return {o:o, p:p, facture: poseFacturee(o)};
+    })
+    .filter(l => l.p.n > 0);
+  const client  = lignes.filter(l => l.p.mode === "client").reduce((t,l) => t + l.p.montant, 0);
+  const societe = lignes.filter(l => l.p.mode === "societe").reduce((t,l) => t + l.p.montant, 0);
+  const fenetres = lignes.reduce((t,l) => t + l.p.n, 0);
+  return {lignes:lignes, client:client, societe:societe, prime: client + societe,
+          fenetres:fenetres, total: REMU.soufBase + client + societe};
+}
+
+function moisLisible(iso){
+  const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août",
+                "septembre","octobre","novembre","décembre"];
+  const a = String(iso || "").split("-");
+  const m = parseInt(a[1], 10);
+  return (MOIS[m - 1] || "") + " " + a[0];
+}
+
+function renderRemu(){
+  if (!adminAllowed()) return;
+  $("remuMois").value = remuMois;
+  $("remuNow").setAttribute("aria-pressed", String(remuMois === moisISO(new Date())));
+
+  const I = remuImane(remuMois), S2 = remuSoufiane(remuMois);
+  const r = (lab, val, cls) => '<div class="rmr"><span>' + lab + '</span><b' +
+    (cls ? ' class="' + cls + '"' : '') + '>' + val + '</b></div>';
+  const gros = (lab, val) => '<div class="rmr gros"><span>' + lab + '</span><b>' + val + '</b></div>';
+  const carte = (ini, nom, sous, tot, corps) =>
+    '<div class="rmcard"><div class="rmhead">' +
+      '<span class="rmini">' + ini + '</span>' +
+      '<span class="rmnom"><b>' + nom + '</b><small>' + sous + '</small></span>' +
+      '<span class="rmtot">' + fr(tot, 2) + '<em>MAD</em></span>' +
+    '</div>' + corps + '</div>';
+
+  /* --- Imane --- */
+  let ci = r("Base du mois", fr(REMU.imaneBase, 2)) +
+    r("Commission acquise  ·  " + REMU.imanePct + " % du produit HT", fr(I.acquise, 2), "ok") +
+    (I.attente > 0.01
+      ? r("En attente d'encaissement", fr(I.attente, 2), "att") : "") +
+    (I.minApplique ? r("Minimum garanti appliqué", fr(REMU.imaneMin, 2), "att") : "") +
+    gros("À verser", fr(I.total, 2) + " MAD");
+  ci += '<div class="rmsub">' + I.lignes.length + " commande" + (I.lignes.length > 1 ? "s" : "") +
+        " prise" + (I.lignes.length > 1 ? "s" : "") + '</div>';
+  ci += I.lignes.length ? I.lignes.map(l =>
+      '<div class="rmline">' +
+        '<span class="n">' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") + '</span>' +
+        '<span class="v' + (l.paye ? "" : " nul") + '">' + fr(l.com, 2) + '</span>' +
+        '<span class="s">Produit HT ' + fr(l.ht, 2) + ' MAD  ·  ' +
+          (l.paye ? "encaissé" : '<b class="rmwarn">pas encore encaissé, commission en attente</b>') +
+        '</span>' +
+      '</div>').join("")
+    : '<div class="rmvide">Aucune commande prise à son nom ce mois ci.</div>';
+
+  /* --- Soufiane --- */
+  let cs = r("Salaire de base", fr(REMU.soufBase, 2)) +
+    r("Forfaits de pose encaissés du client", fr(S2.client, 2), "ok") +
+    r("Primes à la charge de la société", fr(S2.societe, 2), "ok") +
+    r("Fenêtres posées", S2.fenetres) +
+    gros("À verser", fr(S2.total, 2) + " MAD");
+  cs += '<div class="rmsub">' + S2.lignes.length + " pose" + (S2.lignes.length > 1 ? "s" : "") + '</div>';
+  cs += S2.lignes.length ? S2.lignes.map(l => {
+      const ec = Math.abs(l.facture - l.p.grille) > 0.5 && l.p.mode === "client";
+      return '<div class="rmline">' +
+        '<span class="n">' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") +
+          '<button class="rmkm' + (l.o.loin ? " loin" : "") + '" type="button" data-km="' +
+          l.o.id + '">' + (l.o.loin ? "+10 km" : "\u003c10 km") + '</button></span>' +
+        '<span class="v">' + fr(l.p.montant, 2) + '</span>' +
+        '<span class="s">' + l.p.n + ' fenêtre' + (l.p.n > 1 ? "s" : "") + '  ·  ' +
+          (l.p.mode === "societe"
+            ? l.p.n + " × " + REMU.parFenetre + " MAD, payé par la société"
+            : "forfait encaissé du client") +
+          (l.p.mode === "client"
+            ? '  ·  facturé ' + fr(l.facture, 2) + ' MAD' +
+              (ec ? '  ·  <b class="rmwarn">le devis ne suit pas la grille</b>' : "")
+            : "") +
+        '</span>' +
+      '</div>';
+    }).join("")
+    : '<div class="rmvide">Aucune pose ce mois ci.</div>';
+
+  $("remuBody").innerHTML =
+    carte("I", "Imane", "Prise de commandes  ·  payée hors société", I.total, ci) +
+    carte("S", "Soufiane", "Pose  ·  salarié", S2.total, cs) +
+    '<div class="rmregles"><h3>La règle appliquée</h3>' +
+      'Imane : <b>' + REMU.imaneBase + ' MAD</b> de base, <b>' + REMU.imanePct +
+      ' %</b> du produit HT de chaque commande encaissée, minimum <b>' + REMU.imaneMin + ' MAD</b>.<br>' +
+      'Soufiane : <b>' + REMU.soufBase + ' MAD</b> de base, puis par commande posée — ' +
+      'moins de 10 km : <b>' + REMU.grille.proche.petit + '</b> jusqu\'à 2 fenêtres, <b>' +
+      REMU.grille.proche.moyen + '</b> de 3 à 4 ; plus de 10 km : <b>' + REMU.grille.loin.petit +
+      '</b> jusqu\'à 2, <b>' + REMU.grille.loin.moyen + '</b> de 3 à 4. Au delà de ' +
+      REMU.seuilFen + ' fenêtres, la société paie <b>' + REMU.parFenetre + ' MAD</b> par fenêtre.<br>' +
+      'Appuyez sur l\'étiquette de distance d\'une ligne pour la corriger.' +
+    '</div>';
+
+  const nb = bonsDuMois(remuMois).length;
+  $("remuHint").textContent = moisLisible(remuMois) + "  ·  " + nb + " bon" + (nb > 1 ? "s" : "") +
+    " envoyé" + (nb > 1 ? "s" : "") + "  ·  total à verser " +
+    fr(I.total + S2.total, 2) + " MAD.  Le mois d'un bon est celui de sa création.";
+}
+
+$("remuMois").addEventListener("change", e => {
+  remuMois = e.target.value || moisISO(new Date());
+  renderRemu();
+});
+$("remuNow").addEventListener("click", () => { remuMois = moisISO(new Date()); renderRemu(); });
+
+/* Corriger la distance depuis la fiche de paie : le bon est mis à jour et
+   part vers les autres téléphones. */
+$("remuBody").addEventListener("click", e => {
+  const b = e.target.closest("button[data-km]");
+  if (!b) return;
+  const o = (ORDERS || []).find(x => x.id === b.dataset.km);
+  if (!o) return;
+  o.loin = !o.loin;
+  if (S && S.id === o.id) S.loin = o.loin;
+  touche(o); persistOrders(); pushBon(o);
+  renderRemu();
+  toast(o.num + "  ·  " + (o.loin ? "plus de 10 km" : "moins de 10 km"));
+});
+
+$("tileRemu").addEventListener("click", () => {
+  if (!adminAllowed()) return;
+  renderRemu();
+  nav("remuSheet");
+  pullBons().then(() => renderRemu());
 });
 
 /* ============ Logs : journal de fabrication ============ */
