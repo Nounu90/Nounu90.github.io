@@ -713,10 +713,6 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   color:var(--ok); text-align:right; white-space:nowrap}
 .rmline .v.nul{color:var(--muted)}
 .rmline .s{grid-column:1 / -1; font-size:11.5px; color:var(--muted); line-height:1.45}
-.rmkm{display:inline-block; border:1px solid var(--line); border-radius:7px; padding:1px 7px;
-  font-family:"Archivo",sans-serif; font-size:10px; font-weight:700; color:var(--muted);
-  background:var(--card2); margin-left:6px}
-.rmkm.loin{border-color:var(--info); color:var(--info); background:var(--info-soft)}
 .rmwarn{color:var(--warn)}
 .rmvide{padding:14px; font-size:12.5px; color:var(--muted); border-top:1px solid var(--line)}
 .rmregles{border:1px solid var(--line); border-radius:12px; background:var(--card2);
@@ -1348,11 +1344,6 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <button type="button" data-pm="forfait" aria-pressed="true">Forfait</button>
         <button type="button" data-pm="fenetre" aria-pressed="false">Par fenêtre</button>
       </div>
-      <div class="seg" id="segKm" style="margin-top:9px">
-        <button type="button" data-km="0" aria-pressed="true">Moins de 10 km</button>
-        <button type="button" data-km="1" aria-pressed="false">Plus de 10 km</button>
-      </div>
-      <p class="hint" id="kmNote" style="margin:7px 2px 0">La distance décide du forfait de pose versé au poseur.</p>
       <div style="height:9px"></div>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
@@ -2232,7 +2223,6 @@ function blank(){
     posePrix: LS.get("mst_poseprix", ""),
     poseMode: LS.get("mst_posemode", "forfait"),
     pose:"Pose",
-    loin:false,
     notes:"",
     photos:[],
     pieces:{},
@@ -2864,12 +2854,6 @@ $("posePrix").addEventListener("input", e => {
   LS.set("mst_poseprix", clean);
   renderRecap();
 });
-$("segKm").addEventListener("click", e => {
-  const b = e.target.closest("button[data-km]");
-  if (!b) return;
-  S.loin = b.dataset.km === "1";
-  renderPoseMode(); renderRecap();
-});
 $("segPoseMode").addEventListener("click", e => {
   const b = e.target.closest("button[data-pm]");
   if (!b) return;
@@ -2880,10 +2864,6 @@ $("segPoseMode").addEventListener("click", e => {
 /* Le libellé du champ suit Pose ou Livraison. */
 function renderPoseMode(){
   [...$("segPoseMode").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pm === (S.poseMode === "fenetre" ? "fenetre" : "forfait"))));
-  [...$("segKm").children].forEach(x => x.setAttribute("aria-pressed", String((x.dataset.km === "1") === !!S.loin)));
-  const pose = S.pose !== "Livraison";
-  $("segKm").hidden = !pose;
-  $("kmNote").hidden = !pose;
   $("posePrix").placeholder = "Prix de la " + (S.pose === "Livraison" ? "livraison" : "pose");
 }
 /* Montant facturé pour la pose ou la livraison */
@@ -3070,7 +3050,6 @@ const CHAMPS_SUIVIS = [
   ["gps","lien GPS"], ["notes","remarque"], ["ech","échéance"],
   ["type","type de store"], ["prix","prix au m²"], ["prixJN","prix au m² jour et nuit"],
   ["pose","mode de pose"], ["posePrix","prix de la pose"], ["poseMode","calcul de la pose"],
-  ["loin","distance du chantier"],
   ["remise","remise"], ["fact","facture"]
 ];
 function diffBon(a, b){
@@ -5175,7 +5154,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "9.5";
+const APP_VERSION = "9.6";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8081,11 +8060,7 @@ const REMU = {
   imaneMin:  1200,         /* minimum garanti sur le mois */
   soufBase:  3200,         /* salaire de base */
   parFenetre: 40,          /* au delà de 4 fenêtres, la société paie à la fenêtre */
-  seuilFen:  4,
-  grille: {
-    proche: {petit:100, moyen:150},   /* moins de 10 km */
-    loin:   {petit:150, moyen:200}    /* plus de 10 km  */
-  }
+  seuilFen:  4
 };
 const IMANE = "imane", SOUFIANE = "soufiane";
 
@@ -8109,21 +8084,18 @@ function produitHT(o){
 }
 
 /* Ce que la pose d'un bon rapporte au poseur.
-   Quatre fenêtres ou moins : forfait encaissé du client, selon la distance.
-   Au delà : la société paie à la fenêtre. */
+   Quatre fenêtres ou moins : c'est le prix de pose porté par le bon de
+   commande, encaissé du client, tel quel. Au delà de quatre fenêtres, la
+   société paie 40 MAD par fenêtre posée. */
+function poseFacturee(o){ return orderTotals(o).pose; }
+
 function posePrime(o){
   const n = orderTotals(o).nb;
   const pose = o.pose !== "Livraison";
-  if (!pose || !n) return {n:n, montant:0, mode:"", grille:0, hors:true};
+  if (!pose || !n) return {n:n, montant:0, mode:"", hors:true};
   if (n > REMU.seuilFen)
-    return {n:n, montant: n * REMU.parFenetre, mode:"societe", grille:0, hors:false};
-  const g = o.loin ? REMU.grille.loin : REMU.grille.proche;
-  const m = n <= 2 ? g.petit : g.moyen;
-  return {n:n, montant:m, mode:"client", grille:m, hors:false};
-}
-/* Ce qui a réellement été facturé au client pour la pose, pour comparer. */
-function poseFacturee(o){
-  return orderTotals(o).pose;
+    return {n:n, montant: n * REMU.parFenetre, mode:"societe", hors:false};
+  return {n:n, montant: poseFacturee(o), mode:"client", hors:false};
 }
 
 function remuImane(iso){
@@ -8208,24 +8180,18 @@ function renderRemu(){
     r("Fenêtres posées", S2.fenetres) +
     gros("À verser", fr(S2.total, 2) + " MAD");
   cs += '<div class="rmsub">' + S2.lignes.length + " pose" + (S2.lignes.length > 1 ? "s" : "") + '</div>';
-  cs += S2.lignes.length ? S2.lignes.map(l => {
-      const ec = Math.abs(l.facture - l.p.grille) > 0.5 && l.p.mode === "client";
-      return '<div class="rmline">' +
-        '<span class="n">' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") +
-          '<button class="rmkm' + (l.o.loin ? " loin" : "") + '" type="button" data-km="' +
-          l.o.id + '">' + (l.o.loin ? "+10 km" : "\u003c10 km") + '</button></span>' +
-        '<span class="v">' + fr(l.p.montant, 2) + '</span>' +
+  cs += S2.lignes.length ? S2.lignes.map(l =>
+      '<div class="rmline">' +
+        '<span class="n">' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") + '</span>' +
+        '<span class="v' + (l.p.montant > 0.01 ? "" : " nul") + '">' + fr(l.p.montant, 2) + '</span>' +
         '<span class="s">' + l.p.n + ' fenêtre' + (l.p.n > 1 ? "s" : "") + '  ·  ' +
           (l.p.mode === "societe"
             ? l.p.n + " × " + REMU.parFenetre + " MAD, payé par la société"
-            : "forfait encaissé du client") +
-          (l.p.mode === "client"
-            ? '  ·  facturé ' + fr(l.facture, 2) + ' MAD' +
-              (ec ? '  ·  <b class="rmwarn">le devis ne suit pas la grille</b>' : "")
-            : "") +
+            : (l.p.montant > 0.01
+                ? "prix de pose du bon, encaissé du client"
+                : '<b class="rmwarn">aucun prix de pose sur le bon</b>')) +
         '</span>' +
-      '</div>';
-    }).join("")
+      '</div>').join("")
     : '<div class="rmvide">Aucune pose ce mois ci.</div>';
 
   $("remuBody").innerHTML =
@@ -8234,12 +8200,10 @@ function renderRemu(){
     '<div class="rmregles"><h3>La règle appliquée</h3>' +
       'Imane : <b>' + REMU.imaneBase + ' MAD</b> de base, <b>' + REMU.imanePct +
       ' %</b> du produit HT de chaque commande encaissée, minimum <b>' + REMU.imaneMin + ' MAD</b>.<br>' +
-      'Soufiane : <b>' + REMU.soufBase + ' MAD</b> de base, puis par commande posée — ' +
-      'moins de 10 km : <b>' + REMU.grille.proche.petit + '</b> jusqu\'à 2 fenêtres, <b>' +
-      REMU.grille.proche.moyen + '</b> de 3 à 4 ; plus de 10 km : <b>' + REMU.grille.loin.petit +
-      '</b> jusqu\'à 2, <b>' + REMU.grille.loin.moyen + '</b> de 3 à 4. Au delà de ' +
-      REMU.seuilFen + ' fenêtres, la société paie <b>' + REMU.parFenetre + ' MAD</b> par fenêtre.<br>' +
-      'Appuyez sur l\'étiquette de distance d\'une ligne pour la corriger.' +
+      'Soufiane : <b>' + REMU.soufBase + ' MAD</b> de base. Jusqu\'à ' + REMU.seuilFen +
+      ' fenêtres, il encaisse le <b>prix de pose porté par le bon de commande</b>. ' +
+      'Au delà de ' + REMU.seuilFen + ' fenêtres, la société paie <b>' + REMU.parFenetre +
+      ' MAD</b> par fenêtre posée. Les commandes en livraison ne comptent pas.' +
     '</div>';
 
   const nb = bonsDuMois(remuMois).length;
@@ -8253,20 +8217,6 @@ $("remuMois").addEventListener("change", e => {
   renderRemu();
 });
 $("remuNow").addEventListener("click", () => { remuMois = moisISO(new Date()); renderRemu(); });
-
-/* Corriger la distance depuis la fiche de paie : le bon est mis à jour et
-   part vers les autres téléphones. */
-$("remuBody").addEventListener("click", e => {
-  const b = e.target.closest("button[data-km]");
-  if (!b) return;
-  const o = (ORDERS || []).find(x => x.id === b.dataset.km);
-  if (!o) return;
-  o.loin = !o.loin;
-  if (S && S.id === o.id) S.loin = o.loin;
-  touche(o); persistOrders(); pushBon(o);
-  renderRemu();
-  toast(o.num + "  ·  " + (o.loin ? "plus de 10 km" : "moins de 10 km"));
-});
 
 $("tileRemu").addEventListener("click", () => {
   if (!adminAllowed()) return;
