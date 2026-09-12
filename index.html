@@ -721,6 +721,20 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
 .rmregles b{color:var(--ink); font-family:"IBM Plex Mono",monospace; font-weight:600}
 
+/* --- l'échéance, en bas du bon --- */
+.echbar{margin-top:11px; border:1px solid var(--line); border-radius:12px;
+  background:var(--card2); padding:11px 13px}
+.echbar.ok{border-color:var(--ok); background:var(--ok-soft)}
+.echbar.att{border-color:var(--warn); background:var(--warn-soft,#FAEFDD)}
+.echbar .t{display:block; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+.echbar .d{display:block; margin-top:3px; font-family:"Archivo",sans-serif; font-size:16px;
+  font-weight:600; color:var(--ink)}
+.echbar .d::first-letter{text-transform:uppercase}
+.echbar.ok .d{color:var(--ok)}
+.echbar .x{display:block; margin-top:5px; font-size:12px; color:var(--muted); line-height:1.5}
+.echbar .x b{color:var(--ink); font-family:"IBM Plex Mono",monospace; font-weight:600}
+
 /* --- échéance proposée par l'atelier --- */
 .echsug{margin-top:9px; border:1px solid var(--line); border-left:3px solid var(--accent);
   border-radius:0 12px 12px 0; background:var(--card2); padding:11px 13px}
@@ -1436,6 +1450,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <div class="price-bar tot" id="totBar" hidden>
         <span id="totLab">Total TTC</span><b id="sTot">0,00 MAD</b>
       </div>
+      <div class="echbar" id="echBar"></div>
       <div id="alerts"></div>
     </section>
 
@@ -2830,10 +2845,12 @@ $("remise").addEventListener("input", e => {
 $("ech").addEventListener("change", e => {
   if (echVerrou()){
     e.target.value = S.ech || "";
-    toast("L'échéance de ce bon a été fixée à sa création");
+    toast("L'échéance est calculée par l'atelier au passage en production");
     return;
   }
-  S.ech = e.target.value; renderEch();
+  S.ech = e.target.value;
+  S.echManuel = !!S.ech;      /* une date posée à la main ne se recalcule plus */
+  renderEch(); renderRecap();
 });
 
 /* --- lien GPS --- */
@@ -2879,46 +2896,45 @@ $("gpsHere").addEventListener("click", () => {
 /* La date d'échéance se fixe à la création. Une fois le bon enregistré, seul
    l'atelier de la direction peut encore la déplacer : soufiane la voit mais ne
    la change plus, sinon les plannings bougent sous les pieds de l'équipe. */
-const ECH_FIGE = ["soufiane"];
-function echVerrou(){
-  if (!USER) return false;
-  if (ECH_FIGE.indexOf(String(USER.login || "").toLowerCase()) < 0) return false;
-  return !!S && ORDERS.some(o => o.id === S.id);   /* le bon existe déjà */
-}
+
+/* L'échéance n'est plus une saisie : elle se calcule au passage en production.
+   Seule la direction peut la corriger à la main. */
+function echVerrou(){ return !adminAllowed(); }
 function renderEch(){
   $("echLab").textContent = S.ech ? (S.pose === "Livraison" ? "Livraison" : "Pose") : "Échéance";
   const inp = $("ech");
   const fige = echVerrou();
   inp.disabled = fige;
-  inp.title = fige ? "L'échéance a été fixée à la création du bon" : "";
+  inp.title = fige ? "L'échéance est calculée par l'atelier au passage en production" : "";
   const box = inp.closest(".field") || inp.parentElement;
   if (box) box.style.opacity = fige ? ".6" : "";
   renderEchSug();
 }
 
-/* La date que l'atelier peut tenir, recalculée à chaque mesure ajoutée.
-   L'agent reste libre de promettre autre chose, mais plus sans le savoir. */
+/* Le détail du calcul, sous le champ de date, pour la direction seule.
+   Les agents lisent la date en bas du bon, ils n'ont rien à décider. */
 function renderEchSug(){
   const zone = $("echSug");
   if (!zone) return;
   const nb = totals().nb;
-  const sg = nb ? suggereEch(nb, S.id) : null;
-  if (!sg || echVerrou()){ zone.hidden = true; return; }
+  if (!nb || !adminAllowed()){ zone.hidden = true; renderEchBar(); return; }
+  const mq = echManque();
+  const sg = suggereEch(nb, S.id, mq);
+  if (!sg){ zone.hidden = true; renderEchBar(); return; }
   zone.hidden = false;
 
-  const jf = sg.jFile, jb = sg.jBon;
   let x = '<span class="x">' +
     (sg.F ? '<b>' + sg.F + '</b> fenêtre' + (sg.F > 1 ? "s" : "") + ' en attente → ' +
-            jf + ' jour' + (jf > 1 ? "s" : "") + "  ·  "
+            sg.jFile + ' jour' + (sg.jFile > 1 ? "s" : "") + "  ·  "
           : "atelier libre  ·  ") +
     '<b>' + sg.N + '</b> fenêtre' + (sg.N > 1 ? "s" : "") + ' ici → ' +
-    jb + ' jour' + (jb > 1 ? "s" : "") +
+    sg.jBon + ' jour' + (sg.jBon > 1 ? "s" : "") +
     '  ·  pose +' + sg.marge +
     '<br>' + sg.cap + ' fenêtres par jour, du lundi au vendredi.' +
+    (mq.length ? '<br>' + texteManque(sg) : "") +
     '</span>';
 
-  /* l'agent a mis une date plus tôt : on chiffre ce qu'elle demanderait */
-  let w = "", att = false;
+  let w = "", att = !!mq.length;
   if (S.ech && S.ech < sg.iso){
     const c = cadencePour(S.ech, nb, S.id);
     att = true;
@@ -2937,19 +2953,73 @@ function renderEchSug(){
     '<span class="d">' + dateLongue(sg.iso) + '</span>' + x + w +
     '<button type="button" id="echPrendre"' + (S.ech === sg.iso ? " disabled" : "") + '>' +
     (S.ech === sg.iso ? "Date de l'atelier retenue" : "Prendre cette date") + '</button>';
+  renderEchBar();
 }
 
-/* Le bon garde une photo des réglages du jour : changer la capacité demain ne
-   doit pas déplacer une date déjà promise à un client. */
+/* Le manque de tissu du bon en cours de saisie. */
+function echManque(){
+  try { return manqueTissu(S, S.id); } catch(e){ return []; }
+}
+function texteManque(sg){
+  const l = sg.manque.map(m =>
+    '<b>' + esc(m.ref) + '</b> : il manque ' + fr(m.manque, 2) + ' m²').join("  ·  ");
+  return l + '.<br>Commande fournisseur demain, tissu à l\'atelier le ' +
+         dateLongue(sg.matIso) + "." +
+         (sg.parMatiere ? " C'est le tissu qui fixe la date, pas l'atelier." : "");
+}
+
+/* La ligne que tout le monde voit, sous le total du bon. */
+function renderEchBar(){
+  const bar = $("echBar");
+  if (!bar) return;
+  const nb = totals().nb;
+  if (!nb){ bar.hidden = true; return; }
+  bar.hidden = false;
+
+  if (etatDe(S) === "devis"){
+    const mq = echManque();
+    bar.className = "echbar";
+    bar.innerHTML = '<span class="t">Échéance</span>' +
+      '<span class="d">Fixée au passage en production</span>' +
+      '<span class="x">Tant que ce bon est un devis, il n\'occupe pas l\'atelier et ne porte pas de date.' +
+      (mq.length ? ' Attention, ' + mq.map(m => '<b>' + esc(m.ref) + '</b>').join(", ") +
+        (mq.length > 1 ? " manquent" : " manque") + ' en stock.' : "") +
+      '</span>';
+    return;
+  }
+  if (!S.ech){
+    bar.className = "echbar att";
+    bar.innerHTML = '<span class="t">Échéance</span>' +
+      '<span class="d">Pas encore calculée</span>' +
+      '<span class="x">Elle se pose dès que le bon passe en production.</span>';
+    return;
+  }
+  const p = S.plan || {};
+  bar.className = "echbar ok";
+  bar.innerHTML = '<span class="t">' +
+      (S.pose === "Livraison" ? "Livraison" : "Pose") + ' prévue</span>' +
+    '<span class="d">' + dateLongue(S.ech) + '</span>' +
+    '<span class="x">' + (S.echManuel
+      ? "Date fixée par la direction."
+      : "Calculée par l'atelier : <b>" + (p.cap || atlCap()) + "</b> fenêtres par jour" +
+        (p.file ? ", <b>" + p.file + "</b> en attente au moment du calcul" : "") +
+        ", pose +" + (p.marge === undefined ? atlMarge() : p.marge) +
+        ((p.manque && p.manque.length) ? ", tissu à commander" : "")) +
+    '</span>';
+}
+
+/* La direction peut retenir la date de l'atelier d'un appui. */
 $("echSug").addEventListener("click", e => {
   if (!e.target.closest("#echPrendre")) return;
   const nb = totals().nb;
-  const sg = suggereEch(nb, S.id);
+  const sg = suggereEch(nb, S.id, echManque());
   if (!sg || echVerrou()) return;
   S.ech = sg.iso;
-  S.plan = {cap:sg.cap, marge:sg.marge, file:sg.F, nb:sg.N, at:Date.now()};
+  S.echManuel = false;
+  S.plan = {cap:sg.cap, marge:sg.marge, file:sg.F, nb:sg.N, jMat:sg.jMat,
+            manque: sg.manque.map(x => x.ref), at:Date.now()};
   $("ech").value = S.ech;
-  renderEch(); renderProgress();
+  renderEch(); renderProgress(); renderRecap();
   toast("Échéance au " + dateLongue(sg.iso));
 });
 function echFR(){
@@ -3018,7 +3088,9 @@ $("pcEtat").addEventListener("change", e => {
   noteEtat(b);
   touche(b); persistOrders(); pushBon(b);
   sheetSituation(b.num, etatLabel(b.etat));
-  renderHist();
+  if (S && S.id === b.id){ S.ech = b.ech; S.plan = b.plan; try { renderEch(); } catch(err){} }
+  renderHist(); renderHome();
+  if (b.ech) toast("Échéance au " + dateLongue(b.ech));
 });
 $("btnPieces").addEventListener("click", pcConfirm);
 $("btnHook").addEventListener("click", askHook);
@@ -5153,7 +5225,11 @@ $("histBody").addEventListener("change", e => {
   }
   pushBon(o);
   sheetSituation(o.num, etatLabel(o.etat));
-  toast(etatLabel(o.etat) + "  ·  " + (o.nom || "client"));
+  /* l'échéance vient peut être d'être posée par le passage en production */
+  if (S && S.id === o.id){ S.ech = o.ech; S.plan = o.plan; try { renderEch(); } catch(err){} }
+  renderHist(); renderHome();
+  toast(etatLabel(o.etat) + "  ·  " + (o.nom || "client") +
+        (o.ech ? "  ·  échéance " + String(o.ech).split("-").reverse().join("/") : ""));
 });
 
 /* Renommer un bon : BC-08-26-02 devient F2026001, ou tout autre libellé.
@@ -5349,7 +5425,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "10.0";
+const APP_VERSION = "10.1";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -5972,6 +6048,29 @@ function noteEtat(o){
   o.log.push({kind:"etat", at:Date.now(), by:(USER && USER.login) || "", k:"etat",
               on:true, etat:o.etat, lab:etatLabel(o.etat)});
   if (o.log.length > 400) o.log = o.log.slice(-400);
+  majEcheance(o);
+}
+
+/* Le compte à rebours démarre quand le bon passe en production, pas avant :
+   un devis n'occupe pas l'atelier et ne porte donc aucune date. La date est
+   calculée une seule fois, puis figée avec les réglages du jour. */
+function majEcheance(o){
+  if (!o) return false;
+  if (etatDe(o) === "devis"){
+    if (o.ech && !o.echManuel){ delete o.ech; delete o.plan; return true; }
+    return false;
+  }
+  if (o.ech) return false;                       /* déjà fixée, on n'y touche plus */
+  const nb = ordDims(o).length;
+  if (!nb) return false;
+  let mq = [];
+  try { mq = manqueTissu(o, o.id); } catch(e){}
+  const sg = suggereEch(nb, o.id, mq);
+  if (!sg) return false;
+  o.ech = sg.iso;
+  o.plan = {cap:sg.cap, marge:sg.marge, file:sg.F, nb:sg.N, jMat:sg.jMat,
+            manque: mq.map(x => x.ref), at:Date.now()};
+  return true;
 }
 
 /* Ce que l'atelier a besoin de savoir sur le bon avant de couper : combien de
@@ -8403,20 +8502,91 @@ function fileDetail(exclureId){
 }
 function fileAttente(exclureId){ return fileDetail(exclureId).total; }
 
+/* --- la matière --- */
+/* Ce qu'un bon déroule vraiment du rouleau, référence par référence, en m².
+   C'est le plan de coupe qui le dit : les chutes du magasin ne sont pas
+   déroulées, elles ne comptent donc pas dans le besoin. */
+function besoinTissu(o){
+  const need = {};
+  const byRef = {};
+  ordDims(o).forEach(x => {
+    const k = x.ref || "";
+    if (!k) return;
+    (byRef[k] = byRef[k] || []).push(x);
+  });
+  Object.keys(byRef).forEach(ref => {
+    const f = fab(ref);
+    const lz = f ? f.laize : CUT_DEF.laize;
+    let T = null;
+    try { T = planTissu(byRef[ref], lz, CUT.seuilLaize, CUT.seuilLong, chutesPour(o, ref)); } catch(e){}
+    need[ref] = (need[ref] || 0) + (T ? T.conso : 0);
+  });
+  return need;
+}
+
+/* Un bon est « déjà retiré du stock » quand la direction l'a saisi dans SAGE,
+   ou qu'il est livré, selon le réglage. Tant qu'il ne l'est pas, son tissu est
+   promis à un client : il ne doit plus être compté comme disponible. */
+function dejaDeduit(o){
+  return (ATL.deduit === "livre") ? (etatDe(o) === "livre") : estSage(o);
+}
+function tissuReserve(exclureId){
+  const res = {};
+  (ORDERS || []).forEach(o => {
+    if (exclureId && o.id === exclureId) return;
+    if (o.status !== "sent") return;
+    if (etatDe(o) === "devis") return;      /* un devis ne réserve rien */
+    if (dejaDeduit(o)) return;              /* déjà retiré de la feuille */
+    const n = besoinTissu(o);
+    Object.keys(n).forEach(r => { res[r] = (res[r] || 0) + n[r]; });
+  });
+  return res;
+}
+
+/* Ce qui manque pour ce bon, une ligne par tissu. */
+function manqueTissu(o, exclureId){
+  const besoin = besoinTissu(o);
+  const res = tissuReserve(exclureId === undefined ? (o && o.id) : exclureId);
+  const out = [];
+  Object.keys(besoin).forEach(ref => {
+    if (!besoin[ref]) return;
+    const f = fab(ref);
+    const stock = f ? stockM2(f) : 0;
+    const dispo = stock - (res[ref] || 0);
+    const m = besoin[ref] - dispo;
+    if (m > 0.01) out.push({ref:ref, besoin:besoin[ref], dispo: dispo > 0 ? dispo : 0,
+                            manque:m, connu: !!f});
+  });
+  return out.sort((a,b) => b.manque - a.manque);
+}
+
 /* --- la date proposée --- */
 /* La file et ce bon se suivent dans le même atelier : on additionne les fenêtres,
    on divise par la capacité, on compte en jours ouvrés, on ajoute la marge. */
-function suggereEch(nb, exclureId){
+/* Aujourd'hui compte pour le jour 1. Si un tissu manque, on appelle le
+   fournisseur le lendemain et il livre après le délai convenu : la matière est
+   donc à l'atelier le jour 2 + délai. Les deux attentes courent en parallèle,
+   l'atelier vide sa file pendant que le tissu arrive : on garde la plus longue,
+   jamais la somme. */
+function suggereEch(nb, exclureId, manque){
   const cap = atlCap(), marge = atlMarge();
   const F = fileAttente(exclureId);
   const N = Math.max(0, nb || 0);
   if (!N) return null;
+  const mq = manque || [];
+  const four = Math.max(0, parseInt(ATL.four, 10) || 0);
+  const jMat = mq.length ? (2 + four) : 1;        /* jour ouvré où la matière est là */
   const jFile = Math.ceil(F / cap);
+  const jBon  = Math.max(1, Math.ceil(N / cap));
   const jTot  = Math.max(1, Math.ceil((F + N) / cap));
-  const fin   = jourOuvreN(jTot);
+  /* soit la file commande, soit la matière : le plus tard des deux */
+  const finJ  = Math.max(jTot, jMat + jBon - 1);
+  const fin   = jourOuvreN(finJ);
   const ech   = marge > 0 ? ajouteOuvres(fin, marge) : fin;
   return {iso: isoDe(ech), finIso: isoDe(fin), F:F, N:N, cap:cap, marge:marge,
-          jFile:jFile, jBon: jTot - jFile, jTot:jTot};
+          jFile:jFile, jBon:jBon, jTot:finJ, jMat:jMat, four:four, manque:mq,
+          parMatiere: (jMat + jBon - 1) > jTot,
+          matIso: isoDe(jourOuvreN(jMat))};
 }
 /* La cadence qu'il faudrait tenir pour une date choisie à la main. */
 function cadencePour(iso, nb, exclureId){
