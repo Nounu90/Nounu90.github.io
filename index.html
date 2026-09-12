@@ -721,6 +721,48 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
 .rmregles b{color:var(--ink); font-family:"IBM Plex Mono",monospace; font-weight:600}
 
+/* --- échéance proposée par l'atelier --- */
+.echsug{margin-top:9px; border:1px solid var(--line); border-left:3px solid var(--accent);
+  border-radius:0 12px 12px 0; background:var(--card2); padding:11px 13px}
+.echsug.att{border-left-color:var(--warn)}
+.echsug .d{display:block; font-family:"Archivo",sans-serif; font-size:15px; font-weight:600;
+  color:var(--ink)}
+.echsug .d::first-letter{text-transform:uppercase}
+.echsug .x{display:block; margin-top:4px; font-size:12px; color:var(--muted); line-height:1.5}
+.echsug .x b{color:var(--ink); font-family:"IBM Plex Mono",monospace; font-weight:600}
+.echsug .w{display:block; margin-top:6px; font-size:12px; color:var(--warn); line-height:1.45; font-weight:500}
+.echsug button{margin-top:9px; border:1px solid var(--accent); border-radius:9px;
+  background:var(--accent); color:#fff; font-family:"Archivo",sans-serif; font-size:12.5px;
+  font-weight:600; padding:8px 14px}
+.echsug button:disabled{opacity:.45}
+
+/* --- page atelier --- */
+.atgrid{display:grid; grid-template-columns:1fr auto; gap:9px; align-items:center;
+  padding:11px 0; border-top:1px solid var(--line)}
+.atgrid:first-of-type{border-top:0}
+.atgrid label{font-size:13.5px; color:var(--ink); line-height:1.35}
+.atgrid label small{display:block; font-size:11px; color:var(--muted); margin-top:2px}
+.atgrid input{width:78px; text-align:right; border:1px solid var(--line); background:var(--card2);
+  border-radius:9px; padding:9px; font-family:"IBM Plex Mono",monospace; font-size:15px;
+  font-weight:600; color:var(--ink); -webkit-appearance:none}
+.atgrid input:focus{outline:none; border-color:var(--accent); background:var(--card)}
+.atbox{border:1px solid var(--line); border-radius:14px; background:var(--card);
+  padding:4px 14px 12px; margin-bottom:14px}
+.atbox > h3{margin:13px 0 4px; font-family:"Archivo",sans-serif; font-size:10px; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
+.atbox > p{margin:0 0 8px; font-size:11.5px; color:var(--muted); line-height:1.5}
+.atfer{display:flex; justify-content:space-between; align-items:center; gap:10px;
+  padding:8px 0; border-top:1px solid var(--line); font-size:12.5px}
+.atfer .dd{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink)}
+.atfer .nn{flex:1; min-width:0; color:var(--muted); font-size:11.5px}
+.atfer button{border:1px solid var(--line); border-radius:8px; background:var(--card2);
+  color:var(--warn); font-size:11px; font-weight:700; padding:3px 9px; font-family:"Archivo",sans-serif}
+.atadd{display:grid; grid-template-columns:1fr auto; gap:8px; margin-top:10px}
+.atadd input{border:1px solid var(--line); border-radius:9px; padding:9px; background:var(--card2);
+  color:var(--ink); font-family:"IBM Plex Mono",monospace; font-size:13px}
+.atadd button{border:1px solid var(--accent); border-radius:9px; background:var(--accent);
+  color:#fff; font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; padding:0 16px}
+
 /* --- journal de fabrication --- */
 /* --- journal du jour : le résumé, puis qui a fait quoi --- */
 .lgstat{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px}
@@ -1257,6 +1299,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <input id="ech" type="date" aria-label="Échéance de pose ou de livraison">
         <span class="fsuf" id="echLab">Échéance</span>
       </div>
+      <div class="echsug" id="echSug" hidden></div>
     </section>
 
     <!-- TYPE -->
@@ -1468,6 +1511,11 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <button class="tile" id="tilePay" type="button">
         <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg></span>
         <span class="tt"><b>Paiements</b><small id="tilePaySub">Encaissements et impayés</small></span>
+        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+      <button class="tile" id="tileAtl" type="button">
+        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 15h3"/></svg></span>
+        <span class="tt"><b>Atelier</b><small id="tileAtlSub">Capacité, jours fériés, échéances</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
       <button class="tile" id="tileRemu" type="button">
@@ -1914,6 +1962,60 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
     <div class="clfhead" id="cliOneHead"></div>
     <div id="cliOneList"></div>
     <p class="hint" id="cliOneHint"></p>
+  </div>
+</div>
+
+<!-- ATELIER : CAPACITÉ, CALENDRIER, ÉCHÉANCES -->
+<div class="sheet" id="atlSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="atlSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Atelier</h2>
+  </div>
+  <div class="sheet-body">
+    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="lgstat" id="atlStat"></div>
+
+    <div class="atbox">
+      <h3>Le rythme</h3>
+      <div class="atgrid">
+        <label>Fenêtres par jour<small>Débit total de l'atelier, jours ouvrés</small></label>
+        <input id="atlCap" inputmode="decimal" type="text">
+      </div>
+      <div class="atgrid">
+        <label>Marge avant la pose<small>Jours ouvrés entre la dernière fenêtre et la date promise</small></label>
+        <input id="atlMarge" inputmode="numeric" type="text">
+      </div>
+      <p style="margin:10px 0 0">Un bon déjà enregistré garde la date qu'on lui a promise : ces réglages ne servent qu'aux échéances calculées après le changement.</p>
+    </div>
+
+    <div class="atbox">
+      <h3>Pour l'alerte matière</h3>
+      <p>Pas encore utilisé. Ces deux réglages serviront à la prochaine étape, quand l'application vérifiera le tissu et les pièces avant de proposer une date.</p>
+      <div class="atgrid">
+        <label>Délai fournisseur<small>Jours entre l'appel au fournisseur et la livraison à l'atelier</small></label>
+        <input id="atlFour" inputmode="numeric" type="text">
+      </div>
+      <div class="atgrid">
+        <label>Stock déjà déduit de la feuille<small>À partir de quel moment le tissu d'un bon n'est plus compté comme disponible</small></label>
+        <span></span>
+      </div>
+      <div class="seg" id="atlDeduit">
+        <button type="button" data-dd="sage" aria-pressed="true">Saisi dans SAGE</button>
+        <button type="button" data-dd="livre" aria-pressed="false">Commande livrée</button>
+      </div>
+    </div>
+
+    <div class="atbox">
+      <h3>Jours fériés</h3>
+      <p>L'atelier est fermé le samedi et le dimanche, et ces jours là. Les fêtes religieuses suivent la lune : elles sont marquées « estimé » et se corrigent ici dès que la date est annoncée.</p>
+      <div id="atlFeries"></div>
+      <div class="atadd">
+        <input id="atlFerDate" type="date" aria-label="Nouvelle date fériée">
+        <button id="atlFerAdd" type="button">Ajouter</button>
+      </div>
+    </div>
+
+    <p class="hint" id="atlHint"></p>
   </div>
 </div>
 
@@ -2671,6 +2773,7 @@ function renderRecap(){
     : "1 store dépasse la hauteur maximale de " + MAXH + " cm.", true);
   if (t.mini) warn("Facturation au minimum de 1,00 m par côté : " + t.mini + (t.mini > 1 ? " stores comptés" : " store compté") + " sur <b>" + fr(t.m2f) + " m²</b> au lieu de " + fr(t.m2) + " m².");
   if (t.ml > 0) warn("Tube <b>" + fr(t.ml) + " ml</b> (largeurs) · tissu <b>" + fr(t.mlTissu) + " ml</b> (hauteurs), net hors chutes et ourlets.");
+  majEchSug();
 }
 
 function renderProgress(){
@@ -2697,6 +2800,8 @@ function renderProgress(){
 function renderAll(){
   renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap(); renderEch(); renderProgress();
 }
+/* Une mesure ajoutée change la charge d'atelier : la date proposée suit. */
+function majEchSug(){ try { renderEchSug(); } catch(e){} }
 
 /* ============ Events ============ */
 $("nom").addEventListener("input", e => { S.nom = e.target.value; renderProgress(); });
@@ -2775,7 +2880,65 @@ function renderEch(){
   inp.title = fige ? "L'échéance a été fixée à la création du bon" : "";
   const box = inp.closest(".field") || inp.parentElement;
   if (box) box.style.opacity = fige ? ".6" : "";
+  renderEchSug();
 }
+
+/* La date que l'atelier peut tenir, recalculée à chaque mesure ajoutée.
+   L'agent reste libre de promettre autre chose, mais plus sans le savoir. */
+function renderEchSug(){
+  const zone = $("echSug");
+  if (!zone) return;
+  const nb = totals().nb;
+  const sg = nb ? suggereEch(nb, S.id) : null;
+  if (!sg || echVerrou()){ zone.hidden = true; return; }
+  zone.hidden = false;
+
+  const jf = sg.jFile, jb = sg.jBon;
+  let x = '<span class="x">' +
+    (sg.F ? '<b>' + sg.F + '</b> fenêtre' + (sg.F > 1 ? "s" : "") + ' en attente → ' +
+            jf + ' jour' + (jf > 1 ? "s" : "") + "  ·  "
+          : "atelier libre  ·  ") +
+    '<b>' + sg.N + '</b> fenêtre' + (sg.N > 1 ? "s" : "") + ' ici → ' +
+    jb + ' jour' + (jb > 1 ? "s" : "") +
+    '  ·  pose +' + sg.marge +
+    '<br>' + sg.cap + ' fenêtres par jour, du lundi au vendredi.' +
+    '</span>';
+
+  /* l'agent a mis une date plus tôt : on chiffre ce qu'elle demanderait */
+  let w = "", att = false;
+  if (S.ech && S.ech < sg.iso){
+    const c = cadencePour(S.ech, nb, S.id);
+    att = true;
+    w = '<span class="w">' + (!c || c.jours <= 0
+      ? (sg.marge > 0
+          ? "Il ne reste aucune journée d'atelier avant cette date : la marge de pose en prend déjà " +
+            sg.marge + "."
+          : "Cette date est déjà passée ou tombe un jour fermé.")
+      : "Cette date demande " + fr(c.cadence, 1) + " fenêtres par jour pendant " +
+        c.jours + " jour" + (c.jours > 1 ? "s" : "") + ", l'atelier en fait " + sg.cap + ".") +
+      '</span>';
+  }
+
+  zone.className = "echsug" + (att ? " att" : "");
+  zone.innerHTML =
+    '<span class="d">' + dateLongue(sg.iso) + '</span>' + x + w +
+    '<button type="button" id="echPrendre"' + (S.ech === sg.iso ? " disabled" : "") + '>' +
+    (S.ech === sg.iso ? "Date de l'atelier retenue" : "Prendre cette date") + '</button>';
+}
+
+/* Le bon garde une photo des réglages du jour : changer la capacité demain ne
+   doit pas déplacer une date déjà promise à un client. */
+$("echSug").addEventListener("click", e => {
+  if (!e.target.closest("#echPrendre")) return;
+  const nb = totals().nb;
+  const sg = suggereEch(nb, S.id);
+  if (!sg || echVerrou()) return;
+  S.ech = sg.iso;
+  S.plan = {cap:sg.cap, marge:sg.marge, file:sg.F, nb:sg.N, at:Date.now()};
+  $("ech").value = S.ech;
+  renderEch(); renderProgress();
+  toast("Échéance au " + dateLongue(sg.iso));
+});
 function echFR(){
   if (!S.ech) return "";
   const a = String(S.ech).split("-");
@@ -3954,6 +4117,14 @@ async function pullBons(){
     const distants = {};
     data.forEach(r => {
       /* la nomenclature partagée occupe une rangée réservée, ce n'est pas un bon */
+      if (r.id === ATL_ID){
+        const a = r.data;
+        if (a && typeof a === "object" && a.cap !== undefined){
+          ATL = Object.assign({}, ATL_DEF, a);
+          LS.set("mst_atl", ATL);
+        }
+        return;
+      }
       if (r.id === NOM_ID){
         const d = r.data;
         if (d && d.ENR && d.JN){
@@ -4014,6 +4185,7 @@ async function syncAll(){
   await flushTombs();
   await flushPending();
   await pullBons();
+  pullAtl();                  /* réglages d'atelier partagés */
   syncNums();                 /* renommages faits directement dans la feuille */
   verifSheet();               /* et personne ne manque dans le tableau */
 }
@@ -4148,7 +4320,7 @@ async function bootAuth(){
 function nav(where){
   armBack();
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet","remuSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -4195,6 +4367,15 @@ function renderHome(){
     : "Historique et paiements par client";
   $("tileTri").hidden = !adminAllowed();
   $("tileRemu").hidden = !adminAllowed();
+  $("tileAtl").hidden = !adminAllowed();
+  if (adminAllowed()){
+    const F = fileAttente();
+    const j = Math.ceil(F / atlCap());
+    $("tileAtlSub").textContent = F
+      ? F + " fenêtre" + (F > 1 ? "s" : "") + " en attente  ·  " + j + " jour" + (j > 1 ? "s" : "") +
+        " d'atelier  ·  " + atlCap() + "/jour"
+      : "Atelier libre  ·  " + atlCap() + " fenêtres par jour";
+  }
   if (adminAllowed()){
     const t = triTotaux(triAn, triNo);
     $("tileTriSub").textContent = t.n
@@ -4597,6 +4778,7 @@ function renderTout(){
   essai(renderCli);
   essai(renderDoc);
   essai(renderRemu);
+  essai(renderAtl);
 }
 
 function ecranOuvert(){
@@ -5154,7 +5336,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "9.7";
+const APP_VERSION = "9.8";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8048,6 +8230,270 @@ $("tileTri").addEventListener("click", () => {
   renderTri();
   nav("triSheet");
   pullBons().then(() => renderTri());
+});
+
+/* ============ Atelier : capacité, jours ouvrés, échéance proposée ============ */
+/* L'atelier sort un nombre fixe de fenêtres par jour ouvré. La date qu'on promet
+   au client, c'est donc le moment où la file d'attente sera écoulée, plus le
+   temps de fabriquer ce bon là, plus la marge avant la pose. */
+const ATL_ID = "cfg-atelier";        /* rangée réservée, comme la nomenclature */
+
+/* Jours fériés du Maroc. Les fêtes civiles sont sûres, les fêtes religieuses
+   suivent la lune et ne sont confirmées qu'à quelques jours près : elles sont
+   marquées « estimé » et se corrigent à la main dans la page Atelier. */
+const FERIES_DEF = [
+  {d:"2026-11-06", n:"Marche Verte"},
+  {d:"2026-11-18", n:"Fête de l'Indépendance"},
+  {d:"2027-01-01", n:"Nouvel An"},
+  {d:"2027-01-11", n:"Manifeste de l'Indépendance"},
+  {d:"2027-03-10", n:"Aïd al-Fitr (estimé)"},
+  {d:"2027-03-11", n:"Aïd al-Fitr (estimé)"},
+  {d:"2027-05-01", n:"Fête du Travail"},
+  {d:"2027-05-17", n:"Aïd al-Adha (estimé)"},
+  {d:"2027-05-18", n:"Aïd al-Adha (estimé)"},
+  {d:"2027-06-06", n:"1er Moharram (estimé)"},
+  {d:"2027-07-30", n:"Fête du Trône"},
+  {d:"2027-08-14", n:"Oued Eddahab"},
+  {d:"2027-08-15", n:"Aïd al-Mawlid (estimé)"},
+  {d:"2027-08-20", n:"Révolution du Roi et du Peuple"},
+  {d:"2027-08-21", n:"Fête de la Jeunesse"},
+  {d:"2027-11-06", n:"Marche Verte"},
+  {d:"2027-11-18", n:"Fête de l'Indépendance"}
+];
+const ATL_DEF = {cap:3, marge:2, four:3, deduit:"sage", feries:FERIES_DEF.slice(), v:1};
+let ATL = Object.assign({}, ATL_DEF, LS.get("mst_atl", {}));
+if (!Array.isArray(ATL.feries)) ATL.feries = FERIES_DEF.slice();
+
+function atlCap(){   const v = parseFloat(ATL.cap);   return v > 0 ? v : 3; }
+function atlMarge(){ const v = parseInt(ATL.marge, 10); return v >= 0 ? v : 2; }
+
+function atlSave(){
+  LS.set("mst_atl", ATL);
+  pushAtl();
+}
+async function pushAtl(){
+  if (!SB || !USER) return false;
+  try {
+    const {error} = await SB.from("bons").upsert({
+      id: ATL_ID, num: "__ATELIER__", author: USER.login,
+      data: ATL, updated_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    return true;
+  } catch(e){ return false; }
+}
+async function pullAtl(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", ATL_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data;
+    if (d && typeof d === "object" && d.cap !== undefined){
+      ATL = Object.assign({}, ATL_DEF, d);
+      if (!Array.isArray(ATL.feries)) ATL.feries = FERIES_DEF.slice();
+      LS.set("mst_atl", ATL);
+      return true;
+    }
+  } catch(e){}
+  return false;
+}
+
+/* --- le calendrier --- */
+function isoDe(dt){ return dt.getFullYear() + "-" + pad(dt.getMonth() + 1) + "-" + pad(dt.getDate()); }
+function estFerie(iso){ return (ATL.feries || []).some(f => (f && f.d ? f.d : f) === iso); }
+function nomFerie(iso){
+  const f = (ATL.feries || []).find(x => (x && x.d ? x.d : x) === iso);
+  return f ? (f.n || "jour férié") : "";
+}
+/* L'atelier tourne du lundi au vendredi, hors jours fériés. */
+function estOuvre(dt){
+  const j = dt.getDay();
+  if (j === 0 || j === 6) return false;
+  return !estFerie(isoDe(dt));
+}
+function prochainOuvre(dt){
+  const d = new Date(dt.getTime());
+  d.setHours(12, 0, 0, 0);
+  let garde = 0;
+  while (!estOuvre(d) && garde++ < 400) d.setDate(d.getDate() + 1);
+  return d;
+}
+/* n jours ouvrés après une date, la date de départ ne comptant pas. */
+function ajouteOuvres(dt, n){
+  const d = new Date(dt.getTime());
+  d.setHours(12, 0, 0, 0);
+  let reste = Math.max(0, Math.round(n)), garde = 0;
+  while (reste > 0 && garde++ < 800){
+    d.setDate(d.getDate() + 1);
+    if (estOuvre(d)) reste--;
+  }
+  return d;
+}
+/* Le n-ième jour ouvré à partir d'aujourd'hui, aujourd'hui comptant pour le premier. */
+function jourOuvreN(n){
+  let d = prochainOuvre(new Date());
+  for (let i = 1; i < Math.max(1, n); i++){
+    d.setDate(d.getDate() + 1);
+    d = prochainOuvre(d);
+  }
+  return d;
+}
+/* Nombre de jours ouvrés entre aujourd'hui et une date, aujourd'hui compris. */
+function ouvresJusqua(iso){
+  if (!iso) return 0;
+  const fin = new Date(iso + "T12:00:00");
+  if (isNaN(fin.getTime())) return 0;
+  const d = new Date(); d.setHours(12, 0, 0, 0);
+  let n = 0, garde = 0;
+  while (d <= fin && garde++ < 800){
+    if (estOuvre(d)) n++;
+    d.setDate(d.getDate() + 1);
+  }
+  return n;
+}
+function dateLongue(iso){
+  const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+  const MOIS  = ["janvier","février","mars","avril","mai","juin","juillet","août",
+                 "septembre","octobre","novembre","décembre"];
+  const d = new Date(iso + "T12:00:00");
+  if (isNaN(d.getTime())) return iso;
+  return JOURS[d.getDay()] + " " + d.getDate() + " " + MOIS[d.getMonth()];
+}
+
+/* --- la file d'attente de l'atelier --- */
+/* Toutes les fenêtres encore à fabriquer sur les bons acceptés. Un devis
+   n'occupe personne tant qu'il n'est pas confirmé, un bon livré est derrière nous. */
+function fileAttente(exclureId){
+  let n = 0;
+  (ORDERS || []).forEach(o => {
+    if (exclureId && o.id === exclureId) return;
+    if (o.status !== "sent") return;
+    const et = etatDe(o);
+    if (et === "livre" || et === "devis") return;
+    const dims = ordDims(o);
+    if (!dims.length) return;
+    const done = faites(o);
+    n += dims.filter(d => done.indexOf(d.key) < 0).length;
+  });
+  return n;
+}
+
+/* --- la date proposée --- */
+/* La file et ce bon se suivent dans le même atelier : on additionne les fenêtres,
+   on divise par la capacité, on compte en jours ouvrés, on ajoute la marge. */
+function suggereEch(nb, exclureId){
+  const cap = atlCap(), marge = atlMarge();
+  const F = fileAttente(exclureId);
+  const N = Math.max(0, nb || 0);
+  if (!N) return null;
+  const jFile = Math.ceil(F / cap);
+  const jTot  = Math.max(1, Math.ceil((F + N) / cap));
+  const fin   = jourOuvreN(jTot);
+  const ech   = marge > 0 ? ajouteOuvres(fin, marge) : fin;
+  return {iso: isoDe(ech), finIso: isoDe(fin), F:F, N:N, cap:cap, marge:marge,
+          jFile:jFile, jBon: jTot - jFile, jTot:jTot};
+}
+/* La cadence qu'il faudrait tenir pour une date choisie à la main. */
+function cadencePour(iso, nb, exclureId){
+  const marge = atlMarge();
+  const F = fileAttente(exclureId), N = Math.max(0, nb || 0);
+  const fin = new Date(iso + "T12:00:00");
+  if (isNaN(fin.getTime())) return null;
+  /* on retire la marge de pose pour retrouver la dernière journée d'atelier */
+  const d = new Date(fin.getTime());
+  let reste = marge, garde = 0;
+  while (reste > 0 && garde++ < 400){ d.setDate(d.getDate() - 1); if (estOuvre(d)) reste--; }
+  const jours = ouvresJusqua(isoDe(d));
+  return {jours:jours, besoin: F + N,
+          cadence: jours > 0 ? (F + N) / jours : Infinity};
+}
+
+function renderAtl(){
+  if (!adminAllowed()) return;
+  $("atlCap").value = String(ATL.cap);
+  $("atlMarge").value = String(ATL.marge);
+  $("atlFour").value = String(ATL.four);
+  Array.prototype.forEach.call($("atlDeduit").children,
+    b => b.setAttribute("aria-pressed", String(b.dataset.dd === (ATL.deduit || "sage"))));
+
+  const F = fileAttente();
+  const cap = atlCap();
+  const jours = Math.ceil(F / cap);
+  const libre = jours > 0 ? jourOuvreN(jours + 1) : prochainOuvre(new Date());
+  const tuile = (v, lab, cls) =>
+    '<div class="' + cls + (v ? "" : " nul") + '"><b>' + v + '</b><small>' + lab + '</small></div>';
+  $("atlStat").innerHTML =
+    tuile(F, "fenêtres en attente", "a") +
+    tuile(jours, "jours d'atelier", "i") +
+    '<div class="full v"><b style="font-size:19px">' + dateLongue(isoDe(libre)) +
+      '</b><small>premier jour libre pour une nouvelle commande</small></div>';
+
+  const fer = (ATL.feries || []).slice()
+    .filter(f => (f && f.d ? f.d : f) >= isoDe(new Date()))
+    .sort((a,b) => String(a.d || a).localeCompare(String(b.d || b)));
+  $("atlFeries").innerHTML = fer.length ? fer.map(f => {
+      const d = f && f.d ? f.d : f;
+      return '<div class="atfer">' +
+        '<span class="dd">' + esc(String(d).split("-").reverse().join("/")) + '</span>' +
+        '<span class="nn">' + esc((f && f.n) || "") + '</span>' +
+        '<button type="button" data-fer="' + esc(d) + '">Retirer</button>' +
+      '</div>';
+    }).join("")
+    : '<div class="atfer"><span class="nn">Aucun jour férié à venir dans la liste.</span></div>';
+
+  const ex = suggereEch(3);
+  $("atlHint").textContent = ex
+    ? "Exemple : une commande de 3 fenêtres saisie aujourd'hui serait promise au " +
+      dateLongue(ex.iso) + "."
+    : "";
+}
+
+function atlNum(id, cle, min, max, entier){
+  $(id).addEventListener("change", e => {
+    let v = parseFloat(String(e.target.value).replace(",", "."));
+    if (isNaN(v)) v = ATL_DEF[cle];
+    v = Math.max(min, Math.min(max, entier ? Math.round(v) : v));
+    ATL[cle] = v;
+    e.target.value = String(v);
+    atlSave(); renderAtl(); renderHome();
+    try { renderEchSug(); } catch(err){}
+    toast("Réglage enregistré");
+  });
+}
+atlNum("atlCap", "cap", 0.5, 50, false);
+atlNum("atlMarge", "marge", 0, 30, true);
+atlNum("atlFour", "four", 0, 60, true);
+
+$("atlDeduit").addEventListener("click", e => {
+  const b = e.target.closest("button[data-dd]");
+  if (!b) return;
+  ATL.deduit = b.dataset.dd;
+  atlSave(); renderAtl();
+});
+
+$("atlFeries").addEventListener("click", e => {
+  const b = e.target.closest("button[data-fer]");
+  if (!b) return;
+  const d = b.dataset.fer;
+  ATL.feries = (ATL.feries || []).filter(f => (f && f.d ? f.d : f) !== d);
+  atlSave(); renderAtl(); renderHome();
+  toast("Jour férié retiré");
+});
+$("atlFerAdd").addEventListener("click", () => {
+  const d = $("atlFerDate").value;
+  if (!d){ toast("Choisissez une date"); return; }
+  if (estFerie(d)){ toast("Cette date est déjà dans la liste"); return; }
+  ATL.feries = (ATL.feries || []).concat([{d:d, n:"Ajouté à la main"}]);
+  $("atlFerDate").value = "";
+  atlSave(); renderAtl(); renderHome();
+  toast("Jour férié ajouté");
+});
+
+$("tileAtl").addEventListener("click", () => {
+  if (!adminAllowed()) return;
+  renderAtl();
+  nav("atlSheet");
+  pullAtl().then(() => renderAtl());
 });
 
 /* ============ Rémunération : salaires et primes du mois ============ */
