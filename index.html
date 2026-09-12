@@ -1984,7 +1984,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 
     <div class="atbox">
       <h3>Ce qui compose la file</h3>
-      <p>Les fenêtres pas encore cochées « fabriquées », sur les bons acceptés. Un devis n'occupe personne, un bon livré est derrière nous.</p>
+      <p>Toutes les fenêtres pas encore cochées « fabriquées ». Seuls les devis sont écartés, tant que le client n'a pas confirmé. Un bon livré dont les fenêtres ne sont pas pointées reste compté.</p>
       <div id="atlFile"></div>
     </div>
 
@@ -5349,7 +5349,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "9.9";
+const APP_VERSION = "10.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8374,16 +8374,18 @@ function dateLongue(iso){
 }
 
 /* --- la file d'attente de l'atelier --- */
-/* Toutes les fenêtres encore à fabriquer sur les bons acceptés. Un devis
-   n'occupe personne tant qu'il n'est pas confirmé, un bon livré est derrière nous. */
+/* Toutes les fenêtres encore à fabriquer, c'est à dire toutes celles qui ne sont
+   pas cochées, quel que soit l'état du bon. Seul le devis est écarté : tant que
+   le client n'a pas confirmé, il n'occupe personne à l'atelier. Un bon passé en
+   livré dont les fenêtres ne sont pas cochées reste donc compté : ou bien le
+   travail n'est pas fait, ou bien il n'a pas été pointé, et les deux se voient. */
 function fileDetail(exclureId){
   const bons = [];
   let n = 0;
   (ORDERS || []).forEach(o => {
     if (exclureId && o.id === exclureId) return;
     if (o.status !== "sent") return;
-    const et = etatDe(o);
-    if (et === "livre" || et === "devis") return;
+    if (etatDe(o) === "devis") return;
     const dims = ordDims(o);
     if (!dims.length) return;
     const done = faites(o);
@@ -8461,7 +8463,7 @@ function renderAtl(){
         '<span class="s">' + esc(etatLabel(etatDe(b.o))) +
           (b.o.ech ? "  ·  échéance " + esc(String(b.o.ech).split("-").reverse().join("/")) : "  ·  sans échéance") +
           "  ·  " + esc(nomDe(b.o.author || "")) + '</span></div>').join("")
-    : '<div class="atfil"><span class="s">Rien en attente : toutes les fenêtres des bons en cours sont cochées fabriquées. Les devis et les bons livrés ne comptent pas.</span></div>';
+    : '<div class="atfil"><span class="s">Rien en attente : toutes les fenêtres sont cochées fabriquées. Seuls les devis ne comptent pas.</span></div>';
 
   const fer = (ATL.feries || []).slice()
     .filter(f => (f && f.d ? f.d : f) >= isoDe(new Date()))
