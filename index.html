@@ -679,8 +679,13 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 /* --- journal de fabrication --- */
 /* --- journal du jour : le résumé, puis qui a fait quoi --- */
 .lgstat{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px}
-.lgstat > div{padding:12px 8px; border-radius:12px; background:var(--card2);
+.lgstat > div, .lgstat > button{padding:12px 8px; border-radius:12px; background:var(--card2);
   border:1px solid var(--line); text-align:center}
+.lgstat > button{display:block; width:100%; font:inherit; cursor:pointer;
+  -webkit-tap-highlight-color:transparent}
+.lgstat > button:active{background:var(--accent-soft)}
+.lgstat > button.on{border-color:var(--accent); background:var(--accent-soft)}
+.lgstat > button.on small{color:var(--accent)}
 .lgstat b{display:block; font-family:"IBM Plex Mono",monospace; font-size:22px;
   font-weight:600; color:var(--ink); line-height:1.1}
 .lgstat small{display:block; font-family:"Archivo",sans-serif; font-size:9.5px;
@@ -689,7 +694,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .lgstat .v b{color:var(--ok)}
 .lgstat .i b{color:var(--info)}
 .lgstat .a b{color:var(--accent)}
-.lgstat > div.nul b{color:var(--line-strong)}
+.lgstat > div.nul b, .lgstat > button.nul b{color:var(--line-strong)}
 /* la carte d'un agent */
 .agcard{border:1px solid var(--line); border-radius:13px; background:var(--card);
   margin-bottom:11px; overflow:hidden}
@@ -709,6 +714,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .agh{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted)}
 .agdot{width:7px; height:7px; border-radius:50%; background:var(--muted); align-self:center}
 .agdot.bon{background:var(--accent)}
+.agdot.edit{background:var(--info)}
 .agdot.fab{background:var(--ok)}
 .agdot.tube{background:var(--info)}
 .agdot.etat{background:var(--warn)}
@@ -1100,14 +1106,15 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .srow .sref{flex:1; min-width:0}
 .srow .sref b{display:block; font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600}
 .srow .sref small{display:block; color:var(--muted); font-size:12px; margin-top:2px}
-.srow .sqty{font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap}
+.srow .sqty{font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right}
+.srow .sqty em{display:block; font-style:normal; font-size:11px; font-weight:500; color:var(--muted); margin-top:1px}
 .srow .sqty.ok{color:var(--ok)} .srow .sqty.low{color:var(--warn)} .srow .sqty.out{color:var(--muted)}
 .sumline{
   display:flex; justify-content:space-between; gap:10px; padding:13px 15px; border-radius:12px;
   background:var(--accent-soft); margin-bottom:14px;
 }
 .sumline span{font-family:"Archivo",sans-serif; font-weight:600; font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent)}
-.sumline b{font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; color:var(--accent)}
+.sumline b{text-align:right; font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; color:var(--accent)}
 .srcbox{margin-top:20px; padding:15px; border:1px solid var(--line); border-radius:12px; background:var(--card)}
 .srcbox h3{font-family:"Archivo",sans-serif; font-size:13.5px; font-weight:600; margin:0 0 6px}
 .srcbox p{margin:0 0 12px; font-size:12.5px; color:var(--muted); line-height:1.6}
@@ -1813,6 +1820,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <button type="button" data-d="pasage" aria-pressed="false">Pas encore SAGE</button>
       <button type="button" data-d="banque" aria-pressed="false">Virements à vérifier</button>
       <button type="button" data-d="note" aria-pressed="false">Avec note</button>
+      <button type="button" data-d="apresage" aria-pressed="false">Pièces faites, pas SAGE</button>
       <button type="button" data-d="hors" aria-pressed="false">Pas dans le tableau</button>
     </div>
     <div class="lgstat" id="docStat"></div>
@@ -2966,6 +2974,36 @@ function toast(msg){
 }
 
 /* ============ Storage of orders ============ */
+/* Ce qui a changé entre la version enregistrée et celle qu'on écrit.
+   Sert au journal : « bon modifié · prix au m², mesures ». */
+const CHAMPS_SUIVIS = [
+  ["nom","client"], ["tel","téléphone"], ["ice","ICE"], ["adresse","adresse"],
+  ["gps","lien GPS"], ["notes","remarque"], ["ech","échéance"],
+  ["type","type de store"], ["prix","prix au m²"], ["prixJN","prix au m² jour et nuit"],
+  ["pose","mode de pose"], ["posePrix","prix de la pose"], ["poseMode","calcul de la pose"],
+  ["remise","remise"], ["fact","facture"]
+];
+function diffBon(a, b){
+  const out = [];
+  const v = (o, k) => String(o[k] === undefined || o[k] === null ? "" : o[k]).trim();
+  CHAMPS_SUIVIS.forEach(c => { if (v(a, c[0]) !== v(b, c[0])) out.push(c[1]); });
+  const dim = o => JSON.stringify(((o && o.dims) || []).map(d =>
+    [d.l, d.h, d.type || "", d.ref || "", d.qty || "", d.note || ""]));
+  if (dim(a) !== dim(b)) out.push("mesures");
+  const rf = o => JSON.stringify(((o && o.refs) || []).slice().sort());
+  if (rf(a) !== rf(b)) out.push("tissus");
+  return out;
+}
+/* Une ligne de journal par modification réelle : un enregistrement qui ne
+   change rien n'écrit rien, sinon le journal se remplit de bruit. */
+function noteEdit(o, champs){
+  if (!o || !champs.length) return;
+  if (!Array.isArray(o.log)) o.log = [];
+  o.log.push({kind:"edit", at:Date.now(), by:(USER && USER.login) || "",
+              on:true, k:"edit:" + Date.now(), champs:champs});
+  if (o.log.length > 400) o.log = o.log.slice(-400);
+}
+
 function saveOrder(status){
   /* Dernier rempart : si un bon arrivé entre temps porte déjà ce numéro,
      on en prend un neuf avant d'écrire. */
@@ -2981,6 +3019,18 @@ function saveOrder(status){
   rec.date = new Date().toISOString();
   rec.author = rec.author || (USER ? USER.login : "");
   const i = all.findIndex(o => o.id === rec.id);
+  const avant = i >= 0 ? all[i] : null;
+  /* La date d'un bon est sa date de création : une correction faite trois
+     semaines plus tard ne doit pas le faire réapparaître comme neuf. */
+  if (avant && avant.date && avant.status === "sent") rec.date = avant.date;
+  /* Modification d'un bon déjà envoyé : on note qui a touché à quoi. */
+  if (avant && avant.status === "sent" && status === "sent"){
+    const ch = diffBon(avant, rec);
+    if (ch.length){
+      noteEdit(rec, ch);
+      S.log = rec.log;
+    }
+  }
   if (i >= 0) all[i] = rec; else all.unshift(rec);
   ORDERS = all.slice(0, 150);
   const ok = persistOrders();
@@ -4237,12 +4287,15 @@ function renderStock(){
   else                           list = list.slice();
 
   /* Chaque famille dans son unité : enrouleur en m², jour et nuit en ml. */
-  const totM2 = list.filter(stockEnM2).reduce((s,f) => s + stockM2(f), 0);
-  const totMl = list.filter(f => !stockEnM2(f)).reduce((s,f) => s + stockMl(f), 0);
+  const enr = list.filter(stockEnM2), jn = list.filter(f => !stockEnM2(f));
+  const totM2  = enr.reduce((s,f) => s + stockM2(f), 0);
+  const totM2l = enr.reduce((s,f) => s + stockMl(f), 0);   /* l'enrouleur en mètres */
+  const totMl  = jn.reduce((s,f) => s + stockMl(f), 0);
   $("stockSumLabel").textContent = list.length + (list.length > 1 ? " références" : " référence");
-  $("stockSum").textContent = (totM2 > 0 ? fr(totM2) + " m²" : "") +
-    (totM2 > 0 && totMl > 0 ? "  ·  " : "") + (totMl > 0 ? fr(totMl) + " ml" : "") ||
-    "0";
+  const parts = [];
+  if (totM2 > 0) parts.push("Enrouleur " + fr(totM2) + " m² / " + fr(totM2l) + " ml");
+  if (totMl > 0) parts.push("Jour et nuit " + fr(totMl) + " ml");
+  $("stockSum").textContent = parts.join("  ·  ") || "0";
 
   const box = $("stockList");
   box.innerHTML = "";
@@ -4258,7 +4311,7 @@ function renderStock(){
       '<small>' + (f.type === "JN" ? "Jour et nuit" : "Enrouleur") + '  ·  laize ' +
         (f.laize/100).toFixed(2).replace(".",",") + ' m  ·  ' +
         (stockEnM2(f) ? fr(stockMl(f)) + ' ml' : fr(stockM2(f)) + ' m²') + '</small></span>' +
-      '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : stockTxt(f)) + '</span>';
+      '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : stockDeux(f)) + '</span>';
     box.appendChild(d);
   });
   [...$("stockSort").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.s === stockSort)));
@@ -5003,6 +5056,13 @@ function stockM2(f){
 function stockTxt(f){
   return stockEnM2(f) ? fr(stockM2(f)) + " m²" : fr(stockMl(f)) + " ml";
 }
+/* L'enrouleur se compte en m² dans la feuille, mais l'atelier déroule des
+   mètres : les deux unités sont montrées, converties par la laize. */
+function stockDeux(f){
+  return stockEnM2(f)
+    ? fr(stockM2(f)) + " m²<em>" + fr(stockMl(f)) + " ml</em>"
+    : fr(stockMl(f)) + " ml<em>" + fr(stockM2(f)) + " m²</em>";
+}
 
 /* Chutes de stock utilisables pour un tissu donné.
    Une chute sans référence sert à tous les tissus du bon ; une chute attribuée
@@ -5023,7 +5083,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "9.3";
+const APP_VERSION = "9.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -7011,6 +7071,27 @@ function bonAVerifier(o){
   return paiements(o).some(p => !payVu(p));
 }
 
+/* Fenêtres réellement fabriquées d'un bon, séparées par famille. */
+function fabPar(o){
+  const done = faites(o);
+  const n = {ENR:0, JN:0};
+  ordDims(o).forEach(d => { if (done.indexOf(d.key) >= 0) n[d.t === "JN" ? "JN" : "ENR"]++; });
+  return n;
+}
+/* m² facturés d'un bon, par famille. Toute mesure sous 1 m compte pour 1 m,
+   c'est la règle de facturation, la même que sur le bon lui même. */
+function m2Par(o){
+  const n = {ENR:0, JN:0};
+  ordDims(o).forEach(d => { n[d.t === "JN" ? "JN" : "ENR"] += billed(d); });
+  return n;
+}
+/* Un devis n'est pas une créance : tant que le client n'a pas engagé la
+   commande, il n'y a rien à encaisser. */
+function resteDe(o){ return etatDe(o) === "devis" ? 0 : soldeDe(o); }
+
+/* Les filtres déclenchés par les tuiles du haut, qui n'ont pas de bouton. */
+const DOC_TUILES = ["banque", "fenr", "fjn", "m2enr", "m2jn"];
+
 function docDansPeriode(o){
   const d = new Date(o.date || 0);
   if (docD1 && d < new Date(docD1 + "T00:00:00")) return false;
@@ -7018,8 +7099,9 @@ function docDansPeriode(o){
   return true;
 }
 
-function docListe(){
+function docListe(sansDossier){
   const q = docQ.trim().toLowerCase();
+  const dos = sansDossier ? "tous" : docDossier;
   return (ORDERS || []).filter(o => {
     if (docFiltre === "mois"    && !ceMois(o)) return false;
     if (docFiltre === "annee"   && new Date(o.date || 0).getFullYear() !== new Date().getFullYear()) return false;
@@ -7027,13 +7109,20 @@ function docListe(){
     if (docFiltre === "paye"    && !paySolde(o)) return false;
     if (docFiltre === "impaye"  && paySolde(o)) return false;
     if (ETATS.some(e => e.k === docFiltre) && etatDe(o) !== docFiltre) return false;
-    if (docDossier === "fini"    && !estFini(o)) return false;
-    if (docDossier === "encours" && estFini(o)) return false;
-    if (docDossier === "sage"    && !estSage(o)) return false;
-    if (docDossier === "pasage"  && estSage(o)) return false;
-    if (docDossier === "banque"  && !bonAVerifier(o)) return false;
-    if (docDossier === "note"    && !String(o.dnote || "").trim()) return false;
-    if (docDossier === "hors"    && !sheetManquant(o)) return false;
+    if (dos === "fini"    && !estFini(o)) return false;
+    if (dos === "encours" && estFini(o)) return false;
+    if (dos === "sage"    && !estSage(o)) return false;
+    if (dos === "pasage"  && estSage(o)) return false;
+    if (dos === "banque"  && !bonAVerifier(o)) return false;
+    if (dos === "note"    && !String(o.dnote || "").trim()) return false;
+    if (dos === "hors"    && !sheetManquant(o)) return false;
+    /* la fiche de production est remplie, la saisie comptable ne l'est pas */
+    if (dos === "apresage" && !(piecesEtat(o).ok && !estSage(o))) return false;
+    if (dos === "fenr"  && !fabPar(o).ENR) return false;
+    if (dos === "fjn"   && !fabPar(o).JN) return false;
+    /* « vendu » veut dire engagé : un devis n'est pas encore une vente */
+    if (dos === "m2enr" && !(etatDe(o) !== "devis" && m2Par(o).ENR)) return false;
+    if (dos === "m2jn"  && !(etatDe(o) !== "devis" && m2Par(o).JN)) return false;
     if (!q) return true;
     return docFoin(o).indexOf(q.replace("×", "x")) >= 0;
   }).sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
@@ -7186,7 +7275,9 @@ function docCarte(o){
         pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + d.getFullYear() +
         (o.ech ? '  ·  <b>' + (o.pose === "Livraison" ? "Livraison" : "Pose") + " " +
                  esc(String(o.ech).split("-").reverse().join("/")) + '</b>' : '') +
-        (rst > 0.01 ? '  ·  reste <b>' + fr(rst, 2) + ' MAD</b>' : '  ·  <b>soldé</b>') +
+        (et === "devis"
+          ? '  ·  <b>devis, rien à encaisser</b>'
+          : (rst > 0.01 ? '  ·  reste <b>' + fr(rst, 2) + ' MAD</b>' : '  ·  <b>soldé</b>')) +
       '</span>' +
       (note && !ouvert
         ? '<span class="dkapercu">' +
@@ -7338,6 +7429,8 @@ function docCarte(o){
     const dd = new Date(e.at);
     const kind = e.kind || "fab";
     const quoi = kind === "etat" ? (e.lab || etatLabel(e.etat))
+               : kind === "edit" ? "bon modifié" +
+                   ((e.champs && e.champs.length) ? "  ·  " + e.champs.join(", ") : "")
                : kind === "tube" ? (e.on ? "découpe livrée " : "découpe décochée ") + (e.dim || "")
                : kind === "livr" ? "livraison " + (e.dim || "")
                : (e.on ? "fenêtre faite " : "fenêtre décochée ") + (e.dim || "");
@@ -7380,27 +7473,38 @@ function renderDoc(){
 
   const list = docListe();
   const du    = list.reduce((t,o) => t + duDe(o), 0);
-  const reste = list.reduce((t,o) => t + soldeDe(o), 0);
-  const aVerif = list.reduce((n,o) => n + paiements(o).filter(p => !payVu(p)).length, 0);
+  /* Un devis ne compte pas dans la créance : rien n'est encore engagé. */
+  const reste = list.reduce((t,o) => t + resteDe(o), 0);
   const ouverts = list.filter(o => !estFini(o)).length;
-  /* Combien de fenêtres sont sorties de l'atelier, séparées par famille. */
-  let fENR = 0, fJN = 0;
-  list.forEach(o => {
-    const done = faites(o);
-    ordDims(o).forEach(d => {
-      if (done.indexOf(d.key) < 0) return;
-      if (d.t === "JN") fJN++; else fENR++;
-    });
+
+  /* Les tuiles qui servent de filtre gardent leur compte complet, sinon le
+     chiffre changerait sous le doigt au moment où on appuie dessus. */
+  const surTuile = DOC_TUILES.indexOf(docDossier) >= 0;
+  const base = surTuile ? docListe(true) : list;
+  let fENR = 0, fJN = 0, m2E = 0, m2J = 0;
+  base.forEach(o => {
+    const f = fabPar(o);
+    fENR += f.ENR; fJN += f.JN;
+    if (etatDe(o) === "devis") return;      /* un devis n'est pas vendu */
+    const m = m2Par(o);
+    m2E += m.ENR; m2J += m.JN;
   });
-  const tuile = (v, lab, cls) =>
-    '<div class="' + cls + (v ? "" : " nul") + '"><b>' + v + '</b><small>' + lab + '</small></div>';
+  const aVerif = base.reduce((n,o) => n + paiements(o).filter(p => !payVu(p)).length, 0);
+
+  const tuile = (v, lab, cls, t) =>
+    (t ? '<button type="button" data-t="' + t + '" class="' + cls + (v ? "" : " nul") +
+         (docDossier === t ? " on" : "") + '">'
+       : '<div class="' + cls + (v ? "" : " nul") + '">') +
+    '<b>' + v + '</b><small>' + lab + '</small>' + (t ? '</button>' : '</div>');
   $("docStat").innerHTML =
-    tuile(fENR, "fenêtres enrouleur fabriquées", "v") +
-    tuile(fJN, "fenêtres jour et nuit fabriquées", "v") +
+    tuile(fENR, "fenêtres enrouleur fabriquées", "v", "fenr") +
+    tuile(fJN, "fenêtres jour et nuit fabriquées", "v", "fjn") +
+    tuile(fr(m2E, 2), "m² enrouleur vendus", "a", "m2enr") +
+    tuile(fr(m2J, 2), "m² jour et nuit vendus", "a", "m2jn") +
     tuile(list.length, "dossiers", "a") +
     tuile(ouverts, "en cours", "i") +
     tuile(fr(reste, 0), "reste à encaisser", "w") +
-    tuile(aVerif, "virements à vérifier", "w");
+    tuile(aVerif, "virements à vérifier", "w", "banque");
 
   const box = $("docList");
   if (!list.length){
@@ -7409,7 +7513,11 @@ function renderDoc(){
     return;
   }
   box.innerHTML = list.map(docCarte).join("");
+  const TLAB = {fenr:"fenêtres enrouleur fabriquées", fjn:"fenêtres jour et nuit fabriquées",
+                m2enr:"m² enrouleur vendus", m2jn:"m² jour et nuit vendus",
+                banque:"virements à vérifier", apresage:"pièces faites, pas encore SAGE"};
   $("docHint").textContent = list.length + " dossier" + (list.length > 1 ? "s" : "") +
+    (TLAB[docDossier] ? "  ·  filtre : " + TLAB[docDossier] + ", appuyez de nouveau pour tout revoir" : "") +
     "  ·  " + fr(du, 2) + " MAD au total" +
     (reste > 0.01 ? ",  " + fr(reste, 2) + " MAD à encaisser" : ",  tout est encaissé") +
     ".  Appuyez sur une fiche pour tout voir.";
@@ -7437,6 +7545,16 @@ $("docList").addEventListener("focusout", e => {
   /* On redessine après la sortie du champ, pas pendant : refaire le contenu
      au milieu de l'événement casse le navigateur en pleine main. */
   setTimeout(renderDoc, 0);
+});
+
+/* Une tuile est un filtre : un appui montre les bons comptés, un second
+   appui remet la liste entière. */
+$("docStat").addEventListener("click", e => {
+  const b = e.target.closest("button[data-t]");
+  if (!b) return;
+  docDossier = (docDossier === b.dataset.t) ? "tous" : b.dataset.t;
+  renderDoc();
+  $("docList").scrollIntoView({block:"start", behavior:"smooth"});
 });
 
 $("docSearch").addEventListener("input", e => { docQ = e.target.value; renderDoc(); });
@@ -8012,6 +8130,13 @@ function evenementsDuJour(iso){
                   sous:(o.nom || "Client sans nom") + "  ·  " + (o.num || ""), val:""});
         return;
       }
+      if (kind === "edit"){
+        out.push({at:e.at, by:e.by || "", type:"edit", titre:"Bon modifié",
+                  sous:(o.nom || "Client sans nom") + "  ·  " + (o.num || "") +
+                       ((e.champs && e.champs.length) ? "  ·  " + e.champs.join(", ") : ""),
+                  val:""});
+        return;
+      }
       if (!e.on) return;
       if (kind === "fab"){
         out.push({at:e.at, by:e.by || "", type:"fab", titre:e.dim || "",
@@ -8047,6 +8172,8 @@ function renderLog(){
   const ev = evenementsDuJour(logJour);
   const n = t => ev.filter(x => x.type === t).length;
   const nBons  = n("bon");
+  const nEdit  = n("edit");
+  const nPaie  = n("paie");
   const nFab   = n("fab");
   const nTube  = n("tube");
   const nLivre = ev.filter(x => x.type === "etat" && x.etat === "livre").length;
@@ -8064,9 +8191,11 @@ function renderLog(){
     (v > 1 ? plus : un) + '</small></div>';
   $("logStat").innerHTML =
     tuile(nBons,  "bon créé",             "bons créés",            "a") +
+    tuile(nEdit,  "bon modifié",          "bons modifiés",         "i") +
     tuile(nFab,   "fenêtre fabriquée",    "fenêtres fabriquées",   "v") +
     tuile(nTube,  "découpe au magasin 2", "découpes au magasin 2", "i") +
-    tuile(nLivre, "commande livrée",      "commandes livrées",     "a");
+    tuile(nLivre, "commande livrée",      "commandes livrées",     "a") +
+    tuile(nPaie,  "paiement encaissé",    "paiements encaissés",   "v");
   $("logCash").textContent = fr(cash, 2) + " MAD";
 
   Array.prototype.forEach.call($("logVue").children,
@@ -8075,8 +8204,8 @@ function renderLog(){
   const box = $("logList");
   if (!ev.length){
     box.innerHTML = '<div class="empty">Rien ce jour là.<br>' +
-      'Bons créés, fenêtres fabriquées, découpes livrées, commandes livrées et ' +
-      'paiements apparaissent ici dès qu\'un agent les enregistre.</div>';
+      'Bons créés, bons modifiés, fenêtres fabriquées, découpes livrées, ' +
+      'commandes livrées et paiements apparaissent ici dès qu\'un agent les enregistre.</div>';
     $("logHint").textContent = "";
     return;
   }
@@ -8108,9 +8237,10 @@ function vueAgent(ev){
     if (!par[k]) par[k] = [];
     par[k].push(x);
   });
-  const ORDRE = ["bon", "fab", "tube", "etat", "paie"];
+  const ORDRE = ["bon", "edit", "fab", "tube", "etat", "paie"];
   const LABS = {
     bon:  ["bon créé",           "bons créés"],
+    edit: ["bon modifié",        "bons modifiés"],
     fab:  ["fenêtre fabriquée",  "fenêtres fabriquées"],
     tube: ["découpe livrée",     "découpes livrées"],
     etat: ["changement d'état",  "changements d'état"],
