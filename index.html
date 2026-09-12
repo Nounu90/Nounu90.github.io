@@ -762,6 +762,13 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   color:var(--ink); font-family:"IBM Plex Mono",monospace; font-size:13px}
 .atadd button{border:1px solid var(--accent); border-radius:9px; background:var(--accent);
   color:#fff; font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; padding:0 16px}
+.atfil{display:grid; grid-template-columns:1fr auto; gap:3px 10px; padding:9px 0;
+  border-top:1px solid var(--line)}
+.atfil:first-child{border-top:0}
+.atfil .n{font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:600; color:var(--ink)}
+.atfil .v{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600; color:var(--warn);
+  white-space:nowrap}
+.atfil .s{grid-column:1 / -1; font-size:11.5px; color:var(--muted); line-height:1.45}
 
 /* --- journal de fabrication --- */
 /* --- journal du jour : le résumé, puis qui a fait quoi --- */
@@ -1974,6 +1981,12 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
     <div class="lgstat" id="atlStat"></div>
+
+    <div class="atbox">
+      <h3>Ce qui compose la file</h3>
+      <p>Les fenêtres pas encore cochées « fabriquées », sur les bons acceptés. Un devis n'occupe personne, un bon livré est derrière nous.</p>
+      <div id="atlFile"></div>
+    </div>
 
     <div class="atbox">
       <h3>Le rythme</h3>
@@ -5336,7 +5349,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "9.8";
+const APP_VERSION = "9.9";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8363,7 +8376,8 @@ function dateLongue(iso){
 /* --- la file d'attente de l'atelier --- */
 /* Toutes les fenêtres encore à fabriquer sur les bons acceptés. Un devis
    n'occupe personne tant qu'il n'est pas confirmé, un bon livré est derrière nous. */
-function fileAttente(exclureId){
+function fileDetail(exclureId){
+  const bons = [];
   let n = 0;
   (ORDERS || []).forEach(o => {
     if (exclureId && o.id === exclureId) return;
@@ -8373,10 +8387,19 @@ function fileAttente(exclureId){
     const dims = ordDims(o);
     if (!dims.length) return;
     const done = faites(o);
-    n += dims.filter(d => done.indexOf(d.key) < 0).length;
+    const reste = dims.filter(d => done.indexOf(d.key) < 0).length;
+    if (!reste) return;
+    n += reste;
+    bons.push({o:o, reste:reste, tot:dims.length});
   });
-  return n;
+  bons.sort((a,b) => {
+    const ta = a.o.ech ? new Date(a.o.ech + "T12:00:00").getTime() : Infinity;
+    const tb = b.o.ech ? new Date(b.o.ech + "T12:00:00").getTime() : Infinity;
+    return ta - tb || new Date(a.o.date || 0) - new Date(b.o.date || 0);
+  });
+  return {total:n, bons:bons};
 }
+function fileAttente(exclureId){ return fileDetail(exclureId).total; }
 
 /* --- la date proposée --- */
 /* La file et ce bon se suivent dans le même atelier : on additionne les fenêtres,
@@ -8416,7 +8439,8 @@ function renderAtl(){
   Array.prototype.forEach.call($("atlDeduit").children,
     b => b.setAttribute("aria-pressed", String(b.dataset.dd === (ATL.deduit || "sage"))));
 
-  const F = fileAttente();
+  const det = fileDetail();
+  const F = det.total;
   const cap = atlCap();
   const jours = Math.ceil(F / cap);
   const libre = jours > 0 ? jourOuvreN(jours + 1) : prochainOuvre(new Date());
@@ -8427,6 +8451,17 @@ function renderAtl(){
     tuile(jours, "jours d'atelier", "i") +
     '<div class="full v"><b style="font-size:19px">' + dateLongue(isoDe(libre)) +
       '</b><small>premier jour libre pour une nouvelle commande</small></div>';
+
+  /* Le détail, pour que le compteur s'explique de lui même. */
+  $("atlFile").innerHTML = det.bons.length
+    ? det.bons.map(b =>
+        '<div class="atfil"><span class="n">' + esc(b.o.num || "") + '  ·  ' +
+          esc(b.o.nom || "Client sans nom") + '</span>' +
+        '<span class="v">' + b.reste + ' / ' + b.tot + '</span>' +
+        '<span class="s">' + esc(etatLabel(etatDe(b.o))) +
+          (b.o.ech ? "  ·  échéance " + esc(String(b.o.ech).split("-").reverse().join("/")) : "  ·  sans échéance") +
+          "  ·  " + esc(nomDe(b.o.author || "")) + '</span></div>').join("")
+    : '<div class="atfil"><span class="s">Rien en attente : toutes les fenêtres des bons en cours sont cochées fabriquées. Les devis et les bons livrés ne comptent pas.</span></div>';
 
   const fer = (ATL.feries || []).slice()
     .filter(f => (f && f.d ? f.d : f) >= isoDe(new Date()))
@@ -8493,7 +8528,9 @@ $("tileAtl").addEventListener("click", () => {
   if (!adminAllowed()) return;
   renderAtl();
   nav("atlSheet");
-  pullAtl().then(() => renderAtl());
+  /* La file se compte sur les bons de toute l'équipe : on va les rechercher,
+     sinon la page raisonne sur une copie locale en retard. */
+  pullAtl().then(() => pullBons()).then(() => renderAtl());
 });
 
 /* ============ Rémunération : salaires et primes du mois ============ */
