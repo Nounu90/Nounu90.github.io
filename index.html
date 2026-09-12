@@ -1999,7 +1999,13 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 
     <div class="atbox">
       <h3>Ce qui compose la file</h3>
-      <p>Les fenêtres pas encore cochées par Soufiane dans le plan de coupe, sur les bons <b>En production</b> uniquement. Un devis n'est pas confirmé, un bon Prêt ou Livré est sorti de l'atelier : aucun des trois ne prend de capacité.</p>
+      <p>Les fenêtres pas encore cochées par Soufiane dans le plan de coupe. Choisissez les états qui occupent vraiment l'atelier : le compte et la liste se refont aussitôt.</p>
+      <div class="filters" id="atlEtats">
+        <button type="button" data-e="devis">Devis</button>
+        <button type="button" data-e="production">En production</button>
+        <button type="button" data-e="pret">Prêt</button>
+        <button type="button" data-e="livre">Livré</button>
+      </div>
       <div id="atlFile"></div>
     </div>
 
@@ -4206,6 +4212,8 @@ async function pullBons(){
         const a = r.data;
         if (a && typeof a === "object" && a.cap !== undefined){
           ATL = Object.assign({}, ATL_DEF, a);
+          if (!Array.isArray(ATL.feries)) ATL.feries = FERIES_DEF.slice();
+          if (!ATL.etats || typeof ATL.etats !== "object") ATL.etats = Object.assign({}, ATL_ETATS_DEF);
           LS.set("mst_atl", ATL);
         }
         return;
@@ -5425,7 +5433,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "10.2";
+const APP_VERSION = "10.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8372,9 +8380,16 @@ const FERIES_DEF = [
   {d:"2027-11-06", n:"Marche Verte"},
   {d:"2027-11-18", n:"Fête de l'Indépendance"}
 ];
-const ATL_DEF = {cap:3, marge:2, four:3, deduit:"sage", feries:FERIES_DEF.slice(), v:1};
+/* Quels états occupent réellement l'atelier. C'est un réglage et non une règle
+   écrite dans le code : selon la façon dont l'équipe fait vivre les états, un
+   bon « Prêt » peut encore avoir des fenêtres à monter, ou non. */
+const ATL_ETATS_DEF = {devis:false, production:true, pret:true, livre:false};
+const ATL_DEF = {cap:3, marge:2, four:3, deduit:"sage", feries:FERIES_DEF.slice(),
+                 etats:Object.assign({}, ATL_ETATS_DEF), v:1};
 let ATL = Object.assign({}, ATL_DEF, LS.get("mst_atl", {}));
 if (!Array.isArray(ATL.feries)) ATL.feries = FERIES_DEF.slice();
+if (!ATL.etats || typeof ATL.etats !== "object") ATL.etats = Object.assign({}, ATL_ETATS_DEF);
+function etatCompte(k){ return !!(ATL.etats || ATL_ETATS_DEF)[k]; }
 
 function atlCap(){   const v = parseFloat(ATL.cap);   return v > 0 ? v : 3; }
 function atlMarge(){ const v = parseInt(ATL.marge, 10); return v >= 0 ? v : 2; }
@@ -8403,6 +8418,7 @@ async function pullAtl(){
     if (d && typeof d === "object" && d.cap !== undefined){
       ATL = Object.assign({}, ATL_DEF, d);
       if (!Array.isArray(ATL.feries)) ATL.feries = FERIES_DEF.slice();
+      if (!ATL.etats || typeof ATL.etats !== "object") ATL.etats = Object.assign({}, ATL_ETATS_DEF);
       LS.set("mst_atl", ATL);
       return true;
     }
@@ -8474,16 +8490,16 @@ function dateLongue(iso){
 
 /* --- la file d'attente de l'atelier --- */
 /* La file, c'est le travail réellement sur l'établi : les fenêtres pas encore
-   cochées par Soufiane dans le plan de coupe, sur les bons « En production »
-   seulement. Un devis n'est pas confirmé, un bon Prêt ou Livré est sorti de
-   l'atelier : aucun des trois n'occupe la capacité des jours qui viennent. */
+   cochées par Soufiane dans le plan de coupe. Les états qui comptent se règlent
+   dans la page Atelier, parce que seule la direction sait comment l'équipe fait
+   vivre ces états au quotidien. */
 function fileDetail(exclureId){
   const bons = [];
   let n = 0;
   (ORDERS || []).forEach(o => {
     if (exclureId && o.id === exclureId) return;
     if (o.status !== "sent") return;
-    if (etatDe(o) !== "production") return;
+    if (!etatCompte(etatDe(o))) return;
     const dims = ordDims(o);
     if (!dims.length) return;
     const done = faites(o);
@@ -8609,6 +8625,8 @@ function renderAtl(){
   $("atlFour").value = String(ATL.four);
   Array.prototype.forEach.call($("atlDeduit").children,
     b => b.setAttribute("aria-pressed", String(b.dataset.dd === (ATL.deduit || "sage"))));
+  Array.prototype.forEach.call($("atlEtats").children,
+    b => b.setAttribute("aria-pressed", String(etatCompte(b.dataset.e))));
 
   const det = fileDetail();
   const F = det.total;
@@ -8632,7 +8650,7 @@ function renderAtl(){
         '<span class="s">' + esc(etatLabel(etatDe(b.o))) +
           (b.o.ech ? "  ·  échéance " + esc(String(b.o.ech).split("-").reverse().join("/")) : "  ·  sans échéance") +
           "  ·  " + esc(nomDe(b.o.author || "")) + '</span></div>').join("")
-    : '<div class="atfil"><span class="s">Rien sur l\'établi : aucun bon en production n\'attend de fenêtre. Un bon neuf entre dans la file au moment où il passe en production.</span></div>';
+    : '<div class="atfil"><span class="s">Rien sur l\'établi avec les états cochés ci dessus. Si des fenêtres vous semblent manquer, c\'est que leurs bons portent un état décoché.</span></div>';
 
   const fer = (ATL.feries || []).slice()
     .filter(f => (f && f.d ? f.d : f) >= isoDe(new Date()))
@@ -8669,6 +8687,16 @@ function atlNum(id, cle, min, max, entier){
 atlNum("atlCap", "cap", 0.5, 50, false);
 atlNum("atlMarge", "marge", 0, 30, true);
 atlNum("atlFour", "four", 0, 60, true);
+
+$("atlEtats").addEventListener("click", e => {
+  const b = e.target.closest("button[data-e]");
+  if (!b) return;
+  const k = b.dataset.e;
+  if (!ATL.etats) ATL.etats = Object.assign({}, ATL_ETATS_DEF);
+  ATL.etats[k] = !ATL.etats[k];
+  atlSave(); renderAtl(); renderHome();
+  toast(etatLabel(k) + (ATL.etats[k] ? " compte dans la file" : " ne compte plus"));
+});
 
 $("atlDeduit").addEventListener("click", e => {
   const b = e.target.closest("button[data-dd]");
