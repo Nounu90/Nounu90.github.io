@@ -1999,7 +1999,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 
     <div class="atbox">
       <h3>Ce qui compose la file</h3>
-      <p>Toutes les fenêtres pas encore cochées « fabriquées ». Seuls les devis sont écartés, tant que le client n'a pas confirmé. Un bon livré dont les fenêtres ne sont pas pointées reste compté.</p>
+      <p>Les fenêtres pas encore cochées par Soufiane dans le plan de coupe, sur les bons <b>En production</b> uniquement. Un devis n'est pas confirmé, un bon Prêt ou Livré est sorti de l'atelier : aucun des trois ne prend de capacité.</p>
       <div id="atlFile"></div>
     </div>
 
@@ -2981,7 +2981,7 @@ function renderEchBar(){
     bar.className = "echbar";
     bar.innerHTML = '<span class="t">Échéance</span>' +
       '<span class="d">Fixée au passage en production</span>' +
-      '<span class="x">Tant que ce bon est un devis, il n\'occupe pas l\'atelier et ne porte pas de date.' +
+      '<span class="x">Tant que ce bon est un devis, il n\'occupe pas l\'atelier, n\'entre pas dans la file et ne porte pas de date. Passez le en production pour lancer le compte à rebours.' +
       (mq.length ? ' Attention, ' + mq.map(m => '<b>' + esc(m.ref) + '</b>').join(", ") +
         (mq.length > 1 ? " manquent" : " manque") + ' en stock.' : "") +
       '</span>';
@@ -5425,7 +5425,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "10.1";
+const APP_VERSION = "10.2";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8473,18 +8473,17 @@ function dateLongue(iso){
 }
 
 /* --- la file d'attente de l'atelier --- */
-/* Toutes les fenêtres encore à fabriquer, c'est à dire toutes celles qui ne sont
-   pas cochées, quel que soit l'état du bon. Seul le devis est écarté : tant que
-   le client n'a pas confirmé, il n'occupe personne à l'atelier. Un bon passé en
-   livré dont les fenêtres ne sont pas cochées reste donc compté : ou bien le
-   travail n'est pas fait, ou bien il n'a pas été pointé, et les deux se voient. */
+/* La file, c'est le travail réellement sur l'établi : les fenêtres pas encore
+   cochées par Soufiane dans le plan de coupe, sur les bons « En production »
+   seulement. Un devis n'est pas confirmé, un bon Prêt ou Livré est sorti de
+   l'atelier : aucun des trois n'occupe la capacité des jours qui viennent. */
 function fileDetail(exclureId){
   const bons = [];
   let n = 0;
   (ORDERS || []).forEach(o => {
     if (exclureId && o.id === exclureId) return;
     if (o.status !== "sent") return;
-    if (etatDe(o) === "devis") return;
+    if (etatDe(o) !== "production") return;
     const dims = ordDims(o);
     if (!dims.length) return;
     const done = faites(o);
@@ -8633,7 +8632,7 @@ function renderAtl(){
         '<span class="s">' + esc(etatLabel(etatDe(b.o))) +
           (b.o.ech ? "  ·  échéance " + esc(String(b.o.ech).split("-").reverse().join("/")) : "  ·  sans échéance") +
           "  ·  " + esc(nomDe(b.o.author || "")) + '</span></div>').join("")
-    : '<div class="atfil"><span class="s">Rien en attente : toutes les fenêtres sont cochées fabriquées. Seuls les devis ne comptent pas.</span></div>';
+    : '<div class="atfil"><span class="s">Rien sur l\'établi : aucun bon en production n\'attend de fenêtre. Un bon neuf entre dans la file au moment où il passe en production.</span></div>';
 
   const fer = (ATL.feries || []).slice()
     .filter(f => (f && f.d ? f.d : f) >= isoDe(new Date()))
