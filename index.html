@@ -151,6 +151,15 @@ select{appearance:none; -webkit-appearance:none}
   background:var(--card2); border:1px solid var(--line); border-radius:10px; text-align:left;
 }
 .rowfab b{flex:1; font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:600}
+/* Le stock du tissu, juste sous la couleur choisie pour cette fenêtre. */
+.fabnote{
+  display:flex; gap:7px; align-items:flex-start; margin:-5px 0 9px 34px; width:calc(100% - 34px);
+  padding:7px 10px; border-radius:9px; font-size:11.5px; line-height:1.4;
+  background:var(--warn-soft,#FAEFDD); color:var(--warn);
+}
+.fabnote.stop{background:var(--accent-soft); color:var(--accent)}
+.fabnote b{font-family:"IBM Plex Mono",monospace; font-weight:600}
+.fabnote svg{flex:none; margin-top:1px}
 .rowfab b.ph{font-family:"IBM Plex Sans",sans-serif; font-weight:400; color:var(--muted)}
 .rowfab svg{flex:none; color:var(--muted)}
 .seg button .sub{display:block; font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:500; letter-spacing:.06em; margin-top:3px; opacity:.8}
@@ -2598,7 +2607,8 @@ function renderRows(){
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="7" cy="6" rx="3" ry="3"/><path d="M7 3h10a3 3 0 010 6H7M7 9v12M17 9v9a3 3 0 01-3 3H7"/></svg>' +
             '<b class="' + (rowRef(i) ? "" : "ph") + '">' + (rowRef(i) || "Choisir la couleur") + '</b>' +
             '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>' +
-          '</button>'
+          '</button>' +
+          '<div class="fabnote" data-fabnote="' + i + '" hidden></div>'
         : "") +
       '<div class="rem">' +
         '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h9"/></svg>' +
@@ -2610,6 +2620,39 @@ function renderRows(){
 }
 
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+
+/* Ce que le stock dit du tissu d'UNE fenêtre, en une ligne. Le besoin est
+   celui du bon entier pour cette référence : deux fenêtres de la même couleur
+   puisent dans le même rouleau, la phrase est donc la même sous les deux. */
+function noteFabLigne(i){
+  const f = rowFab(i);
+  if (!f) return null;
+  const ml = (mlByRef()[f.ref] || 0);
+  if (!ml) return null;
+  const dm = stockMl(f);
+  if (f.dispo < 1)
+    return {stop:true, txt:"<b>" + f.ref + "</b> est en rupture au dépôt : à commander au fournisseur."};
+  if (dm < ml)
+    return {stop:true, txt:"<b>" + f.ref + "</b> : il manque <b>" + fr(ml - dm) +
+            " ml</b> pour ce bon (stock " + fr(dm) + " ml, besoin " + fr(ml) + " ml)."};
+  if (dm - ml < 10)
+    return {stop:false, txt:"Après ce bon il ne restera que <b>" + fr(dm - ml) + " ml</b> de " + f.ref + "."};
+  return null;
+}
+/* Toutes les lignes d'un coup : une mesure tapée sur une ligne change le
+   besoin des autres fenêtres de la même couleur. */
+function updateFabNotes(){
+  if (!rowsEl) return;
+  rowsEl.querySelectorAll("[data-fabnote]").forEach(el => {
+    const i = +el.dataset.fabnote;
+    let n = null;
+    try { n = noteFabLigne(i); } catch(e){}
+    if (!n){ el.hidden = true; el.innerHTML = ""; return; }
+    el.hidden = false;
+    el.className = "fabnote" + (n.stop ? " stop" : "");
+    el.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg><span>' + n.txt + '</span>';
+  });
+}
 
 function updateNote(i){
   const wrap = rowsEl.querySelector('[data-row="' + i + '"]');
@@ -2696,6 +2739,7 @@ function renderRefs(){
     al.innerHTML = "";
     alertesTissu().forEach(a => poseAlerte(al, a.txt, a.stop, true));
   }
+  updateFabNotes();
 }
 
 function pickFamily(){
@@ -5665,7 +5709,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "11.5";
+const APP_VERSION = "11.6";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
