@@ -726,8 +726,10 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:6px;
   background:var(--card2); color:var(--muted); border:1px solid var(--line)}
 .pketat.production{background:var(--warn-soft,#FAEFDD); color:var(--warn); border-color:transparent}
+.hprog.br{background:var(--accent-soft); color:var(--accent)}
 .pketat.pret{background:var(--info-soft); color:var(--info); border-color:transparent}
 .pketat.livre{background:var(--ok-soft); color:var(--ok); border-color:transparent}
+.pketat.brouillon{background:var(--accent-soft); color:var(--accent); border-color:transparent}
 
 /* --- l'échéance, en bas du bon --- */
 .echbar{margin-top:11px; border:1px solid var(--line); border-radius:12px;
@@ -791,6 +793,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .atfil .v{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600; color:var(--warn);
   white-space:nowrap}
 .atfil .v.part{color:var(--info)}
+.atfil .v.nul{color:var(--line-strong)}
 .atfil.hors{opacity:.55}
 .atfil .s .pketat{margin-right:4px}
 .atsep{margin-top:14px; padding:8px 0 2px; border-top:2px solid var(--line);
@@ -2013,7 +2016,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 
     <div class="atbox">
       <h3>Ce qui compose la file</h3>
-      <p>Tous les bons qui ne sont pas entièrement fabriqués, quel que soit leur état. Les découpes de tube ne comptent pas : seules les fenêtres cochées par Soufiane font foi. Le chiffre à droite se lit <b>fabriquées sur total</b>, l'échéance la plus proche en tête.</p>
+      <p>Tous les bons qui ne sont pas entièrement fabriqués, sauf les devis. Les découpes de tube ne comptent pas : seules les fenêtres cochées par Soufiane font foi. Le chiffre à droite se lit <b>fabriquées sur total</b>, l'échéance la plus proche en tête.</p>
       <div id="atlFile"></div>
     </div>
 
@@ -5133,8 +5136,12 @@ function renderHist(){
             echSuffix(o) +
             '<span class="hnum">' + o.num + '</span>' +
           '</span>' +
-          (av.tube.tot || av.fen.tot
+          ((o.status !== "sent" || av.tube.tot || av.fen.tot || !ordDims(o).length)
             ? '<span class="hl2" style="margin-top:6px">' +
+              (o.status !== "sent"
+                 ? '<span class="hprog br">brouillon, jamais envoyé</span>  ' : '') +
+              (!ordDims(o).length
+                 ? '<span class="hprog br">aucune mesure exploitable</span>  ' : '') +
               (av.tube.tot ? '<span class="hprog ' + (av.tube.fait === av.tube.tot ? "ok" : "att") + '">' +
                  'tubes ' + av.tube.fait + '/' + av.tube.tot + '</span>  ' : '') +
               (av.fen.tot ? '<span class="hprog ' + (av.fen.fait === av.fen.tot ? "ok" : "att") + '">' +
@@ -5441,7 +5448,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "10.5";
+const APP_VERSION = "10.8";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6826,6 +6833,7 @@ function dessinePick(){
     btn.innerHTML =
       '<span class="hmain"><span class="hl1"><b>' + esc(o.nom || "Client sans nom") + '</b>' +
       '<span class="pketat ' + etatDe(o) + '">' + etatLabel(etatDe(o)) + '</span>' +
+      (o.status !== "sent" ? '<span class="pketat brouillon">Brouillon</span>' : '') +
       (et ? '<span class="badge ' + (et.ok ? "ok" : "warn") + '">' + et.txt + '</span>'
           : '<span class="badge ' + (o.status === "sent" ? "ok" : "") + '">' +
             (o.status === "sent" ? "Envoyé" : "Brouillon") + '</span>') +
@@ -7666,6 +7674,8 @@ function docCarte(o){
         (nv ? chip(nv + " à vérifier", "att") : "") +
         (pe.tot ? chip(pe.ok ? "pièces ok" : "pièces à remplir", pe.ok ? "ok" : "acc") : "") +
         (note ? chip("note", "inf") : "") +
+        (o.status !== "sent" ? chip("brouillon", "acc") : "") +
+        (!ordDims(o).length ? chip("sans mesure", "acc") : "") +
         (sheetManquant(o) ? chip("pas au tableau", "att") : "") +
         (av.tube.tot ? chip("tubes " + av.tube.fait + "/" + av.tube.tot,
                             av.tube.fait === av.tube.tot ? "ok" : "att") : "") +
@@ -8515,22 +8525,41 @@ function dateLongue(iso){
 
 /* --- la file d'attente de l'atelier --- */
 /* La file d'atelier : tout bon enregistré qui n'est pas entièrement fabriqué,
-   quel que soit son état. Aucun filtre, aucun réglage : ce qui reste à monter
-   reste à monter, qu'on l'appelle devis, en production, prêt ou livré.
+   sauf les devis, qui ne sont pas des commandes confirmées. En production, Prêt
+   et Livré comptent tous : tant qu'une fenêtre n'est pas montée, elle est à faire.
    Seules les fenêtres décident : une découpe de tube cochée ne veut pas dire que
-   la fenêtre est montée, on ne regarde donc jamais les tubes. */
+   la fenêtre est montée, on ne regarde donc jamais les tubes.
+   Un bon écarté n'est jamais caché : il descend dans la liste des écartés avec
+   sa raison, pour qu'aucune absence ne reste inexpliquée. */
 function fileDetail(exclureId){
-  const bons = [];
+  const bons = [], ecartes = [];
   let n = 0;
   (ORDERS || []).forEach(o => {
     if (exclureId && o.id === exclureId) return;
-    if (o.status !== "sent") return;
+    if (o.status !== "sent"){
+      ecartes.push({o:o, pourquoi:"brouillon, jamais envoyé"});
+      return;
+    }
     const dims = ordDims(o);
-    if (!dims.length) return;
+    if (!dims.length){
+      const lignes = ((o && o.dims) || []).length;
+      ecartes.push({o:o, pourquoi: lignes
+        ? lignes + " ligne" + (lignes > 1 ? "s" : "") + " de mesure sans largeur ou sans hauteur"
+        : "aucune ligne de mesure"});
+      return;
+    }
     const done = faites(o);
     const fait = dims.filter(d => done.indexOf(d.key) >= 0).length;
     const reste = dims.length - fait;
-    if (!reste) return;                       /* tout est monté, plus rien à faire */
+    if (!reste){
+      ecartes.push({o:o, pourquoi:"les " + dims.length + " fenêtres sont cochées fabriquées"});
+      return;
+    }
+    if (etatDe(o) === "devis"){
+      ecartes.push({o:o, pourquoi:"devis non confirmé  ·  " + reste + " fenêtre" +
+                    (reste > 1 ? "s" : "") + " si la commande se fait"});
+      return;
+    }
     n += reste;
     bons.push({o:o, reste:reste, fait:fait, tot:dims.length});
   });
@@ -8540,7 +8569,8 @@ function fileDetail(exclureId){
     const tb = b.o.ech ? new Date(b.o.ech + "T12:00:00").getTime() : Infinity;
     return ta - tb || new Date(a.o.date || 0) - new Date(b.o.date || 0);
   });
-  return {total:n, bons:bons};
+  ecartes.sort((a,b) => new Date(b.o.date || 0) - new Date(a.o.date || 0));
+  return {total:n, bons:bons, ecartes:ecartes};
 }
 function fileAttente(exclureId){ return fileDetail(exclureId).total; }
 
@@ -8678,9 +8708,27 @@ function renderAtl(){
       (b.o.ech ? "  ·  échéance " + esc(String(b.o.ech).split("-").reverse().join("/")) : "  ·  sans échéance") +
       "  ·  " + esc(nomDe(b.o.author || "")) + '</span></div>';
 
-  $("atlFile").innerHTML = det.bons.length
+  let h = det.bons.length
     ? det.bons.map(b => ligne(b, false)).join("")
-    : '<div class="atfil"><span class="s">Tous les bons enregistrés sont entièrement fabriqués : aucune fenêtre ne reste à monter.</span></div>';
+    : '<div class="atfil"><span class="s">Aucun bon n\'a de fenêtre à monter.</span></div>';
+
+  /* Ce que la file a laissé de côté, et la raison exacte. Sans cela, un bon
+     absent reste un mystère qu'on ne peut pas expliquer à distance. */
+  const ec = det.ecartes || [];
+  if (ec.length){
+    h += '<div class="atsep">' + ec.length + ' bon' + (ec.length > 1 ? "s" : "") +
+         ' écarté' + (ec.length > 1 ? "s" : "") + ' de la file</div>';
+    h += ec.slice(0, 40).map(x =>
+      '<div class="atfil hors"><span class="n">' + esc(x.o.num || "(sans numéro)") + '  ·  ' +
+        esc(x.o.nom || "Client sans nom") + '</span>' +
+      '<span class="v nul">—</span>' +
+      '<span class="s"><b class="pketat ' + etatDe(x.o) + '">' + etatLabel(etatDe(x.o)) + '</b>  ' +
+        esc(x.pourquoi) + '</span></div>').join("");
+    if (ec.length > 40) h += '<div class="atfil"><span class="s">et ' + (ec.length - 40) + ' autres.</span></div>';
+  }
+  h += '<div class="atfil"><span class="s"><b>' + (ORDERS || []).length +
+       '</b> bons chargés sur ce téléphone au total.</span></div>';
+  $("atlFile").innerHTML = h;
 
   const fer = (ATL.feries || []).slice()
     .filter(f => (f && f.d ? f.d : f) >= isoDe(new Date()))
