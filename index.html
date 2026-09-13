@@ -168,10 +168,10 @@ select{appearance:none; -webkit-appearance:none}
 /* ---------- dimensions ---------- */
 .dim-head{display:grid; grid-template-columns:26px 1fr 14px 1fr 34px; gap:8px; align-items:center; padding:0 2px 6px}
 .dim-head span{font-family:"Archivo",sans-serif; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600}
-.row{display:grid; grid-template-columns:24px 1fr 12px 1fr 56px 32px; gap:7px; align-items:center; margin-bottom:8px}
+.row{display:grid; grid-template-columns:24px 1fr 12px 1fr 74px 32px; gap:7px; align-items:center; margin-bottom:8px}
 .qty{display:flex; align-items:center; gap:2px; background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:0 5px 0 6px; height:38px}
 .qty > span{flex:none; font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted)}
-.qty input{width:100%; min-width:0; border:0; background:none; padding:0; text-align:center; font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; color:var(--ink)}
+.qty input{width:100%; min-width:44px; border:0; background:none; padding:0; text-align:center; font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; color:var(--ink)}
 .qty input::placeholder{color:var(--muted); opacity:.6; font-weight:500}
 .qty:focus-within{border-color:var(--accent); background:var(--card)}
 .qty.on{background:var(--accent-soft); border-color:transparent}
@@ -1453,8 +1453,9 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 6.5C17 4.6 14.8 3.5 12 3.5S7 4.6 7 6.5s2.2 2.9 5 3.5 5 1.6 5 3.5-2.2 3-5 3-5-1.1-5-3"/></svg>
         <input id="posePrix" inputmode="decimal" placeholder="Prix de la pose" aria-label="Prix de la pose ou de la livraison">
-        <span class="fsuf">MAD</span>
+        <span class="fsuf">MAD HT</span>
       </div>
+      <p class="hint" id="poseHt" style="margin-top:6px">Le prix de la pose se saisit toujours hors taxe.</p>
       <div class="seg" id="segPoseMode" style="margin-top:9px">
         <button type="button" data-pm="forfait" aria-pressed="true">Forfait</button>
         <button type="button" data-pm="fenetre" aria-pressed="false">Par fenêtre</button>
@@ -2664,13 +2665,17 @@ function updateNote(i){
   const wide = f && l > f.laize;
   const tall = h > MAXH;
   note.className = "row-note" + (wide || tall ? " alert" : "");
+  /* Le tissu se déroule à la hauteur du store : le métrage d'une ligne, c'est
+     sa hauteur multipliée par le nombre de fenêtres identiques. */
+  const ml = qtyOf(i) * h / 100;
   note.textContent = tall
     ? "Hauteur " + h + " cm au-delà du maximum " + MAXH + " cm"
     : wide
       ? "Largeur " + l + " cm au-delà de la laize " + f.laize + " cm : raccord nécessaire"
       : (qtyOf(i) > 1
-          ? qtyOf(i) + " fenêtres · " + fr(l*h/10000) + " m² chacune · " + fr(qtyOf(i)*l*h/10000) + " m²"
-          : fr(l*h/10000) + " m²");
+          ? qtyOf(i) + " fenêtres · " + fr(l*h/10000) + " m² chacune · " +
+            fr(qtyOf(i)*l*h/10000) + " m² · " + fr(ml) + " ml"
+          : fr(l*h/10000) + " m² · " + fr(ml) + " ml");
 }
 
 function updateAllNotes(){ S.dims.forEach((d, i) => updateNote(i)); }
@@ -2878,7 +2883,7 @@ function renderRecap(){
   $("poseBar").hidden = !(pose > 0);
   if (pose > 0){
     const u = parseFloat(String(S.posePrix).replace(",", ".")) || 0;
-    $("poseLab").textContent = (S.pose === "Livraison" ? "Livraison" : "Pose") +
+    $("poseLab").textContent = (S.pose === "Livraison" ? "Livraison" : "Pose") + " HT" +
       (S.poseMode === "fenetre" && t.nb ? "  ·  " + t.nb + " × " + fr(u) : "");
     $("sPose").textContent = fr(pose) + " MAD";
   }
@@ -5709,7 +5714,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "11.6";
+const APP_VERSION = "11.7";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
