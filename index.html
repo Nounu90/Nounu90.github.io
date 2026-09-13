@@ -333,6 +333,9 @@ select{appearance:none; -webkit-appearance:none}
   border-top:1px solid var(--line); background:var(--warn-soft); color:var(--warn);
 }
 .alert.stop{background:var(--accent-soft); color:var(--accent)}
+/* La même alerte, mais posée dans une carte : elle se lit à l'endroit où la
+   décision se prend, sous le tissu choisi. */
+.alert.inline{border-top:none; border-radius:11px; margin:0 0 9px; padding:10px 12px}
 .alert svg{flex:none; margin-top:1px}
 
 /* ---------- photo ---------- */
@@ -1422,6 +1425,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
     <section class="card">
       <div class="card-head"><div class="label">Tissu</div><div class="badge" id="refCount">0 tissu</div></div>
       <div id="chips"></div>
+      <div id="refAlerts"></div>
       <button class="add" id="refBtn" type="button">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         <span id="refBtnLabel">Choisir le tissu</span>
@@ -1503,7 +1507,6 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 
   <div class="bottom">
     <div class="bottom-in">
-      <button class="draft-link" id="btnDraft" type="button" hidden>Enregistrer les modifications</button>
       <button class="send" id="btnSend" type="button"></button>
     </div>
   </div>
@@ -2629,6 +2632,36 @@ function updateNote(i){
 
 function updateAllNotes(){ S.dims.forEach((d, i) => updateNote(i)); }
 
+/* Ce que le stock dit des tissus de ce bon. Une seule liste, lue deux fois :
+   sous le choix du tissu, et dans les alertes du bas de page. */
+function alertesTissu(){
+  const need = mlByRef();
+  const out = [];
+  chosen().forEach(f => {
+    const ml = need[f.ref] || 0;
+    if (!ml) return;
+    const dm = stockMl(f);
+    if (f.dispo < 1)
+      out.push({stop:true, txt:"<b>" + f.ref + "</b> est en rupture au dépôt. " +
+        "Il faut le commander au fournisseur avant de promettre un délai."});
+    else if (dm < ml)
+      out.push({stop:true, txt:"<b>" + f.ref + "</b> : stock <b>" + fr(dm) + " ml</b> " +
+        "insuffisant pour les <b>" + fr(ml) + " ml</b> de ce bon. Manque <b>" +
+        fr(ml - dm) + " ml</b>."});
+    else if (dm - ml < 10)
+      out.push({stop:false, txt:"Après ce bon il ne restera que <b>" + fr(dm - ml) +
+        " ml</b> de " + f.ref + "."});
+  });
+  return out;
+}
+/* Fabrique une alerte dans la boîte donnée. */
+function poseAlerte(box, txt, stop, inline){
+  const d = document.createElement("div");
+  d.className = "alert" + (stop ? " stop" : "") + (inline ? " inline" : "");
+  d.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg><div>' + txt + '</div>';
+  box.appendChild(d);
+}
+
 function renderRefs(){
   const box = $("chips"), need = mlByRef();
   box.innerHTML = "";
@@ -2655,6 +2688,14 @@ function renderRefs(){
   $("refBtnLabel").textContent = S.refs.length ? "Changer de tissu" : "Choisir le tissu";
   if (S.multi && !S.refs.length)
     box.innerHTML = '<div class="hint" style="margin:0 0 4px">Choisissez le tissu de chaque fenêtre dans la partie Dimensions.</div>';
+
+  /* Le manque se voit ici, au moment où l'on choisit le tissu : c'est là
+     qu'on peut encore changer de couleur ou appeler le fournisseur. */
+  const al = $("refAlerts");
+  if (al){
+    al.innerHTML = "";
+    alertesTissu().forEach(a => poseAlerte(al, a.txt, a.stop, true));
+  }
 }
 
 function pickFamily(){
@@ -2820,21 +2861,8 @@ function renderRecap(){
 
   const box = $("alerts");
   box.innerHTML = "";
-  const warn = (txt, stop) => {
-    const d = document.createElement("div");
-    d.className = "alert" + (stop ? " stop" : "");
-    d.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg><div>' + txt + '</div>';
-    box.appendChild(d);
-  };
-  const need = mlByRef();
-  chosen().forEach(f => {
-    const ml = need[f.ref] || 0;
-    if (!ml) return;
-    const dm = stockMl(f);
-    if (f.dispo < 1) warn("<b>" + f.ref + "</b> est en rupture au dépôt. Confirmez la disponibilité avant de promettre un délai.", true);
-    else if (dm < ml) warn("<b>" + f.ref + "</b> : stock " + fr(dm) + " ml insuffisant pour " + fr(ml) + " ml demandés. Manque <b>" + fr(ml - dm) + " ml</b>.", true);
-    else if (dm - ml < 10) warn("Après ce bon il ne restera que <b>" + fr(dm - ml) + " ml</b> de " + f.ref + ".");
-  });
+  const warn = (txt, stop) => poseAlerte(box, txt, stop, false);
+  /* Le stock de tissu est signalé sous le tissu, pas ici : on ne répète pas. */
   const wide = validDims().filter(d => { const g = fab(d.ref); return g && d.l > g.laize; });
   if (wide.length) warn(wide.length > 1
     ? wide.length + " stores dépassent la laize de leur tissu : raccord ou changement de tissu."
@@ -2880,14 +2908,10 @@ function renderProgress(){
     ? "Bon déjà enregistré"
     : (dern ? "Dernier bon de l'année : " + dern : "Premier bon de l'année");
   $("formTitle").textContent = known ? "Modifier le bon" : "Nouveau bon de commande";
-  /* Plus de brouillon : on n'enregistre que des bons qui portent une
-     situation. Le lien discret ne sert qu'à corriger un bon déjà enregistré
-     sans refaire passer l'image. */
-  $("btnDraft").hidden = S.status !== "sent";
 }
 
 function renderAll(){
-  renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap();
+  renderRows(); renderPhotos(); renderDecoupe(); renderRecap(); renderRefs();
   renderEtatBon(); renderEch(); renderProgress();
 }
 /* Une mesure ajoutée change la charge d'atelier : la date proposée suit. */
@@ -3479,13 +3503,6 @@ function saveOrder(status){
   return ok;
 }
 
-$("btnDraft").addEventListener("click", () => {
-  if (saveOrder("sent")){
-    renderAll(); renderHome();
-    toast("Bon " + S.num + " mis à jour");
-  }
-});
-
 /* ============ Retour en deux temps ============ */
 /* Le plan de coupe et le formulaire ouvert depuis l'historique reviennent
    d'abord à la liste des bons, puis seulement à l'accueil. */
@@ -3883,7 +3900,12 @@ $("btnSend").addEventListener("click", async () => {
   if (etb !== "production"){
     S.status = "sent";
     if (saveOrder("sent")){
-      renderAll(); renderHome();
+      renderAll();
+      /* Le bon est enregistré : l'agent n'a plus rien à faire sur cet écran,
+         on le ramène à l'accueil au lieu de le laisser devant un formulaire
+         qu'il pourrait croire encore ouvert. */
+      formVenu = "";
+      nav("home");
       toast(etb === "devis"
         ? "Devis " + S.num + " enregistré"
         : "Bon " + S.num + " enregistré  ·  " + etatLabel(etb));
@@ -5643,7 +5665,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "11.4";
+const APP_VERSION = "11.5";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
