@@ -5887,7 +5887,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "12.1";
+const APP_VERSION = "12.2";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -7731,7 +7731,11 @@ function bilanJour(iso){
       n: par[k].n,
       cash: par[k].cash,
       lignes: JOUR_ORDRE.filter(t => par[k].cpt[t])
-        .map(t => par[k].cpt[t] + " " + jourLab(t, par[k].cpt[t]))
+        .map(t => t === "etat"
+          ? par[k].cpt[t] + " " + jourLab(t, par[k].cpt[t]) + " (" +
+            ev.filter(x => x.type === "etat" && (x.by || "?") === k)
+              .map(x => etatLabel(x.etat)).join(", ") + ")"
+          : par[k].cpt[t] + " " + jourLab(t, par[k].cpt[t]))
     }));
 
   let reste = {total:0, bons:[]};
@@ -10379,45 +10383,75 @@ function livresLe(iso){
 function evenementsDuJour(iso){
   const out = [];
   (ORDERS || []).forEach(o => {
+    /* Les situations de ce bon, dans l'ordre où elles se sont produites. */
+    const etats = (o.log || []).filter(e => (e.kind || "fab") === "etat")
+                               .slice().sort((a, b) => (a.at || 0) - (b.at || 0));
+
     /* le bon lui même, le jour où il a été créé */
     if (o.status === "sent" && jourISO(o.date) === iso){
       const t = orderTotals(o);
+      /* la situation qu'il portait en naissant, pas celle d'aujourd'hui */
+      const ne = etats.length ? etatLabel(etats[0].etat) : etatLabel(etatDe(o));
       out.push({at:new Date(o.date).getTime(), by:o.author || "", type:"bon",
-                titre:o.num || "Bon sans numéro",
-                sous:(o.nom || "Client sans nom") + "  ·  " + t.nb + " store" + (t.nb > 1 ? "s" : ""),
+                titre:"Bon créé  ·  " + (o.num || "sans numéro"),
+                sous:(o.nom || "Client sans nom") + "  ·  " + t.nb + " store" +
+                     (t.nb > 1 ? "s" : "") + "  ·  " + ne,
                 val:(t.prix || t.pose) ? fr(prixClient(o, htDe(o)), 0) + " MAD" : ""});
     }
+
+    /* Chaque passage d'une situation à l'autre, avec son auteur. Deux agents
+       peuvent toucher le même bon dans la journée : on doit voir les deux. */
+    etats.forEach((e, i) => {
+      if (jourISO(e.at) !== iso) return;
+      /* La toute première situation est celle de la création : la ligne du
+         bon la dit déjà, on ne la répète pas sous une autre forme. */
+      if (i === 0 && o.status === "sent" && jourISO(o.date) === iso &&
+          (e.by || "") === (o.author || "")) return;
+      /* Deux fois la même situation d'affilée : rien n'a bougé, rien à dire. */
+      if (i > 0 && etats[i-1].etat === e.etat) return;
+      /* D'où l'on vient : la dernière situation réellement différente. */
+      let av = "";
+      for (let j = i - 1; j >= 0; j--){
+        if (etats[j].etat !== e.etat){ av = etats[j].etat; break; }
+      }
+      out.push({at:e.at, by:e.by || "", type:"etat", etat:e.etat,
+                titre:(av ? etatLabel(av) + "  \u2192  " : "Situation  ·  ") +
+                      (e.lab || etatLabel(e.etat)),
+                sous:(o.nom || "Client sans nom") + "  ·  " + (o.num || ""),
+                val:""});
+    });
     /* le journal : c'est le dernier geste de la journée qui compte */
+    /* Une fenêtre cochée puis décochée ne compte plus, une fenêtre cochée deux
+       fois ne compte qu'une : c'est le dernier geste sur chaque pièce qui fait
+       foi. Les situations, elles, sont traitées plus haut, une par une. */
     const dernier = {};
     (o.log || []).forEach(e => {
       if (jourISO(e.at) !== iso) return;
       const kind = e.kind || "fab";
-      const cle = kind + ":" + e.k;
+      if (kind === "etat") return;
+      const cle = kind + ":" + e.k + ":" + (e.by || "");
       if (!dernier[cle] || e.at >= dernier[cle].at) dernier[cle] = e;
     });
     Object.keys(dernier).forEach(k => {
       const e = dernier[k];
       const kind = e.kind || "fab";
-      if (kind === "etat"){
-        out.push({at:e.at, by:e.by || "", type:"etat",
-                  titre:e.lab || etatLabel(e.etat), etat:e.etat,
-                  sous:(o.nom || "Client sans nom") + "  ·  " + (o.num || ""), val:""});
-        return;
-      }
       if (kind === "edit"){
-        out.push({at:e.at, by:e.by || "", type:"edit", titre:"Bon modifié",
-                  sous:(o.nom || "Client sans nom") + "  ·  " + (o.num || "") +
+        out.push({at:e.at, by:e.by || "", type:"edit",
+                  titre:"Bon modifié  ·  " + (o.num || ""),
+                  sous:(o.nom || "Client sans nom") +
                        ((e.champs && e.champs.length) ? "  ·  " + e.champs.join(", ") : ""),
                   val:""});
         return;
       }
       if (!e.on) return;
       if (kind === "fab"){
-        out.push({at:e.at, by:e.by || "", type:"fab", titre:e.dim || "",
+        out.push({at:e.at, by:e.by || "", type:"fab",
+                  titre:"Fenêtre fabriquée  ·  " + (e.dim || ""),
                   sous:(o.nom || "") + "  ·  " + (o.num || "") +
                        (e.ref ? "  ·  " + e.ref : ""), val:""});
       } else if (kind === "tube" || kind === "livr"){
-        out.push({at:e.at, by:e.by || "", type:"tube", titre:e.dim || "",
+        out.push({at:e.at, by:e.by || "", type:"tube",
+                  titre:"Découpe livrée  ·  " + (e.dim || ""),
                   sous:(e.prof ? e.prof + "  ·  " : "") + (o.nom || "") + "  ·  " + (o.num || ""),
                   val:""});
       }
@@ -10427,7 +10461,7 @@ function evenementsDuJour(iso){
       if (String(p.date || "") !== iso) return;
       const m = parseFloat(p.montant) || 0;
       out.push({at:p.at || new Date(iso + "T12:00:00").getTime(), by:p.by || "", type:"paie",
-                titre:p.mode || "Paiement",
+                titre:"Encaissé  ·  " + (p.mode || "Paiement"),
                 sous:(o.nom || "Client sans nom") + "  ·  " + (o.num || ""),
                 val:fr(m, 2) + " MAD", montant:m});
     });
@@ -10517,11 +10551,13 @@ function renderLog(){
 
 function ligneEv(x, avecHeure){
   const d = new Date(x.at);
+  const qui = x.by ? nomDe(x.by) : "";
   return '<div class="agline">' +
     '<span class="agh">' + (avecHeure ? pad(d.getHours()) + ":" + pad(d.getMinutes()) : "") + '</span>' +
     '<span class="agdot ' + x.type + '"></span>' +
     '<span class="agt"><b>' + esc(x.titre) + '</b>' +
-      (x.sous ? '<small>' + esc(x.sous) + '</small>' : '') + '</span>' +
+      '<small>' + esc(x.sous || "") +
+        (qui ? (x.sous ? '  ·  ' : '') + 'par ' + esc(qui) : '') + '</small></span>' +
     '<span class="agv">' + esc(x.val || "") + '</span>' +
   '</div>';
 }
@@ -10576,7 +10612,7 @@ function vueHeure(ev){
         '<span class="agh">' + pad(d.getHours()) + ":" + pad(d.getMinutes()) + '</span>' +
         '<span class="agdot ' + x.type + '"></span>' +
         '<span class="agt"><b>' + esc(x.titre) + '</b>' +
-          '<small>' + esc(x.sous) + (qui ? '  ·  ' + esc(qui) : '') + '</small></span>' +
+          '<small>' + esc(x.sous) + (qui ? '  ·  par ' + esc(qui) : '') + '</small></span>' +
         '<span class="agv">' + esc(x.val || "") + '</span>' +
       '</div>';
     }).join("") +
