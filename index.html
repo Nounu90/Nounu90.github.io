@@ -721,12 +721,27 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
 .rmregles b{color:var(--ink); font-family:"IBM Plex Mono",monospace; font-weight:600}
 
+/* --- le délai de l'atelier, en tête d'accueil --- */
+.atban{display:grid; grid-template-columns:1fr auto; gap:4px 12px; align-items:center;
+  border:1px solid var(--line); border-left:3px solid var(--info); border-radius:0 12px 12px 0;
+  background:var(--card2); padding:11px 13px; margin-bottom:13px}
+.atban .l{font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted)}
+.atban .v{grid-row:1 / 3; font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:600;
+  color:var(--info); white-space:nowrap; text-align:right}
+.atban .v em{display:block; font-style:normal; font-family:"Archivo",sans-serif; font-size:9px;
+  font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-top:2px}
+.atban .s{font-size:12px; color:var(--ink); line-height:1.45}
+.atban .s b{font-family:"IBM Plex Mono",monospace; font-weight:600}
+
 /* --- la situation du bon dans le choix du plan de coupe --- */
 .pketat{flex:none; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
   letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:6px;
   background:var(--card2); color:var(--muted); border:1px solid var(--line)}
 .pketat.production{background:var(--warn-soft,#FAEFDD); color:var(--warn); border-color:transparent}
 .hprog.br{background:var(--accent-soft); color:var(--accent)}
+.hprog.del{background:var(--info-soft); color:var(--info)}
+.hprog.del.mat{background:var(--warn-soft,#FAEFDD); color:var(--warn)}
 .pketat.pret{background:var(--info-soft); color:var(--info); border-color:transparent}
 .pketat.livre{background:var(--ok-soft); color:var(--ok); border-color:transparent}
 .pketat.brouillon{background:var(--accent-soft); color:var(--accent); border-color:transparent}
@@ -1513,6 +1528,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <p>Bons de commande</p>
     </div>
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="atban" id="atlBan" hidden></div>
     <div class="tiles">
       <button class="tile primary" id="tileNew" type="button">
         <span class="ti"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
@@ -2923,8 +2939,10 @@ function renderEch(){
   const fige = echVerrou();
   inp.disabled = fige;
   inp.title = fige ? "L'échéance est calculée par l'atelier au passage en production" : "";
+  /* Les agents ne choisissent pas de date : le champ n'existe plus pour eux.
+     Ils lisent l'échéance en bas du bon, sous le total. */
   const box = inp.closest(".field") || inp.parentElement;
-  if (box) box.style.opacity = fige ? ".6" : "";
+  if (box){ box.hidden = !adminAllowed(); box.style.opacity = ""; }
   renderEchSug();
 }
 
@@ -2940,16 +2958,8 @@ function renderEchSug(){
   if (!sg){ zone.hidden = true; renderEchBar(); return; }
   zone.hidden = false;
 
-  let x = '<span class="x">' +
-    (sg.F ? '<b>' + sg.F + '</b> fenêtre' + (sg.F > 1 ? "s" : "") + ' en attente → ' +
-            sg.jFile + ' jour' + (sg.jFile > 1 ? "s" : "") + "  ·  "
-          : "atelier libre  ·  ") +
-    '<b>' + sg.N + '</b> fenêtre' + (sg.N > 1 ? "s" : "") + ' ici → ' +
-    sg.jBon + ' jour' + (sg.jBon > 1 ? "s" : "") +
-    '  ·  pose +' + sg.marge +
-    '<br>' + sg.cap + ' fenêtres par jour, du lundi au vendredi.' +
-    (mq.length ? '<br>' + texteManque(sg) : "") +
-    '</span>';
+  let x = '<span class="x">' + texteCalcul(sg) +
+    (mq.length ? '<br>' + texteManque(sg) : "") + '</span>';
 
   let w = "", att = !!mq.length;
   if (S.ech && S.ech < sg.iso){
@@ -2973,6 +2983,18 @@ function renderEchSug(){
   renderEchBar();
 }
 
+/* Le calcul en une phrase, pour la zone de la direction comme pour la barre
+   que tout le monde lit en bas du bon. */
+function texteCalcul(sg){
+  return (sg.F ? '<b>' + sg.F + '</b> fenêtre' + (sg.F > 1 ? "s" : "") + ' en attente → ' +
+                 sg.jFile + ' jour' + (sg.jFile > 1 ? "s" : "") + "  ·  "
+               : "atelier libre  ·  ") +
+    '<b>' + sg.N + '</b> fenêtre' + (sg.N > 1 ? "s" : "") + ' ici → ' +
+    sg.jBon + ' jour' + (sg.jBon > 1 ? "s" : "") +
+    '  ·  pose +' + sg.marge +
+    '<br>' + sg.cap + ' fenêtres par jour, du lundi au vendredi.';
+}
+
 /* Le manque de tissu du bon en cours de saisie. */
 function echManque(){
   try { return manqueTissu(S, S.id); } catch(e){ return []; }
@@ -2993,22 +3015,30 @@ function renderEchBar(){
   if (!nb){ bar.hidden = true; return; }
   bar.hidden = false;
 
-  if (etatDe(S) === "devis"){
-    const mq = echManque();
-    bar.className = "echbar";
-    bar.innerHTML = '<span class="t">Échéance</span>' +
-      '<span class="d">Fixée au passage en production</span>' +
-      '<span class="x">Tant que ce bon est un devis, il n\'occupe pas l\'atelier, n\'entre pas dans la file et ne porte pas de date. Passez le en production pour lancer le compte à rebours.' +
-      (mq.length ? ' Attention, ' + mq.map(m => '<b>' + esc(m.ref) + '</b>').join(", ") +
-        (mq.length > 1 ? " manquent" : " manque") + ' en stock.' : "") +
-      '</span>';
-    return;
-  }
+  /* Pas encore de date posée : on montre celle que l'atelier donnerait si la
+     commande partait aujourd'hui. C'est la réponse à donner au client au
+     téléphone, sans avoir à passer le bon en production pour la connaître. */
   if (!S.ech){
-    bar.className = "echbar att";
-    bar.innerHTML = '<span class="t">Échéance</span>' +
-      '<span class="d">Pas encore calculée</span>' +
-      '<span class="x">Elle se pose dès que le bon passe en production.</span>';
+    const devis = etatDe(S) === "devis";
+    const mq = echManque();
+    const sg = suggereEch(nb, S.id, mq);
+    if (!sg){
+      bar.className = "echbar";
+      bar.innerHTML = '<span class="t">Échéance</span>' +
+        '<span class="d">En attente des mesures</span>' +
+        '<span class="x">Ajoutez au moins une fenêtre pour connaître la date.</span>';
+      return;
+    }
+    bar.className = "echbar" + (mq.length ? " att" : "");
+    bar.innerHTML =
+      '<span class="t">' + (devis
+        ? "Échéance si la commande part aujourd'hui"
+        : "Échéance proposée par l'atelier") + '</span>' +
+      '<span class="d">' + dateLongue(sg.iso) + '</span>' +
+      '<span class="x">' + texteCalcul(sg) +
+        (mq.length ? '<br>' + texteManque(sg) : "") +
+        '<br>Date indicative : elle est recalculée et fixée définitivement au passage en production.' +
+      '</span>';
     return;
   }
   const p = S.plan || {};
@@ -4502,6 +4532,28 @@ function renderHome(){
       ? nl + " fenêtre" + (nl > 1 ? "s" : "") + " fabriquée" + (nl > 1 ? "s" : "") + " aujourd'hui"
       : "Aucune fenêtre fabriquée aujourd'hui";
   }
+  /* Le délai que l'atelier annonce aujourd'hui, pour répondre au téléphone
+     sans ouvrir le moindre bon. */
+  const ban = $("atlBan");
+  if (ban){
+    if (!payAllowed()){ ban.hidden = true; }
+    else {
+      const F = fileAttente();
+      const jf = Math.ceil(F / atlCap());
+      const fin = jourOuvreN(Math.max(1, jf + 1));
+      const ech = ajouteOuvres(fin, atlMarge());
+      const j = delaiOuvres(isoDe(ech));
+      ban.hidden = false;
+      ban.innerHTML =
+        '<span class="l">Délai annoncé aujourd\'hui</span>' +
+        '<span class="v">' + j + '<em>jours ouvrés</em></span>' +
+        '<span class="s">Pour une commande d\'une à trois fenêtres, à compter de la ' +
+        '<b>réception de l\'acompte</b>.<br>' +
+        (F ? '<b>' + F + '</b> fenêtre' + (F > 1 ? "s" : "") + ' en attente à l\'atelier'
+           : 'Atelier libre') +
+        '  ·  <b>' + atlCap() + '</b> par jour  ·  pose +' + atlMarge() + '</span>';
+    }
+  }
   $("tileArt").hidden = !artAllowed();
   $("tileNom").hidden = !adminAllowed();
   $("tileCout").hidden = !adminAllowed();
@@ -5032,6 +5084,17 @@ function avancement(o){
   };
 }
 
+/* La réponse au téléphone, sur la ligne du devis : pas besoin de l'ouvrir. */
+function pucedelai(o){
+  let d = null;
+  try { d = delaiDevis(o); } catch(e){}
+  if (!d) return "";
+  const j = d.j;
+  return '<span class="hprog del' + (d.manque.length ? " mat" : "") + '">' +
+    (j <= 0 ? "prêt aujourd'hui" : "\u2248 " + j + " j après acompte") +
+    (d.manque.length ? "  ·  tissu à commander" : "") + '</span>  ';
+}
+
 /* Rappel de l'échéance dans la liste des bons */
 function echSuffix(o){
   if (!o || !o.ech) return "";
@@ -5141,6 +5204,7 @@ function renderHist(){
             ? '<span class="hl2" style="margin-top:6px">' +
               (o.status !== "sent"
                  ? '<span class="hprog br">brouillon, jamais envoyé</span>  ' : '') +
+              (et === "devis" && !o.ech ? pucedelai(o) : '') +
               (!ordDims(o).length
                  ? '<span class="hprog br">aucune mesure exploitable</span>  ' : '') +
               (av.tube.tot ? '<span class="hprog ' + (av.tube.fait === av.tube.tot ? "ok" : "att") + '">' +
@@ -5449,7 +5513,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "11.0";
+const APP_VERSION = "11.2";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6840,6 +6904,7 @@ function dessinePick(){
       '<span class="hmain"><span class="hl1"><b>' + esc(o.nom || "Client sans nom") + '</b>' +
       '<span class="pketat ' + etatDe(o) + '">' + etatLabel(etatDe(o)) + '</span>' +
       (o.status !== "sent" ? '<span class="pketat brouillon">Brouillon</span>' : '') +
+      (etatDe(o) === "devis" && !o.ech ? pucedelai(o) : '') +
       (et ? '<span class="badge ' + (et.ok ? "ok" : "warn") + '">' + et.txt + '</span>'
           : '<span class="badge ' + (o.status === "sent" ? "ok" : "") + '">' +
             (o.status === "sent" ? "Envoyé" : "Brouillon") + '</span>') +
@@ -8643,9 +8708,10 @@ function manqueTissu(o, exclureId){
    donc à l'atelier le jour 2 + délai. Les deux attentes courent en parallèle,
    l'atelier vide sa file pendant que le tissu arrive : on garde la plus longue,
    jamais la somme. */
-function suggereEch(nb, exclureId, manque){
+function suggereEch(nb, exclureId, manque, fileConnue){
   const cap = atlCap(), marge = atlMarge();
-  const F = fileAttente(exclureId);
+  const F = (fileConnue === undefined || fileConnue === null)
+    ? fileAttente(exclureId) : fileConnue;
   const N = Math.max(0, nb || 0);
   if (!N) return null;
   const mq = manque || [];
@@ -8834,6 +8900,64 @@ function bonsDuMois(iso){
 function produitHT(o){
   const t = orderTotals(o);
   return t.prix * (1 - remisePct(o) / 100);
+}
+
+/* --- le délai annoncé au client, en jours ouvrés --- */
+/* Un client au téléphone n'entend pas une date, il entend « dans X jours ».
+   Le nombre se recalcule à chaque affichage, il ne peut donc pas être périmé. */
+function delaiOuvres(iso){
+  const n = ouvresJusqua(iso);
+  return Math.max(0, estOuvre(new Date()) ? n - 1 : n);
+}
+
+/* La file et la réservation de tissu coûtent cher à recalculer pour chaque
+   ligne d'une liste : on les garde quelques secondes, le temps d'un rendu. */
+let _fileCache = null, _fileCacheAt = 0;
+function fileTotalCache(){
+  if (_fileCache !== null && Date.now() - _fileCacheAt < 3000) return _fileCache;
+  _fileCache = fileDetail().total;
+  _fileCacheAt = Date.now();
+  return _fileCache;
+}
+let _resCache = null, _resCacheAt = 0;
+function reserveCache(){
+  if (_resCache && Date.now() - _resCacheAt < 3000) return _resCache;
+  _resCache = tissuReserve(null);
+  _resCacheAt = Date.now();
+  return _resCache;
+}
+const _besoinMemo = {};
+function besoinTissuMemo(o){
+  const k = o.id + "|" + (o.maj || 0) + "|" + ((o.dims || []).length);
+  if (_besoinMemo[k]) return _besoinMemo[k];
+  return (_besoinMemo[k] = besoinTissu(o));
+}
+/* Le manque de tissu d'un bon, à partir de la réservation déjà calculée. */
+function manqueRapide(o){
+  const besoin = besoinTissuMemo(o);
+  const res = reserveCache();
+  /* un devis, un brouillon ou un bon déjà saisi ne figure pas dans la réservation */
+  const horsReserve = (o.status !== "sent") || etatDe(o) === "devis" || dejaDeduit(o);
+  const out = [];
+  Object.keys(besoin).forEach(ref => {
+    if (!besoin[ref]) return;
+    const f = fab(ref);
+    const stock = f ? stockM2(f) : 0;
+    const pris = (res[ref] || 0) - (horsReserve ? 0 : besoin[ref]);
+    const m = besoin[ref] - (stock - pris);
+    if (m > 0.01) out.push({ref:ref, manque:m, besoin:besoin[ref]});
+  });
+  return out;
+}
+/* Le délai d'un devis, prêt à être lu au téléphone. */
+function delaiDevis(o){
+  const nb = ordDims(o).length;
+  if (!nb) return null;
+  let mq = [];
+  try { mq = manqueRapide(o); } catch(e){}
+  const sg = suggereEch(nb, o.id, mq, fileTotalCache());
+  if (!sg) return null;
+  return {j: delaiOuvres(sg.iso), iso: sg.iso, manque: mq, sg: sg};
 }
 
 /* Ce que la pose d'un bon rapporte au poseur.
