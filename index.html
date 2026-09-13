@@ -5448,7 +5448,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "10.8";
+const APP_VERSION = "10.9";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8551,10 +8551,7 @@ function fileDetail(exclureId){
     const done = faites(o);
     const fait = dims.filter(d => done.indexOf(d.key) >= 0).length;
     const reste = dims.length - fait;
-    if (!reste){
-      ecartes.push({o:o, pourquoi:"les " + dims.length + " fenêtres sont cochées fabriquées"});
-      return;
-    }
+    if (!reste) return;        /* tout est monté : ce bon n'a plus rien à voir avec l'atelier */
     if (etatDe(o) === "devis"){
       ecartes.push({o:o, pourquoi:"devis non confirmé  ·  " + reste + " fenêtre" +
                     (reste > 1 ? "s" : "") + " si la commande se fait"});
@@ -8717,7 +8714,7 @@ function renderAtl(){
   const ec = det.ecartes || [];
   if (ec.length){
     h += '<div class="atsep">' + ec.length + ' bon' + (ec.length > 1 ? "s" : "") +
-         ' écarté' + (ec.length > 1 ? "s" : "") + ' de la file</div>';
+         ' pas encore confirmé' + (ec.length > 1 ? "s" : "") + '</div>';
     h += ec.slice(0, 40).map(x =>
       '<div class="atfil hors"><span class="n">' + esc(x.o.num || "(sans numéro)") + '  ·  ' +
         esc(x.o.nom || "Client sans nom") + '</span>' +
