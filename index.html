@@ -3198,7 +3198,7 @@ function renderEchSug(){
   const nb = totals().nb;
   if (!nb || !adminAllowed()){ zone.hidden = true; renderEchBar(); return; }
   const mq = echManque();
-  const sg = suggereEch(nb, S.id, mq);
+  const sg = suggereEch(nb, S.id, mq, null, S.pose);
   if (!sg){ zone.hidden = true; renderEchBar(); return; }
   zone.hidden = false;
 
@@ -3206,10 +3206,19 @@ function renderEchSug(){
     (mq.length ? '<br>' + texteManque(sg) : "") + '</span>';
 
   let w = "", att = !!mq.length;
+  if (S.ech && S.pose !== "Livraison"){
+    const occupe = joursPosePris(S.id)[S.ech];
+    if (occupe){
+      att = true;
+      w += '<span class="w">Une pose est déjà prévue ce jour là chez <b>' +
+        esc(occupe.nom || "un autre client") + '</b> (' + esc(occupe.num || "") +
+        '). On ne pose que chez un client par jour.</span>';
+    }
+  }
   if (S.ech && S.ech < sg.iso){
     const c = cadencePour(S.ech, nb, S.id);
     att = true;
-    w = '<span class="w">' + (!c || c.jours <= 0
+    w += '<span class="w">' + (!c || c.jours <= 0
       ? (sg.marge > 0
           ? "Il ne reste aucune journée d'atelier avant cette date : la marge de pose en prend déjà " +
             sg.marge + "."
@@ -3235,8 +3244,15 @@ function texteCalcul(sg){
                : "atelier libre  ·  ") +
     '<b>' + sg.N + '</b> fenêtre' + (sg.N > 1 ? "s" : "") + ' ici → ' +
     sg.jBon + ' jour' + (sg.jBon > 1 ? "s" : "") +
-    '  ·  pose +' + sg.marge +
-    '<br>' + sg.cap + ' fenêtres par jour, du lundi au vendredi.';
+    '  ·  ' + (sg.posee ? 'pose +' : 'livraison +') + sg.marge +
+    '<br>' + sg.cap + ' fenêtres par jour, du lundi au vendredi.' +
+    (sg.decale
+      ? '<br>Une pose est déjà prévue le ' +
+        esc(String(sg.brutIso).split("-").reverse().join("/")) +
+        (sg.bloque ? ' chez <b>' + esc(sg.bloque.nom || "un autre client") + '</b>' : '') +
+        ' : on décale de ' + sg.decale + ' jour' + (sg.decale > 1 ? "s" : "") +
+        '. Une seule pose par jour.'
+      : '');
 }
 
 /* Le manque de tissu du bon en cours de saisie. */
@@ -3301,7 +3317,7 @@ function renderEchBar(){
   if (!S.ech){
     const devis = etatDe(S) === "devis";
     const mq = echManque();
-    const sg = suggereEch(nb, S.id, mq);
+    const sg = suggereEch(nb, S.id, mq, null, S.pose);
     if (!sg){
       bar.className = "echbar";
       bar.innerHTML = '<span class="t">Échéance</span>' +
@@ -3339,7 +3355,7 @@ function renderEchBar(){
 $("echSug").addEventListener("click", e => {
   if (!e.target.closest("#echPrendre")) return;
   const nb = totals().nb;
-  const sg = suggereEch(nb, S.id, echManque());
+  const sg = suggereEch(nb, S.id, echManque(), null, S.pose);
   if (!sg || echVerrou()) return;
   S.ech = sg.iso;
   S.echManuel = false;
@@ -5887,7 +5903,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "12.2";
+const APP_VERSION = "12.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6527,11 +6543,12 @@ function majEcheance(o){
   if (!nb) return false;
   let mq = [];
   try { mq = manqueTissu(o, o.id); } catch(e){}
-  const sg = suggereEch(nb, o.id, mq);
+  const sg = suggereEch(nb, o.id, mq, null, o.pose);
   if (!sg) return false;
   o.ech = sg.iso;
   o.plan = {cap:sg.cap, marge:sg.marge, file:sg.F, nb:sg.N, jMat:sg.jMat,
-            manque: mq.map(x => x.ref), at:Date.now()};
+            manque: mq.map(x => x.ref), at:Date.now(),
+            decale: sg.decale || 0, posee: !!sg.posee};
   return true;
 }
 
@@ -9350,7 +9367,35 @@ function manqueTissu(o, exclureId){
    donc à l'atelier le jour 2 + délai. Les deux attentes courent en parallèle,
    l'atelier vide sa file pendant que le tissu arrive : on garde la plus longue,
    jamais la somme. */
-function suggereEch(nb, exclureId, manque, fileConnue){
+/* Les jours déjà retenus pour une pose, par commande. Une livraison ne
+   mobilise pas l'équipe : elle ne bloque aucun jour. Un devis non plus, tant
+   que le client n'a rien confirmé. */
+function joursPosePris(exclureId){
+  const pris = {};
+  (ORDERS || []).forEach(o => {
+    if (!o || !o.ech) return;
+    if (exclureId && o.id === exclureId) return;
+    if (o.status !== "sent") return;
+    if (etatDe(o) === "devis") return;
+    if (o.pose === "Livraison") return;
+    pris[o.ech] = o;
+  });
+  return pris;
+}
+/* Le prochain jour ouvré libre pour une pose, à partir d'une date. */
+function jourPoseLibre(dt, exclureId, posee){
+  if (!posee) return {date: dt, decale: 0, bloque: null};
+  const pris = joursPosePris(exclureId);
+  let d = new Date(dt.getTime()), n = 0, premier = null, garde = 0;
+  while (pris[isoDe(d)] && garde++ < 160){
+    if (!premier) premier = pris[isoDe(d)];
+    d = ajouteOuvres(d, 1);
+    n++;
+  }
+  return {date: d, decale: n, bloque: premier};
+}
+
+function suggereEch(nb, exclureId, manque, fileConnue, pose){
   const cap = atlCap(), marge = atlMarge();
   const F = (fileConnue === undefined || fileConnue === null)
     ? fileAttente(exclureId) : fileConnue;
@@ -9365,11 +9410,18 @@ function suggereEch(nb, exclureId, manque, fileConnue){
   /* soit la file commande, soit la matière : le plus tard des deux */
   const finJ  = Math.max(jTot, jMat + jBon - 1);
   const fin   = jourOuvreN(finJ);
-  const ech   = marge > 0 ? ajouteOuvres(fin, marge) : fin;
+  const brut  = marge > 0 ? ajouteOuvres(fin, marge) : fin;
+  /* Une pose par jour : si la date tombe sur un jour déjà promis à un autre
+     client, on glisse au prochain jour ouvré libre. */
+  const posee = (pose === undefined) ? true : (pose !== "Livraison");
+  const libre = jourPoseLibre(brut, exclureId, posee);
+  const ech   = libre.date;
   return {iso: isoDe(ech), finIso: isoDe(fin), F:F, N:N, cap:cap, marge:marge,
           jFile:jFile, jBon:jBon, jTot:finJ, jMat:jMat, four:four, manque:mq,
           parMatiere: (jMat + jBon - 1) > jTot,
-          matIso: isoDe(jourOuvreN(jMat))};
+          matIso: isoDe(jourOuvreN(jMat)),
+          posee: posee, brutIso: isoDe(brut),
+          decale: libre.decale, bloque: libre.bloque};
 }
 /* La cadence qu'il faudrait tenir pour une date choisie à la main. */
 function cadencePour(iso, nb, exclureId){
@@ -10096,7 +10148,7 @@ function delaiDevis(o){
   if (!nb) return null;
   let mq = [];
   try { mq = manqueRapide(o); } catch(e){}
-  const sg = suggereEch(nb, o.id, mq, fileTotalCache());
+  const sg = suggereEch(nb, o.id, mq, fileTotalCache(), o.pose);
   if (!sg) return null;
   return {j: delaiOuvres(sg.iso), iso: sg.iso, manque: mq, sg: sg};
 }
