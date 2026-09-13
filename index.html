@@ -1462,6 +1462,13 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <p class="hint">Prenez la photo ou choisissez la dans la galerie du téléphone. Elle part avec le bon.</p>
     </section>
 
+    <!-- SITUATION -->
+    <section class="card">
+      <div class="card-head"><div class="label">Situation du bon</div></div>
+      <div class="seg" id="segEtat"></div>
+      <p class="hint" id="etatHint"></p>
+    </section>
+
     <!-- RECAP -->
     <section class="recap" id="recap">
       <div class="rh"><div class="label">Récapitulatif</div></div>
@@ -1496,11 +1503,8 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 
   <div class="bottom">
     <div class="bottom-in">
-      <button class="draft-link" id="btnDraft" type="button">Enregistrer brouillon</button>
-      <button class="send" id="btnSend" type="button">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-        Envoyer à l'agent
-      </button>
+      <button class="draft-link" id="btnDraft" type="button" hidden>Enregistrer les modifications</button>
+      <button class="send" id="btnSend" type="button"></button>
     </div>
   </div>
 </div>
@@ -2382,6 +2386,7 @@ function blank(){
     num: nextNum(),
     date: new Date().toISOString(),
     nom:"", tel:"", adresse:"", gps:"", ech:"", remise:"", ice:"",
+    etat:"devis",                 /* un bon commence toujours par un devis */
     type:"ENR",
     multi:false,
     dims:[{l:"",h:"",ref:"",note:"",type:"ENR",q:""}],
@@ -2853,7 +2858,21 @@ function renderProgress(){
   const p = Math.round(done / 5 * 100);
   $("fill").style.width = p + "%";
   $("pct").textContent = p + "%";
-  $("btnSend").disabled = done < 5;
+  /* Le bouton du bas suit la situation choisie plus haut. Un devis
+     s'enregistre même incomplet : c'est une proposition, pas un ordre de
+     fabrication. Une commande lancée exige un bon complet. */
+  const etb = etatDe(S);
+  const env = etb === "production";
+  const bs = $("btnSend");
+  bs.disabled = env ? (done < 5) : !S.nom.trim();
+  bs.innerHTML = (env
+    ? '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>'
+    : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>')
+    + (etb === "devis" ? "Enregistrer le devis"
+       : (env ? "Envoyer à l'agent" : "Enregistrer le bon"));
+  bs.title = env ? "" : (etb === "devis"
+    ? "Le devis est enregistré et visible par tout le monde"
+    : "Le bon est enregistré sans image à envoyer");
   $("numBadge").textContent = S.num;
   const known = ORDERS.some(o => o.id === S.id);
   const dern = lastNum();
@@ -2861,11 +2880,15 @@ function renderProgress(){
     ? "Bon déjà enregistré"
     : (dern ? "Dernier bon de l'année : " + dern : "Premier bon de l'année");
   $("formTitle").textContent = known ? "Modifier le bon" : "Nouveau bon de commande";
-  $("btnDraft").textContent = S.status === "sent" ? "Enregistrer les modifications" : "Enregistrer brouillon";
+  /* Plus de brouillon : on n'enregistre que des bons qui portent une
+     situation. Le lien discret ne sert qu'à corriger un bon déjà enregistré
+     sans refaire passer l'image. */
+  $("btnDraft").hidden = S.status !== "sent";
 }
 
 function renderAll(){
-  renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap(); renderEch(); renderProgress();
+  renderRows(); renderRefs(); renderPhotos(); renderDecoupe(); renderRecap();
+  renderEtatBon(); renderEch(); renderProgress();
 }
 /* Une mesure ajoutée change la charge d'atelier : la date proposée suit. */
 function majEchSug(){ try { renderEchSug(); } catch(e){} }
@@ -3014,6 +3037,42 @@ function texteManque(sg){
 }
 
 /* La ligne que tout le monde voit, sous le total du bon. */
+/* La situation décide de tout le reste : le bouton du bas, l'échéance, la
+   place du bon dans l'atelier. On la choisit donc avant d'enregistrer. */
+function renderEtatBon(){
+  const box = $("segEtat");
+  if (!box) return;
+  const k = etatDe(S);
+  const connu = ORDERS.some(o => o.id === S.id);
+  /* Un bon neuf est un devis ou une commande lancée. Prêt et Livré ne
+     concernent qu'un bon déjà en atelier : ils n'apparaissent qu'ensuite. */
+  const choix = connu ? ETATS : ETATS.filter(e => e.k === "devis" || e.k === "production");
+  const sous = {devis:"rien n'est lancé", production:"l'atelier démarre",
+                pret:"tout est fabriqué", livre:"chez le client"};
+  box.innerHTML = choix.map(e =>
+    '<button type="button" data-etatbon="' + e.k + '" aria-pressed="' +
+    (e.k === k ? "true" : "false") + '">' + e.label +
+    '<span class="sub">' + (sous[e.k] || "") + '</span></button>').join("");
+  const h = $("etatHint");
+  if (h){
+    h.textContent = k === "devis"
+      ? "Le devis n'occupe pas l'atelier et ne réserve pas de tissu. L'échéance ci-dessous n'est qu'une indication."
+      : (k === "production"
+         ? "L'atelier prend la commande en charge : l'échéance est fixée à l'enregistrement."
+         : "Le bon est enregistré tel quel, sans passer par l'atelier.");
+  }
+}
+$("segEtat").addEventListener("click", e => {
+  const b = e.target.closest("[data-etatbon]");
+  if (!b) return;
+  const k = b.dataset.etatbon;
+  if (k === etatDe(S)) return;
+  S.etat = k;
+  /* Repasser en devis efface la date : elle sera recalculée au lancement. */
+  if (k === "devis" && !S.echManuel){ delete S.ech; delete S.plan; $("ech").value = ""; }
+  renderAll();
+});
+
 function renderEchBar(){
   const bar = $("echBar");
   if (!bar) return;
@@ -3401,6 +3460,17 @@ function saveOrder(status){
       S.log = rec.log;
     }
   }
+  /* Le passage en production depuis le formulaire vaut le même geste que
+     depuis l'historique : on le journalise et l'échéance se fige ici. */
+  const etAv = avant ? etatDe(avant) : "";
+  const etAp = etatDe(rec);
+  if (status === "sent" && etAp !== etAv){
+    try {
+      noteEtat(rec);
+      S.log = rec.log; S.ech = rec.ech; S.plan = rec.plan;
+      if (avant) sheetSituation(rec.num, etatLabel(etAp));
+    } catch(e){}
+  }
   if (i >= 0) all[i] = rec; else all.unshift(rec);
   ORDERS = all.slice(0, 150);
   const ok = persistOrders();
@@ -3410,10 +3480,9 @@ function saveOrder(status){
 }
 
 $("btnDraft").addEventListener("click", () => {
-  const st = S.status === "sent" ? "sent" : "draft";
-  if (saveOrder(st)){
-    renderHome();
-    toast(st === "sent" ? "Bon " + S.num + " mis à jour" : "Brouillon " + S.num + " enregistré");
+  if (saveOrder("sent")){
+    renderAll(); renderHome();
+    toast("Bon " + S.num + " mis à jour");
   }
 });
 
@@ -3808,6 +3877,19 @@ function shotName(){
   return S.num + "-" + (S.nom || "client").trim().replace(/[^\w]+/g, "-").toLowerCase().replace(/^-|-$/g, "") + ".png";
 }
 $("btnSend").addEventListener("click", async () => {
+  const etb = etatDe(S);
+  /* Seule une commande lancée part à l'atelier en image. Un devis ou un bon
+     déjà fabriqué s'enregistre sans rien à partager. */
+  if (etb !== "production"){
+    S.status = "sent";
+    if (saveOrder("sent")){
+      renderAll(); renderHome();
+      toast(etb === "devis"
+        ? "Devis " + S.num + " enregistré"
+        : "Bon " + S.num + " enregistré  ·  " + etatLabel(etb));
+    }
+    return;
+  }
   try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch(e){}
   await loadPhotoImgs();
   const c = ticket();
@@ -3816,7 +3898,7 @@ $("btnSend").addEventListener("click", async () => {
   c.toBlob(b => { shotBlob = b; }, "image/png");
   S.status = "sent";
   saveOrder("sent");
-  renderHome();
+  renderAll(); renderHome();
   openSheet("shotSheet");
   toast("Bon " + S.num + " prêt");
 });
@@ -5561,7 +5643,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "11.3";
+const APP_VERSION = "11.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
