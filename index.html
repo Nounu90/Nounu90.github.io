@@ -921,6 +921,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .agdot.tube{background:var(--info)}
 .agdot.etat{background:var(--warn)}
 .agdot.paie{background:var(--ok)}
+.agdot.pros{background:#128C7E}
 .agt{min-width:0; font-size:12.5px; line-height:1.4}
 .agt b{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink)}
 .agt small{display:block; font-size:11px; color:var(--muted); margin-top:1px}
@@ -2286,6 +2287,10 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
     <p class="hint" id="logJourLab" style="margin:0 2px 11px; font-family:Archivo,sans-serif; font-weight:600; color:var(--ink)"></p>
     <div class="lgstat" id="logStat"></div>
     <div class="sumline"><span>Encaissé ce jour là</span><b id="logCash">0</b></div>
+    <button class="btn primary" id="logPartage" type="button" style="width:100%; margin-bottom:14px">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/><path d="M8.6 9.4c0 3.3 2.7 6 6 6"/></svg>
+      Résumé de la journée à partager
+    </button>
     <div class="seg" id="logVue" style="margin-bottom:14px">
       <button type="button" data-v="agent" aria-pressed="true">Par agent</button>
       <button type="button" data-v="heure" aria-pressed="false">Chronologie</button>
@@ -5882,7 +5887,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "12.0";
+const APP_VERSION = "12.1";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -7678,11 +7683,244 @@ $("tilePay").addEventListener("click", () => {
   pullBons().then(() => renderPay());
 });
 
+/* ============ Le résumé d'une journée, à envoyer au groupe ============ */
+/* Une image que chacun lit d'un coup d'œil sur WhatsApp : ce que la boîte a
+   fait aujourd'hui, agent par agent, et ce qui reste sur l'établi. */
+function jourLong(iso){
+  const a = new Date(String(iso) + "T12:00:00");
+  if (isNaN(a.getTime())) return String(iso || "");
+  const J = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+  const M = ["janvier","février","mars","avril","mai","juin","juillet","août",
+             "septembre","octobre","novembre","décembre"];
+  return J[a.getDay()] + " " + a.getDate() + " " + M[a.getMonth()] + " " + a.getFullYear();
+}
+
+const JOUR_ORDRE = ["bon", "fab", "tube", "etat", "paie", "pros", "edit"];
+const JOUR_LABS = {
+  bon:  ["bon créé",          "bons créés"],
+  fab:  ["fenêtre fabriquée", "fenêtres fabriquées"],
+  tube: ["découpe livrée",    "découpes livrées"],
+  etat: ["situation changée", "situations changées"],
+  paie: ["paiement encaissé", "paiements encaissés"],
+  pros: ["contact WhatsApp",  "contacts WhatsApp"],
+  edit: ["bon modifié",       "bons modifiés"]
+};
+function jourLab(t, n){ const L = JOUR_LABS[t]; return L ? L[n > 1 ? 1 : 0] : t; }
+
+/* Ce que la journée contient, prêt à être dessiné ou écrit. */
+function bilanJour(iso){
+  const ev = evenementsDuJour(iso);
+  const cpt = {};
+  ev.forEach(x => { cpt[x.type] = (cpt[x.type] || 0) + 1; });
+  const cash = ev.filter(x => x.type === "paie").reduce((t, x) => t + (x.montant || 0), 0);
+  const livres = ev.filter(x => x.type === "etat" && x.etat === "livre").length;
+
+  const par = {};
+  ev.forEach(x => {
+    const k = x.by || "?";
+    if (!par[k]) par[k] = {n:0, cpt:{}, cash:0};
+    par[k].n++;
+    par[k].cpt[x.type] = (par[k].cpt[x.type] || 0) + 1;
+    if (x.type === "paie") par[k].cash += (x.montant || 0);
+  });
+  const agents = Object.keys(par)
+    .sort((a, b) => par[b].n - par[a].n)
+    .map(k => ({
+      login: k,
+      nom: k === "?" ? "Sans agent" : nomDe(k),
+      n: par[k].n,
+      cash: par[k].cash,
+      lignes: JOUR_ORDRE.filter(t => par[k].cpt[t])
+        .map(t => par[k].cpt[t] + " " + jourLab(t, par[k].cpt[t]))
+    }));
+
+  let reste = {total:0, bons:[]};
+  try { reste = resteAFabriquer(); } catch(e){}
+  return {iso:iso, ev:ev, cpt:cpt, cash:cash, livres:livres, agents:agents, reste:reste};
+}
+
+/* Le texte qui accompagne l'image : lisible même si la photo ne charge pas. */
+function resumeTexteJour(iso){
+  const B = bilanJour(iso);
+  const L = ["MSTORECASA  ·  " + jourLong(iso), ""];
+  if (!B.ev.length){
+    L.push("Aucune opération enregistrée ce jour là.");
+    return L.join("\n");
+  }
+  B.agents.forEach(a => {
+    L.push(a.nom + " : " + a.lignes.join(", ") +
+      (a.cash ? "  ·  " + fr(a.cash, 0) + " MAD encaissés" : ""));
+  });
+  L.push("");
+  const tot = [];
+  JOUR_ORDRE.forEach(t => { if (B.cpt[t]) tot.push(B.cpt[t] + " " + jourLab(t, B.cpt[t])); });
+  if (tot.length) L.push("Total : " + tot.join(", "));
+  if (B.cash) L.push("Encaissé : " + fr(B.cash, 2) + " MAD");
+  if (B.reste.total) L.push("Reste à fabriquer : " + B.reste.total + " fenêtre" +
+    (B.reste.total > 1 ? "s" : "") + " sur " + B.reste.bons.length + " bon" +
+    (B.reste.bons.length > 1 ? "s" : ""));
+  return L.join("\n");
+}
+
+function imageJour(iso){
+  const B = bilanJour(iso);
+  const W = 1080, P = 60;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = 2600;
+  const x = c.getContext("2d");
+  x.fillStyle = "#FFFFFF"; x.fillRect(0, 0, W, c.height);
+  const A = 'Archivo, sans-serif', BB = '"IBM Plex Sans", sans-serif', M = '"IBM Plex Mono", monospace';
+  x.textBaseline = "alphabetic";
+  let y = 0;
+
+  /* bandeau */
+  x.fillStyle = T.accent; x.fillRect(0, 0, W, 160);
+  x.fillStyle = "#FFFFFF";
+  x.font = "700 42px " + A; x.fillText("MSTORECASA", P, 66);
+  x.font = "400 28px " + BB;
+  x.fillText("Ce qu'on a fait  ·  " + jourLong(iso), P, 110);
+  y = 160;
+
+  if (!B.ev.length){
+    y += 90;
+    x.fillStyle = T.muted; x.font = "400 30px " + BB;
+    x.fillText("Aucune opération enregistrée ce jour là.", P, y);
+    y += 50;
+    const fin = document.createElement("canvas");
+    fin.width = W; fin.height = y + 40;
+    fin.getContext("2d").drawImage(c, 0, 0);
+    return fin;
+  }
+
+  /* les grands chiffres de la journée */
+  const cases = [];
+  JOUR_ORDRE.forEach(t => { if (B.cpt[t]) cases.push([String(B.cpt[t]), jourLab(t, B.cpt[t])]); });
+  if (B.cash) cases.push([fr(B.cash, 0), "MAD encaissés"]);
+  y += 46;
+  const cw = (W - 2*P - 20) / 2, ch = 118;
+  cases.forEach((cs, i) => {
+    const cx = P + (i % 2) * (cw + 20);
+    const cy = y + Math.floor(i / 2) * (ch + 16);
+    x.fillStyle = T.card; x.fillRect(cx, cy, cw, ch);
+    x.fillStyle = T.accent; x.font = "600 46px " + M;
+    x.fillText(cs[0], cx + 24, cy + 62);
+    x.fillStyle = T.muted; x.font = "600 22px " + A;
+    x.fillText(String(cs[1]).toUpperCase(), cx + 24, cy + 96);
+  });
+  y += Math.ceil(cases.length / 2) * (ch + 16) + 26;
+
+  /* agent par agent */
+  x.fillStyle = T.line; x.fillRect(P, y, W - 2*P, 2); y += 52;
+  x.fillStyle = T.ink; x.font = "700 34px " + A;
+  x.fillText("Qui a fait quoi", P, y); y += 26;
+
+  B.agents.forEach(a => {
+    y += 34;
+    /* pastille de l'initiale */
+    x.fillStyle = T.soft;
+    x.beginPath(); x.arc(P + 26, y - 10, 26, 0, Math.PI * 2); x.fill();
+    x.fillStyle = T.accent; x.font = "700 28px " + A; x.textAlign = "center";
+    x.fillText(a.nom.slice(0, 1).toUpperCase(), P + 26, y - 1);
+    x.textAlign = "left";
+
+    x.fillStyle = T.ink; x.font = "600 34px " + A;
+    x.fillText(a.nom, P + 68, y);
+    x.textAlign = "right";
+    x.fillStyle = T.muted; x.font = "600 30px " + M;
+    x.fillText(String(a.n), W - P, y);
+    x.textAlign = "left";
+    y += 12;
+    a.lignes.forEach(l => {
+      y += 36;
+      x.fillStyle = T.muted; x.font = "400 27px " + BB;
+      x.fillText("·  " + l, P + 68, y);
+    });
+    if (a.cash){
+      y += 36;
+      x.fillStyle = T.ok; x.font = "600 27px " + BB;
+      x.fillText("·  " + fr(a.cash, 2) + " MAD encaissés", P + 68, y);
+    }
+    y += 26;
+    x.fillStyle = T.line; x.fillRect(P, y, W - 2*P, 1);
+  });
+
+  /* ce qui reste sur l'établi */
+  y += 56;
+  x.fillStyle = T.ink; x.font = "700 34px " + A;
+  x.fillText("Reste à fabriquer", P, y);
+  x.textAlign = "right";
+  x.fillStyle = B.reste.total ? T.warn : T.ok; x.font = "600 34px " + M;
+  x.fillText(B.reste.total + (B.reste.total > 1 ? " fenêtres" : " fenêtre"), W - P, y);
+  x.textAlign = "left";
+  y += 14;
+  if (!B.reste.total){
+    y += 36;
+    x.fillStyle = T.ok; x.font = "400 27px " + BB;
+    x.fillText("Tout est fabriqué sur les commandes confirmées.", P, y);
+  } else {
+    B.reste.bons.slice(0, 6).forEach(b => {
+      y += 38;
+      x.fillStyle = T.muted; x.font = "400 27px " + BB;
+      x.fillText(String(b.o.nom || "Client sans nom").slice(0, 28) +
+        "  ·  " + (b.o.num || ""), P, y);
+      x.textAlign = "right";
+      x.fillStyle = T.ink; x.font = "600 27px " + M;
+      x.fillText("reste " + b.reste.length + " sur " + b.tot, W - P, y);
+      x.textAlign = "left";
+    });
+    if (B.reste.bons.length > 6){
+      y += 38;
+      x.fillStyle = T.muted; x.font = "400 25px " + BB;
+      x.fillText("et " + (B.reste.bons.length - 6) + " autre" +
+        (B.reste.bons.length - 6 > 1 ? "s" : "") + " bon" +
+        (B.reste.bons.length - 6 > 1 ? "s" : ""), P, y);
+    }
+    y += 14;
+    x.fillStyle = T.muted; x.font = "400 22px " + BB;
+    y += 34;
+    x.fillText("Les devis et les bons livrés ne comptent pas.", P, y);
+  }
+
+  y += 60;
+  const fin = document.createElement("canvas");
+  fin.width = W; fin.height = y;
+  const fx = fin.getContext("2d");
+  fx.fillStyle = "#FFFFFF"; fx.fillRect(0, 0, W, y);
+  fx.drawImage(c, 0, 0);
+  return fin;
+}
+
+async function ouvrirResumeJour(iso){
+  resO = null; resJour = iso;
+  $("resTitre").textContent = "Journée du " + jourLong(iso);
+  $("resImg").removeAttribute("src");
+  $("resHint").textContent = "Préparation de l'image...";
+  openSheet("resSheet");
+  try {
+    if (document.fonts && document.fonts.ready){
+      await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 900))]);
+    }
+    const c = imageJour(iso);
+    resUrl = c.toDataURL("image/png");
+    $("resImg").src = resUrl;
+    resBlob = null;
+    c.toBlob(b => { resBlob = b; }, "image/png");
+    $("resHint").textContent = "« Envoyer au groupe » ouvre le partage du téléphone : " +
+      "choisissez WhatsApp puis le groupe MSTORECASA. L'image et le texte partent ensemble.";
+  } catch(e){
+    $("resHint").textContent = "L'image n'a pas pu être préparée : " +
+      (e && e.message ? e.message : "erreur inconnue");
+    toast("Résumé impossible à préparer");
+  }
+}
+$("logPartage").addEventListener("click", () => ouvrirResumeJour(logJour));
+
 /* ============ Résumé d'une commande, pour le groupe WhatsApp ============ */
 /* Une image qui tient dans un message : où en est la découpe, où en est la
    fabrication, et où en est le paiement. */
 const GROUPE_WA = "https://chat.whatsapp.com/GIhfGPm2mtvBQCQMsPG3yc?s=cl&p=a&mlu=4&ilr=4";
 let resBlob = null, resUrl = null, resO = null;
+let resJour = "";        /* rempli quand la feuille montre une journée, pas un bon */
 
 function resumeImage(o){
   const W = 1080, P = 60;
@@ -7833,7 +8071,7 @@ function resumeTexte(o){
 
 async function ouvrirResume(o){
   if (!o) return;
-  resO = o;
+  resO = o; resJour = "";
   /* L'agent doit voir tout de suite que son appui a été pris en compte : la
      feuille s'ouvre avant le dessin, qui prend un instant sur un vieux téléphone. */
   $("resTitre").textContent = "Résumé " + (o.num || "");
@@ -7865,18 +8103,20 @@ function resNom(o){
 
 $("resShare").addEventListener("click", async () => {
   const o = resO;
-  if (!o) return;
-  const texte = resumeTexte(o);
+  if (!o && !resJour) return;
+  const texte = resJour ? resumeTexteJour(resJour) : resumeTexte(o);
+  const titre = resJour ? "MSTORECASA  ·  " + jourLong(resJour) : "MSTORECASA " + (o.num || "");
+  const nomF  = resJour ? "journee-" + resJour + ".png" : resNom(o);
   try {
     if (resBlob && navigator.canShare){
-      const f = new File([resBlob], resNom(o), {type:"image/png"});
+      const f = new File([resBlob], nomF, {type:"image/png"});
       if (navigator.canShare({files:[f]})){
-        await navigator.share({files:[f], title:"MSTORECASA " + (o.num || ""), text:texte});
+        await navigator.share({files:[f], title:titre, text:texte});
         return;
       }
     }
     if (navigator.share){
-      await navigator.share({title:"MSTORECASA " + (o.num || ""), text:texte});
+      await navigator.share({title:titre, text:texte});
       toast("Image non partageable ici : enregistrez la puis joignez la");
       return;
     }
@@ -7886,8 +8126,8 @@ $("resShare").addEventListener("click", async () => {
 
 $("resSave").addEventListener("click", async () => {
   const o = resO;
-  if (!o) return;
-  const nom = resNom(o);
+  if (!o && !resJour) return;
+  const nom = resJour ? "journee-" + resJour + ".png" : resNom(o);
   if (DL && resBlob){
     try { await DL.save({filename:nom, data:resBlob}); toast("Image enregistrée"); return; }
     catch(e){ if (e && e.code === "declined") return; }
@@ -9661,7 +9901,10 @@ $("prosBody").addEventListener("click", e => {
   if (wa){
     /* le lien s'ouvre tout seul, on note juste la date du dernier contact */
     const p = PROS.find(x => x.id === wa.dataset.prwa);
-    if (p){ p.vu = Date.now(); p.maj = Date.now(); prosSave(); setTimeout(renderPros, 60); }
+    if (p){
+      p.vu = Date.now(); p.vuBy = (USER && USER.login) || ""; p.maj = Date.now();
+      prosSave(); setTimeout(renderPros, 60);
+    }
     return;
   }
   const ed = e.target.closest("[data-predit]");
@@ -10016,6 +10259,10 @@ function resteAFabriquer(){
   let tot = 0;
   (ORDERS || []).forEach(o => {
     if (etatDe(o) === "livre") return;
+    /* Un devis n'est pas du travail : le client n'a rien confirmé, l'atelier
+       ne doit pas le voir dans ce qui lui reste à faire. */
+    if (etatDe(o) === "devis") return;
+    if (o.status !== "sent") return;
     const dims = ordDims(o);
     if (!dims.length) return;
     const done = faites(o);
@@ -10038,7 +10285,7 @@ function renderTodo(){
   $("lgTodoBadge").className = "badge" + (R.total ? " warn" : " ok");
   const box = $("lgTodoList");
   if (!R.bons.length){
-    box.innerHTML = '<div class="hint" style="margin:0">Rien en attente : toutes les fenêtres des bons non livrés sont fabriquées.</div>';
+    box.innerHTML = '<div class="hint" style="margin:0">Rien en attente : toutes les fenêtres des commandes confirmées sont fabriquées.</div>';
     $("lgTodoHint").textContent = "";
     return;
   }
@@ -10065,7 +10312,7 @@ function renderTodo(){
   $("lgTodoHint").textContent = R.total + " fenêtre" + (R.total > 1 ? "s" : "") +
     " sur " + R.bons.length + " bon" + (R.bons.length > 1 ? "s" : "") +
     (nProd ? ",  dont " + nProd + " sur " + enProd.length + " bon" + (enProd.length > 1 ? "s" : "") + " en production" : "") +
-    ".  Les bons livrés ne comptent plus.";
+    ".  Les devis et les bons livrés ne comptent pas.";
 }
 
 /* Combien de fenêtres sont fabriquées ce jour là.
@@ -10185,6 +10432,26 @@ function evenementsDuJour(iso){
                 val:fr(m, 2) + " MAD", montant:m});
     });
   });
+
+  /* Les demandes reçues sur WhatsApp : elles ne sont pas des bons, mais c'est
+     du travail d'Imane et ça doit se voir dans la journée. */
+  (typeof PROS !== "undefined" ? (PROS || []) : []).forEach(p => {
+    if (!p || p.sup) return;
+    const quoi = [];
+    const r = (typeof prosResume === "function") ? prosResume(p) : null;
+    if (r && r.nb) quoi.push(r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre"));
+    if (p.type) quoi.push(typeCourt(p.type));
+    if (p.at && jourISO(p.at) === iso){
+      out.push({at:p.at, by:p.by || "", type:"pros", titre:"Nouveau contact WhatsApp",
+                sous:(p.nom || "Sans nom") + (p.tel ? "  ·  " + telAffiche(p.tel) : ""),
+                val:quoi.join("  ·  ")});
+    }
+    if (p.vu && jourISO(p.vu) === iso && jourISO(p.at) !== iso){
+      out.push({at:p.vu, by:p.vuBy || p.by || "", type:"pros", titre:"Contact rappelé",
+                sous:(p.nom || "Sans nom") + (p.tel ? "  ·  " + telAffiche(p.tel) : ""),
+                val:quoi.join("  ·  ")});
+    }
+  });
   return out.sort((a,b) => b.at - a.at);
 }
 
@@ -10204,6 +10471,7 @@ function renderLog(){
   const nFab   = n("fab");
   const nTube  = n("tube");
   const nLivre = ev.filter(x => x.type === "etat" && x.etat === "livre").length;
+  const nPros  = n("pros");
   const cash   = ev.filter(x => x.type === "paie").reduce((s,x) => s + (x.montant || 0), 0);
 
   const a = new Date(logJour + "T12:00:00");
@@ -10222,7 +10490,8 @@ function renderLog(){
     tuile(nFab,   "fenêtre fabriquée",    "fenêtres fabriquées",   "v") +
     tuile(nTube,  "découpe au magasin 2", "découpes au magasin 2", "i") +
     tuile(nLivre, "commande livrée",      "commandes livrées",     "a") +
-    tuile(nPaie,  "paiement encaissé",    "paiements encaissés",   "v");
+    tuile(nPaie,  "paiement encaissé",    "paiements encaissés",   "v") +
+    tuile(nPros,  "contact WhatsApp",     "contacts WhatsApp",     "i");
   $("logCash").textContent = fr(cash, 2) + " MAD";
 
   Array.prototype.forEach.call($("logVue").children,
@@ -10232,7 +10501,8 @@ function renderLog(){
   if (!ev.length){
     box.innerHTML = '<div class="empty">Rien ce jour là.<br>' +
       'Bons créés, bons modifiés, fenêtres fabriquées, découpes livrées, ' +
-      'commandes livrées et paiements apparaissent ici dès qu\'un agent les enregistre.</div>';
+      'commandes livrées, paiements et contacts WhatsApp apparaissent ici ' +
+      'dès qu\'un agent les enregistre.</div>';
     $("logHint").textContent = "";
     return;
   }
@@ -10264,14 +10534,15 @@ function vueAgent(ev){
     if (!par[k]) par[k] = [];
     par[k].push(x);
   });
-  const ORDRE = ["bon", "edit", "fab", "tube", "etat", "paie"];
+  const ORDRE = ["bon", "edit", "fab", "tube", "etat", "paie", "pros"];
   const LABS = {
     bon:  ["bon créé",           "bons créés"],
     edit: ["bon modifié",        "bons modifiés"],
     fab:  ["fenêtre fabriquée",  "fenêtres fabriquées"],
     tube: ["découpe livrée",     "découpes livrées"],
     etat: ["changement d'état",  "changements d'état"],
-    paie: ["paiement",           "paiements"]
+    paie: ["paiement",           "paiements"],
+    pros: ["contact WhatsApp",   "contacts WhatsApp"]
   };
   return Object.keys(par)
     .sort((a,b) => par[b].length - par[a].length)
