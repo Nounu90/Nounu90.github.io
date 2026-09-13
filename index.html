@@ -721,6 +721,14 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
 .rmregles b{color:var(--ink); font-family:"IBM Plex Mono",monospace; font-weight:600}
 
+/* --- la situation du bon dans le choix du plan de coupe --- */
+.pketat{flex:none; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:6px;
+  background:var(--card2); color:var(--muted); border:1px solid var(--line)}
+.pketat.production{background:var(--warn-soft,#FAEFDD); color:var(--warn); border-color:transparent}
+.pketat.pret{background:var(--info-soft); color:var(--info); border-color:transparent}
+.pketat.livre{background:var(--ok-soft); color:var(--ok); border-color:transparent}
+
 /* --- l'échéance, en bas du bon --- */
 .echbar{margin-top:11px; border:1px solid var(--line); border-radius:12px;
   background:var(--card2); padding:11px 13px}
@@ -782,6 +790,12 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .atfil .n{font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:600; color:var(--ink)}
 .atfil .v{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600; color:var(--warn);
   white-space:nowrap}
+.atfil .v.part{color:var(--info)}
+.atfil.hors{opacity:.55}
+.atfil .s .pketat{margin-right:4px}
+.atsep{margin-top:14px; padding:8px 0 2px; border-top:2px solid var(--line);
+  font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--muted)}
 .atfil .s{grid-column:1 / -1; font-size:11.5px; color:var(--muted); line-height:1.45}
 
 /* --- journal de fabrication --- */
@@ -1999,7 +2013,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 
     <div class="atbox">
       <h3>Ce qui compose la file</h3>
-      <p>Les fenêtres pas encore cochées par Soufiane dans le plan de coupe. Choisissez les états qui occupent vraiment l'atelier : le compte et la liste se refont aussitôt.</p>
+      <p>Les fenêtres pas encore cochées par Soufiane dans le plan de coupe. Les découpes de tube ne comptent pas : seules les fenêtres montées font foi. Le chiffre à droite se lit <b>fabriquées sur total</b>. Les bons dont l'état n'est pas coché restent affichés en bas, en gris.</p>
       <div class="filters" id="atlEtats">
         <button type="button" data-e="devis">Devis</button>
         <button type="button" data-e="production">En production</button>
@@ -5433,7 +5447,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "10.3";
+const APP_VERSION = "10.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6204,9 +6218,29 @@ $("cutFait").addEventListener("click", e => {
   });
   if (o.log.length > 400) o.log = o.log.slice(-400);
 
+  /* La dernière fenêtre cochée fait passer le bon de « En production » à
+     « Prêt » : l'atelier n'a plus rien à faire dessus, et il sort de la file.
+     Si une fenêtre est décochée ensuite, le bon repart en production. */
+  const tousFaits = dims.length > 0 && dims.every(x => l.indexOf(x.key) >= 0);
+  let bascule = "";
+  if (tousFaits && etatDe(o) === "production"){ o.etat = "pret"; bascule = "pret"; }
+  else if (!tousFaits && etatDe(o) === "pret"){ o.etat = "production"; bascule = "production"; }
+  if (bascule){
+    noteEtat(o);
+    sheetSituation(o.num, etatLabel(o.etat));
+    if (S && S.id === o.id){ S.etat = o.etat; S.ech = o.ech; S.plan = o.plan; }
+  }
+
   touche(o); persistOrders();
   pushBon(o);                 /* les autres téléphones suivent */
   renderPlan();
+  if (bascule){
+    try { renderEtatSel(); } catch(err){}
+    try { renderHist(); renderHome(); renderAtl(); } catch(err){}
+    toast(bascule === "pret"
+      ? "Toutes les fenêtres sont faites  ·  " + o.num + " passe en Prêt"
+      : o.num + " repasse en production");
+  }
   if ($("logSheet").classList.contains("open")) renderLog();
 });
 
@@ -6756,9 +6790,11 @@ function ouvrirPickBon(cible){
   $("cutPickSheet").classList.add("open");
 }
 
-/* L'atelier veut voir en premier ce qu'il lui reste à faire, et parmi ça, ce qui
-   arrive à échéance le plus tôt. Les bons terminés descendent en bas. */
+/* L'atelier veut voir en premier ce qu'il a sur l'établi, et parmi ça, ce qui
+   arrive à échéance le plus tôt. Viennent ensuite les bons terminés, puis les
+   devis, qui ne sont pas encore du travail confirmé. */
 function pickRang(o){
+  if (etatDe(o) === "devis") return 3;
   if (estFini(o)) return 2;
   const et = pickEtat(o);
   return (et && et.ok) ? 1 : 0;
@@ -6795,6 +6831,7 @@ function dessinePick(){
     btn.dataset.cut = o.id;
     btn.innerHTML =
       '<span class="hmain"><span class="hl1"><b>' + esc(o.nom || "Client sans nom") + '</b>' +
+      '<span class="pketat ' + etatDe(o) + '">' + etatLabel(etatDe(o)) + '</span>' +
       (et ? '<span class="badge ' + (et.ok ? "ok" : "warn") + '">' + et.txt + '</span>'
           : '<span class="badge ' + (o.status === "sent" ? "ok" : "") + '">' +
             (o.status === "sent" ? "Envoyé" : "Brouillon") + '</span>') +
@@ -8493,27 +8530,32 @@ function dateLongue(iso){
    cochées par Soufiane dans le plan de coupe. Les états qui comptent se règlent
    dans la page Atelier, parce que seule la direction sait comment l'équipe fait
    vivre ces états au quotidien. */
+/* Seules les fenêtres décident : une découpe de tube cochée ne veut pas dire
+   que la fenêtre est montée. On ne regarde donc que la liste « Fenêtres
+   fabriquées » du plan de coupe, jamais les tubes. */
 function fileDetail(exclureId){
-  const bons = [];
+  const dedans = [], dehors = [];
   let n = 0;
   (ORDERS || []).forEach(o => {
     if (exclureId && o.id === exclureId) return;
     if (o.status !== "sent") return;
-    if (!etatCompte(etatDe(o))) return;
     const dims = ordDims(o);
     if (!dims.length) return;
     const done = faites(o);
-    const reste = dims.filter(d => done.indexOf(d.key) < 0).length;
-    if (!reste) return;
-    n += reste;
-    bons.push({o:o, reste:reste, tot:dims.length});
+    const fait = dims.filter(d => done.indexOf(d.key) >= 0).length;
+    const reste = dims.length - fait;
+    if (!reste) return;                       /* tout est monté, plus rien à faire */
+    const ligne = {o:o, reste:reste, fait:fait, tot:dims.length};
+    if (etatCompte(etatDe(o))){ n += reste; dedans.push(ligne); }
+    else dehors.push(ligne);                  /* visible, mais hors capacité */
   });
-  bons.sort((a,b) => {
+  const tri = (a,b) => {
     const ta = a.o.ech ? new Date(a.o.ech + "T12:00:00").getTime() : Infinity;
     const tb = b.o.ech ? new Date(b.o.ech + "T12:00:00").getTime() : Infinity;
     return ta - tb || new Date(a.o.date || 0) - new Date(b.o.date || 0);
-  });
-  return {total:n, bons:bons};
+  };
+  dedans.sort(tri); dehors.sort(tri);
+  return {total:n, bons:dedans, autres:dehors};
 }
 function fileAttente(exclureId){ return fileDetail(exclureId).total; }
 
@@ -8641,16 +8683,28 @@ function renderAtl(){
     '<div class="full v"><b style="font-size:19px">' + dateLongue(isoDe(libre)) +
       '</b><small>premier jour libre pour une nouvelle commande</small></div>';
 
-  /* Le détail, pour que le compteur s'explique de lui même. */
-  $("atlFile").innerHTML = det.bons.length
-    ? det.bons.map(b =>
-        '<div class="atfil"><span class="n">' + esc(b.o.num || "") + '  ·  ' +
-          esc(b.o.nom || "Client sans nom") + '</span>' +
-        '<span class="v">' + b.reste + ' / ' + b.tot + '</span>' +
-        '<span class="s">' + esc(etatLabel(etatDe(b.o))) +
-          (b.o.ech ? "  ·  échéance " + esc(String(b.o.ech).split("-").reverse().join("/")) : "  ·  sans échéance") +
-          "  ·  " + esc(nomDe(b.o.author || "")) + '</span></div>').join("")
-    : '<div class="atfil"><span class="s">Rien sur l\'établi avec les états cochés ci dessus. Si des fenêtres vous semblent manquer, c\'est que leurs bons portent un état décoché.</span></div>';
+  /* Le détail. On montre tout ce qui a encore des fenêtres à monter, y compris
+     les bons dont l'état ne compte pas dans la capacité : ils sont grisés, mais
+     ils ne disparaissent jamais de l'écran. */
+  const ligne = (b, hors) =>
+    '<div class="atfil' + (hors ? " hors" : "") + '"><span class="n">' +
+      esc(b.o.num || "") + '  ·  ' + esc(b.o.nom || "Client sans nom") + '</span>' +
+    '<span class="v' + (b.fait ? " part" : "") + '">' + b.fait + ' / ' + b.tot + '</span>' +
+    '<span class="s"><b class="pketat ' + etatDe(b.o) + '">' + etatLabel(etatDe(b.o)) + '</b>  ' +
+      b.reste + ' fenêtre' + (b.reste > 1 ? "s" : "") + ' à monter' +
+      (b.o.ech ? "  ·  échéance " + esc(String(b.o.ech).split("-").reverse().join("/")) : "  ·  sans échéance") +
+      "  ·  " + esc(nomDe(b.o.author || "")) + '</span></div>';
+
+  let h = det.bons.length
+    ? det.bons.map(b => ligne(b, false)).join("")
+    : '<div class="atfil"><span class="s">Aucun bon dont l\'état compte dans la capacité n\'a de fenêtre à monter.</span></div>';
+  if (det.autres.length){
+    h += '<div class="atsep">Encore à monter, mais hors capacité  ·  ' +
+         det.autres.reduce((t,b) => t + b.reste, 0) + ' fenêtre' +
+         (det.autres.reduce((t,b) => t + b.reste, 0) > 1 ? "s" : "") + '</div>' +
+         det.autres.map(b => ligne(b, true)).join("");
+  }
+  $("atlFile").innerHTML = h;
 
   const fer = (ATL.feries || []).slice()
     .filter(f => (f && f.d ? f.d : f) >= isoDe(new Date()))
