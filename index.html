@@ -747,6 +747,26 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .atban .s b{font-family:"IBM Plex Mono",monospace; font-weight:600}
 
 /* --- les contacts WhatsApp --- */
+.prsub{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between;
+  gap:2px 10px; margin:14px 0 7px}
+.prsub span{font-family:"Archivo",sans-serif; font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); font-weight:600}
+.prsub b{flex:none; font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; color:var(--muted)}
+.prrow{display:grid; grid-template-columns:22px 1fr 12px 1fr 74px 32px; gap:6px; align-items:center; margin-bottom:7px}
+.prrow .idx{width:22px; height:32px; border-radius:8px; background:var(--card2); color:var(--muted);
+  display:grid; place-items:center; font-family:"IBM Plex Mono",monospace; font-size:11px}
+.prrow input{height:38px; border:1px solid var(--line); background:var(--card2); border-radius:10px;
+  text-align:center; font-family:"IBM Plex Mono",monospace; font-size:14.5px; font-weight:600;
+  color:var(--ink); min-width:0; padding:0 4px}
+.prrow input:focus{border-color:var(--accent); background:var(--card); outline:none}
+.prrow .times{text-align:center; color:var(--muted); font-size:12px}
+.prrowsel{display:flex; gap:6px; padding:0 0 8px 28px; margin-top:-3px}
+.prrowsel button{flex:1; padding:7px 6px; border-radius:9px; border:1px solid var(--line);
+  background:var(--card2); font-family:"Archivo",sans-serif; font-size:12px; font-weight:600; color:var(--muted)}
+.prrowsel button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.prdem{margin-top:7px; font-size:12.5px; line-height:1.5; color:var(--muted)}
+.prdem b{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink)}
+
 .prcard{background:var(--card); border:1px solid var(--line); border-radius:13px; padding:12px 13px; margin-bottom:9px}
 .prcard.fin{opacity:.6}
 .prcard.client{border-color:var(--ok)}
@@ -2098,8 +2118,34 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       </div>
       <p class="hint" id="prosTelApercu" hidden style="margin-top:6px"></p>
       <div class="field" style="margin-top:9px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.6 7-11a7 7 0 10-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+        <input id="prosAdresse" type="text" placeholder="Adresse (quartier, ville)" autocomplete="off">
+      </div>
+
+      <div class="prsub"><span>Type de store</span></div>
+      <div class="seg seg3" id="prosType">
+        <button type="button" data-ptype="ENR" aria-pressed="true">Enrouleur</button>
+        <button type="button" data-ptype="JN" aria-pressed="false">Jour et nuit</button>
+        <button type="button" data-ptype="MIX" aria-pressed="false">Les deux</button>
+      </div>
+
+      <div class="prsub"><span>Tissus envisagés</span><b id="prosRefCount">aucun</b></div>
+      <div id="prosChips"></div>
+      <button class="add" id="prosRefBtn" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Choisir un tissu</span>
+      </button>
+
+      <div class="prsub"><span>Dimensions</span><b id="prosDimTot">—</b></div>
+      <div id="prosRows"></div>
+      <button class="add" id="prosAddRow" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Ajouter une fenêtre
+      </button>
+
+      <div class="field" style="margin-top:9px">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
-        <input id="prosNote" type="text" placeholder="Ce qu'il demande (pièce, couleur, budget...)">
+        <input id="prosNote" type="text" placeholder="Ce qu'il demande (budget, délai, remarque...)">
       </div>
       <div class="seg" id="prosBtns" style="margin-top:11px; display:flex; gap:8px">
         <button type="button" id="prosSave" style="flex:1" aria-pressed="true">Ajouter le contact</button>
@@ -2825,6 +2871,9 @@ function renderRefs(){
 }
 
 function pickFamily(){
+  if (pickPros){
+    try { return prosD.type === "MIX" ? null : prosD.type; } catch(e){ return null; }
+  }
   if (pickTarget !== null) return rowType(pickTarget);
   return S.type === "MIX" ? null : S.type;   /* null = les deux familles */
 }
@@ -2837,11 +2886,14 @@ function renderRefList(){
   const box = $("refList");
   box.innerHTML = "";
   const fam2 = pickFamily();
-  $("refSheetTitle").textContent = (pickTarget !== null ? "Store " + (pickTarget+1) + " · " : "") +
+  $("refSheetTitle").textContent = (pickPros ? "Contact · " : "") +
+    (!pickPros && pickTarget !== null ? "Store " + (pickTarget+1) + " · " : "") +
     (fam2 === "JN" ? "Tissu jour et nuit" : fam2 === "ENR" ? "Tissu enrouleur" : "Tissu");
-  $("refHint").textContent = pickTarget !== null
-    ? "Un seul tissu par fenêtre. Appuyez sur celui qui est coché pour le retirer."
-    : (S.multi ? "" : "Un seul tissu pour tout le bon.");
+  $("refHint").textContent = pickPros
+    ? "Ce que le client a en tête. Rien n'est réservé, on pourra en changer au bon."
+    : (pickTarget !== null
+      ? "Un seul tissu par fenêtre. Appuyez sur celui qui est coché pour le retirer."
+      : (S.multi ? "" : "Un seul tissu pour tout le bon."));
 
   const group = (title, arr, out) => {
     if (!arr.length) return;
@@ -2852,9 +2904,11 @@ function renderRefList(){
       const b = document.createElement("button");
       b.type = "button";
       b.className = "opt" + (out ? " out" : "");
-      const on = pickTarget !== null
-        ? ((S.dims[pickTarget] || {}).ref === f.ref)
-        : (S.refs.indexOf(f.ref) >= 0);
+      const on = pickPros
+        ? (prosD.refs.indexOf(f.ref) >= 0)
+        : (pickTarget !== null
+          ? ((S.dims[pickTarget] || {}).ref === f.ref)
+          : (S.refs.indexOf(f.ref) >= 0));
       b.setAttribute("aria-selected", String(on));
       b.dataset.ref = f.ref;
       b.innerHTML =
@@ -3400,7 +3454,9 @@ $("segPose").addEventListener("click", e => {
   renderEch(); renderPoseMode(); renderRecap(); renderProgress();
 });
 let pickTarget = null;   /* null = carte tissu, sinon index de ligne */
+let pickPros = false;    /* vrai quand on choisit le tissu d'une fiche contact */
 function openPicker(target){
+  pickPros = false;
   pickTarget = (target === undefined) ? null : target;
   $("refSearch").value = "";
   renderRefList();
@@ -3412,6 +3468,13 @@ $("refList").addEventListener("click", e => {
   const b = e.target.closest("button[data-ref]");
   if (!b) return;
   const r = b.dataset.ref;
+  if (pickPros){
+    const i = prosD.refs.indexOf(r);
+    if (i >= 0) prosD.refs.splice(i, 1); else prosD.refs.push(r);
+    renderRefList();
+    try { renderProsD(); } catch(e){}
+    return;
+  }
   if (pickTarget !== null){
     /* même tissu = on le retire de cette fenêtre */
     S.dims[pickTarget].ref = (S.dims[pickTarget].ref === r) ? "" : r;
@@ -5812,7 +5875,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "11.8";
+const APP_VERSION = "11.9";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -9344,6 +9407,16 @@ function renderPros(){
         (p.vu ? tag("contacté le " + prosDate(p.vu), "inf") : "") +
         (p.by ? tag(esc(nomDe(p.by))) : "") +
       '</div>' +
+      (function(){
+        const r = prosResume(p);
+        const bouts = [];
+        if (p.adresse) bouts.push(esc(p.adresse));
+        if (r && r.nb) bouts.push('<b>' + r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre") + '</b>' +
+          '  ·  <b>' + fr(r.m2, 2) + ' m²</b>  ·  <b>' + fr(r.ml, 2) + ' ml</b>');
+        if (p.type) bouts.push(typeCourt(p.type));
+        if (r && r.refs.length) bouts.push('<b>' + r.refs.map(esc).join(", ") + '</b>');
+        return bouts.length ? '<div class="prdem">' + bouts.join("  ·  ") + '</div>' : '';
+      })() +
       (p.note ? '<div class="prnote">' + esc(p.note) + '</div>' : '') +
       '<div class="pract">' +
         (lien
@@ -9372,37 +9445,185 @@ function renderPros(){
   }).join("");
 }
 
+/* --- ce que le contact a demandé, au niveau de détail qu'on a pu obtenir --- */
+/* Rien ici n'est engageant : ni réservation de tissu, ni place dans l'atelier.
+   C'est une prise de notes qui évitera de tout retaper le jour du devis. */
+function prosDVide(){ return {adresse:"", type:"ENR", refs:[], dims:[]}; }
+let prosD = prosDVide();
+
+function prosDimNette(d){
+  const l = parseFloat(String(d.l).replace(",", ".")), h = parseFloat(String(d.h).replace(",", "."));
+  return (l > 0 && h > 0) ? {l:l, h:h, q: prosQty(d)} : null;
+}
+function prosQty(d){
+  const n = Math.round(parseFloat(String(d && d.q !== undefined ? d.q : "").replace(",", ".")));
+  return (n >= 1 && n <= 99) ? n : 1;
+}
+/* Ce que la demande représente, pour l'écrire sur la carte. */
+function prosResume(p){
+  const dims = (p.dims || []).map(prosDimNette).filter(Boolean);
+  if (!dims.length && !(p.refs || []).length && !p.type) return null;
+  let nb = 0, m2 = 0, ml = 0;
+  dims.forEach(d => { nb += d.q; m2 += d.q * d.l * d.h / 10000; ml += d.q * d.h / 100; });
+  return {nb:nb, m2:m2, ml:ml, refs:(p.refs || []).slice(), type:p.type || ""};
+}
+function typeCourt(t){
+  return t === "JN" ? "jour et nuit" : (t === "MIX" ? "enrouleur et jour/nuit" : "enrouleur");
+}
+
+function renderProsD(){
+  if (!$("prosType")) return;
+  [...$("prosType").children].forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.ptype === prosD.type)));
+
+  /* les tissus pressentis */
+  const box = $("prosChips");
+  box.innerHTML = prosD.refs.map(r => {
+    const f = fab(r);
+    return '<div class="chip"><span class="ci"><span class="cref">' + esc(r) + '</span>' +
+      '<span class="csub">' + (f ? "laize " + (f.laize/100).toFixed(2).replace(".", ",") + " m  ·  " +
+        stockTxt(f) + " en stock" : "référence inconnue") + '</span></span>' +
+      '<button class="cx" data-prunpick="' + esc(r) + '" aria-label="Retirer ' + esc(r) + '">' +
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
+  }).join("");
+  $("prosRefCount").textContent = prosD.refs.length
+    ? prosD.refs.length + (prosD.refs.length > 1 ? " tissus" : " tissu") : "aucun";
+
+  /* les mesures */
+  const rows = $("prosRows");
+  rows.innerHTML = prosD.dims.map((d, i) =>
+    '<div class="prrow">' +
+      '<div class="idx">' + (i + 1) + '</div>' +
+      '<input inputmode="decimal" value="' + esc(d.l || "") + '" data-prk="l" data-pri="' + i + '" placeholder="larg." aria-label="Largeur fenêtre ' + (i+1) + '">' +
+      '<div class="times">&times;</div>' +
+      '<input inputmode="decimal" value="' + esc(d.h || "") + '" data-prk="h" data-pri="' + i + '" placeholder="haut." aria-label="Hauteur fenêtre ' + (i+1) + '">' +
+      '<input inputmode="numeric" value="' + esc(d.q || "") + '" data-prk="q" data-pri="' + i + '" placeholder="1" aria-label="Nombre de fenêtres identiques ' + (i+1) + '">' +
+      '<button class="del" type="button" data-prdelrow="' + i + '" aria-label="Supprimer la ligne ' + (i+1) + '">' +
+        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>' +
+      '</button>' +
+    '</div>' +
+    (prosD.type === "MIX"
+      ? '<div class="prrowsel">' +
+          '<button type="button" data-prtype="' + i + '" data-v="ENR" aria-pressed="' + ((d.type || "ENR") === "ENR") + '">Enrouleur</button>' +
+          '<button type="button" data-prtype="' + i + '" data-v="JN" aria-pressed="' + (d.type === "JN") + '">Jour et nuit</button>' +
+        '</div>'
+      : "")
+  ).join("");
+
+  const r = prosResume(prosD);
+  $("prosDimTot").textContent = (r && r.nb)
+    ? r.nb + (r.nb > 1 ? " fenêtres  ·  " : " fenêtre  ·  ") + fr(r.m2, 2) + " m²  ·  " + fr(r.ml, 2) + " ml"
+    : "—";
+}
+
+$("prosType").addEventListener("click", e => {
+  const b = e.target.closest("[data-ptype]");
+  if (!b) return;
+  prosD.type = b.dataset.ptype;
+  /* changer de famille invalide les tissus de l'autre famille */
+  prosD.refs = prosD.refs.filter(x => {
+    const f = fab(x);
+    return !f || prosD.type === "MIX" || f.type === prosD.type;
+  });
+  if (prosD.type !== "MIX") prosD.dims.forEach(d => { delete d.type; });
+  renderProsD();
+});
+$("prosRefBtn").addEventListener("click", () => {
+  pickPros = true; pickTarget = null;
+  $("refSearch").value = "";
+  renderRefList();
+  openSheet("refSheet");
+});
+$("prosChips").addEventListener("click", e => {
+  const b = e.target.closest("[data-prunpick]");
+  if (!b) return;
+  const i = prosD.refs.indexOf(b.dataset.prunpick);
+  if (i >= 0) prosD.refs.splice(i, 1);
+  renderProsD();
+});
+$("prosAddRow").addEventListener("click", () => {
+  prosD.dims.push({l:"", h:"", q:""});
+  renderProsD();
+});
+$("prosRows").addEventListener("input", e => {
+  const i = e.target.dataset.pri;
+  if (i === undefined) return;
+  const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
+  if (clean !== e.target.value) e.target.value = clean;
+  prosD.dims[i][e.target.dataset.prk] = clean;
+  const r = prosResume(prosD);
+  $("prosDimTot").textContent = (r && r.nb)
+    ? r.nb + (r.nb > 1 ? " fenêtres  ·  " : " fenêtre  ·  ") + fr(r.m2, 2) + " m²  ·  " + fr(r.ml, 2) + " ml"
+    : "—";
+});
+$("prosRows").addEventListener("click", e => {
+  const t = e.target.closest("[data-prtype]");
+  if (t){ prosD.dims[+t.dataset.prtype].type = t.dataset.v; renderProsD(); return; }
+  const d = e.target.closest("[data-prdelrow]");
+  if (!d) return;
+  prosD.dims.splice(+d.dataset.prdelrow, 1);
+  renderProsD();
+});
+
 /* --- le petit formulaire du haut --- */
 function prosVide(){
   prosEdit = "";
   $("prosNom").value = ""; $("prosTel").value = ""; $("prosNote").value = "";
+  $("prosAdresse").value = "";
+  prosD = prosDVide();
+  try { renderProsD(); } catch(e){}
+}
+/* Charge une fiche dans le formulaire du haut. */
+function prosCharge(p){
+  prosEdit = p.id;
+  $("prosNom").value = p.nom || ""; $("prosTel").value = p.tel || "";
+  $("prosNote").value = p.note || ""; $("prosAdresse").value = p.adresse || "";
+  prosD = {adresse: p.adresse || "", type: p.type || "ENR",
+           refs: (p.refs || []).slice(),
+           dims: (p.dims || []).map(d => Object.assign({}, d))};
+  renderProsD();
+}
+/* Recopie le formulaire du haut dans une fiche. */
+function prosApplique(p){
+  p.nom = $("prosNom").value.trim();
+  p.tel = $("prosTel").value.trim();
+  p.note = $("prosNote").value.trim();
+  p.adresse = $("prosAdresse").value.trim();
+  p.type = prosD.type || "ENR";
+  p.refs = prosD.refs.slice();
+  p.dims = prosD.dims
+    .filter(d => String(d.l).trim() || String(d.h).trim())
+    .map(d => ({l:d.l || "", h:d.h || "", q:d.q || "", type:d.type || ""}));
+  p.maj = Date.now();
 }
 $("prosNom").addEventListener("input", renderPros);
 $("prosTel").addEventListener("input", renderPros);
 $("prosSave").addEventListener("click", () => {
   const nom = $("prosNom").value.trim();
   const tel = $("prosTel").value.trim();
-  const note = $("prosNote").value.trim();
   if (!nom && !tel){ toast("Il faut au moins un nom ou un numéro"); return; }
   if (prosEdit){
     const p = PROS.find(x => x.id === prosEdit);
-    if (p){ p.nom = nom; p.tel = tel; p.note = note; p.maj = Date.now(); }
+    if (p) prosApplique(p);
     toast("Contact modifié");
   } else {
-    /* Le même numéro deux fois, c'est la même personne qui réécrit. */
+    /* Le même numéro deux fois, c'est la même personne qui réécrit :
+       on rouvre sa fiche au lieu d'en créer une seconde. */
     const n = waNum(tel);
     const dejala = n && prosVivants().find(x => waNum(x.tel) === n);
     if (dejala){
-      prosEdit = dejala.id;
-      $("prosNom").value = dejala.nom || nom;
-      $("prosNote").value = dejala.note || note;
+      const gardeNom = nom, gardeNote = $("prosNote").value.trim();
+      prosCharge(dejala);
+      if (gardeNom) $("prosNom").value = gardeNom;
+      if (gardeNote) $("prosNote").value = gardeNote;
       renderPros();
       toast("Ce numéro est déjà dans la liste");
       return;
     }
-    PROS.unshift({id:"p" + Date.now() + Math.floor(Math.random()*900),
-                  nom:nom, tel:tel, note:note, at:Date.now(), maj:Date.now(),
-                  by:(USER && USER.login) || ""});
+    const p = {id:"p" + Date.now() + Math.floor(Math.random()*900),
+               at:Date.now(), by:(USER && USER.login) || ""};
+    prosApplique(p);
+    PROS.unshift(p);
     toast("Contact ajouté");
   }
   prosVide(); prosSave(); renderPros(); renderHome();
@@ -9429,9 +9650,7 @@ $("prosBody").addEventListener("click", e => {
   if (ed){
     const p = PROS.find(x => x.id === ed.dataset.predit);
     if (!p) return;
-    prosEdit = p.id;
-    $("prosNom").value = p.nom || ""; $("prosTel").value = p.tel || "";
-    $("prosNote").value = p.note || "";
+    prosCharge(p);
     renderPros();
     $("prosSheet").querySelector(".sheet-body").scrollTo({top:0, behavior:"smooth"});
     return;
@@ -9474,12 +9693,32 @@ $("prosBody").addEventListener("click", e => {
    pour qu'un formulaire abandonné ne la fasse pas disparaître de la liste. */
 function prosVersBon(p, etat){
   newOrderSynced();
-  S.nom = p.nom || "";  $("nom").value = S.nom;
-  S.tel = p.tel || "";  $("tel").value = S.tel;
+  S.nom = p.nom || "";          $("nom").value = S.nom;
+  S.tel = p.tel || "";          $("tel").value = S.tel;
+  S.adresse = p.adresse || "";  $("adresse").value = S.adresse;
   if (p.note){ S.notes = p.note; $("notes").value = p.note; }
+
+  /* Tout ce qui a été relevé au téléphone passe tel quel dans le bon :
+     le prix, la pose et le tissu de chaque fenêtre restent à compléter. */
+  S.type = p.type || "ENR";
+  S.refs = (p.refs || []).filter(r => fab(r));
+  S.multi = S.refs.length > 1;
+  const dims = (p.dims || []).filter(d => String(d.l).trim() || String(d.h).trim());
+  if (dims.length){
+    S.dims = dims.map(d => ({
+      l: d.l || "", h: d.h || "", q: d.q || "", note: "",
+      ref: (!S.multi && S.refs.length === 1) ? "" : "",
+      type: S.type === "MIX" ? (d.type || "ENR") : S.type
+    }));
+  }
   S.etat = etat;
   S.pros = p.id;
   formVenu = "pros";
+
+  /* les boutons du formulaire suivent ce qu'on vient de poser */
+  [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === S.type)));
+  [...$("segMulti").children].forEach(x => x.setAttribute("aria-pressed", String((x.dataset.multi === "1") === !!S.multi)));
+
   renderAll();
   nav("form");
   toast(etat === "devis"
