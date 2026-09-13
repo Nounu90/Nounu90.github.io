@@ -3423,7 +3423,8 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
   if (id === "cliOneSheet"){ nav("cliSheet"); renderCli(); return; }
   if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
       id === "nomSheet"   || id === "coutSheet" || id === "cliSheet" || id === "docSheet" ||
-      id === "logSheet" || id === "paySheet" || id === "triSheet") nav("home");
+      id === "logSheet" || id === "paySheet" || id === "triSheet" ||
+      id === "atlSheet" || id === "remuSheet") nav("home");
   else closeSheet(id);
 }));
 
@@ -4886,7 +4887,7 @@ function renderTout(){
 }
 
 function ecranOuvert(){
-  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","paySheet","refSheet","cutPickSheet","nomPickSheet","shotSheet"];
+  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","paySheet","refSheet","cutPickSheet","nomPickSheet","shotSheet","atlSheet","remuSheet","docSheet","triSheet","cliSheet"];
   for (let i = 0; i < ids.length; i++){
     const el = $(ids[i]);
     if (el && el.classList.contains("open")) return ids[i];
@@ -5448,7 +5449,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "10.9";
+const APP_VERSION = "11.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6791,14 +6792,19 @@ function ouvrirPickBon(cible){
   $("cutPickSheet").classList.add("open");
 }
 
-/* L'atelier veut voir en premier ce qu'il a sur l'établi, et parmi ça, ce qui
-   arrive à échéance le plus tôt. Viennent ensuite les bons terminés, puis les
-   devis, qui ne sont pas encore du travail confirmé. */
+/* L'ordre de la liste suit le chemin d'une commande dans l'atelier :
+   ce qui est sur l'établi d'abord, puis ce qui n'est pas encore confirmé,
+   puis ce qui en est sorti. À rang égal, l'échéance la plus proche passe devant.
+   1 · En production   2 · Devis et brouillons   3 · Prêt   4 · Livré
+   Les dossiers classés terminés ferment la marche. */
 function pickRang(o){
-  if (etatDe(o) === "devis") return 3;
-  if (estFini(o)) return 2;
-  const et = pickEtat(o);
-  return (et && et.ok) ? 1 : 0;
+  if (estFini(o)) return 4;
+  if (o.status !== "sent") return 1;
+  const et = etatDe(o);
+  if (et === "production") return 0;
+  if (et === "devis") return 1;
+  if (et === "pret") return 2;
+  return 3;                         /* livré */
 }
 function dessinePick(){
   const q = pickQ.trim().toLowerCase();
@@ -10003,6 +10009,8 @@ function backOneStep(){
       $("triSheet").classList.contains("open") ||
       $("cliSheet").classList.contains("open") ||
       $("docSheet").classList.contains("open") ||
+      $("atlSheet").classList.contains("open") ||
+      $("remuSheet").classList.contains("open") ||
       $("paySheet").classList.contains("open")){ nav("home"); return true; }
   if (!$("home").classList.contains("open")){ retourForm(); return true; }   /* formulaire */
   return false;                                                  /* accueil : sortie de l'app */
