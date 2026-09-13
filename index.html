@@ -2122,6 +2122,12 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <input id="prosAdresse" type="text" placeholder="Adresse (quartier, ville)" autocomplete="off">
       </div>
 
+      <div class="prsub"><span>Pose ou livraison</span></div>
+      <div class="seg" id="prosPose">
+        <button type="button" data-ppose="Pose" aria-pressed="true">Pose</button>
+        <button type="button" data-ppose="Livraison" aria-pressed="false">Livraison</button>
+      </div>
+
       <div class="prsub"><span>Type de store</span></div>
       <div class="seg seg3" id="prosType">
         <button type="button" data-ptype="ENR" aria-pressed="true">Enrouleur</button>
@@ -3457,6 +3463,7 @@ let pickTarget = null;   /* null = carte tissu, sinon index de ligne */
 let pickPros = false;    /* vrai quand on choisit le tissu d'une fiche contact */
 function openPicker(target){
   pickPros = false;
+  $("refSheet").classList.remove("pick");   /* appelé depuis le bon : niveau normal */
   pickTarget = (target === undefined) ? null : target;
   $("refSearch").value = "";
   renderRefList();
@@ -5875,7 +5882,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "11.9";
+const APP_VERSION = "12.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -9411,6 +9418,7 @@ function renderPros(){
         const r = prosResume(p);
         const bouts = [];
         if (p.adresse) bouts.push(esc(p.adresse));
+        if (p.pose) bouts.push(p.pose === "Livraison" ? "livraison" : "pose");
         if (r && r.nb) bouts.push('<b>' + r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre") + '</b>' +
           '  ·  <b>' + fr(r.m2, 2) + ' m²</b>  ·  <b>' + fr(r.ml, 2) + ' ml</b>');
         if (p.type) bouts.push(typeCourt(p.type));
@@ -9448,7 +9456,7 @@ function renderPros(){
 /* --- ce que le contact a demandé, au niveau de détail qu'on a pu obtenir --- */
 /* Rien ici n'est engageant : ni réservation de tissu, ni place dans l'atelier.
    C'est une prise de notes qui évitera de tout retaper le jour du devis. */
-function prosDVide(){ return {adresse:"", type:"ENR", refs:[], dims:[]}; }
+function prosDVide(){ return {adresse:"", pose:"Pose", type:"ENR", refs:[], dims:[]}; }
 let prosD = prosDVide();
 
 function prosDimNette(d){
@@ -9473,6 +9481,8 @@ function typeCourt(t){
 
 function renderProsD(){
   if (!$("prosType")) return;
+  [...$("prosPose").children].forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.ppose === (prosD.pose || "Pose"))));
   [...$("prosType").children].forEach(b =>
     b.setAttribute("aria-pressed", String(b.dataset.ptype === prosD.type)));
 
@@ -9516,6 +9526,12 @@ function renderProsD(){
     : "—";
 }
 
+$("prosPose").addEventListener("click", e => {
+  const b = e.target.closest("[data-ppose]");
+  if (!b) return;
+  prosD.pose = b.dataset.ppose;
+  renderProsD();
+});
 $("prosType").addEventListener("click", e => {
   const b = e.target.closest("[data-ptype]");
   if (!b) return;
@@ -9532,6 +9548,7 @@ $("prosRefBtn").addEventListener("click", () => {
   pickPros = true; pickTarget = null;
   $("refSearch").value = "";
   renderRefList();
+  $("refSheet").classList.add("pick");   /* par-dessus la page des contacts */
   openSheet("refSheet");
 });
 $("prosChips").addEventListener("click", e => {
@@ -9578,7 +9595,7 @@ function prosCharge(p){
   prosEdit = p.id;
   $("prosNom").value = p.nom || ""; $("prosTel").value = p.tel || "";
   $("prosNote").value = p.note || ""; $("prosAdresse").value = p.adresse || "";
-  prosD = {adresse: p.adresse || "", type: p.type || "ENR",
+  prosD = {adresse: p.adresse || "", pose: p.pose || "Pose", type: p.type || "ENR",
            refs: (p.refs || []).slice(),
            dims: (p.dims || []).map(d => Object.assign({}, d))};
   renderProsD();
@@ -9589,6 +9606,7 @@ function prosApplique(p){
   p.tel = $("prosTel").value.trim();
   p.note = $("prosNote").value.trim();
   p.adresse = $("prosAdresse").value.trim();
+  p.pose = prosD.pose || "Pose";
   p.type = prosD.type || "ENR";
   p.refs = prosD.refs.slice();
   p.dims = prosD.dims
@@ -9696,6 +9714,7 @@ function prosVersBon(p, etat){
   S.nom = p.nom || "";          $("nom").value = S.nom;
   S.tel = p.tel || "";          $("tel").value = S.tel;
   S.adresse = p.adresse || "";  $("adresse").value = S.adresse;
+  S.pose = (p.pose === "Livraison") ? "Livraison" : "Pose";
   if (p.note){ S.notes = p.note; $("notes").value = p.note; }
 
   /* Tout ce qui a été relevé au téléphone passe tel quel dans le bon :
@@ -9718,6 +9737,7 @@ function prosVersBon(p, etat){
   /* les boutons du formulaire suivent ce qu'on vient de poser */
   [...$("seg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.type === S.type)));
   [...$("segMulti").children].forEach(x => x.setAttribute("aria-pressed", String((x.dataset.multi === "1") === !!S.multi)));
+  [...$("segPose").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.pose === S.pose)));
 
   renderAll();
   nav("form");
