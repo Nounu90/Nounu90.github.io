@@ -740,8 +740,8 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   background:var(--card2); color:var(--muted); border:1px solid var(--line)}
 .pketat.production{background:var(--warn-soft,#FAEFDD); color:var(--warn); border-color:transparent}
 .hprog.br{background:var(--accent-soft); color:var(--accent)}
-.hprog.del{background:var(--info-soft); color:var(--info)}
-.hprog.del.mat{background:var(--warn-soft,#FAEFDD); color:var(--warn)}
+.hprog.dlai{background:var(--info-soft); color:var(--info)}
+.hprog.dlai.tissu{background:var(--warn-soft,#FAEFDD); color:var(--warn)}
 .pketat.pret{background:var(--info-soft); color:var(--info); border-color:transparent}
 .pketat.livre{background:var(--ok-soft); color:var(--ok); border-color:transparent}
 .pketat.brouillon{background:var(--accent-soft); color:var(--accent); border-color:transparent}
@@ -1176,9 +1176,15 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   border:1px solid var(--line); border-radius:12px; margin-bottom:9px;
 }
 .hrow .hmain{flex:1; min-width:0; text-align:left; display:block}
-.hl1{display:flex; align-items:center; gap:8px}
-.hl1 b{flex:1; min-width:0; font-family:"Archivo",sans-serif; font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.hl1{display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px}
+.hl1 .hprog, .hl1 .badge, .hl1 .pketat{flex:none; line-height:1.6}
+.hl1 b{flex:1 1 100%; min-width:0; font-family:"Archivo",sans-serif; font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .hl2{display:block; margin-top:5px}
+/* Une rangée de puces : elle se replie, chaque puce garde sa hauteur et n'est
+   jamais rognée. C'est ce qui évite que les textes se chevauchent. */
+.hchips{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:7px}
+.hchips .hprog{flex:none; line-height:1.6; max-width:100%}
+.hchips .hprog.dlai, .hl1 .hprog.dlai{white-space:normal; text-align:left}
 .hl2 small{display:block; color:var(--muted); font-size:12.5px; line-height:1.45}
 /* Les repères du bon tiennent sur une ligne qui se replie, plus en colonne à droite :
    la ligne de l'agent garde toute la largeur de la carte. */
@@ -1201,8 +1207,8 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .hchk.grp:active{background:var(--ok-soft)}
 .hchk.bloque{opacity:.35}
 /* avancement de l'atelier sur la ligne du bon */
-.hprog{display:inline-flex; align-items:center; gap:4px; padding:1px 7px; border-radius:6px;
-  font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600;
+.hprog{display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:6px;
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; line-height:1.6;
   background:var(--card2); color:var(--muted); white-space:nowrap}
 .hprog.ok{background:var(--ok-soft); color:var(--ok)}
 .hprog.att{background:var(--warn-soft,#FAEFDD); color:var(--warn)}
@@ -5084,15 +5090,57 @@ function avancement(o){
   };
 }
 
+/* Le nombre de jours ouvrés entre deux instants, bornes comprises côté départ. */
+function ouvresEntre(a, b){
+  const d = new Date(a); d.setHours(12, 0, 0, 0);
+  const f = new Date(b); f.setHours(12, 0, 0, 0);
+  let n = 0, garde = 0;
+  while (d < f && garde++ < 900){ d.setDate(d.getDate() + 1); if (estOuvre(d)) n++; }
+  return n;
+}
+
+/* Le temps qu'une commande a vraiment pris : du passage en « En production »
+   au passage en « Livré ». Les deux instants sortent du journal du bon, rien
+   n'est deviné. Un bon plus ancien que le journal ne renvoie rien. */
+function dureeReelle(o){
+  const log = (o && Array.isArray(o.log)) ? o.log : [];
+  let prod = 0, livre = 0;
+  log.forEach(e => {
+    if (!e || e.kind !== "etat") return;
+    if (e.etat === "production" && !prod) prod = e.at || 0;
+    if (e.etat === "livre" && prod && !livre) livre = e.at || 0;
+  });
+  if (!prod) return null;
+  const fini = !!livre;
+  const fin = livre || Date.now();
+  if (fin < prod) return null;
+  return {prod:prod, livre:livre, fini:fini,
+          jours: Math.max(0, Math.round((fin - prod) / 86400000)),
+          ouvres: ouvresEntre(prod, fin)};
+}
+function jjmm(iso){
+  const a = String(iso || "").split("-");
+  return a.length === 3 ? a[2] + "/" + a[1] : String(iso || "");
+}
+/* Ce qu'on dit d'une échéance en un mot : le client n'attend pas une date. */
+function echMot(iso){
+  const p = new Date(String(iso) + "T12:00:00");
+  if (isNaN(p.getTime())) return "";
+  const t = new Date(); t.setHours(12, 0, 0, 0);
+  if (p < t) return "dépassée";
+  const j = delaiOuvres(iso);
+  return j <= 0 ? "aujourd'hui" : "dans " + j + " j";
+}
+
 /* La réponse au téléphone, sur la ligne du devis : pas besoin de l'ouvrir. */
 function pucedelai(o){
   let d = null;
   try { d = delaiDevis(o); } catch(e){}
   if (!d) return "";
   const j = d.j;
-  return '<span class="hprog del' + (d.manque.length ? " mat" : "") + '">' +
-    (j <= 0 ? "prêt aujourd'hui" : "\u2248 " + j + " j après acompte") +
-    (d.manque.length ? "  ·  tissu à commander" : "") + '</span>  ';
+  return '<span class="hprog dlai' + (d.manque.length ? " tissu" : "") + '">' +
+    (j <= 0 ? "prêt aujourd'hui" : "\u2248 " + j + " j après acompte") + '</span>' +
+    (d.manque.length ? '<span class="hprog dlai tissu">tissu à commander</span>' : '');
 }
 
 /* Rappel de l'échéance dans la liste des bons */
@@ -5201,14 +5249,14 @@ function renderHist(){
             '<span class="hnum">' + o.num + '</span>' +
           '</span>' +
           ((o.status !== "sent" || av.tube.tot || av.fen.tot || !ordDims(o).length)
-            ? '<span class="hl2" style="margin-top:6px">' +
+            ? '<span class="hchips">' +
               (o.status !== "sent"
-                 ? '<span class="hprog br">brouillon, jamais envoyé</span>  ' : '') +
+                 ? '<span class="hprog br">brouillon, jamais envoyé</span>' : '') +
               (et === "devis" && !o.ech ? pucedelai(o) : '') +
               (!ordDims(o).length
-                 ? '<span class="hprog br">aucune mesure exploitable</span>  ' : '') +
+                 ? '<span class="hprog br">aucune mesure exploitable</span>' : '') +
               (av.tube.tot ? '<span class="hprog ' + (av.tube.fait === av.tube.tot ? "ok" : "att") + '">' +
-                 'tubes ' + av.tube.fait + '/' + av.tube.tot + '</span>  ' : '') +
+                 'tubes ' + av.tube.fait + '/' + av.tube.tot + '</span>' : '') +
               (av.fen.tot ? '<span class="hprog ' + (av.fen.fait === av.fen.tot ? "ok" : "att") + '">' +
                  'fenêtres ' + av.fen.fait + '/' + av.fen.tot + '</span>' : '') +
               '</span>'
@@ -5513,7 +5561,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "11.2";
+const APP_VERSION = "11.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -7731,6 +7779,13 @@ function docCarte(o){
   const puTxt = o.type === "MIX"
     ? ((puE || puJ) ? fr(puE, 2) + " / " + fr(puJ, 2) + " MAD/m²" : "")
     : (puE ? fr(puE, 2) + " MAD/m²" : "");
+  /* L'échéance du bon, le délai projeté tant que c'est un devis, et le temps
+     que la commande a réellement pris une fois confirmée. */
+  const enRetard = echRetard(o);
+  let dj = null;
+  if (et === "devis" && !o.ech){ try { dj = delaiDevis(o); } catch(e){} }
+  let dr = null;
+  try { dr = dureeReelle(o); } catch(e){}
   let h = '<div class="dkcard' + (estFini(o) ? " fini" : "") + (ouvert ? " ouvert" : "") + '">' +
     '<div class="dkhead">' +
     '<button class="dkopen" type="button" data-doc="' + o.id + '">' +
@@ -7752,6 +7807,17 @@ function docCarte(o){
                             av.tube.fait === av.tube.tot ? "ok" : "att") : "") +
         (av.fen.tot ? chip("fenêtres " + av.fen.fait + "/" + av.fen.tot,
                            av.fen.fait === av.fen.tot ? "ok" : "att") : "") +
+        (o.ech
+          ? chip("échéance " + jjmm(o.ech) + (et === "livre" ? "" : "  ·  " + echMot(o.ech)),
+                 enRetard ? "att" : "inf")
+          : "") +
+        (dj ? chip("\u2248 " + dj.j + " j après acompte" +
+                   (dj.manque.length ? "  ·  tissu à commander" : ""),
+                   dj.manque.length ? "att" : "inf") : "") +
+        (dr ? chip(dr.fini
+                     ? "livrée en " + dr.ouvres + " j ouvrés"
+                     : "en cours depuis " + dr.ouvres + " j ouvrés",
+                   dr.fini ? "ok" : "") : "") +
       '</span>' +
       '<span class="dkl3">' + esc(storesParType(o).join("  ·  ")) +
         '  ·  ' + fr(t.m2 || 0, 2) + ' m²' +
@@ -7801,6 +7867,17 @@ function docCarte(o){
     ((facture(o) || rem > 0) ? r("Total HT", fr(ht, 2)) : "") +
     (facture(o) ? r("TVA 20 %", fr(tvaDe(ht), 2)) : "") +
     '<div class="dkr gros"><span>' + (facture(o) ? "Total TTC" : "Total HT") + '</span><b>' + fr(du, 2) + ' MAD</b></div>' +
+    (o.ech
+      ? r((o.pose === "Livraison" ? "Livraison" : "Pose") + " prévue",
+          esc(String(o.ech).split("-").reverse().join("/")) +
+          (et === "livre" ? "" : "  ·  " + echMot(o.ech)),
+          enRetard ? "acc" : "")
+      : (dj ? r("Délai si confirmée", "\u2248 " + dj.j + " j ouvrés après acompte") : "")) +
+    (dr
+      ? r(dr.fini ? "Confirmée à livrée" : "En cours depuis",
+          dr.ouvres + " j ouvrés  ·  " + dr.jours + " j",
+          dr.fini ? "ok" : "")
+      : "") +
     (o.tel ? r("Téléphone", esc(telAffiche(o.tel))) : "") +
     (o.ice ? r("ICE", esc(o.ice)) : "") +
     (o.adresse ? r("Adresse", esc(o.adresse)) : "") +
