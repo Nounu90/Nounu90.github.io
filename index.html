@@ -900,6 +900,37 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .print button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
 .print .prmsg{flex:1 1 100%}
 .print .prmsg[aria-pressed="true"]{background:var(--warn-soft,#FAEFDD); border-color:var(--warn); color:var(--warn)}
+.prsuivi{margin-top:8px}
+.prsuiv{margin-top:8px; padding:8px 10px; border-radius:9px; background:var(--warn-soft,#FAEFDD);
+  font-size:12.5px; line-height:1.45; color:var(--ink)}
+.prsuiv b{display:block; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
+  letter-spacing:.07em; text-transform:uppercase; color:var(--warn); margin-bottom:2px}
+.prcmd{margin-top:9px; display:flex; flex-direction:column; gap:7px}
+.prcmdb{border:1px solid var(--line); border-radius:10px; padding:9px 10px; background:var(--card2)}
+.prcmdh{display:flex; align-items:center; gap:7px}
+.prcmdh b{font-family:"IBM Plex Mono",monospace; font-size:13px}
+.prcmdh em{margin-left:auto; font-style:normal; font-size:11.5px; color:var(--muted)}
+.prcmdl{font-size:12px; color:var(--muted); margin:5px 0 4px; line-height:1.4}
+.prcmdl b{color:var(--ink)}
+.prcmdr{display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:2px 0}
+.prcmdr span{color:var(--muted)}
+.prcmdr b{font-family:"IBM Plex Mono",monospace; font-weight:600}
+.prcmdr.pay span, .prcmdr.pay b{font-size:11.5px; font-weight:400}
+.prcmdr b.ok{color:var(--ok)} .prcmdr b.att{color:var(--warn)}
+.prl1 b.nm-fini{color:var(--ok)}
+.prl1 b.nm-encours{color:var(--info)}
+.prl1 b.nm-devis{color:#7B3FBF}
+.prl1 b.nm-rappel{color:var(--warn)}
+.prl1 b.nm-int{color:var(--accent)}
+.prl1 b.nm-nc{color:#0E8C8C}
+.prl1 b.nm-nrp{color:#8A6D3B}
+.prl1 b.nm-off{color:var(--muted); text-decoration:line-through; text-decoration-thickness:1px}
+.prleg{display:flex; flex-wrap:wrap; gap:4px 12px; margin:10px 0 2px; font-size:11px; color:var(--muted)}
+.prleg span::before{content:""; display:inline-block; width:9px; height:9px; border-radius:50%;
+  margin-right:5px; vertical-align:-1px; background:currentColor}
+.prleg .nm-fini{color:var(--ok)} .prleg .nm-encours{color:var(--info)} .prleg .nm-devis{color:#7B3FBF}
+.prleg .nm-rappel{color:var(--warn)} .prleg .nm-int{color:var(--accent)} .prleg .nm-nc{color:#0E8C8C}
+.prleg .nm-nrp{color:#8A6D3B} .prleg .nm-off{color:var(--muted)}
 .prrap{display:flex; align-items:center; gap:10px; width:100%; padding:11px 12px; border-radius:10px;
   border:1px solid var(--line); background:var(--card2); font-family:"Archivo",sans-serif; font-size:14px;
   font-weight:600; color:var(--ink); text-align:left}
@@ -2357,6 +2388,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <div class="prsub"><span>Suivi</span></div>
       <button type="button" class="prrap" id="prosRappel" aria-pressed="false">
         <i></i><span>À rappeler</span></button>
+      <textarea class="dknote prsuivi" id="prosSuivi" rows="2" placeholder="Note de suivi (ex. rappeler après l'Aïd, attend le devis du voisin...)"></textarea>
       <div class="prpromo">
         <span><b>Promos envoyées</b><small id="prosPromoDer">aucune</small></span>
         <button type="button" id="prosPromoMoins" aria-label="Une de moins">−</button>
@@ -2373,6 +2405,8 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <button type="button" data-pf="tous" aria-pressed="true">Tous</button>
       <button type="button" data-pf="rappel" aria-pressed="false">À rappeler</button>
       <button type="button" data-pf="client" aria-pressed="false">Devenus clients</button>
+      <button type="button" data-pf="promo" aria-pressed="false">Promos envoyées</button>
+      <button type="button" data-pf="nos" aria-pressed="false">Nos clients</button>
       <button type="button" data-pf="fin" aria-pressed="false">Sans suite</button>
       <button type="button" data-pf="nc" aria-pressed="false">Nouveaux clients</button>
       <button type="button" data-pf="int" aria-pressed="false">Intéressés</button>
@@ -2385,6 +2419,12 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
     <div class="field" style="margin-top:9px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="prosSearch" type="search" placeholder="Nom ou numéro" autocomplete="off">
+    </div>
+    <div class="prleg">
+      <span class="nm-fini">Livré et payé</span><span class="nm-encours">Commande en cours</span>
+      <span class="nm-devis">Devis envoyé</span><span class="nm-rappel">À rappeler</span>
+      <span class="nm-int">Intéressé</span><span class="nm-nc">Nouveau client</span>
+      <span class="nm-nrp">Ne répond pas</span><span class="nm-off">Pas intéressé ou sans suite</span>
     </div>
     <div id="prosBody" style="margin-top:11px"></div>
   </div>
@@ -6366,7 +6406,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "12.8";
+const APP_VERSION = "12.9";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -10679,19 +10719,22 @@ async function pullPromo(){
 function promosVivantes(){ return PROMO.promos.filter(p => p && !p.sup); }
 /* Combien de promos ce numéro a reçu, et quand la dernière. */
 function promoInfo(num, promoId){
-  if (!num) return {n:0, der:0, recu:false};
-  let n = 0, der = 0, recu = false;
+  if (!num) return {n:0, der:0, prem:0, recu:false};
+  let n = 0, der = 0, prem = 0, recu = false;
   PROMO.envois.forEach(e => {
     if (e.n !== num) return;
     n++; if ((e.at || 0) > der) der = e.at;
+    if (e.at && (!prem || e.at < prem)) prem = e.at;
     if (promoId && e.p === promoId) recu = true;
   });
   (typeof PROS !== "undefined" ? PROS : []).forEach(p => {
     if (!p || p.sup || !p.promoMan || waNum(p.tel) !== num) return;
     n += p.promoMan;
     if ((p.promoDer || 0) > der) der = p.promoDer;
+    const pp = p.promoPrem || p.promoDer || 0;
+    if (pp && (!prem || pp < prem)) prem = pp;
   });
-  return {n:n, der:der, recu:recu};
+  return {n:n, der:der, prem:prem, recu:recu};
 }
 /* Tous ceux à qui on peut écrire : contacts WhatsApp et anciens clients,
    un numéro une seule fois. */
@@ -11187,7 +11230,7 @@ function prosLignes(){
     return [jjmmaaaa(p.at), p.nom || "", p.tel || "", waLien(p.tel), p.adresse || "",
       p.pose || "", p.type ? typeCourt(p.type) : "", (p.refs || []).join(", "), dims,
       r && r.nb ? r.nb : "", r && r.m2 ? Math.round(r.m2 * 100) / 100 : "",
-      p.note || "",
+      [p.note || "", p.suivi ? "Suivi : " + p.suivi : ""].filter(Boolean).join(" · "),
       (st === "client" ? "Devenu client" : (st === "fin" ? "Sans suite" : (p.rappel ? "À rappeler" : "En cours"))) +
         (p.interet ? " · " + PROS_INT[p.interet] : ""),
       (prosBonDe(p) || {}).num || "", jjmmaaaa(p.msg || p.vu), nomDe(p.vuBy || p.by || ""), p.id];
@@ -11287,10 +11330,16 @@ function prosListe(){
       if (j < (prosFiltre === "m1" ? 30 : 60)) return false;
     }
     if (prosFiltre === "nopromo" && promoInfo(waNum(p.tel)).n > 0) return false;
+    if (prosFiltre === "promo" && (st === "client" || !promoInfo(waNum(p.tel)).n)) return false;
     if (!q) return true;
-    return (String(p.nom || "") + " " + String(p.tel || "") + " " + String(p.note || ""))
+    return (String(p.nom || "") + " " + String(p.tel || "") + " " + String(p.note || "") + " " + String(p.suivi || ""))
       .toLowerCase().indexOf(q) >= 0;
-  }).sort((a, b) => (b.at || 0) - (a.at || 0));
+  }).sort((a, b) => {
+    /* promos envoyées : celui qui a reçu sa première promo il y a le plus longtemps d'abord */
+    if (prosFiltre === "promo")
+      return (promoInfo(waNum(a.tel)).prem || 0) - (promoInfo(waNum(b.tel)).prem || 0);
+    return (b.at || 0) - (a.at || 0);
+  });
 }
 
 function prosDate(ms){
@@ -11298,6 +11347,104 @@ function prosDate(ms){
   const d = new Date(ms);
   if (isNaN(d.getTime())) return "";
   return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear();
+}
+
+/* ---- ce que le contact a commandé chez nous ---- */
+function bonsDuTel(tel, bonNum){
+  const n = waNum(tel);
+  return (ORDERS || []).filter(o => o && o.status === "sent" &&
+    ((n && waNum(o.tel) === n) || (bonNum && o.num === bonNum)))
+    .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+}
+/* devis = rien de confirmé ; encours = une commande pas livrée ou pas soldée ;
+   fini = tout livré et tout payé */
+function clientEtat(bons){
+  if (!bons.length) return "";
+  const vrais = bons.filter(o => etatDe(o) !== "devis");
+  if (!vrais.length) return "devis";
+  return vrais.every(o => etatDe(o) === "livre" && soldeDe(o) <= 0.01) ? "fini" : "encours";
+}
+const CLIENT_LAB = {devis:"devis envoyé", encours:"commande en cours", fini:"livré et payé"};
+function blocCommandes(bons){
+  if (!bons.length) return "";
+  return '<div class="prcmd">' + bons.map(o => {
+    const t = orderTotals(o);
+    const du = duDe(o), pay = payeDe(o), rst = soldeDe(o);
+    const et = etatDe(o);
+    const pl = paiements(o).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    return '<div class="prcmdb">' +
+      '<div class="prcmdh"><b>' + esc(o.num || "") + '</b><span class="pketat ' + et + '">' + etatLabel(et) + '</span>' +
+        '<em>' + (o.date ? dateFR(String(o.date).slice(0, 10)) : "") + '</em></div>' +
+      '<div class="prcmdl">' + esc(storesParType(o).join("  ·  ")) + '  ·  <b>' + t.nb +
+        (t.nb > 1 ? " fenêtres" : " fenêtre") + '</b>  ·  ' + fr(t.m2 || 0, 2) + ' m²</div>' +
+      '<div class="prcmdr"><span>Total</span><b>' + fr(du, 2) + ' MAD</b></div>' +
+      (et === "devis" ? '' :
+        pl.map(pp => '<div class="prcmdr pay"><span>' + dateFR(pp.date) + '  ·  ' + esc(pp.mode || "Paiement") +
+          '</span><b>' + fr(parseFloat(pp.montant) || 0, 2) + '</b></div>').join("") +
+        '<div class="prcmdr"><span>Payé</span><b class="ok">' + fr(pay, 2) + '</b></div>' +
+        '<div class="prcmdr"><span>' + (rst > 0.01 ? "Reste à payer" : "Soldé") + '</span><b class="' +
+          (rst > 0.01 ? "att" : "ok") + '">' + fr(rst, 2) + '</b></div>') +
+    '</div>';
+  }).join("") + '</div>';
+}
+/* La couleur du nom dit où en est la personne, sans lire les étiquettes. */
+function prosCouleur(p){
+  const ce = clientEtat(bonsDuTel(p.tel, p.bon));
+  if (ce) return "nm-" + ce;
+  if (p.fin || p.interet === "pas") return "nm-off";
+  if (p.rappel) return "nm-rappel";
+  if (p.interet) return "nm-" + p.interet;
+  return "";
+}
+/* Tous nos clients, qu'ils soient passés par la liste WhatsApp ou non. */
+function nosClients(){
+  const par = {};
+  (ORDERS || []).forEach(o => {
+    if (!o || o.status !== "sent") return;
+    const n = waNum(o.tel) || ("bon:" + o.id);
+    if (!par[n]) par[n] = {num:n, tel:o.tel || "", nom:o.nom || "Client", bons:[]};
+    par[n].bons.push(o);
+    if (o.nom) par[n].nom = o.nom;
+  });
+  return Object.keys(par).map(k => {
+    const c = par[k];
+    c.bons.sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+    c.etat = clientEtat(c.bons);
+    c.der = c.bons.length ? String(c.bons[c.bons.length - 1].date || "") : "";
+    c.pros = prosVivants().find(p => waNum(p.tel) && waNum(p.tel) === c.num) || null;
+    return c;
+  }).filter(c => c.etat && c.etat !== "devis")
+    .sort((a, b) => b.der.localeCompare(a.der));
+}
+function renderNosClients(body){
+  const L = nosClients().filter(c => {
+    const q = prosQ.trim().toLowerCase();
+    return !q || (c.nom + " " + c.tel + " " + c.bons.map(o => o.num).join(" ")).toLowerCase().indexOf(q) >= 0;
+  });
+  $("prosSum").textContent = L.length;
+  $("prosSumLab").textContent = L.length > 1 ? "Clients" : "Client";
+  if (!L.length){ body.innerHTML = '<div class="empty">Aucun client avec un bon confirmé.</div>'; return; }
+  const tag = (t, c) => '<span class="prtag' + (c ? " " + c : "") + '">' + t + '</span>';
+  body.innerHTML = L.map(c => {
+    const pi = promoInfo(c.num.indexOf("bon:") === 0 ? "" : c.num);
+    const lien = c.num.indexOf("bon:") === 0 ? "" : "https://wa.me/" + c.num;
+    return '<div class="prcard client">' +
+      '<div class="prl1"><b class="nm-' + c.etat + '">' + esc(c.nom) + '</b><em>' + esc(telAffiche(c.tel)) + '</em></div>' +
+      '<div class="prtags">' +
+        tag(CLIENT_LAB[c.etat], c.etat === "fini" ? "ok" : "inf") +
+        tag(c.bons.length + (c.bons.length > 1 ? " commandes" : " commande")) +
+        (pi.n ? tag(pi.n + (pi.n > 1 ? " promos" : " promo") + "  ·  dernière " + prosDate(pi.der), "inf") : tag("aucune promo")) +
+        (c.pros ? tag("dans les contacts") : "") +
+      '</div>' +
+      blocCommandes(c.bons) +
+      '<div class="pract">' +
+        (lien ? '<a class="prbtn wa" href="' + lien + '" target="_blank" rel="noopener">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg>' +
+          'Ouvrir la conversation</a>' : '<span class="prbtn" style="flex:1 1 100%">Numéro manquant</span>') +
+        (lien ? '<button class="prbtn dev" type="button" data-cpromo="' + c.num + '">Promo envoyée  +1</button>' : '') +
+      '</div>' +
+    '</div>';
+  }).join("");
 }
 
 function renderPros(){
@@ -11322,6 +11469,7 @@ function renderPros(){
     ap.textContent = n ? "WhatsApp : +" + n : "";
   }
 
+  if (prosFiltre === "nos"){ renderNosClients(body); return; }
   const list = prosListe();
   if (!list.length){
     body.innerHTML = '<div class="empty">' + (tous.length
@@ -11334,8 +11482,10 @@ function renderPros(){
     const st = prosStatut(p);
     const lien = waLien(p.tel);
     const tag = (t, c) => '<span class="prtag' + (c ? " " + c : "") + '">' + t + '</span>';
+    const bons = st === "client" ? bonsDuTel(p.tel, p.bon) : [];
+    const ce = clientEtat(bons);
     return '<div class="prcard ' + st + '">' +
-      '<div class="prl1"><b>' + esc(p.nom || "Sans nom") + '</b>' +
+      '<div class="prl1"><b class="' + prosCouleur(p) + '">' + esc(p.nom || "Sans nom") + '</b>' +
         '<em>' + esc(telAffiche(p.tel || "")) + '</em></div>' +
       '<div class="prtags">' +
         (p.interet ? tag(PROS_INT[p.interet], p.interet === "int" ? "ok" : (p.interet === "pas" ? "" : "att")) : "") +
@@ -11345,7 +11495,7 @@ function renderPros(){
                       : tag("aucune promo");
         })() +
         (p.msg ? tag("mis à jour le " + prosDate(p.msg)) : "") +
-        (st === "client" ? tag("devenu client  ·  " + esc((prosBonDe(p) || {}).num || ""), "ok")
+        (st === "client" ? tag("client  ·  " + (CLIENT_LAB[ce] || ""), ce === "fini" ? "ok" : "inf")
           : (st === "fin" ? tag("sans suite") : (p.rappel ? tag("à rappeler", "att") : ""))) +
         (p.at ? tag("ajouté le " + prosDate(p.at)) : "") +
         (p.vu ? tag("contacté le " + prosDate(p.vu), "inf") : "") +
@@ -11363,6 +11513,8 @@ function renderPros(){
         return bouts.length ? '<div class="prdem">' + bouts.join("  ·  ") + '</div>' : '';
       })() +
       (p.note ? '<div class="prnote">' + esc(p.note) + '</div>' : '') +
+      (p.suivi ? '<div class="prsuiv"><b>Suivi</b>' + esc(p.suivi) + '</div>' : '') +
+      blocCommandes(bons) +
       '<div class="pract">' +
         (lien
           ? '<a class="prbtn wa" href="' + lien + '" target="_blank" rel="noopener" data-prwa="' + p.id + '">' +
@@ -11538,7 +11690,7 @@ $("prosRows").addEventListener("click", e => {
 function prosVide(){
   prosEdit = "";
   $("prosNom").value = ""; $("prosTel").value = ""; $("prosNote").value = "";
-  $("prosAdresse").value = "";
+  $("prosAdresse").value = ""; $("prosSuivi").value = "";
   prosD = prosDVide();
   try { renderProsSuivi(); } catch(e){}
   try { renderProsD(); } catch(e){}
@@ -11548,8 +11700,10 @@ function prosCharge(p){
   prosEdit = p.id;
   $("prosNom").value = p.nom || ""; $("prosTel").value = p.tel || "";
   $("prosNote").value = p.note || ""; $("prosAdresse").value = p.adresse || "";
+  $("prosSuivi").value = p.suivi || "";
   prosD = {adresse: p.adresse || "", pose: p.pose || "Pose", type: p.type || "ENR",
            rappel: !!p.rappel, promoMan: p.promoMan || 0, promoDer: p.promoDer || 0,
+           promoPrem: p.promoPrem || 0,
            refs: (p.refs || []).slice(),
            dims: (p.dims || []).map(d => Object.assign({}, d))};
   renderProsD();
@@ -11563,8 +11717,10 @@ function prosApplique(p){
   /* chaque enregistrement par Imane compte comme la dernière nouvelle du client */
   p.msg = Date.now();
   p.rappel = !!prosD.rappel;
+  p.suivi = $("prosSuivi").value.trim();
   p.promoMan = prosD.promoMan || 0;
   p.promoDer = prosD.promoDer || 0;
+  p.promoPrem = prosD.promoMan ? (prosD.promoPrem || prosD.promoDer || 0) : 0;
   p.pose = prosD.pose || "Pose";
   p.type = prosD.type || "ENR";
   p.refs = prosD.refs.slice();
@@ -11575,7 +11731,9 @@ function prosApplique(p){
 }
 $("prosRappel").addEventListener("click", () => { prosD.rappel = !prosD.rappel; renderProsSuivi(); });
 $("prosPromoPlus").addEventListener("click", () => {
-  prosD.promoMan = (prosD.promoMan || 0) + 1; prosD.promoDer = Date.now(); renderProsSuivi();
+  prosD.promoMan = (prosD.promoMan || 0) + 1; prosD.promoDer = Date.now();
+  if (!prosD.promoPrem) prosD.promoPrem = prosD.promoDer;
+  renderProsSuivi();
 });
 $("prosPromoMoins").addEventListener("click", () => {
   prosD.promoMan = Math.max(0, (prosD.promoMan || 0) - 1);
@@ -11625,6 +11783,14 @@ $("prosFiltres").addEventListener("click", e => {
 
 /* --- ce qu'on fait d'un contact --- */
 $("prosBody").addEventListener("click", e => {
+  const cp = e.target.closest("[data-cpromo]");
+  if (cp){
+    PROMO.envois.push({id:"e" + Date.now() + Math.floor(Math.random()*900), p:"manuel",
+                       n:cp.dataset.cpromo, at:Date.now(), by:moiLogin()});
+    promoSave(); renderPros();
+    toast("Promo comptée");
+    return;
+  }
   const pi = e.target.closest("[data-print]");
   if (pi){
     const q = pi.dataset.print.split("|");
