@@ -901,6 +901,29 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .print .prmsg{flex:1 1 100%}
 .print .prmsg[aria-pressed="true"]{background:var(--warn-soft,#FAEFDD); border-color:var(--warn); color:var(--warn)}
 .prsuivi{margin-top:8px}
+.prpadd{margin-top:8px; padding:10px; border-radius:11px; border:1px solid var(--line); background:var(--card2)}
+.prpaddr{display:flex; gap:8px}
+.prpaddr label{flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; font-family:"Archivo",sans-serif;
+  font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.prpaddr input{font-size:13px; max-width:100%}
+.prpnote{width:100%; margin-top:8px; padding:10px; border-radius:9px; border:1px solid var(--line);
+  background:var(--card); font-size:14px; color:var(--ink)}
+.prpl{display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--line)}
+.prpl:first-child{border-top:0}
+.prpl .prpth{width:54px; height:54px}
+.prpl span{flex:1; min-width:0; font-size:13px; line-height:1.35}
+.prpl span small{display:block; font-size:11px; color:var(--muted)}
+.prpl span.prpth{flex:none; width:54px; font-size:10px; line-height:1}
+.prpl button{flex:none; width:30px; height:30px; border-radius:9px; border:1px solid var(--line);
+  background:var(--card); color:var(--muted)}
+.prpth{flex:none; width:44px; height:44px; border-radius:8px; object-fit:cover; background:var(--card2);
+  border:1px solid var(--line); display:inline-block; cursor:pointer}
+.prpth.vide{display:inline-grid; place-items:center; font-size:10px; color:var(--muted); cursor:default}
+.prpromos{margin-top:8px; display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.prpromos em{font-style:normal; font-size:12px; color:var(--muted); margin-right:4px}
+.pimgview{position:fixed; inset:0; z-index:90; background:rgba(0,0,0,.85); display:grid; place-items:center; padding:16px}
+.pimgview img{max-width:100%; max-height:88vh; border-radius:10px}
+.pimgview p{position:absolute; left:0; right:0; bottom:18px; text-align:center; color:#fff; font-size:13px; margin:0}
 .prouvrir{margin:0 0 12px; background:var(--card); font-weight:700}
 .field .unit{flex:none; font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:700;
   letter-spacing:.04em; color:var(--muted); padding-right:4px}
@@ -2382,7 +2405,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
     <div class="sumline"><span id="prosSumLab">Contacts à rappeler</span><b id="prosSum">0</b></div>
-    <button class="prbtn wa promobtn" id="prosPromoBtn" type="button">
+    <button class="prbtn wa promobtn" id="prosPromoBtn" type="button" hidden>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>
       Promotions WhatsApp</button>
 
@@ -2471,12 +2494,24 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <button type="button" class="prrap" id="prosRappel" aria-pressed="false">
         <i></i><span>À rappeler</span></button>
       <textarea class="dknote prsuivi" id="prosSuivi" rows="2" placeholder="Note de suivi (ex. rappeler après l'Aïd, attend le devis du voisin...)"></textarea>
-      <div class="prpromo">
-        <span><b>Promos envoyées</b><small id="prosPromoDer">aucune</small></span>
-        <button type="button" id="prosPromoMoins" aria-label="Une de moins">−</button>
-        <em id="prosPromoN">0</em>
-        <button type="button" id="prosPromoPlus" aria-label="Une de plus">+</button>
+      <div class="prsub"><span>Promos envoyées</span><b id="prosPromoCnt">aucune</b></div>
+      <div id="prosPromoListe"></div>
+      <div class="prpadd" id="prosPromoAdd" hidden>
+        <div class="prpaddr">
+          <label>Date<input type="date" id="prosPromoDate"></label>
+          <label>Image de la promo<input type="file" accept="image/*" id="prosPromoImg"></label>
+        </div>
+        <img id="prosPromoApercu" class="promoapercu" alt="" hidden>
+        <input id="prosPromoNote" type="text" class="prpnote" placeholder="Ce qui a été proposé (ex. -15 % jour et nuit)">
+        <div class="seg" style="display:flex; gap:8px; margin-top:8px">
+          <button type="button" id="prosPromoOk" style="flex:1" aria-pressed="true">Ajouter la promo</button>
+          <button type="button" id="prosPromoNon" style="flex:0 0 auto">Annuler</button>
+        </div>
       </div>
+      <button class="add" id="prosPromoOuvre" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Ajouter une promo envoyée
+      </button>
       <div class="seg" id="prosBtns" style="margin-top:11px; display:flex; gap:8px">
         <button type="button" id="prosSave" style="flex:1" aria-pressed="true">Ajouter le contact</button>
         <button type="button" id="prosCancel" style="flex:0 0 auto">Annuler</button>
@@ -2485,15 +2520,9 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 
     <div class="filters" id="prosFiltres">
       <button type="button" data-pf="tous" aria-pressed="true">Tous</button>
-      <button type="button" data-pf="rappel" aria-pressed="false">À rappeler</button>
       <button type="button" data-pf="client" aria-pressed="false">Devenus clients</button>
       <button type="button" data-pf="promo" aria-pressed="false">Promos envoyées</button>
       <button type="button" data-pf="nos" aria-pressed="false">Nos clients</button>
-      <button type="button" data-pf="fin" aria-pressed="false">Sans suite</button>
-      <button type="button" data-pf="nc" aria-pressed="false">Nouveaux clients</button>
-      <button type="button" data-pf="int" aria-pressed="false">Intéressés</button>
-      <button type="button" data-pf="nrp" aria-pressed="false">Ne répond pas</button>
-      <button type="button" data-pf="pas" aria-pressed="false">Pas intéressés</button>
       <button type="button" data-pf="m1" aria-pressed="false">Sans nouvelles +1 mois</button>
       <button type="button" data-pf="m2" aria-pressed="false">Sans nouvelles +2 mois</button>
       <button type="button" data-pf="nopromo" aria-pressed="false">Jamais reçu de promo</button>
@@ -5080,6 +5109,7 @@ async function pullBons(){
   try {
     const {data, error} = await SB.from("bons")
       .select("id,num,author,data,updated_at")
+      .not("id", "like", "pimg-%")
       .order("updated_at", {ascending:false}).limit(200);
     if (error) throw error;
     const map = {};
@@ -5102,6 +5132,7 @@ async function pullBons(){
         if (d && Array.isArray(d.liste)) fusionPros(d.liste);
         return;
       }
+      if (String(r.id).indexOf("pimg-") === 0) return;
       if (r.id === PROMO_ID){
         if (r.data) fusionPromo(r.data);
         return;
@@ -5173,6 +5204,7 @@ async function syncAll(){
   flushSheetRows();
   flushPay();
   try { flushProsFeuille(); } catch(e){}
+  try { flushPimg(); } catch(e){}
   if (!SB || !USER) return;
   await flushTombs();
   await flushPending();
@@ -6492,7 +6524,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "13.1";
+const APP_VERSION = "13.2";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -10814,7 +10846,13 @@ function promoInfo(num, promoId){
     if (promoId && e.p === promoId) recu = true;
   });
   (typeof PROS !== "undefined" ? PROS : []).forEach(p => {
-    if (!p || p.sup || !p.promoMan || waNum(p.tel) !== num) return;
+    if (!p || p.sup || waNum(p.tel) !== num) return;
+    promosDe(p).forEach(x => {
+      n++;
+      if ((x.at || 0) > der) der = x.at;
+      if (x.at && (!prem || x.at < prem)) prem = x.at;
+    });
+    if (!p.promoMan) return;
     n += p.promoMan;
     if ((p.promoDer || 0) > der) der = p.promoDer;
     const pp = p.promoPrem || p.promoDer || 0;
@@ -11437,6 +11475,94 @@ function prosDate(ms){
   return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear();
 }
 
+/* ---- images des promos : une rangée à part par image, chargée à la demande ---- */
+const PIMG = {};
+function pimgLocal(id){
+  if (PIMG[id]) return PIMG[id];
+  try { const v = localStorage.getItem("mst_pimg_" + id); if (v){ PIMG[id] = v; return v; } } catch(e){}
+  return "";
+}
+function pimgGet(id){
+  if (!id) return Promise.resolve("");
+  const l = pimgLocal(id);
+  if (l) return Promise.resolve(l);
+  if (!SB) return Promise.resolve("");
+  return SB.from("bons").select("data").eq("id", id).limit(1).then(r => {
+    const v = r && r.data && r.data[0] && r.data[0].data && r.data[0].data.img || "";
+    if (v){ PIMG[id] = v; try { localStorage.setItem("mst_pimg_" + id, v); } catch(e){} }
+    return v;
+  }).catch(() => "");
+}
+function pimgPut(id, img){
+  PIMG[id] = img;
+  try { localStorage.setItem("mst_pimg_" + id, img); } catch(e){}
+  const q = LS.get("mst_pimgq", []);
+  if (q.indexOf(id) < 0){ q.push(id); LS.set("mst_pimgq", q); }
+  flushPimg();
+}
+async function flushPimg(){
+  if (!SB || !USER) return;
+  const q = LS.get("mst_pimgq", []);
+  if (!q.length) return;
+  const reste = [];
+  for (const id of q){
+    const img = pimgLocal(id);
+    if (!img) continue;
+    try {
+      const {error} = await SB.from("bons").upsert({id:id, num:"__IMG__", author:USER.login,
+        data:{img:img}, updated_at:new Date().toISOString()});
+      if (error) throw error;
+    } catch(e){ reste.push(id); }
+  }
+  LS.set("mst_pimgq", reste);
+}
+function chargeVignettes(root){
+  (root || document).querySelectorAll("img[data-pimg]:not([src])").forEach(im => {
+    pimgGet(im.dataset.pimg).then(v => { if (v) im.src = v; else im.classList.add("vide"); });
+  });
+}
+function voirPimg(id, legende){
+  pimgGet(id).then(v => {
+    if (!v){ toast("Image pas encore disponible"); return; }
+    const d = document.createElement("div");
+    d.className = "pimgview";
+    d.innerHTML = '<img alt=""><p></p>';
+    d.querySelector("img").src = v;
+    d.querySelector("p").textContent = legende || "";
+    d.addEventListener("click", () => d.remove());
+    document.body.appendChild(d);
+  });
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("img[data-pimgvoir]");
+  if (t){ e.stopPropagation(); voirPimg(t.dataset.pimgvoir, t.dataset.leg || ""); }
+}, true);
+function reduitImage(fichier, largeur){
+  return new Promise((ok, ko) => {
+    const rd = new FileReader();
+    rd.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const k = Math.min(1, largeur / im.width);
+        const c = document.createElement("canvas");
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        ok(c.toDataURL("image/jpeg", 0.72));
+      };
+      im.onerror = ko;
+      im.src = rd.result;
+    };
+    rd.onerror = ko;
+    rd.readAsDataURL(fichier);
+  });
+}
+function vignette(id, leg, cls){
+  return id ? '<img class="prpth' + (cls ? " " + cls : "") + '" data-pimg="' + id + '" data-pimgvoir="' + id +
+              '" data-leg="' + esc(leg || "") + '" alt="">'
+            : '<span class="prpth vide">texte</span>';
+}
+function promosDe(p){ return Array.isArray(p && p.promos) ? p.promos : []; }
+
 /* ---- ce que le contact a commandé chez nous ---- */
 function bonsDuTel(tel, bonNum){
   const n = waNum(tel);
@@ -11525,15 +11651,21 @@ function renderNosClients(body){
         (pi.n ? tag(pi.n + (pi.n > 1 ? " promos" : " promo") + "  ·  dernière " + prosDate(pi.der), "inf") : tag("aucune promo")) +
         (c.pros ? tag("dans les contacts") : "") +
       '</div>' +
+      (function(){
+        const L = c.pros ? promosDe(c.pros).slice().sort((a, b) => (b.at || 0) - (a.at || 0)) : [];
+        return L.length ? '<div class="prpromos"><em>Promos :</em>' + L.slice(0, 6).map(x =>
+          vignette(x.img, prosDate(x.at) + (x.note ? "  ·  " + x.note : ""))).join("") + '</div>' : "";
+      })() +
       blocCommandes(c.bons) +
       '<div class="pract">' +
         (lien ? '<a class="prbtn wa" href="' + lien + '" target="_blank" rel="noopener">' +
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg>' +
           'Ouvrir la conversation</a>' : '<span class="prbtn" style="flex:1 1 100%">Numéro manquant</span>') +
-        (lien ? '<button class="prbtn dev" type="button" data-cpromo="' + c.num + '">Promo envoyée  +1</button>' : '') +
+        (lien ? '<button class="prbtn dev" type="button" data-cpromo="' + c.num + '">Ajouter une promo envoyée</button>' : '') +
       '</div>' +
     '</div>';
   }).join("");
+  chargeVignettes(body);
 }
 
 function renderPros(){
@@ -11607,6 +11739,13 @@ function renderPros(){
       (prosEstim(p) ? '<div class="prestim">Prix WhatsApp  ·  ' + esc(prosEstimTexte(p)) +
         '<small>Estimation donnée par message, pas un devis officiel.</small></div>' : '') +
       (p.suivi ? '<div class="prsuiv"><b>Suivi</b>' + esc(p.suivi) + '</div>' : '') +
+      (function(){
+        const L = promosDe(p).slice().sort((a, b) => (b.at || 0) - (a.at || 0));
+        if (!L.length) return "";
+        return '<div class="prpromos"><em>Promos :</em>' + L.slice(0, 6).map(x =>
+          vignette(x.img, prosDate(x.at) + (x.note ? "  ·  " + x.note : ""))).join("") +
+          (L.length > 6 ? '<em>+' + (L.length - 6) + '</em>' : '') + '</div>';
+      })() +
       blocCommandes(bons) +
       '<div class="pract">' +
         (lien
@@ -11639,13 +11778,15 @@ function renderPros(){
       '</div>' +
     '</div>';
   }).join("");
+  chargeVignettes(body);
 }
 
 /* --- ce que le contact a demandé, au niveau de détail qu'on a pu obtenir --- */
 /* Rien ici n'est engageant : ni réservation de tissu, ni place dans l'atelier.
    C'est une prise de notes qui évitera de tout retaper le jour du devis. */
 function prosDVide(){ return {adresse:"", pose:"Pose", type:"ENR", refs:[], dims:[],
-                              rappel:false, promoMan:0, promoDer:0, fact:"oui", poseMode:"forfait"}; }
+                              rappel:false, promoMan:0, promoDer:0, fact:"oui", poseMode:"forfait",
+                              promos:[]}; }
 function prosFormPrix(){
   return {type:prosD.type, dims:prosD.dims, pxE:$("prosPxE").value, pxJ:$("prosPxJ").value,
           remise:$("prosRemise").value, fact:prosD.fact || "oui",
@@ -11685,9 +11826,29 @@ function renderProsSuivi(){
   if (!$("prosRappel")) return;
   try { renderProsPrix(); } catch(e){}
   $("prosRappel").setAttribute("aria-pressed", prosD.rappel ? "true" : "false");
-  $("prosPromoN").textContent = prosD.promoMan || 0;
-  $("prosPromoDer").textContent = prosD.promoDer
-    ? "dernière le " + prosDate(prosD.promoDer) : "aucune cochée à la main";
+  renderProsPromos();
+}
+let prosPromoTmp = "";
+function renderProsPromos(){
+  const L = (prosD.promos || []).slice().sort((a, b) => (b.at || 0) - (a.at || 0));
+  const anc = prosD.promoMan || 0;
+  const n = L.length + anc;
+  $("prosPromoCnt").textContent = n ? n + (n > 1 ? " promos" : " promo") : "aucune";
+  $("prosPromoListe").innerHTML = L.map(x =>
+    '<div class="prpl">' + vignette(x.img, prosDate(x.at) + (x.note ? "  ·  " + x.note : "")) +
+      '<span>' + esc(x.note || "Promo envoyée") + '<small>le ' + prosDate(x.at) +
+        (x.by ? "  ·  " + esc(nomDe(x.by)) : "") + (x.img ? "" : "  ·  sans image") + '</small></span>' +
+      '<button type="button" data-ppdel="' + x.id + '" aria-label="Retirer">×</button>' +
+    '</div>').join("") +
+    (anc ? '<p class="hint" style="margin:6px 0 0">+ ' + anc + (anc > 1 ? " promos comptées" : " promo comptée") +
+      ' avant, sans image' + (prosD.promoDer ? " (dernière le " + prosDate(prosD.promoDer) + ")" : "") + '.</p>' : "");
+  chargeVignettes($("prosPromoListe"));
+}
+function prosPromoFerme(){
+  prosPromoTmp = "";
+  $("prosPromoAdd").hidden = true; $("prosPromoOuvre").hidden = false;
+  $("prosPromoImg").value = ""; $("prosPromoNote").value = "";
+  $("prosPromoApercu").hidden = true; $("prosPromoApercu").removeAttribute("src");
 }
 let prosD = prosDVide();
 
@@ -11867,6 +12028,7 @@ function prosVide(){
   $("prosAdresse").value = ""; $("prosSuivi").value = "";
   $("prosPxE").value = ""; $("prosPxJ").value = "";
   $("prosRemise").value = ""; $("prosPoseP").value = "";
+  try { prosPromoFerme(); } catch(e){}
   prosD = prosDVide();
   try { renderProsSuivi(); } catch(e){}
   try { renderProsD(); } catch(e){}
@@ -11882,6 +12044,7 @@ function prosCharge(p){
   prosD = {adresse: p.adresse || "", pose: p.pose || "Pose", type: p.type || "ENR",
            rappel: !!p.rappel, promoMan: p.promoMan || 0, promoDer: p.promoDer || 0,
            promoPrem: p.promoPrem || 0, fact: p.fact === "non" ? "non" : "oui",
+           promos: promosDe(p).map(x => Object.assign({}, x)),
            poseMode: p.poseMode === "fenetre" ? "fenetre" : "forfait",
            refs: (p.refs || []).slice(),
            dims: (p.dims || []).map(d => Object.assign({}, d))};
@@ -11906,6 +12069,7 @@ function prosApplique(p){
   p.promoMan = prosD.promoMan || 0;
   p.promoDer = prosD.promoDer || 0;
   p.promoPrem = prosD.promoMan ? (prosD.promoPrem || prosD.promoDer || 0) : 0;
+  p.promos = (prosD.promos || []).map(x => Object.assign({}, x));
   p.pose = prosD.pose || "Pose";
   p.type = prosD.type || "ENR";
   p.refs = prosD.refs.slice();
@@ -11928,15 +12092,38 @@ $("prosPoseMode").addEventListener("click", e => {
   if (c !== e.target.value) e.target.value = c;
   renderProsPrix();
 }));
-$("prosPromoPlus").addEventListener("click", () => {
-  prosD.promoMan = (prosD.promoMan || 0) + 1; prosD.promoDer = Date.now();
-  if (!prosD.promoPrem) prosD.promoPrem = prosD.promoDer;
-  renderProsSuivi();
+$("prosPromoOuvre").addEventListener("click", () => {
+  $("prosPromoAdd").hidden = false; $("prosPromoOuvre").hidden = true;
+  $("prosPromoDate").value = jourISO(new Date());
 });
-$("prosPromoMoins").addEventListener("click", () => {
-  prosD.promoMan = Math.max(0, (prosD.promoMan || 0) - 1);
-  if (!prosD.promoMan) prosD.promoDer = 0;
-  renderProsSuivi();
+$("prosPromoNon").addEventListener("click", prosPromoFerme);
+$("prosPromoImg").addEventListener("change", async e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  try {
+    prosPromoTmp = await reduitImage(f, 900);
+    $("prosPromoApercu").src = prosPromoTmp; $("prosPromoApercu").hidden = false;
+  } catch(err){ toast("Image illisible"); }
+});
+$("prosPromoOk").addEventListener("click", () => {
+  const d = $("prosPromoDate").value;
+  const at = d ? new Date(d + "T12:00:00").getTime() : Date.now();
+  const x = {id:"pp" + Date.now() + Math.floor(Math.random()*900), at:at, by:moiLogin(),
+             note:$("prosPromoNote").value.trim(), img:""};
+  if (prosPromoTmp){
+    x.img = "pimg-" + Date.now().toString(36) + Math.floor(Math.random()*1e6).toString(36);
+    pimgPut(x.img, prosPromoTmp);
+  }
+  prosD.promos = (prosD.promos || []).concat([x]);
+  prosPromoFerme();
+  renderProsPromos();
+  toast("Promo ajoutée : n'oubliez pas d'enregistrer le contact");
+});
+$("prosPromoListe").addEventListener("click", e => {
+  const b = e.target.closest("[data-ppdel]");
+  if (!b) return;
+  prosD.promos = (prosD.promos || []).filter(x => x.id !== b.dataset.ppdel);
+  renderProsPromos();
 });
 $("prosNom").addEventListener("input", renderPros);
 $("prosTel").addEventListener("input", renderPros);
@@ -11997,10 +12184,19 @@ $("prosFiltres").addEventListener("click", e => {
 $("prosBody").addEventListener("click", e => {
   const cp = e.target.closest("[data-cpromo]");
   if (cp){
-    PROMO.envois.push({id:"e" + Date.now() + Math.floor(Math.random()*900), p:"manuel",
-                       n:cp.dataset.cpromo, at:Date.now(), by:moiLogin()});
-    promoSave(); renderPros();
-    toast("Promo comptée");
+    /* le client n'est peut-être pas dans la liste WhatsApp : on l'y ajoute */
+    const num = cp.dataset.cpromo;
+    let p = prosVivants().find(x => waNum(x.tel) === num);
+    if (!p){
+      const c = nosClients().find(x => x.num === num);
+      p = {id:"p" + Date.now() + Math.floor(Math.random()*900), nom:(c && c.nom) || "", tel:(c && c.tel) || num,
+           at:Date.now(), maj:Date.now(), by:moiLogin()};
+      PROS.unshift(p); prosSave();
+    }
+    prosFiltre = "tous"; prosCoul = "";
+    prosCharge(p); prosFormOuvre(true); renderPros();
+    $("prosPromoOuvre").click();
+    setTimeout(() => $("prosPromoAdd").scrollIntoView({behavior:"smooth", block:"center"}), 80);
     return;
   }
   const pi = e.target.closest("[data-print]");
