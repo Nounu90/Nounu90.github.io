@@ -878,6 +878,45 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .mtq small{display:block; margin-top:4px}
 .dketat{display:grid; grid-template-columns:1fr 1fr; gap:6px}
 
+/* --- notes : destinataires, partage, envoi depuis un dossier --- */
+.nposeg{display:flex; flex-wrap:wrap; gap:6px}
+.nposeg button{flex:1 1 28%}
+.nwa{flex:none; width:30px; height:30px; border-radius:9px; border:0; background:#128C7E;
+  color:#fff; display:grid; place-items:center; margin-right:6px}
+.dktag{margin-top:12px; padding-top:11px; border-top:1px dashed var(--line-strong)}
+.dktag > span{display:block; font-family:"Archivo",sans-serif; font-size:10px; font-weight:700;
+  letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:7px}
+.dktagb{display:flex; gap:6px}
+.dktagb button{flex:1; padding:8px 6px; border-radius:9px; border:1px solid var(--line); background:var(--card2);
+  font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--muted)}
+.dktagb button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.dksend{width:100%; margin-top:8px; padding:10px; border-radius:10px; border:0; background:var(--accent);
+  color:var(--accent-ink); font-family:"Archivo",sans-serif; font-size:13px; font-weight:600}
+.dkenv{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+/* --- contacts : intérêt, promos --- */
+.print{display:flex; flex-wrap:wrap; gap:6px; flex:1 1 100%}
+.print button{flex:1 1 28%; padding:7px 5px; border-radius:9px; border:1px solid var(--line); background:var(--card2);
+  font-family:"Archivo",sans-serif; font-size:11.5px; font-weight:600; color:var(--muted)}
+.print button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.print .prmsg{flex:1 1 100%; color:var(--info); background:var(--info-soft); border-color:transparent}
+.promobtn{width:100%; margin:0 0 12px}
+.promoapercu{display:block; max-width:100%; max-height:220px; margin-top:9px; border-radius:10px; border:1px solid var(--line)}
+#promoImg{margin-top:4px; font-size:12px; max-width:100%}
+.pmcard{background:var(--card); border:1px solid var(--line); border-radius:13px; padding:12px 13px; margin-bottom:9px}
+.pmcard.on{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset}
+.pmcard b{display:block; font-family:"Archivo",sans-serif; font-size:15px; font-weight:600}
+.pmcard p{margin:6px 0 0; font-size:13px; line-height:1.45; color:var(--muted); white-space:pre-wrap}
+.pmrow{display:flex; align-items:center; gap:9px; padding:10px 0; border-top:1px solid var(--line)}
+.pmrow:first-child{border-top:0}
+.pmrow .pmq{flex:1; min-width:0}
+.pmrow .pmq b{display:block; font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.pmrow .pmq small{display:block; font-size:11.5px; color:var(--muted); margin-top:2px}
+.pmrow a, .pmrow button{flex:none; padding:8px 10px; border-radius:9px; border:0; font-family:"Archivo",sans-serif;
+  font-size:12px; font-weight:600; text-decoration:none}
+.pmrow .pmt{background:#128C7E; color:#fff}
+.pmrow .pmi{background:var(--info-soft); color:var(--info)}
+.pmrow.fait{opacity:.55}
+
 /* --- les notes entre la direction et le bureau --- */
 .tbadge{flex:none; min-width:22px; height:22px; padding:0 7px; border-radius:11px;
   display:inline-grid; place-items:center; background:var(--accent); color:var(--accent-ink);
@@ -2247,6 +2286,9 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
     <div class="sumline"><span id="prosSumLab">Contacts à rappeler</span><b id="prosSum">0</b></div>
+    <button class="prbtn wa promobtn" id="prosPromoBtn" type="button">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>
+      Promotions WhatsApp</button>
 
     <section class="card">
       <div class="card-head"><div class="label" id="prosFormLab">Nouveau contact</div></div>
@@ -2295,6 +2337,8 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
         <input id="prosNote" type="text" placeholder="Ce qu'il demande (budget, délai, remarque...)">
       </div>
+      <div class="prsub"><span>Dernier message du client</span></div>
+      <div class="field"><input id="prosMsg" type="date" aria-label="Dernier message du client"></div>
       <div class="seg" id="prosBtns" style="margin-top:11px; display:flex; gap:8px">
         <button type="button" id="prosSave" style="flex:1" aria-pressed="true">Ajouter le contact</button>
         <button type="button" id="prosCancel" style="flex:0 0 auto">Annuler</button>
@@ -2306,12 +2350,53 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <button type="button" data-pf="tous" aria-pressed="false">Tous</button>
       <button type="button" data-pf="client" aria-pressed="false">Devenus clients</button>
       <button type="button" data-pf="fin" aria-pressed="false">Sans suite</button>
+      <button type="button" data-pf="int" aria-pressed="false">Intéressés</button>
+      <button type="button" data-pf="nrp" aria-pressed="false">Ne répond pas</button>
+      <button type="button" data-pf="pas" aria-pressed="false">Pas intéressés</button>
+      <button type="button" data-pf="m1" aria-pressed="false">Sans nouvelles +1 mois</button>
+      <button type="button" data-pf="m2" aria-pressed="false">Sans nouvelles +2 mois</button>
+      <button type="button" data-pf="nopromo" aria-pressed="false">Jamais reçu de promo</button>
     </div>
     <div class="field" style="margin-top:9px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="prosSearch" type="search" placeholder="Nom ou numéro" autocomplete="off">
     </div>
     <div id="prosBody" style="margin-top:11px"></div>
+  </div>
+</div>
+
+<!-- PROMOTIONS WHATSAPP -->
+<div class="sheet" id="promoSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="promoSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Promotions WhatsApp</h2>
+  </div>
+  <div class="sheet-body">
+    <section class="card">
+      <div class="card-head"><div class="label" id="promoFormLab">Nouvelle promotion</div></div>
+      <div class="field"><input id="promoTitre" type="text" placeholder="Titre (ex. -15 % jour et nuit)" autocomplete="off"></div>
+      <textarea class="dknote" id="promoTxt" rows="4" style="margin-top:9px" placeholder="Le message envoyé au client"></textarea>
+      <div class="prsub"><span>Image (facultatif)</span><b id="promoImgLab">aucune</b></div>
+      <input id="promoImg" type="file" accept="image/*">
+      <img id="promoApercu" class="promoapercu" alt="" hidden>
+      <div class="seg" style="margin-top:11px; display:flex; gap:8px">
+        <button type="button" id="promoSave" style="flex:1" aria-pressed="true">Enregistrer la promotion</button>
+        <button type="button" id="promoCancel" style="flex:0 0 auto" hidden>Annuler</button>
+      </div>
+    </section>
+    <div id="promoListe"></div>
+    <section class="card" id="promoEnvoi" hidden>
+      <div class="card-head"><div class="label" id="promoEnvLab">Envoyer</div></div>
+      <div class="filters" id="promoFiltres">
+        <button type="button" data-pz="pasrecu" aria-pressed="true">Pas encore reçu celle ci</button>
+        <button type="button" data-pz="jamais" aria-pressed="false">Jamais reçu de promo</button>
+        <button type="button" data-pz="int" aria-pressed="false">Intéressés</button>
+        <button type="button" data-pz="clients" aria-pressed="false">Anciens clients</button>
+        <button type="button" data-pz="tous" aria-pressed="false">Tous</button>
+      </div>
+      <p class="hint" id="promoEnvHint"></p>
+      <div id="promoDest"></div>
+    </section>
   </div>
 </div>
 
@@ -2369,7 +2454,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       </div>
 
       <div class="prsub"><span>Pour qui</span></div>
-      <div class="seg seg3" id="notePour"></div>
+      <div class="seg nposeg" id="notePour"></div>
 
       <button class="nbonbtn" id="noteBon" type="button">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h10l6 6v10a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M14 4v6h6"/></svg>
@@ -4032,6 +4117,7 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
   if (id === "nomPickSheet" || id === "cliPickSheet"){ $(id).classList.remove("open"); return; }
   if (id === "cutSheet"){ retourCut(); return; }
   if (id === "cliOneSheet"){ nav("cliSheet"); renderCli(); return; }
+  if (id === "promoSheet"){ nav("prosSheet"); renderPros(); return; }
   if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
       id === "nomSheet"   || id === "coutSheet" || id === "cliSheet" || id === "docSheet" ||
       id === "logSheet" || id === "paySheet" || id === "triSheet" ||
@@ -4865,6 +4951,10 @@ async function pullBons(){
         if (d && Array.isArray(d.liste)) fusionPros(d.liste);
         return;
       }
+      if (r.id === PROMO_ID){
+        if (r.data) fusionPromo(r.data);
+        return;
+      }
       if (r.id === PERSO_ID){
         const d = r.data;
         if (persoAllowed() && d && Array.isArray(d.liste)) fusionPerso(d.liste);
@@ -5071,7 +5161,7 @@ async function bootAuth(){
 function nav(where){
   armBack();
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet","noteSheet","persoSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet","noteSheet","persoSheet","promoSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -5597,10 +5687,11 @@ function renderTout(){
   essai(renderNote);
   essai(renderPerso);
   essai(renderPersoHome);
+  essai(renderPromo);
 }
 
 function ecranOuvert(){
-  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","paySheet","refSheet","cutPickSheet","nomPickSheet","shotSheet","atlSheet","remuSheet","docSheet","triSheet","cliSheet","prosSheet","noteSheet","persoSheet"];
+  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","paySheet","refSheet","cutPickSheet","nomPickSheet","shotSheet","atlSheet","remuSheet","docSheet","triSheet","cliSheet","prosSheet","noteSheet","persoSheet","promoSheet"];
   for (let i = 0; i < ids.length; i++){
     const el = $(ids[i]);
     if (el && el.classList.contains("open")) return ids[i];
@@ -6250,7 +6341,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "12.6";
+const APP_VERSION = "12.7";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8162,6 +8253,38 @@ function bilanJour(iso){
   return {iso:iso, ev:ev, cpt:cpt, cash:cash, livres:livres, agents:agents, reste:reste};
 }
 
+/* Le reste à fabriquer vu sur la semaine : ce qui traînait déjà, et ce qui
+   est entré en production chacun des sept derniers jours. */
+function dateProd(o){
+  const e = (o.log || []).find(x => x && x.kind === "etat" && x.etat === "production" && x.at);
+  return e ? jourISO(e.at) : String(o.date || "").slice(0, 10);
+}
+function resteSemaine(iso){
+  const R = resteAFabriquer();
+  const fin = new Date(iso + "T12:00:00");
+  const jours = [];
+  for (let i = 6; i >= 0; i--){
+    const d = new Date(fin.getTime()); d.setDate(d.getDate() - i);
+    jours.push({iso:jourISO(d), bons:[], f:0});
+  }
+  const debut = jours[0].iso;
+  const anciens = {bons:[], f:0};
+  R.bons.forEach(b => {
+    const dp = dateProd(b.o);
+    let j = jours.find(x => x.iso === dp);
+    if (!j && dp > iso) j = jours[jours.length - 1];
+    if (j){ j.bons.push(b); j.f += b.reste.length; }
+    else { anciens.bons.push(b); anciens.f += b.reste.length; }
+  });
+  const nouv = jours.reduce((t, j) => t + j.f, 0);
+  return {total:R.total, nbBons:R.bons.length, anciens:anciens, jours:jours, nouveaux:nouv};
+}
+function jourCourt(iso){
+  const J = ["dim.","lun.","mar.","mer.","jeu.","ven.","sam."];
+  const d = new Date(iso + "T12:00:00");
+  return J[d.getDay()] + " " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1);
+}
+
 /* Le texte qui accompagne l'image : lisible même si la photo ne charge pas. */
 function resumeTexteJour(iso){
   const B = bilanJour(iso);
@@ -8179,9 +8302,18 @@ function resumeTexteJour(iso){
   JOUR_ORDRE.forEach(t => { if (B.cpt[t]) tot.push(B.cpt[t] + " " + jourLab(t, B.cpt[t])); });
   if (tot.length) L.push("Total : " + tot.join(", "));
   if (B.cash) L.push("Encaissé : " + fr(B.cash, 2) + " MAD");
-  if (B.reste.total) L.push("Reste à fabriquer : " + B.reste.total + " fenêtre" +
-    (B.reste.total > 1 ? "s" : "") + " sur " + B.reste.bons.length + " bon" +
-    (B.reste.bons.length > 1 ? "s" : ""));
+  const RS = resteSemaine(iso);
+  L.push("");
+  L.push("Reste à fabriquer : " + RS.total + " fenêtre" + (RS.total > 1 ? "s" : "") +
+    " sur " + RS.nbBons + " bon" + (RS.nbBons > 1 ? "s" : ""));
+  if (RS.total){
+    L.push("  dont " + RS.anciens.f + " d'avant la semaine et " + RS.nouveaux + " entrées cette semaine");
+    RS.jours.forEach(j => {
+      if (!j.bons.length) return;
+      L.push(jourCourt(j.iso) + " : " + j.bons.map(b =>
+        (b.o.num || "") + " " + (b.o.nom || "") + " (reste " + b.reste.length + ")").join(", "));
+    });
+  }
   return L.join("\n");
 }
 
@@ -8189,7 +8321,7 @@ function imageJour(iso){
   const B = bilanJour(iso);
   const W = 1080, P = 60;
   const c = document.createElement("canvas");
-  c.width = W; c.height = 2600;
+  c.width = W; c.height = 4200;
   const x = c.getContext("2d");
   x.fillStyle = "#FFFFFF"; x.fillRect(0, 0, W, c.height);
   const A = 'Archivo, sans-serif', BB = '"IBM Plex Sans", sans-serif', M = '"IBM Plex Mono", monospace';
@@ -8276,11 +8408,47 @@ function imageJour(iso){
   x.fillText(B.reste.total + (B.reste.total > 1 ? " fenêtres" : " fenêtre"), W - P, y);
   x.textAlign = "left";
   y += 14;
+  const RS = resteSemaine(iso);
   if (!B.reste.total){
     y += 36;
     x.fillStyle = T.ok; x.font = "400 27px " + BB;
     x.fillText("Tout est fabriqué sur les commandes confirmées.", P, y);
   } else {
+    /* anciens / nouveaux, puis la semaine jour par jour */
+    y += 44;
+    x.fillStyle = T.muted; x.font = "400 27px " + BB;
+    x.fillText("D'avant la semaine", P, y);
+    x.textAlign = "right"; x.fillStyle = T.ink; x.font = "600 27px " + M;
+    x.fillText(RS.anciens.f + " fen.  ·  " + RS.anciens.bons.length + " bon" + (RS.anciens.bons.length > 1 ? "s" : ""), W - P, y);
+    x.textAlign = "left";
+    y += 38;
+    x.fillStyle = T.muted; x.font = "400 27px " + BB;
+    x.fillText("Entrées cette semaine", P, y);
+    x.textAlign = "right"; x.fillStyle = T.accent; x.font = "600 27px " + M;
+    x.fillText(RS.nouveaux + " fen.", W - P, y);
+    x.textAlign = "left";
+    y += 22;
+    RS.jours.forEach(j => {
+      y += 44;
+      x.fillStyle = j.iso === iso ? T.accent : T.ink; x.font = "600 27px " + A;
+      x.fillText(jourCourt(j.iso) + (j.iso === iso ? "  ·  aujourd'hui" : ""), P, y);
+      x.textAlign = "right"; x.fillStyle = j.bons.length ? T.warn : T.muted; x.font = "600 26px " + M;
+      x.fillText(j.bons.length ? j.bons.length + " bon" + (j.bons.length > 1 ? "s" : "") + "  ·  reste " + j.f + " fen." : "rien de nouveau", W - P, y);
+      x.textAlign = "left";
+      j.bons.slice(0, 5).forEach(b => {
+        y += 34;
+        x.fillStyle = T.muted; x.font = "400 24px " + BB;
+        x.fillText("·  " + (b.o.num || "") + "  " + String(b.o.nom || "Client sans nom").slice(0, 26), P + 24, y);
+        x.textAlign = "right"; x.fillStyle = T.ink; x.font = "400 24px " + M;
+        x.fillText("reste " + b.reste.length + "/" + b.tot, W - P, y);
+        x.textAlign = "left";
+      });
+    });
+    y += 30;
+    x.fillStyle = T.line; x.fillRect(P, y, W - 2*P, 1);
+    y += 10;
+    x.fillStyle = T.muted; x.font = "600 22px " + A;
+    y += 30; x.fillText("TOUS LES BONS EN COURS", P, y);
     B.reste.bons.slice(0, 6).forEach(b => {
       y += 38;
       x.fillStyle = T.muted; x.font = "400 27px " + BB;
@@ -8314,7 +8482,7 @@ function imageJour(iso){
 }
 
 async function ouvrirResumeJour(iso){
-  resO = null; resJour = iso;
+  resO = null; resJour = iso; resNote = null;
   $("resTitre").textContent = "Journée du " + jourLong(iso);
   $("resImg").removeAttribute("src");
   $("resHint").textContent = "Préparation de l'image...";
@@ -8479,6 +8647,94 @@ function resumeImage(o){
   return fin;
 }
 
+/* Une note partagée au groupe : le texte de la note en tête, puis le bon
+   de commande en entier s'il y en a un, pour que personne n'ait à demander
+   « c'est quel client ? ». */
+let resNote = null;
+let DKSEL = {};          /* agents cochés sous la note d'un dossier, par bon */
+function lignesCoupees(x, texte, maxW){
+  const out = [];
+  String(texte || "").split(/\n/).forEach(par => {
+    let cur = "";
+    par.split(/\s+/).forEach(m => {
+      const essai = cur ? cur + " " + m : m;
+      if (x.measureText(essai).width > maxW && cur){ out.push(cur); cur = m; }
+      else cur = essai;
+    });
+    out.push(cur);
+  });
+  return out;
+}
+function imageNote(n, o){
+  const W = 1080, P = 60;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = 1400;
+  const x = c.getContext("2d");
+  x.fillStyle = "#FFFFFF"; x.fillRect(0, 0, W, c.height);
+  const A = 'Archivo, sans-serif', B = '"IBM Plex Sans", sans-serif';
+  x.textBaseline = "alphabetic";
+  x.fillStyle = T.accent; x.fillRect(0, 0, W, 130);
+  x.fillStyle = "#FFFFFF";
+  x.font = "700 40px " + A; x.fillText("MSTORECASA", P, 60);
+  x.font = "400 26px " + B; x.fillText("Note d'équipe", P, 100);
+  let y = 130 + 60;
+  x.font = "600 36px " + A;
+  const L = lignesCoupees(x, n.txt, W - 2*P - 40).slice(0, 18);
+  const hBloc = L.length * 50 + 44;
+  x.fillStyle = T.soft; x.fillRect(P, y - 20, W - 2*P, hBloc);
+  x.fillStyle = T.accent; x.fillRect(P, y - 20, 8, hBloc);
+  x.fillStyle = T.ink;
+  L.forEach((l, i) => x.fillText(l, P + 34, y + 38 + i * 50));
+  y += hBloc + 30;
+  x.fillStyle = T.muted; x.font = "400 26px " + B;
+  x.fillText("De " + nomDe(n.by || "") + "  ·  " + notePourLab(n.pour) +
+             (n.at ? "  ·  " + noteDate(n.at) : ""), P, y);
+  y += 20;
+  if (n.fait){
+    y += 36; x.fillStyle = T.ok; x.font = "600 26px " + B;
+    x.fillText("Fait le " + noteDate(n.fait) + (n.faitBy ? " par " + nomDe(n.faitBy) : ""), P, y);
+  }
+  y += 30;
+  const bon = o ? resumeImage(o) : null;
+  const fin = document.createElement("canvas");
+  fin.width = W; fin.height = y + (bon ? bon.height : 20);
+  const f = fin.getContext("2d");
+  f.fillStyle = "#FFFFFF"; f.fillRect(0, 0, W, fin.height);
+  f.drawImage(c, 0, 0);
+  if (bon){
+    f.fillStyle = T.line; f.fillRect(P, y - 4, W - 2*P, 3);
+    f.drawImage(bon, 0, y);
+  }
+  return fin;
+}
+function noteTexte(n, o){
+  const L = ["Note d'équipe  ·  " + nomDe(n.by || "") + "  ·  " + notePourLab(n.pour), "", String(n.txt || "")];
+  if (o){ L.push(""); L.push(resumeTexte(o)); }
+  return L.join("\n");
+}
+async function ouvrirNoteGroupe(n){
+  const o = n.bon ? (ORDERS || []).find(x => x.id === n.bon) : null;
+  resO = o || null; resJour = ""; resNote = n;
+  $("resTitre").textContent = "Note" + (o ? "  ·  " + (o.num || "") : "");
+  $("resImg").removeAttribute("src");
+  $("resHint").textContent = "Préparation de l'image...";
+  openSheet("resSheet");
+  try {
+    if (document.fonts && document.fonts.ready){
+      await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 900))]);
+    }
+    const c = imageNote(n, o);
+    resUrl = c.toDataURL("image/png");
+    $("resImg").src = resUrl;
+    resBlob = null;
+    c.toBlob(b => { resBlob = b; }, "image/png");
+    $("resHint").textContent = "« Envoyer au groupe » ouvre le partage du téléphone : choisissez WhatsApp " +
+      "puis le groupe MSTORECASA." + (o ? " Le bon complet est sous la note." : "");
+  } catch(e){
+    $("resHint").textContent = "L'image n'a pas pu être préparée.";
+  }
+}
+
 function resumeTexte(o){
   const av = avancement(o);
   const rst = soldeDe(o);
@@ -8494,7 +8750,7 @@ function resumeTexte(o){
 
 async function ouvrirResume(o){
   if (!o) return;
-  resO = o; resJour = "";
+  resO = o; resJour = ""; resNote = null;
   /* L'agent doit voir tout de suite que son appui a été pris en compte : la
      feuille s'ouvre avant le dessin, qui prend un instant sur un vieux téléphone. */
   $("resTitre").textContent = "Résumé " + (o.num || "");
@@ -8526,10 +8782,10 @@ function resNom(o){
 
 $("resShare").addEventListener("click", async () => {
   const o = resO;
-  if (!o && !resJour) return;
-  const texte = resJour ? resumeTexteJour(resJour) : resumeTexte(o);
-  const titre = resJour ? "MSTORECASA  ·  " + jourLong(resJour) : "MSTORECASA " + (o.num || "");
-  const nomF  = resJour ? "journee-" + resJour + ".png" : resNom(o);
+  if (!o && !resJour && !resNote) return;
+  const texte = resNote ? noteTexte(resNote, o) : (resJour ? resumeTexteJour(resJour) : resumeTexte(o));
+  const titre = resNote ? "MSTORECASA  ·  note" : (resJour ? "MSTORECASA  ·  " + jourLong(resJour) : "MSTORECASA " + (o.num || ""));
+  const nomF  = resNote ? "note-" + resNote.id + ".png" : (resJour ? "journee-" + resJour + ".png" : resNom(o));
   try {
     if (resBlob && navigator.canShare){
       const f = new File([resBlob], nomF, {type:"image/png"});
@@ -8549,8 +8805,8 @@ $("resShare").addEventListener("click", async () => {
 
 $("resSave").addEventListener("click", async () => {
   const o = resO;
-  if (!o && !resJour) return;
-  const nom = resJour ? "journee-" + resJour + ".png" : resNom(o);
+  if (!o && !resJour && !resNote) return;
+  const nom = resNote ? "note-" + resNote.id + ".png" : (resJour ? "journee-" + resJour + ".png" : resNom(o));
   if (DL && resBlob){
     try { await DL.save({filename:nom, data:resBlob}); toast("Image enregistrée"); return; }
     catch(e){ if (e && e.code === "declined") return; }
@@ -9000,8 +9256,25 @@ function docCarte(o){
       'placeholder="Ce qu\'il faut savoir sur ce dossier : accord avec le client, retard, litige, rappel..."' +
       '>' + esc(o.dnote || "") + '</textarea>' +
     '<p class="dknsub">' + (note
-      ? "Enregistrée sur ce dossier. Visible ici seulement."
+      ? "Enregistrée sur ce dossier."
       : "Rien pour l'instant. Ce que vous écrivez reste sur ce dossier.") + '</p>' +
+    '<div class="dktag">' +
+      '<span>Envoyer cette note à</span>' +
+      '<div class="dktagb">' +
+        ["ahmed", "imane", "soufiane"].map(u =>
+          '<button type="button" data-dktag="' + u + '" data-dko="' + o.id + '" aria-pressed="' +
+          ((DKSEL[o.id] || {})[u] ? "true" : "false") + '">' + nomDe(u) + '</button>').join("") +
+      '</div>' +
+      '<button type="button" class="dksend" data-dksend="' + o.id + '">Envoyer la note</button>' +
+      (function(){
+        const env = (typeof NOTES !== "undefined" ? NOTES : [])
+          .filter(nn => nn && !nn.sup && nn.bon === o.id && nn.pour);
+        if (!env.length) return "";
+        return '<div class="dkenv">' + env.slice(0, 6).map(nn =>
+          '<span class="prtag ' + (nn.fait ? "ok" : "att") + '">' + esc(nomDe(nn.pour)) + '  ·  ' +
+          (nn.fait ? "fait " + noteDate(nn.fait) : "envoyée " + noteDate(nn.at)) + '</span>').join("") + '</div>';
+      })() +
+    '</div>' +
   '</div>';
 
   /* --- les gestes --- */
@@ -9206,6 +9479,33 @@ $("docDossier").addEventListener("click", e => {
 });
 
 $("docList").addEventListener("click", e => {
+  const dt = e.target.closest("button[data-dktag]");
+  if (dt){
+    const sel = DKSEL[dt.dataset.dko] || (DKSEL[dt.dataset.dko] = {});
+    sel[dt.dataset.dktag] = !sel[dt.dataset.dktag];
+    dt.setAttribute("aria-pressed", sel[dt.dataset.dktag] ? "true" : "false");
+    return;
+  }
+  const ds = e.target.closest("button[data-dksend]");
+  if (ds){
+    const o = ORDERS.find(x => x.id === ds.dataset.dksend);
+    if (!o) return;
+    const ta = ds.closest(".dkbloc").querySelector("textarea[data-dnote]");
+    const txt = String((ta && ta.value) || o.dnote || "").trim();
+    if (!txt){ toast("Écrivez d'abord la note"); return; }
+    const sel = DKSEL[o.id] || {};
+    const qui = Object.keys(sel).filter(u => sel[u]);
+    if (!qui.length){ toast("Choisissez à qui l'envoyer"); return; }
+    o.dnote = txt; touche(o); persistOrders(); pushBon(o);
+    qui.forEach(u => {
+      NOTES.unshift({id:"n" + Date.now() + Math.floor(Math.random()*900) + u.charAt(0),
+                     txt:txt, pour:u, bon:o.id, at:Date.now(), maj:Date.now(), by:moiLogin()});
+    });
+    DKSEL[o.id] = {};
+    notesSave(); renderDoc(); renderHome();
+    toast("Note envoyée à " + qui.map(nomDe).join(", "));
+    return;
+  }
   const det = e.target.closest("button[data-docetat]");
   if (det){
     const p = det.dataset.docetat.split("|");
@@ -10054,7 +10354,7 @@ $("tileAtl").addEventListener("click", () => {
 /* Un mot laissé à l'autre vaut mieux qu'un appel oublié. Chacun écrit une
    ligne, l'autre la voit en rouge sur l'accueil, la coche quand c'est fait,
    et celui qui l'a écrite voit qu'elle est faite. Rien de plus. */
-const NOTE_USERS = ["noureddine", "imane"];
+const NOTE_USERS = ["noureddine", "imane", "soufiane", "ahmed"];
 function noteAllowed(){
   try { return !!USER && NOTE_USERS.indexOf(USER.login) >= 0; } catch(e){ return false; }
 }
@@ -10211,6 +10511,8 @@ function renderNote(){
           (bon ? tag(esc(bon.num || "bon") + "  ·  " + esc(bon.nom || "")) : "") +
         '</div>' +
       '</div>' +
+      '<button class="nwa" type="button" data-nwa="' + n.id + '" aria-label="Envoyer au groupe WhatsApp">' +
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg></button>' +
       (mienne
         ? '<button class="ndel" type="button" data-ndel="' + n.id + '" aria-label="Supprimer">' +
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>'
@@ -10269,6 +10571,12 @@ $("noteBody").addEventListener("click", e => {
     toast(n.fait ? "Coché" : "Remis à faire");
     return;
   }
+  const nw = e.target.closest("[data-nwa]");
+  if (nw){
+    const n = NOTES.find(x => x.id === nw.dataset.nwa);
+    if (n) ouvrirNoteGroupe(n);
+    return;
+  }
   const del = e.target.closest("[data-ndel]");
   if (del){
     const n = NOTES.find(x => x.id === del.dataset.ndel);
@@ -10292,6 +10600,253 @@ $("tileNote").addEventListener("click", () => {
   renderNote();
   nav("noteSheet");
   pullNotes().then(() => { renderNote(); renderHome(); });
+});
+
+/* ============ Promotions WhatsApp ============ */
+/* WhatsApp gratuit n'envoie pas en masse : on envoie un par un, l'app prépare
+   le message, compte chaque envoi par numéro et retient la date. Les anciens
+   clients (numéro pris sur leurs bons) sont dans la liste avec les contacts. */
+const PROS_INT = {int:"Intéressé", nrp:"Ne répond pas", pas:"Pas intéressé"};
+function prosDernier(p){ return p.msg || p.at || 0; }
+const PROMO_ID = "cfg-promos";
+let PROMO = LS.get("mst_promo", {promos:[], envois:[]});
+if (!PROMO || !Array.isArray(PROMO.promos)) PROMO = {promos:[], envois:[]};
+if (!Array.isArray(PROMO.envois)) PROMO.envois = [];
+let promoSel = "", promoFiltre = "pasrecu", promoEdit = "", promoImgData = "";
+
+function promoSave(){ LS.set("mst_promo", PROMO); pushPromo(); }
+async function pushPromo(){
+  if (!SB || !USER) return false;
+  try {
+    const {error} = await SB.from("bons").upsert({
+      id: PROMO_ID, num: "__PROMOS__", author: USER.login,
+      data: {v:1, promos: PROMO.promos, envois: PROMO.envois}, updated_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    return true;
+  } catch(e){ return false; }
+}
+function fusionPromo(d){
+  if (!d) return false;
+  const par = {};
+  PROMO.promos.forEach(p => { if (p && p.id) par[p.id] = p; });
+  (d.promos || []).forEach(p => {
+    if (!p || !p.id) return;
+    if (!par[p.id] || (p.maj || 0) > (par[p.id].maj || 0)) par[p.id] = p;
+  });
+  const ev = {};
+  PROMO.envois.concat(d.envois || []).forEach(e => { if (e && e.id) ev[e.id] = e; });
+  PROMO = {promos: Object.keys(par).map(k => par[k]).sort((a, b) => (b.at || 0) - (a.at || 0)),
+           envois: Object.keys(ev).map(k => ev[k])};
+  LS.set("mst_promo", PROMO);
+  return true;
+}
+async function pullPromo(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", PROMO_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data;
+    if (d){ fusionPromo(d); return true; }
+  } catch(e){}
+  return false;
+}
+function promosVivantes(){ return PROMO.promos.filter(p => p && !p.sup); }
+/* Combien de promos ce numéro a reçu, et quand la dernière. */
+function promoInfo(num, promoId){
+  if (!num) return {n:0, der:0, recu:false};
+  let n = 0, der = 0, recu = false;
+  PROMO.envois.forEach(e => {
+    if (e.n !== num) return;
+    n++; if ((e.at || 0) > der) der = e.at;
+    if (promoId && e.p === promoId) recu = true;
+  });
+  return {n:n, der:der, recu:recu};
+}
+/* Tous ceux à qui on peut écrire : contacts WhatsApp et anciens clients,
+   un numéro une seule fois. */
+function promoDestinataires(){
+  const par = {};
+  prosVivants().forEach(p => {
+    const n = waNum(p.tel); if (!n) return;
+    par[n] = {num:n, nom:p.nom || "Sans nom", tel:p.tel, src:"contact", interet:p.interet || "", pros:p};
+  });
+  (ORDERS || []).forEach(o => {
+    if (!o || o.status !== "sent") return;
+    const n = waNum(o.tel); if (!n) return;
+    if (par[n]){ par[n].client = true; return; }
+    par[n] = {num:n, nom:o.nom || "Client", tel:o.tel, src:"client", client:true, interet:""};
+  });
+  return Object.keys(par).map(k => par[k]).sort((a, b) => a.nom.localeCompare(b.nom));
+}
+
+function renderPromo(){
+  const box = $("promoListe");
+  if (!box) return;
+  $("promoFormLab").textContent = promoEdit ? "Modifier la promotion" : "Nouvelle promotion";
+  $("promoSave").textContent = promoEdit ? "Enregistrer" : "Enregistrer la promotion";
+  $("promoCancel").hidden = !promoEdit;
+  $("promoImgLab").textContent = promoImgData ? "ajoutée" : "aucune";
+  $("promoApercu").hidden = !promoImgData;
+  if (promoImgData) $("promoApercu").src = promoImgData;
+  const L = promosVivantes();
+  const dest = promoDestinataires();
+  box.innerHTML = L.length ? L.map(p => {
+    const nb = PROMO.envois.filter(e => e.p === p.id).length;
+    return '<div class="pmcard' + (p.id === promoSel ? " on" : "") + '">' +
+      '<b>' + esc(p.titre || "Promotion") + '</b>' +
+      '<div class="prtags" style="margin-top:6px">' +
+        '<span class="prtag inf">envoyée ' + nb + ' / ' + dest.length + '</span>' +
+        '<span class="prtag">créée ' + prosDate(p.at) + '</span>' +
+        (p.img ? '<span class="prtag">avec image</span>' : '') +
+      '</div>' +
+      (p.txt ? '<p>' + esc(p.txt) + '</p>' : '') +
+      '<div class="pract">' +
+        '<button class="prbtn wa" type="button" data-pmsel="' + p.id + '">' +
+          (p.id === promoSel ? "Liste d'envoi ouverte" : "Envoyer aux clients") + '</button>' +
+        '<span class="pricons">' +
+          '<button class="prbtn min" type="button" data-pmedit="' + p.id + '">Modifier</button>' +
+          '<button class="prbtn min" type="button" data-pmdel="' + p.id + '">Supprimer</button>' +
+        '</span>' +
+      '</div>' +
+    '</div>';
+  }).join("") : '<div class="empty">Aucune promotion. Écrivez la première au dessus.</div>';
+
+  const env = $("promoEnvoi");
+  const pr = promoSel ? L.find(p => p.id === promoSel) : null;
+  env.hidden = !pr;
+  if (!pr) return;
+  $("promoEnvLab").textContent = "Envoyer  ·  " + (pr.titre || "Promotion");
+  [...$("promoFiltres").children].forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.pz === promoFiltre)));
+  const liste = dest.filter(d => {
+    const pi = promoInfo(d.num, pr.id);
+    if (promoFiltre === "pasrecu") return !pi.recu && d.interet !== "pas";
+    if (promoFiltre === "jamais")  return pi.n === 0 && d.interet !== "pas";
+    if (promoFiltre === "int")     return d.interet === "int";
+    if (promoFiltre === "clients") return !!d.client;
+    return true;
+  });
+  $("promoEnvHint").textContent = liste.length + " destinataire" + (liste.length > 1 ? "s" : "") +
+    ". « Texte » ouvre la conversation avec le message déjà écrit. « Image » ouvre le partage : " +
+    "choisissez WhatsApp puis ce client. Chaque appui compte un envoi.";
+  const txt = (pr.titre ? pr.titre + "\n\n" : "") + (pr.txt || "");
+  $("promoDest").innerHTML = liste.length ? liste.map(d => {
+    const pi = promoInfo(d.num, pr.id);
+    return '<div class="pmrow' + (pi.recu ? " fait" : "") + '">' +
+      '<span class="pmq"><b>' + esc(d.nom) + '</b><small>' + esc(telAffiche(d.tel || "")) + '  ·  ' +
+        (d.client ? "ancien client" : "contact") +
+        (d.interet ? "  ·  " + PROS_INT[d.interet] : "") +
+        '  ·  ' + (pi.n ? pi.n + " promo" + (pi.n > 1 ? "s" : "") : "aucune promo") +
+        (pi.recu ? "  ·  déjà reçue" : "") + '</small></span>' +
+      '<a class="pmt" href="https://wa.me/' + d.num + '?text=' + encodeURIComponent(txt) +
+        '" target="_blank" rel="noopener" data-pmsend="' + d.num + '">Texte</a>' +
+      (pr.img ? '<button type="button" class="pmi" data-pmimg="' + d.num + '">Image</button>' : '') +
+    '</div>';
+  }).join("") : '<div class="empty">Personne dans ce filtre.</div>';
+}
+function promoNoteEnvoi(num){
+  if (!promoSel || !num) return;
+  PROMO.envois.push({id:"e" + Date.now() + Math.floor(Math.random()*900), p:promoSel, n:num,
+                     at:Date.now(), by:moiLogin()});
+  const p = prosVivants().find(x => waNum(x.tel) === num);
+  if (p){ p.vu = Date.now(); p.vuBy = moiLogin(); p.maj = Date.now(); LS.set("mst_pros", PROS); pushPros(); }
+  promoSave();
+}
+function promoVide(){
+  promoEdit = ""; promoImgData = "";
+  $("promoTitre").value = ""; $("promoTxt").value = ""; $("promoImg").value = "";
+}
+/* L'image est réduite à 900 px de large avant d'être gardée : elle voyage
+   entre les téléphones avec la promotion. */
+$("promoImg").addEventListener("change", e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, 900 / im.width);
+      const c = document.createElement("canvas");
+      c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      promoImgData = c.toDataURL("image/jpeg", 0.8);
+      renderPromo();
+    };
+    im.src = rd.result;
+  };
+  rd.readAsDataURL(f);
+});
+$("promoSave").addEventListener("click", () => {
+  const titre = $("promoTitre").value.trim(), txt = $("promoTxt").value.trim();
+  if (!titre && !txt){ toast("Écrivez au moins un titre ou un message"); return; }
+  if (promoEdit){
+    const p = PROMO.promos.find(x => x.id === promoEdit);
+    if (p){ p.titre = titre; p.txt = txt; p.img = promoImgData; p.maj = Date.now(); }
+    toast("Promotion modifiée");
+  } else {
+    const p = {id:"pm" + Date.now(), titre:titre, txt:txt, img:promoImgData,
+               at:Date.now(), maj:Date.now(), by:moiLogin()};
+    PROMO.promos.unshift(p);
+    promoSel = p.id; promoFiltre = "pasrecu";
+    toast("Promotion enregistrée");
+  }
+  promoVide(); promoSave(); renderPromo();
+});
+$("promoCancel").addEventListener("click", () => { promoVide(); renderPromo(); });
+$("promoListe").addEventListener("click", e => {
+  const s1 = e.target.closest("[data-pmsel]");
+  if (s1){ promoSel = s1.dataset.pmsel; promoFiltre = "pasrecu"; renderPromo();
+           $("promoEnvoi").scrollIntoView({behavior:"smooth", block:"start"}); return; }
+  const ed = e.target.closest("[data-pmedit]");
+  if (ed){
+    const p = PROMO.promos.find(x => x.id === ed.dataset.pmedit);
+    if (!p) return;
+    promoEdit = p.id; promoImgData = p.img || "";
+    $("promoTitre").value = p.titre || ""; $("promoTxt").value = p.txt || "";
+    renderPromo();
+    $("promoSheet").querySelector(".sheet-body").scrollTo({top:0, behavior:"smooth"});
+    return;
+  }
+  const dl = e.target.closest("[data-pmdel]");
+  if (dl){
+    const p = PROMO.promos.find(x => x.id === dl.dataset.pmdel);
+    if (!p) return;
+    ask("Supprimer cette promotion ?", "Le compte des envois déjà faits reste sur chaque client.", () => {
+      p.sup = true; p.img = ""; p.maj = Date.now();
+      if (promoSel === p.id) promoSel = "";
+      promoSave(); renderPromo();
+    });
+  }
+});
+$("promoFiltres").addEventListener("click", e => {
+  const b = e.target.closest("[data-pz]");
+  if (!b) return;
+  promoFiltre = b.dataset.pz; renderPromo();
+});
+$("promoDest").addEventListener("click", async e => {
+  const t = e.target.closest("[data-pmsend]");
+  if (t){ promoNoteEnvoi(t.dataset.pmsend); setTimeout(renderPromo, 80); return; }
+  const im = e.target.closest("[data-pmimg]");
+  if (im){
+    const pr = PROMO.promos.find(x => x.id === promoSel);
+    if (!pr || !pr.img) return;
+    try {
+      const blob = await (await fetch(pr.img)).blob();
+      const f = new File([blob], "promotion.jpg", {type: blob.type || "image/jpeg"});
+      const txt = (pr.titre ? pr.titre + "\n\n" : "") + (pr.txt || "");
+      if (navigator.canShare && navigator.canShare({files:[f]})){
+        await navigator.share({files:[f], text:txt});
+        promoNoteEnvoi(im.dataset.pmimg); renderPromo();
+      } else toast("Partage d'image indisponible sur ce téléphone");
+    } catch(err){ /* annulé */ }
+  }
+});
+$("prosPromoBtn").addEventListener("click", () => {
+  if (!prosAllowed()) return;
+  promoVide(); renderPromo();
+  nav("promoSheet");
+  pullPromo().then(() => renderPromo());
 });
 
 /* ============ Mes notes (direction seule) ============ */
@@ -10603,7 +11158,8 @@ function prosLignes(){
       p.pose || "", p.type ? typeCourt(p.type) : "", (p.refs || []).join(", "), dims,
       r && r.nb ? r.nb : "", r && r.m2 ? Math.round(r.m2 * 100) / 100 : "",
       p.note || "",
-      st === "client" ? "Devenu client" : (st === "fin" ? "Sans suite" : "À rappeler"),
+      (st === "client" ? "Devenu client" : (st === "fin" ? "Sans suite" : "À rappeler")) +
+        (p.interet ? " · " + PROS_INT[p.interet] : ""),
       p.bon || "", jjmmaaaa(p.vu), nomDe(p.vuBy || p.by || ""), p.id];
   });
 }
@@ -10679,6 +11235,15 @@ function prosListe(){
     if (prosFiltre === "rappel" && st !== "rappel") return false;
     if (prosFiltre === "client" && st !== "client") return false;
     if (prosFiltre === "fin"    && st !== "fin")    return false;
+    if (prosFiltre === "int"    && p.interet !== "int") return false;
+    if (prosFiltre === "nrp"    && p.interet !== "nrp") return false;
+    if (prosFiltre === "pas"    && p.interet !== "pas") return false;
+    if (prosFiltre === "m1" || prosFiltre === "m2"){
+      if (st === "client" || p.interet === "pas") return false;
+      const j = (Date.now() - prosDernier(p)) / 86400000;
+      if (j < (prosFiltre === "m1" ? 30 : 60)) return false;
+    }
+    if (prosFiltre === "nopromo" && promoInfo(waNum(p.tel)).n > 0) return false;
     if (!q) return true;
     return (String(p.nom || "") + " " + String(p.tel || "") + " " + String(p.note || ""))
       .toLowerCase().indexOf(q) >= 0;
@@ -10730,6 +11295,13 @@ function renderPros(){
       '<div class="prl1"><b>' + esc(p.nom || "Sans nom") + '</b>' +
         '<em>' + esc(telAffiche(p.tel || "")) + '</em></div>' +
       '<div class="prtags">' +
+        (p.interet ? tag(PROS_INT[p.interet], p.interet === "int" ? "ok" : (p.interet === "pas" ? "" : "att")) : "") +
+        (function(){
+          const pi = promoInfo(waNum(p.tel));
+          return pi.n ? tag(pi.n + (pi.n > 1 ? " promos" : " promo") + "  ·  dernière " + prosDate(pi.der), "inf")
+                      : tag("aucune promo");
+        })() +
+        tag("dernier message " + prosDate(prosDernier(p))) +
         (st === "client" ? tag("devenu client  ·  " + esc(p.bon), "ok")
           : (st === "fin" ? tag("sans suite") : tag("à rappeler", "att"))) +
         (p.at ? tag("ajouté le " + prosDate(p.at)) : "") +
@@ -10757,6 +11329,11 @@ function renderPros(){
         (st === "client" ? '' :
           '<button class="prbtn dev" type="button" data-prdev="' + p.id + '">Faire un devis</button>' +
           '<button class="prbtn prod" type="button" data-prprod="' + p.id + '">Commande ferme</button>') +
+        '<span class="print">' +
+          ["int", "nrp", "pas"].map(k => '<button type="button" data-print="' + p.id + '|' + k + '" aria-pressed="' +
+            (p.interet === k ? "true" : "false") + '">' + PROS_INT[k] + '</button>').join("") +
+          '<button type="button" class="prmsg" data-prmsg="' + p.id + '">Il a écrit aujourd\'hui</button>' +
+        '</span>' +
         '<span class="pricons">' +
         '<button class="prbtn min" type="button" data-predit="' + p.id + '" title="Modifier">' +
           '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>' +
@@ -10908,7 +11485,7 @@ $("prosRows").addEventListener("click", e => {
 function prosVide(){
   prosEdit = "";
   $("prosNom").value = ""; $("prosTel").value = ""; $("prosNote").value = "";
-  $("prosAdresse").value = "";
+  $("prosAdresse").value = ""; $("prosMsg").value = "";
   prosD = prosDVide();
   try { renderProsD(); } catch(e){}
 }
@@ -10917,6 +11494,7 @@ function prosCharge(p){
   prosEdit = p.id;
   $("prosNom").value = p.nom || ""; $("prosTel").value = p.tel || "";
   $("prosNote").value = p.note || ""; $("prosAdresse").value = p.adresse || "";
+  $("prosMsg").value = p.msg ? jourISO(p.msg) : "";
   prosD = {adresse: p.adresse || "", pose: p.pose || "Pose", type: p.type || "ENR",
            refs: (p.refs || []).slice(),
            dims: (p.dims || []).map(d => Object.assign({}, d))};
@@ -10928,6 +11506,9 @@ function prosApplique(p){
   p.tel = $("prosTel").value.trim();
   p.note = $("prosNote").value.trim();
   p.adresse = $("prosAdresse").value.trim();
+  const dm = $("prosMsg").value;
+  if (dm) p.msg = new Date(dm + "T12:00:00").getTime();
+  else if (!p.msg) p.msg = p.at || Date.now();
   p.pose = prosD.pose || "Pose";
   p.type = prosD.type || "ENR";
   p.refs = prosD.refs.slice();
@@ -10979,6 +11560,26 @@ $("prosFiltres").addEventListener("click", e => {
 
 /* --- ce qu'on fait d'un contact --- */
 $("prosBody").addEventListener("click", e => {
+  const pi = e.target.closest("[data-print]");
+  if (pi){
+    const q = pi.dataset.print.split("|");
+    const p = PROS.find(x => x.id === q[0]);
+    if (!p) return;
+    p.interet = p.interet === q[1] ? "" : q[1];
+    p.maj = Date.now();
+    prosSave(); renderPros();
+    return;
+  }
+  const pm = e.target.closest("[data-prmsg]");
+  if (pm){
+    const p = PROS.find(x => x.id === pm.dataset.prmsg);
+    if (!p) return;
+    p.msg = Date.now(); p.maj = Date.now();
+    if (p.fin) delete p.fin;
+    prosSave(); renderPros(); renderHome();
+    toast("Dernier message noté : aujourd'hui");
+    return;
+  }
   const wa = e.target.closest("[data-prwa]");
   if (wa){
     /* le lien s'ouvre tout seul, on note juste la date du dernier contact */
@@ -11086,6 +11687,7 @@ $("tilePros").addEventListener("click", () => {
   renderPros();
   nav("prosSheet");
   pullPros().then(() => renderPros());
+  pullPromo().then(() => renderPros());
 });
 
 /* ============ Rémunération : salaires et primes du mois ============ */
@@ -12523,6 +13125,7 @@ function backOneStep(){
   if ($("shotSheet").classList.contains("open")){ closeSheet("shotSheet"); return true; }
   if ($("resSheet").classList.contains("open")){ closeSheet("resSheet"); return true; }
   if ($("cliOneSheet").classList.contains("open")){ nav("cliSheet"); renderCli(); return true; }
+  if ($("promoSheet").classList.contains("open")){ nav("prosSheet"); renderPros(); return true; }
   if ($("cutSheet").classList.contains("open")){ retourCut(); return true; }
   if ($("histSheet").classList.contains("open") ||
       $("stockSheet").classList.contains("open") ||
