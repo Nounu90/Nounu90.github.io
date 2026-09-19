@@ -746,6 +746,46 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .atban .s{font-size:12px; color:var(--ink); line-height:1.45}
 .atban .s b{font-family:"IBM Plex Mono",monospace; font-weight:600}
 
+/* --- le simulateur de prix du coût de revient --- */
+.simbox{border:1px solid var(--line); border-radius:13px; padding:13px; margin-bottom:14px; background:var(--card)}
+.simbox.on{border-color:var(--accent); background:var(--accent-soft)}
+.simhead{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:11px}
+.simhead b{font-family:"Archivo",sans-serif; font-size:13px; font-weight:700;
+  letter-spacing:.04em; text-transform:uppercase; color:var(--ink)}
+.simhead button{font-family:"Archivo",sans-serif; font-size:11.5px; font-weight:600;
+  color:var(--accent); background:none; border:0; padding:0; text-decoration:underline}
+.simrow{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:9px}
+.simrow label{flex:1; min-width:0; font-family:"Archivo",sans-serif; font-size:13px; font-weight:600; color:var(--ink)}
+.simrow label small{display:block; font-family:"IBM Plex Sans",sans-serif; font-size:11.5px;
+  font-weight:400; color:var(--muted); margin-top:2px}
+.simfield{flex:none; display:flex; align-items:center; gap:7px; background:var(--card2);
+  border:1px solid var(--line); border-radius:10px; padding:0 11px; height:42px}
+.simfield:focus-within{border-color:var(--accent); background:var(--card)}
+.simfield input{width:76px; border:0; background:none; text-align:right; padding:0;
+  font-family:"IBM Plex Mono",monospace; font-size:16px; font-weight:600; color:var(--ink)}
+.simfield input:focus{outline:none}
+.simfield span{font-family:"Archivo",sans-serif; font-size:10px; font-weight:700;
+  letter-spacing:.05em; color:var(--muted)}
+.simhint{margin:2px 0 0; font-size:11.5px; line-height:1.45; color:var(--muted)}
+.simcibles{margin-top:12px; padding-top:11px; border-top:1px dashed var(--line-strong)}
+.simlab{display:block; font-family:"Archivo",sans-serif; font-size:10px; font-weight:700;
+  letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:8px}
+.simcible{display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-bottom:7px}
+.simcible > span{flex:1 1 100%; font-size:12px; color:var(--muted)}
+.simcible button{flex:1; min-width:84px; padding:8px 6px; border-radius:9px; border:1px solid var(--line);
+  background:var(--card2); font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; color:var(--ink)}
+.simcible button:active{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+
+/* --- l'état d'envoi de la fiche vers le tableau de production --- */
+.pcsheet{display:flex; gap:9px; align-items:flex-start; margin:0 0 11px;
+  padding:10px 12px; border-radius:11px; font-size:12.5px; line-height:1.45;
+  background:var(--card2); color:var(--muted)}
+.pcsheet svg{flex:none; margin-top:1px}
+.pcsheet b{font-weight:600}
+.pcsheet.ok{background:var(--ok-soft); color:var(--ok)}
+.pcsheet.att{background:var(--warn-soft,#FAEFDD); color:var(--warn)}
+.pcsheet.stop{background:var(--accent-soft); color:var(--accent)}
+
 /* --- les contacts WhatsApp --- */
 .prsub{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between;
   gap:2px 10px; margin:14px 0 7px}
@@ -794,6 +834,29 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .prbtn.min{flex:0 0 auto; min-width:0; padding:10px 13px; color:var(--muted)}
 .prbtn[disabled]{opacity:.4}
 
+/* --- les notes entre la direction et le bureau --- */
+.tbadge{flex:none; min-width:22px; height:22px; padding:0 7px; border-radius:11px;
+  display:inline-grid; place-items:center; background:var(--accent); color:var(--accent-ink);
+  font-family:"Archivo",sans-serif; font-size:11.5px; font-weight:700}
+.ncard{background:var(--card); border:1px solid var(--line); border-radius:13px;
+  padding:12px 13px; margin-bottom:9px; display:flex; gap:11px; align-items:flex-start}
+.ncard.pourmoi{border-color:var(--accent)}
+.ncard.fait{opacity:.55}
+.nchk{flex:none; width:26px; height:26px; border-radius:8px; border:1.8px solid var(--line-strong);
+  background:var(--card2); display:grid; place-items:center; color:transparent; margin-top:1px}
+.nchk.on{background:var(--ok); border-color:transparent; color:#fff}
+.nmid{flex:1; min-width:0}
+.ntxt{font-size:14px; line-height:1.5; color:var(--ink); white-space:pre-wrap; word-break:break-word}
+.ncard.fait .ntxt{text-decoration:line-through}
+.ntags{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:7px}
+.ndel{flex:none; width:30px; height:30px; border-radius:9px; border:1px solid var(--line);
+  background:var(--card2); color:var(--muted); display:grid; place-items:center}
+.nbonbtn{display:flex; align-items:center; gap:8px; width:100%; margin-top:9px; padding:10px 12px;
+  border-radius:10px; border:1px dashed var(--line-strong); background:var(--card2);
+  font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--muted)}
+.nbonbtn.on{border-style:solid; border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
+.nbonbtn span{flex:1; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
 /* --- la situation du bon dans le choix du plan de coupe --- */
 .pketat{flex:none; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
   letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:6px;
@@ -805,6 +868,14 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .pketat.pret{background:var(--info-soft); color:var(--info); border-color:transparent}
 .pketat.livre{background:var(--ok-soft); color:var(--ok); border-color:transparent}
 .pketat.brouillon{background:var(--accent-soft); color:var(--accent); border-color:transparent}
+/* La famille de store, lisible avant d'ouvrir le bon. */
+.pkfam{flex:none; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:6px;
+  line-height:1.6; white-space:nowrap; background:var(--card2); color:var(--muted);
+  border:1px solid var(--line)}
+.pkfam.enr{background:var(--info-soft); color:var(--info); border-color:transparent}
+.pkfam.jn{background:var(--ok-soft); color:var(--ok); border-color:transparent}
+.pkfam.mix{background:var(--accent-soft); color:var(--accent); border-color:transparent}
 
 /* --- l'échéance, en bas du bon --- */
 .echbar{margin-top:11px; border:1px solid var(--line); border-radius:12px;
@@ -922,6 +993,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .agdot.etat{background:var(--warn)}
 .agdot.paie{background:var(--ok)}
 .agdot.pros{background:#128C7E}
+.agdot.note{background:var(--accent)}
 .agt{min-width:0; font-size:12.5px; line-height:1.4}
 .agt b{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink)}
 .agt small{display:block; font-size:11px; color:var(--muted); margin-top:1px}
@@ -1259,6 +1331,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 }
 .hchk.on{border-style:solid; border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
 .hchk.sage.on{border-color:var(--info); background:var(--info-soft); color:var(--info)}
+.hchk.sagedev.on{border-color:var(--warn); background:var(--warn-soft,#FAEFDD); color:var(--warn)}
 /* l'état de la fiche des pièces, avant même d'ouvrir le dossier :
    O vert quand tout est rempli, X rouge quand il manque une case */
 .hchk.pcs{font-family:"Archivo",sans-serif; font-size:17px; font-weight:700; letter-spacing:0}
@@ -1636,6 +1709,12 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <span class="tt"><b>Contacts WhatsApp</b><small id="tileProsSub">Demandes de renseignement à rappeler</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
+      <button class="tile" id="tileNote" type="button">
+        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2 2 4-4"/><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M8 2v4M16 2v4"/></svg></span>
+        <span class="tt"><b>Notes de l'équipe</b><small id="tileNoteSub">Ce qu'on se demande l'un à l'autre</small></span>
+        <span class="tbadge" id="tileNoteBadge" hidden>0</span>
+        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
       <button class="tile" id="tileCli" type="button">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.4 2.9-5.2 6.5-5.2s6.5 1.8 6.5 5.2"/><path d="M17 8.5a3 3 0 010 5M19.5 6a6 6 0 010 10"/></svg>
         <span class="tt"><b>Clients</b><small id="tileCliSub">Historique et paiements par client</small></span>
@@ -1843,6 +1922,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
     </div>
     <div id="pcList"></div>
     <p class="pcmiss" id="pcMiss" hidden></p>
+    <div class="pcsheet" id="pcSheet" hidden></div>
     <button class="pc-confirm" id="btnPieces" type="button">Confirmer et envoyer au tableau</button>
     <p class="hint" id="pcHint">Les cases rouges sont calculées par l'application, vous pouvez les corriger. Les autres sont à remplir par l'atelier.</p>
     <button class="pcreset" id="btnHook" type="button" style="padding-left:2px">Lien du tableau de production</button>
@@ -2171,6 +2251,46 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <input id="prosSearch" type="search" placeholder="Nom ou numéro" autocomplete="off">
     </div>
     <div id="prosBody" style="margin-top:11px"></div>
+  </div>
+</div>
+
+<!-- NOTES ENTRE NOUREDDINE ET IMANE -->
+<div class="sheet" id="noteSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="noteSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Notes de l'équipe</h2>
+  </div>
+  <div class="sheet-body">
+    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="sumline"><span id="noteSumLab">Note à traiter</span><b id="noteSum">0</b></div>
+
+    <section class="card">
+      <div class="card-head"><div class="label">Nouvelle note</div></div>
+      <div class="field">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+        <input id="noteTxt" type="text" placeholder="Ce qu'il faut faire ou savoir" autocomplete="off">
+      </div>
+
+      <div class="prsub"><span>Pour qui</span></div>
+      <div class="seg seg3" id="notePour"></div>
+
+      <button class="nbonbtn" id="noteBon" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h10l6 6v10a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M14 4v6h6"/></svg>
+        <span id="noteBonLab">Rattacher à un bon (facultatif)</span>
+      </button>
+
+      <div class="seg" style="margin-top:11px; display:flex; gap:8px">
+        <button type="button" id="noteAdd" style="flex:1" aria-pressed="true">Ajouter la note</button>
+        <button type="button" id="noteCancel" style="flex:0 0 auto" hidden>Annuler</button>
+      </div>
+    </section>
+
+    <div class="filters" id="noteFiltres">
+      <button type="button" data-nf="afaire" aria-pressed="true">À faire</button>
+      <button type="button" data-nf="tous" aria-pressed="false">Toutes</button>
+      <button type="button" data-nf="fait" aria-pressed="false">Faites</button>
+    </div>
+    <div id="noteBody" style="margin-top:11px"></div>
   </div>
 </div>
 
@@ -3653,16 +3773,50 @@ const CHAMPS_SUIVIS = [
   ["pose","mode de pose"], ["posePrix","prix de la pose"], ["poseMode","calcul de la pose"],
   ["remise","remise"], ["fact","facture"]
 ];
+/* Ce qu'une valeur devient dans le journal : vide se dit « vide », une date
+   se lit à l'endroit, le reste part tel quel. */
+function valLisible(k, v){
+  const t = String(v === undefined || v === null ? "" : v).trim();
+  if (!t) return "vide";
+  if (k === "ech" && t.length === 10) return t.split("-").reverse().join("/");
+  if (k === "fact") return t === "non" ? "sans facture" : "facturée";
+  if (k === "poseMode") return t === "fenetre" ? "par fenêtre" : "forfait";
+  if (k === "type") return t === "MIX" ? "les deux" : (t === "JN" ? "jour et nuit" : "enrouleur");
+  return t;
+}
+/* Une modification dit d'où l'on vient et où l'on va : « prix au m² :
+   250 → 280 ». Un nom de champ seul n'a jamais aidé personne. */
 function diffBon(a, b){
   const out = [];
   const v = (o, k) => String(o[k] === undefined || o[k] === null ? "" : o[k]).trim();
-  CHAMPS_SUIVIS.forEach(c => { if (v(a, c[0]) !== v(b, c[0])) out.push(c[1]); });
-  const dim = o => JSON.stringify(((o && o.dims) || []).map(d =>
-    [d.l, d.h, d.type || "", d.ref || "", d.qty || "", d.note || ""]));
-  if (dim(a) !== dim(b)) out.push("mesures");
-  const rf = o => JSON.stringify(((o && o.refs) || []).slice().sort());
-  if (rf(a) !== rf(b)) out.push("tissus");
+  CHAMPS_SUIVIS.forEach(c => {
+    if (v(a, c[0]) === v(b, c[0])) return;
+    out.push({lab:c[1], av:valLisible(c[0], a[c[0]]), ap:valLisible(c[0], b[c[0]])});
+  });
+  const dim = o => ((o && o.dims) || []).map(d =>
+    [d.l, d.h, d.type || "", d.ref || "", d.q || "", d.note || ""].join("|"));
+  const da = dim(a), db = dim(b);
+  if (da.join("\n") !== db.join("\n")){
+    const n = Math.max(da.length, db.length);
+    let touchees = 0;
+    for (let i = 0; i < n; i++){ if (da[i] !== db[i]) touchees++; }
+    out.push({lab:"mesures",
+              av: da.length + " ligne" + (da.length > 1 ? "s" : ""),
+              ap: db.length + " ligne" + (db.length > 1 ? "s" : "") +
+                  (touchees ? "  ·  " + touchees + " modifiée" + (touchees > 1 ? "s" : "") : "")});
+  }
+  const rf = o => ((o && o.refs) || []).slice().sort();
+  if (rf(a).join(",") !== rf(b).join(",")){
+    out.push({lab:"tissus", av: rf(a).join(", ") || "aucun", ap: rf(b).join(", ") || "aucun"});
+  }
   return out;
+}
+/* Une modification, en une phrase lisible. Les anciens journaux ne
+   contiennent que le nom du champ : on les affiche tels quels. */
+function texteChamp(c){
+  if (typeof c === "string") return c;
+  if (!c || !c.lab) return "";
+  return c.lab + " : " + c.av + " \u2192 " + c.ap;
 }
 /* Une ligne de journal par modification réelle : un enregistrement qui ne
    change rien n'écrit rien, sinon le journal se remplit de bruit. */
@@ -3770,7 +3924,8 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
   if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
       id === "nomSheet"   || id === "coutSheet" || id === "cliSheet" || id === "docSheet" ||
       id === "logSheet" || id === "paySheet" || id === "triSheet" ||
-      id === "atlSheet" || id === "remuSheet" || id === "prosSheet") nav("home");
+      id === "atlSheet" || id === "remuSheet" || id === "prosSheet" ||
+      id === "noteSheet") nav("home");
   else closeSheet(id);
 }));
 
@@ -4599,6 +4754,11 @@ async function pullBons(){
         if (d && Array.isArray(d.liste)) fusionPros(d.liste);
         return;
       }
+      if (r.id === NOTE_ID){
+        const d = r.data;
+        if (d && Array.isArray(d.liste)) fusionNotes(d.liste);
+        return;
+      }
       if (r.id === NOM_ID){
         const d = r.data;
         if (d && d.ENR && d.JN){
@@ -4794,7 +4954,7 @@ async function bootAuth(){
 function nav(where){
   armBack();
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet","noteSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -4842,6 +5002,21 @@ function renderHome(){
   $("tileTri").hidden = !adminAllowed();
   $("tileRemu").hidden = !adminAllowed();
   $("tileAtl").hidden = !adminAllowed();
+  const tn = $("tileNote");
+  if (tn){
+    tn.hidden = !noteAllowed();
+    if (noteAllowed()){
+      const na = (typeof notesAlerte === "function") ? notesAlerte() : 0;
+      const att = (typeof notesVivantes === "function")
+        ? notesVivantes().filter(n => notePourMoi(n)).length : 0;
+      const bd = $("tileNoteBadge");
+      bd.hidden = !na;
+      bd.textContent = na;
+      $("tileNoteSub").textContent = att
+        ? (att > 1 ? att + " notes vous attendent" : "1 note vous attend")
+        : "Ce qu'on se demande l'un à l'autre";
+    }
+  }
   $("tilePros").hidden = !prosAllowed();
   if (prosAllowed()){
     const n = (typeof prosVivants === "function")
@@ -5284,10 +5459,11 @@ function renderTout(){
   essai(renderRemu);
   essai(renderAtl);
   essai(renderPros);
+  essai(renderNote);
 }
 
 function ecranOuvert(){
-  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","paySheet","refSheet","cutPickSheet","nomPickSheet","shotSheet","atlSheet","remuSheet","docSheet","triSheet","cliSheet","prosSheet"];
+  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","paySheet","refSheet","cutPickSheet","nomPickSheet","shotSheet","atlSheet","remuSheet","docSheet","triSheet","cliSheet","prosSheet","noteSheet"];
   for (let i = 0; i < ids.length; i++){
     const el = $(ids[i]);
     if (el && el.classList.contains("open")) return ids[i];
@@ -5420,6 +5596,10 @@ function finRefus(o){
 }
 function estFini(o){ return !!(o && o.fini); }
 function estSage(o){ return !!(o && o.sage); }
+/* Une pièce devis existe t elle déjà dans SAGE pour ce bon ? C'est autre
+   chose que la saisie finale : on coche celle ci le jour où l'on prépare le
+   devis, pour ne pas en créer un deuxième la semaine suivante. */
+function estSageDev(o){ return !!(o && o.sagedev); }
 
 /* Où en sont ahmed et soufiane sur ce bon. */
 function avancement(o){
@@ -5623,8 +5803,11 @@ function renderHist(){
                   : 'FIN') + '</button>'
               : '') +
             (sageAllowed()
-              ? '<button class="hchk sage' + (estSage(o) ? " on" : "") +
-                '" type="button" data-sage="' + o.id + '" title="Saisi dans SAGE">SAGE</button>'
+              ? '<button class="hchk sagedev' + (estSageDev(o) ? " on" : "") +
+                '" type="button" data-sagedev="' + o.id + '" ' +
+                'title="Devis déjà créé dans SAGE">DEV</button>' +
+                '<button class="hchk sage' + (estSage(o) ? " on" : "") +
+                '" type="button" data-sage="' + o.id + '" title="Commande saisie dans SAGE">SAGE</button>'
               : '') +
             (finAllowed()
               ? '<button class="hchk grp" type="button" data-resume="' + o.id + '" title="Résumé pour le groupe">' +
@@ -5753,6 +5936,7 @@ $("histBody").addEventListener("click", e => {
   const num  = e.target.closest("button[data-num]");
   const fin  = e.target.closest("button[data-fini]");
   const sage = e.target.closest("button[data-sage]");
+  const sdev = e.target.closest("button[data-sagedev]");
   const res  = e.target.closest("button[data-resume]");
 
   if (res){
@@ -5769,6 +5953,18 @@ $("histBody").addEventListener("click", e => {
     touche(o); persistOrders(); pushBon(o);
     renderHist(); renderHome();
     toast(estFini(o) ? "Dossier " + o.num + " classé terminé" : "Dossier " + o.num + " rouvert");
+    return;
+  }
+  if (sdev){
+    const o = ORDERS.find(x => x.id === sdev.dataset.sagedev);
+    if (!o || !sageAllowed()) return;
+    if (estSageDev(o)) delete o.sagedev;
+    else o.sagedev = {at: Date.now(), by: (USER && USER.login) || ""};
+    touche(o); persistOrders(); pushBon(o);
+    renderHist();
+    toast(estSageDev(o)
+      ? "Devis SAGE fait pour " + o.num
+      : o.num + " : le devis SAGE reste à créer");
     return;
   }
   if (sage){
@@ -5903,7 +6099,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "12.3";
+const APP_VERSION = "12.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -6147,10 +6343,51 @@ function pcManquants(){
   return out;
 }
 
+/* Où en est la fiche de ce bon vis à vis du tableau Google. Quatre états
+   seulement, et chacun dit quoi faire. */
+function etatFiche(o){
+  if (!o) return null;
+  const num = String(o.num || "");
+  if (!num) return null;
+  if (SHEETROWS[num])
+    return {cls:"att", t:"En attente de réseau",
+            d:"La fiche est gardée sur ce téléphone, elle partira toute seule dès que la connexion revient."};
+  if (o.sheetAt){
+    const d = new Date(o.sheetAt);
+    const quand = isNaN(d.getTime()) ? "" :
+      " le " + pad(d.getDate()) + "/" + pad(d.getMonth()+1) +
+      " à " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+    /* Parti une fois, mais la relecture du tableau ne le retrouve plus :
+       quelqu'un a supprimé la ligne, ou le numéro du bon a changé. */
+    if (SHEETVUS && !SHEETVUS[num])
+      return {cls:"stop", t:"Plus dans le tableau",
+              d:"La fiche était partie" + quand + ", mais elle n'est plus dans le tableau. Renvoyez la."};
+    return {cls:"ok", t:"Envoyé au tableau" + quand,
+            d:"Renvoyer met la ligne à jour, ça n'en crée pas une deuxième."};
+  }
+  return {cls:"", t:"Pas encore envoyé au tableau",
+          d:"L'atelier ne verra cette fiche qu'une fois le bouton pressé."};
+}
+function renderPcSheet(){
+  const z = $("pcSheet");
+  if (!z) return;
+  const e = etatFiche(pcO());
+  if (!e){ z.hidden = true; return; }
+  z.hidden = false;
+  z.className = "pcsheet" + (e.cls ? " " + e.cls : "");
+  const ico = e.cls === "ok"
+    ? '<path d="M20 6L9 17l-5-5"/>'
+    : (e.cls === "att" ? '<path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/>'
+       : '<path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/>');
+  z.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+    ico + '</svg><div><b>' + e.t + '</b><br>' + e.d + '</div>';
+}
+
 function renderPieces(){
   const box = $("pcList"), badge = $("pcBadge"), btn = $("btnPieces");
   const fams = famsPresent();
   renderEtatSel();
+  renderPcSheet();
   box.innerHTML = "";
   pcData = {};
   if (!fams.length){
@@ -6158,6 +6395,7 @@ function renderPieces(){
     btn.disabled = true;
     btn.textContent = "Confirmer et envoyer au tableau";
     $("pcMiss").hidden = true;
+    $("pcSheet").hidden = true;
     box.innerHTML = '<div class="hint" style="margin:0">Saisissez une dimension pour préparer la fiche de production.</div>';
     return;
   }
@@ -6295,7 +6533,9 @@ function pcConfirm(){
       btn.textContent = "Envoyé au tableau"; btn.classList.add("done");
       toast(j.updated ? "Ligne mise à jour dans le tableau" : "Ligne ajoutée au tableau");
       b.sheetAt = new Date().toISOString();
+      if (SHEETVUS) SHEETVUS[b.num] = true;
       touche(b); persistOrders(); pushBon(b);
+      try { renderPcSheet(); } catch(e){}
       setTimeout(() => {
         btn.textContent = lbl; btn.classList.remove("done"); btn.disabled = false;
       }, 2500);
@@ -6304,6 +6544,7 @@ function pcConfirm(){
       /* le réseau a manqué : la fiche reste en file et partira toute seule */
       btn.disabled = false;
       sheetQueue(payload);
+      try { renderPcSheet(); } catch(e){}
       btn.textContent = "Gardée, part au retour du réseau";
       toast("Pas de réseau : la fiche part dès que la connexion revient");
       setTimeout(() => { btn.textContent = lbl; }, 3000);
@@ -7294,6 +7535,8 @@ function dessinePick(){
     btn.innerHTML =
       '<span class="hmain"><span class="hl1"><b>' + esc(o.nom || "Client sans nom") + '</b>' +
       '<span class="pketat ' + etatDe(o) + '">' + etatLabel(etatDe(o)) + '</span>' +
+      '<span class="pkfam ' + (o.type === "MIX" ? "mix" : (o.type === "JN" ? "jn" : "enr")) + '">' +
+        (o.type === "MIX" ? "ENR + JN" : (o.type === "JN" ? "Jour et nuit" : "Enrouleur")) + '</span>' +
       (o.status !== "sent" ? '<span class="pketat brouillon">Brouillon</span>' : '') +
       (etatDe(o) === "devis" && !o.ech ? pucedelai(o) : '') +
       (et ? '<span class="badge ' + (et.ok ? "ok" : "warn") + '">' + et.txt + '</span>'
@@ -7317,6 +7560,11 @@ $("cutPickBody").addEventListener("click", e => {
   const b = e.target.closest("[data-cut]");
   if (!b) return;
   $("cutPickSheet").classList.remove("open");
+  if (pickCible === "note"){
+    noteBonId = b.dataset.cut;
+    renderNote();
+    return;
+  }
   if (pickCible === "cout"){
     coutOrderId = b.dataset.cut;
     renderCout();
@@ -7712,7 +7960,7 @@ function jourLong(iso){
   return J[a.getDay()] + " " + a.getDate() + " " + M[a.getMonth()] + " " + a.getFullYear();
 }
 
-const JOUR_ORDRE = ["bon", "fab", "tube", "etat", "paie", "pros", "edit"];
+const JOUR_ORDRE = ["bon", "fab", "tube", "etat", "paie", "pros", "note", "edit"];
 const JOUR_LABS = {
   bon:  ["bon créé",          "bons créés"],
   fab:  ["fenêtre fabriquée", "fenêtres fabriquées"],
@@ -7720,6 +7968,7 @@ const JOUR_LABS = {
   etat: ["situation changée", "situations changées"],
   paie: ["paiement encaissé", "paiements encaissés"],
   pros: ["contact WhatsApp",  "contacts WhatsApp"],
+  note: ["note d'équipe",     "notes d'équipe"],
   edit: ["bon modifié",       "bons modifiés"]
 };
 function jourLab(t, n){ const L = JOUR_LABS[t]; return L ? L[n > 1 ? 1 : 0] : t; }
@@ -8377,6 +8626,7 @@ function docCarte(o){
         chip(esc(o.num || ""), "acc") +
         chip(etatLabel(et), et === "livre" ? "ok" : (et === "devis" ? "" : "att")) +
         chip(facture(o) ? "facturée" : "sans facture", facture(o) ? "" : "att") +
+        (estSageDev(o) ? chip("devis SAGE", "att") : "") +
         (estSage(o) ? chip("SAGE", "inf") : "") +
         (estFini(o) ? chip("terminé", "ok") : "") +
         (nv ? chip(nv + " à vérifier", "att") : "") +
@@ -9563,6 +9813,250 @@ $("tileAtl").addEventListener("click", () => {
   pullAtl().then(() => pullBons()).then(() => renderAtl());
 });
 
+/* ============ Notes entre la direction et le bureau ============ */
+/* Un mot laissé à l'autre vaut mieux qu'un appel oublié. Chacun écrit une
+   ligne, l'autre la voit en rouge sur l'accueil, la coche quand c'est fait,
+   et celui qui l'a écrite voit qu'elle est faite. Rien de plus. */
+const NOTE_USERS = ["noureddine", "imane"];
+function noteAllowed(){
+  try { return !!USER && NOTE_USERS.indexOf(USER.login) >= 0; } catch(e){ return false; }
+}
+const NOTE_ID = "cfg-notes";            /* rangée réservée, comme les contacts */
+let NOTES = LS.get("mst_notes", []);
+if (!Array.isArray(NOTES)) NOTES = [];
+/* « J'ai vu que c'était fait » reste sur le téléphone : ça ne regarde que moi. */
+let NOTEVU = LS.get("mst_notevu", {});
+if (!NOTEVU || typeof NOTEVU !== "object") NOTEVU = {};
+
+function moiLogin(){ return (USER && USER.login) || ""; }
+
+function notesSave(){
+  LS.set("mst_notes", NOTES);
+  pushNotes();
+}
+async function pushNotes(){
+  if (!SB || !USER) return false;
+  try {
+    const {error} = await SB.from("bons").upsert({
+      id: NOTE_ID, num: "__NOTES__", author: USER.login,
+      data: {v:1, liste: NOTES}, updated_at: new Date().toISOString()
+    });
+    if (error) throw error;
+    return true;
+  } catch(e){ return false; }
+}
+function fusionNotes(distant){
+  if (!Array.isArray(distant)) return false;
+  const par = {};
+  NOTES.forEach(n => { if (n && n.id) par[n.id] = n; });
+  let bouge = false;
+  distant.forEach(d => {
+    if (!d || !d.id) return;
+    const l = par[d.id];
+    if (!l || (d.maj || 0) > (l.maj || 0)){ par[d.id] = d; bouge = true; }
+  });
+  if (!bouge && distant.length === NOTES.length) return false;
+  NOTES = Object.keys(par).map(k => par[k]).sort((a, b) => (b.at || 0) - (a.at || 0));
+  LS.set("mst_notes", NOTES);
+  return true;
+}
+async function pullNotes(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", NOTE_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data;
+    if (d && Array.isArray(d.liste)){ fusionNotes(d.liste); return true; }
+  } catch(e){}
+  return false;
+}
+
+function notesVivantes(){ return NOTES.filter(n => n && !n.sup); }
+/* Une note me concerne si elle m'est adressée, ou si elle est pour tout le
+   monde et que ce n'est pas moi qui l'ai écrite. */
+function notePourMoi(n){
+  const moi = moiLogin();
+  if (!moi || n.fait) return false;
+  if (n.pour) return n.pour === moi;
+  return (n.by || "") !== moi;
+}
+/* Une note que j'ai écrite et que l'autre vient de cocher : bonne nouvelle,
+   elle mérite une pastille jusqu'à ce que je l'aie ouverte une fois. */
+function noteFaiteNonVue(n){
+  const moi = moiLogin();
+  return !!(moi && n.fait && (n.by || "") === moi && (n.faitBy || "") !== moi && !NOTEVU[n.id]);
+}
+function notesAlerte(){
+  if (!noteAllowed()) return 0;
+  return notesVivantes().filter(n => notePourMoi(n) || noteFaiteNonVue(n)).length;
+}
+
+let noteFiltre = "afaire", noteBonId = "", noteEditId = "";
+
+function noteListe(){
+  return notesVivantes().filter(n => {
+    if (noteFiltre === "afaire") return !n.fait;
+    if (noteFiltre === "fait")   return !!n.fait;
+    return true;
+  }).sort((a, b) => {
+    const pa = notePourMoi(a) ? 0 : 1, pb = notePourMoi(b) ? 0 : 1;
+    if (pa !== pb) return pa - pb;
+    const fa = a.fait ? 1 : 0, fb = b.fait ? 1 : 0;
+    if (fa !== fb) return fa - fb;
+    return (b.at || 0) - (a.at || 0);
+  });
+}
+function noteDate(ms){
+  if (!ms) return "";
+  const d = new Date(ms);
+  return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + " à " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+}
+function notePourLab(p){
+  if (!p) return "pour tout le monde";
+  return "pour " + nomDe(p);
+}
+
+function renderNotePour(){
+  const box = $("notePour");
+  if (!box) return;
+  const moi = moiLogin();
+  const autres = NOTE_USERS.filter(u => u !== moi);
+  const choix = autres.map(u => ({k:u, lab:nomDe(u)})).concat([{k:"", lab:"Tout le monde"}]);
+  box.innerHTML = choix.map(c =>
+    '<button type="button" data-npour="' + esc(c.k) + '" aria-pressed="' +
+    (c.k === notePour ? "true" : "false") + '">' + esc(c.lab) + '</button>').join("");
+}
+let notePour = "";
+
+function renderNote(){
+  const body = $("noteBody");
+  if (!body) return;
+  const att = notesVivantes().filter(n => notePourMoi(n)).length;
+  $("noteSum").textContent = att;
+  $("noteSumLab").textContent = att > 1 ? "Notes à traiter" : "Note à traiter";
+
+  [...$("noteFiltres").children].forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.nf === noteFiltre)));
+
+  renderNotePour();
+  const bo = noteBonId ? (ORDERS || []).find(o => o.id === noteBonId) : null;
+  $("noteBon").classList.toggle("on", !!bo);
+  $("noteBonLab").textContent = bo
+    ? (bo.num || "Bon") + "  ·  " + (bo.nom || "Client sans nom")
+    : "Rattacher à un bon (facultatif)";
+  $("noteAdd").textContent = noteEditId ? "Enregistrer" : "Ajouter la note";
+  $("noteCancel").hidden = !noteEditId;
+
+  const list = noteListe();
+  if (!list.length){
+    body.innerHTML = '<div class="empty">' +
+      (noteFiltre === "fait" ? "Aucune note faite pour l'instant."
+       : (noteFiltre === "afaire" ? "Rien à faire. Tout est coché."
+          : "Aucune note.<br>Écrivez ce que vous voulez demander à l'autre.")) + '</div>';
+    return;
+  }
+  const tag = (t, c) => '<span class="prtag' + (c ? " " + c : "") + '">' + t + '</span>';
+  body.innerHTML = list.map(n => {
+    const mienne = (n.by || "") === moiLogin();
+    const bon = n.bon ? (ORDERS || []).find(o => o.id === n.bon) : null;
+    return '<div class="ncard ' + (n.fait ? "fait" : (notePourMoi(n) ? "pourmoi" : "")) + '">' +
+      '<button class="nchk' + (n.fait ? " on" : "") + '" type="button" data-nchk="' + n.id + '" aria-label="Cocher">' +
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>' +
+      '</button>' +
+      '<div class="nmid">' +
+        '<div class="ntxt">' + esc(n.txt || "") + '</div>' +
+        '<div class="ntags">' +
+          (n.fait
+            ? tag("fait le " + noteDate(n.fait) + (n.faitBy ? "  ·  " + esc(nomDe(n.faitBy)) : ""), "ok")
+            : (notePourMoi(n) ? tag("à faire", "att") : tag("en attente"))) +
+          tag((mienne ? "de moi" : "de " + esc(nomDe(n.by))) + "  ·  " + notePourLab(n.pour)) +
+          (n.at ? tag(noteDate(n.at), "inf") : "") +
+          (bon ? tag(esc(bon.num || "bon") + "  ·  " + esc(bon.nom || "")) : "") +
+        '</div>' +
+      '</div>' +
+      (mienne
+        ? '<button class="ndel" type="button" data-ndel="' + n.id + '" aria-label="Supprimer">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>'
+        : '') +
+    '</div>';
+  }).join("");
+}
+
+$("notePour").addEventListener("click", e => {
+  const b = e.target.closest("[data-npour]");
+  if (!b) return;
+  notePour = b.dataset.npour;
+  renderNotePour();
+});
+$("noteBon").addEventListener("click", () => {
+  if (noteBonId){ noteBonId = ""; renderNote(); return; }
+  ouvrirPickBon("note");
+});
+$("noteFiltres").addEventListener("click", e => {
+  const b = e.target.closest("[data-nf]");
+  if (!b) return;
+  noteFiltre = b.dataset.nf;
+  renderNote();
+});
+function noteVide(){
+  noteEditId = ""; noteBonId = "";
+  $("noteTxt").value = "";
+}
+$("noteCancel").addEventListener("click", () => { noteVide(); renderNote(); });
+$("noteAdd").addEventListener("click", () => {
+  const txt = $("noteTxt").value.trim();
+  if (!txt){ toast("Écrivez d'abord la note"); return; }
+  if (noteEditId){
+    const n = NOTES.find(x => x.id === noteEditId);
+    if (n){
+      n.txt = txt; n.pour = notePour; n.bon = noteBonId; n.maj = Date.now();
+    }
+    toast("Note modifiée");
+  } else {
+    NOTES.unshift({id:"n" + Date.now() + Math.floor(Math.random()*900),
+                   txt:txt, pour:notePour, bon:noteBonId,
+                   at:Date.now(), maj:Date.now(), by:moiLogin()});
+    toast(notePour ? "Note envoyée à " + nomDe(notePour) : "Note ajoutée");
+  }
+  noteVide(); notesSave(); renderNote(); renderHome();
+});
+$("noteBody").addEventListener("click", e => {
+  const ch = e.target.closest("[data-nchk]");
+  if (ch){
+    const n = NOTES.find(x => x.id === ch.dataset.nchk);
+    if (!n) return;
+    if (n.fait){ delete n.fait; delete n.faitBy; }
+    else { n.fait = Date.now(); n.faitBy = moiLogin(); }
+    n.maj = Date.now();
+    notesSave(); renderNote(); renderHome();
+    toast(n.fait ? "Coché" : "Remis à faire");
+    return;
+  }
+  const del = e.target.closest("[data-ndel]");
+  if (del){
+    const n = NOTES.find(x => x.id === del.dataset.ndel);
+    if (!n) return;
+    ask("Supprimer cette note ?", "Elle disparaîtra pour tout le monde.", () => {
+      n.sup = true; n.txt = ""; n.maj = Date.now();
+      notesSave(); renderNote(); renderHome();
+      toast("Note supprimée");
+    });
+  }
+});
+
+$("tileNote").addEventListener("click", () => {
+  if (!noteAllowed()) return;
+  noteVide();
+  notePour = NOTE_USERS.filter(u => u !== moiLogin())[0] || "";
+  noteFiltre = "afaire";
+  /* Ouvrir la page vaut accusé de réception des notes qu'on a cochées pour moi. */
+  notesVivantes().forEach(n => { if (noteFaiteNonVue(n)) NOTEVU[n.id] = 1; });
+  LS.set("mst_notevu", NOTEVU);
+  renderNote();
+  nav("noteSheet");
+  pullNotes().then(() => { renderNote(); renderHome(); });
+});
+
 /* ============ Contacts WhatsApp ============ */
 /* Les gens qui écrivent pour se renseigner ne sont pas des clients : tant
    qu'ils n'ont rien commandé, ils n'ont pas de bon, pas de numéro, et ils ne
@@ -10488,10 +10982,11 @@ function evenementsDuJour(iso){
       const e = dernier[k];
       const kind = e.kind || "fab";
       if (kind === "edit"){
+        const ch = (e.champs || []).map(texteChamp).filter(Boolean);
         out.push({at:e.at, by:e.by || "", type:"edit",
                   titre:"Bon modifié  ·  " + (o.num || ""),
                   sous:(o.nom || "Client sans nom") +
-                       ((e.champs && e.champs.length) ? "  ·  " + e.champs.join(", ") : ""),
+                       (ch.length ? "  ·  " + ch.join("  ·  ") : ""),
                   val:""});
         return;
       }
@@ -10536,6 +11031,22 @@ function evenementsDuJour(iso){
       out.push({at:p.vu, by:p.vuBy || p.by || "", type:"pros", titre:"Contact rappelé",
                 sous:(p.nom || "Sans nom") + (p.tel ? "  ·  " + telAffiche(p.tel) : ""),
                 val:quoi.join("  ·  ")});
+    }
+  });
+  /* Les notes qu'on se laisse font partie de la journée au même titre
+     qu'un bon : écrire une consigne est un travail, la cocher aussi. */
+  (typeof NOTES !== "undefined" ? (NOTES || []) : []).forEach(n => {
+    if (!n || n.sup) return;
+    const court = String(n.txt || "").slice(0, 70);
+    if (n.at && jourISO(n.at) === iso){
+      out.push({at:n.at, by:n.by || "", type:"note", titre:"Note laissée",
+                sous:court + (n.pour ? "  ·  pour " + nomDe(n.pour) : "  ·  pour tout le monde"),
+                val:""});
+    }
+    if (n.fait && jourISO(n.fait) === iso){
+      out.push({at:n.fait, by:n.faitBy || "", type:"note", titre:"Note faite",
+                sous:court + (n.by ? "  ·  demandée par " + nomDe(n.by) : ""),
+                val:""});
     }
   });
   return out.sort((a,b) => b.at - a.at);
@@ -10622,7 +11133,7 @@ function vueAgent(ev){
     if (!par[k]) par[k] = [];
     par[k].push(x);
   });
-  const ORDRE = ["bon", "edit", "fab", "tube", "etat", "paie", "pros"];
+  const ORDRE = ["bon", "edit", "fab", "tube", "etat", "paie", "pros", "note"];
   const LABS = {
     bon:  ["bon créé",           "bons créés"],
     edit: ["bon modifié",        "bons modifiés"],
@@ -10630,7 +11141,8 @@ function vueAgent(ev){
     tube: ["découpe livrée",     "découpes livrées"],
     etat: ["changement d'état",  "changements d'état"],
     paie: ["paiement",           "paiements"],
-    pros: ["contact WhatsApp",   "contacts WhatsApp"]
+    pros: ["contact WhatsApp",   "contacts WhatsApp"],
+    note: ["note d'équipe",      "notes d'équipe"]
   };
   return Object.keys(par)
     .sort((a,b) => par[b].length - par[a].length)
@@ -11105,7 +11617,7 @@ function modeleDe(o, fam, k){
   return m ? (m[k] || "") : "";
 }
 
-function calcCout(o){
+function calcCout(o, puSim){
   const dims = ordDims(o);
   if (!dims.length) return null;
   /* Aucun repli silencieux : ce qui est affiché est ce qui est calculé. */
@@ -11175,7 +11687,10 @@ function calcCout(o){
     }
 
     const cout = cTissu + cPiece + cBarTh + cAcc + pose;
-    const pu = puFam(f, o);
+    /* Un prix simulé remplace celui du bon, pour voir ce que donnerait une
+       autre offre. Le bon n'est pas touché. */
+    const puReel = puFam(f, o);
+    const pu = (puSim && isFinite(puSim[f]) && puSim[f] > 0) ? puSim[f] : puReel;
     const vente = m2 * pu;
     return {x:x, fam:f, m2:m2, m2tissu:m2tissu, hors:horsLaize, pu:pu, vente:vente,
             pxTisB:pxTisB, pxTisM2:pxTisM2, laizeM:laizeM, bande:bande, m2chute:m2chute,
@@ -11224,6 +11739,63 @@ function ligneTissu(s, li){
     (s.m2chute > 0 ? li("Tissu repris d'une chute", fr(s.m2chute,2) + " m² déjà payés", "0,00", "pos") : "");
 }
 
+/* ============ Simulateur de prix, pour la direction ============ */
+/* « À combien faut il vendre pour gagner ce que je veux ? » se répond en
+   tapant un prix et en lisant la marge, pas en faisant le calcul à la main.
+   Rien n'est enregistré : le bon garde son prix. */
+let COUTSIM = {ENR:0, JN:0};
+function coutSimActif(){
+  return adminAllowed() && ((COUTSIM.ENR > 0) || (COUTSIM.JN > 0));
+}
+/* Le prix qui ferait exactement la marge visée, pour une famille donnée. */
+function prixPourMarge(o, fam, marge){
+  const C = calcCout(o);
+  if (!C) return 0;
+  const st = C.stores.filter(x => x.fam === fam);
+  if (!st.length) return 0;
+  const cout = st.reduce((t, x) => t + x.cout, 0);
+  const m2   = st.reduce((t, x) => t + x.m2, 0);
+  if (!(m2 > 0)) return 0;
+  const m = Math.min(0.95, Math.max(0, marge));
+  return (cout / (1 - m)) / m2;
+}
+function simulateurHTML(o){
+  if (!adminAllowed()) return "";
+  const dims = ordDims(o);
+  const fams = ["ENR","JN"].filter(f => dims.some(d => d.t === f));
+  if (!fams.length) return "";
+  const nomFam = f => f === "JN" ? "Jour et nuit" : "Enrouleur";
+  const ligne = f => {
+    const reel = puFam(f, o);
+    const sim  = COUTSIM[f] > 0 ? COUTSIM[f] : "";
+    return '<div class="simrow">' +
+      '<label>' + nomFam(f) + '<small>prix du bon : ' + fr(reel, 2) + ' MAD/m²</small></label>' +
+      '<div class="simfield">' +
+        '<input inputmode="decimal" data-sim="' + f + '" value="' + esc(String(sim)) + '" placeholder="' + fr(reel, 2) + '">' +
+        '<span>MAD/m²</span>' +
+      '</div>' +
+    '</div>';
+  };
+  const cible = f => {
+    const p30 = prixPourMarge(o, f, 0.30), p40 = prixPourMarge(o, f, 0.40), p50 = prixPourMarge(o, f, 0.50);
+    if (!(p30 > 0)) return "";
+    return '<div class="simcible"><span>' + nomFam(f) + '</span>' +
+      '<button type="button" data-simval="' + f + '|' + p30.toFixed(2) + '">30 % → ' + fr(p30, 0) + '</button>' +
+      '<button type="button" data-simval="' + f + '|' + p40.toFixed(2) + '">40 % → ' + fr(p40, 0) + '</button>' +
+      '<button type="button" data-simval="' + f + '|' + p50.toFixed(2) + '">50 % → ' + fr(p50, 0) + '</button>' +
+    '</div>';
+  };
+  return '<div class="simbox' + (coutSimActif() ? " on" : "") + '">' +
+    '<div class="simhead"><b>Simuler un prix de vente</b>' +
+      (coutSimActif() ? '<button type="button" id="simReset">Revenir au prix du bon</button>' : '') +
+    '</div>' +
+    fams.map(ligne).join("") +
+    '<p class="simhint">Ce que vous tapez ici ne touche pas le bon. Les chiffres au dessous se recalculent avec ce prix.</p>' +
+    '<div class="simcibles"><span class="simlab">Le prix qu\'il faudrait pour une marge de</span>' +
+      fams.map(cible).join("") + '</div>' +
+  '</div>';
+}
+
 function renderCout(){
   const out = $("coutBody");
   const o = ORDERS.find(x => x.id === coutOrderId);
@@ -11240,10 +11812,11 @@ function renderCout(){
 
   $("coutFcCard").hidden = false;
   renderFcSiBesoin();
-  const C = calcCout(o);
+  const C = calcCout(o, coutSimActif() ? COUTSIM : null);
   if (!C){ out.innerHTML = '<div class="empty">Ce bon ne contient aucune dimension exploitable.</div>'; return; }
 
   let h = "";
+  h += simulateurHTML(o);
   if (C.manque.length){
     h += '<div class="cwarn"><b>Prix manquants dans la nomenclature</b><br>' +
          C.manque.map(esc).join(", ") + '.<br>Le coût affiché est incomplet tant que ces lignes n’ont pas de prix.</div>';
@@ -11310,6 +11883,46 @@ function renderCout(){
   h += '<p class="hint">Bénéfice et marge se calculent sur le <b>hors taxe</b> : la TVA n\'est pas un revenu, elle est reversée à l\'État. Le tissu est compté sur les m² réellement déroulés par le plan de coupe, chutes du stock déduites, pas sur la surface de la fenêtre. Chaque profilé a sa ligne, sur sa propre longueur de coupe. La ligne « plan de coupe réel » donne, en regard, ce que ce bon a vraiment sorti du stock.</p>';
 
   out.innerHTML = h;
+}
+
+/* Le simulateur : on tape, tout se recalcule sous les doigts. */
+$("coutBody").addEventListener("input", e => {
+  const f = e.target.dataset.sim;
+  if (!f) return;
+  const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
+  if (clean !== e.target.value) e.target.value = clean;
+  COUTSIM[f] = parseFloat(clean) || 0;
+  coutRedessine();
+});
+$("coutBody").addEventListener("click", e => {
+  const b = e.target.closest("[data-simval]");
+  if (b){
+    const p = String(b.dataset.simval).split("|");
+    COUTSIM[p[0]] = parseFloat(p[1]) || 0;
+    renderCout();
+    return;
+  }
+  if (e.target.closest("#simReset")){ COUTSIM = {ENR:0, JN:0}; renderCout(); }
+});
+/* Redessiner sous les doigts ferait perdre le curseur : on ne refait que les
+   chiffres, en gardant les champs du simulateur tels qu'ils sont. */
+let coutT = null;
+function coutRedessine(){
+  clearTimeout(coutT);
+  coutT = setTimeout(() => {
+    const actifs = {};
+    $("coutBody").querySelectorAll("[data-sim]").forEach(i => { actifs[i.dataset.sim] = i.value; });
+    const focus = document.activeElement && document.activeElement.dataset
+      ? document.activeElement.dataset.sim : null;
+    renderCout();
+    $("coutBody").querySelectorAll("[data-sim]").forEach(i => {
+      if (actifs[i.dataset.sim] !== undefined) i.value = actifs[i.dataset.sim];
+      if (focus && i.dataset.sim === focus){
+        i.focus();
+        try { i.setSelectionRange(i.value.length, i.value.length); } catch(err){}
+      }
+    });
+  }, 220);
 }
 
 $("coutPick").addEventListener("click", () => ouvrirPickBon("cout"));
@@ -11388,6 +12001,7 @@ function backOneStep(){
       $("docSheet").classList.contains("open") ||
       $("atlSheet").classList.contains("open") ||
       $("prosSheet").classList.contains("open") ||
+      $("noteSheet").classList.contains("open") ||
       $("remuSheet").classList.contains("open") ||
       $("paySheet").classList.contains("open")){ nav("home"); return true; }
   if (!$("home").classList.contains("open")){ retourForm(); return true; }   /* formulaire */
