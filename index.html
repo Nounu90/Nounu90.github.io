@@ -895,10 +895,27 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .dkenv{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
 /* --- contacts : intérêt, promos --- */
 .print{display:flex; flex-wrap:wrap; gap:6px; flex:1 1 100%}
-.print button{flex:1 1 28%; padding:7px 5px; border-radius:9px; border:1px solid var(--line); background:var(--card2);
+.print button{flex:1 1 40%; padding:7px 5px; border-radius:9px; border:1px solid var(--line); background:var(--card2);
   font-family:"Archivo",sans-serif; font-size:11.5px; font-weight:600; color:var(--muted)}
 .print button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
-.print .prmsg{flex:1 1 100%; color:var(--info); background:var(--info-soft); border-color:transparent}
+.print .prmsg{flex:1 1 100%}
+.print .prmsg[aria-pressed="true"]{background:var(--warn-soft,#FAEFDD); border-color:var(--warn); color:var(--warn)}
+.prrap{display:flex; align-items:center; gap:10px; width:100%; padding:11px 12px; border-radius:10px;
+  border:1px solid var(--line); background:var(--card2); font-family:"Archivo",sans-serif; font-size:14px;
+  font-weight:600; color:var(--ink); text-align:left}
+.prrap i{flex:none; width:20px; height:20px; border-radius:6px; border:1.8px solid var(--line-strong); background:var(--card)}
+.prrap[aria-pressed="true"]{border-color:var(--warn); background:var(--warn-soft,#FAEFDD)}
+.prrap[aria-pressed="true"] i{background:var(--warn); border-color:var(--warn);
+  box-shadow:inset 0 0 0 3px var(--warn-soft,#FAEFDD)}
+.prpromo{display:flex; align-items:center; gap:9px; margin-top:8px; padding:9px 12px; border-radius:10px;
+  border:1px solid var(--line); background:var(--card2)}
+.prpromo > span{flex:1; min-width:0}
+.prpromo b{display:block; font-family:"Archivo",sans-serif; font-size:14px; font-weight:600}
+.prpromo small{display:block; font-size:11.5px; color:var(--muted); margin-top:2px}
+.prpromo button{flex:none; width:38px; height:38px; border-radius:10px; border:1px solid var(--line);
+  background:var(--card); font-size:20px; font-weight:600; color:var(--ink)}
+.prpromo em{flex:none; min-width:26px; text-align:center; font-style:normal;
+  font-family:"IBM Plex Mono",monospace; font-size:18px; font-weight:600}
 .promobtn{width:100%; margin:0 0 12px}
 .promoapercu{display:block; max-width:100%; max-height:220px; margin-top:9px; border-radius:10px; border:1px solid var(--line)}
 #promoImg{margin-top:4px; font-size:12px; max-width:100%}
@@ -2337,8 +2354,15 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
         <input id="prosNote" type="text" placeholder="Ce qu'il demande (budget, délai, remarque...)">
       </div>
-      <div class="prsub"><span>Dernier message du client</span></div>
-      <div class="field"><input id="prosMsg" type="date" aria-label="Dernier message du client"></div>
+      <div class="prsub"><span>Suivi</span></div>
+      <button type="button" class="prrap" id="prosRappel" aria-pressed="false">
+        <i></i><span>À rappeler</span></button>
+      <div class="prpromo">
+        <span><b>Promos envoyées</b><small id="prosPromoDer">aucune</small></span>
+        <button type="button" id="prosPromoMoins" aria-label="Une de moins">−</button>
+        <em id="prosPromoN">0</em>
+        <button type="button" id="prosPromoPlus" aria-label="Une de plus">+</button>
+      </div>
       <div class="seg" id="prosBtns" style="margin-top:11px; display:flex; gap:8px">
         <button type="button" id="prosSave" style="flex:1" aria-pressed="true">Ajouter le contact</button>
         <button type="button" id="prosCancel" style="flex:0 0 auto">Annuler</button>
@@ -2346,10 +2370,11 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
     </section>
 
     <div class="filters" id="prosFiltres">
-      <button type="button" data-pf="rappel" aria-pressed="true">À rappeler</button>
-      <button type="button" data-pf="tous" aria-pressed="false">Tous</button>
+      <button type="button" data-pf="tous" aria-pressed="true">Tous</button>
+      <button type="button" data-pf="rappel" aria-pressed="false">À rappeler</button>
       <button type="button" data-pf="client" aria-pressed="false">Devenus clients</button>
       <button type="button" data-pf="fin" aria-pressed="false">Sans suite</button>
+      <button type="button" data-pf="nc" aria-pressed="false">Nouveaux clients</button>
       <button type="button" data-pf="int" aria-pressed="false">Intéressés</button>
       <button type="button" data-pf="nrp" aria-pressed="false">Ne répond pas</button>
       <button type="button" data-pf="pas" aria-pressed="false">Pas intéressés</button>
@@ -5228,7 +5253,7 @@ function renderHome(){
   $("tilePros").hidden = !prosAllowed();
   if (prosAllowed()){
     const n = (typeof prosVivants === "function")
-      ? prosVivants().filter(p => prosStatut(p) === "rappel").length : 0;
+      ? prosVivants().filter(p => prosARappeler(p)).length : 0;
     $("tileProsSub").textContent = n
       ? n + (n > 1 ? " contacts à rappeler" : " contact à rappeler")
       : "Demandes de renseignement à rappeler";
@@ -6341,7 +6366,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "12.7";
+const APP_VERSION = "12.8";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -10606,7 +10631,7 @@ $("tileNote").addEventListener("click", () => {
 /* WhatsApp gratuit n'envoie pas en masse : on envoie un par un, l'app prépare
    le message, compte chaque envoi par numéro et retient la date. Les anciens
    clients (numéro pris sur leurs bons) sont dans la liste avec les contacts. */
-const PROS_INT = {int:"Intéressé", nrp:"Ne répond pas", pas:"Pas intéressé"};
+const PROS_INT = {nc:"Nouveau client", int:"Intéressé", nrp:"Ne répond pas", pas:"Pas intéressé"};
 function prosDernier(p){ return p.msg || p.at || 0; }
 const PROMO_ID = "cfg-promos";
 let PROMO = LS.get("mst_promo", {promos:[], envois:[]});
@@ -10660,6 +10685,11 @@ function promoInfo(num, promoId){
     if (e.n !== num) return;
     n++; if ((e.at || 0) > der) der = e.at;
     if (promoId && e.p === promoId) recu = true;
+  });
+  (typeof PROS !== "undefined" ? PROS : []).forEach(p => {
+    if (!p || p.sup || !p.promoMan || waNum(p.tel) !== num) return;
+    n += p.promoMan;
+    if ((p.promoDer || 0) > der) der = p.promoDer;
   });
   return {n:n, der:der, recu:recu};
 }
@@ -11158,9 +11188,9 @@ function prosLignes(){
       p.pose || "", p.type ? typeCourt(p.type) : "", (p.refs || []).join(", "), dims,
       r && r.nb ? r.nb : "", r && r.m2 ? Math.round(r.m2 * 100) / 100 : "",
       p.note || "",
-      (st === "client" ? "Devenu client" : (st === "fin" ? "Sans suite" : "À rappeler")) +
+      (st === "client" ? "Devenu client" : (st === "fin" ? "Sans suite" : (p.rappel ? "À rappeler" : "En cours"))) +
         (p.interet ? " · " + PROS_INT[p.interet] : ""),
-      p.bon || "", jjmmaaaa(p.vu), nomDe(p.vuBy || p.by || ""), p.id];
+      (prosBonDe(p) || {}).num || "", jjmmaaaa(p.msg || p.vu), nomDe(p.vuBy || p.by || ""), p.id];
   });
 }
 let prosFeuilleT = null;
@@ -11221,20 +11251,33 @@ async function pullPros(){
 /* Les fiches vivantes : les tombes des supprimés ne s'affichent jamais. */
 function prosVivants(){ return PROS.filter(p => p && !p.sup); }
 
-function prosStatut(p){
-  if (p.bon) return "client";
-  if (p.fin) return "fin";
-  return "rappel";
+/* Un contact est « devenu client » quand un bon enregistré porte son numéro,
+   qu'il ait été créé depuis sa fiche ou tapé à la main dans un nouveau bon. */
+function prosBonDe(p){
+  if (p.bon){
+    const o = (ORDERS || []).find(x => x && x.num === p.bon);
+    return o || {num:p.bon};
+  }
+  const n = waNum(p.tel);
+  if (!n) return null;
+  return (ORDERS || []).find(o => o && o.status === "sent" && waNum(o.tel) === n) || null;
 }
-let prosFiltre = "rappel", prosQ = "", prosEdit = "";
+function prosStatut(p){
+  if (prosBonDe(p)) return "client";
+  if (p.fin) return "fin";
+  return "ouvert";
+}
+function prosARappeler(p){ return !!p.rappel && prosStatut(p) !== "client"; }
+let prosFiltre = "tous", prosQ = "", prosEdit = "";
 
 function prosListe(){
   const q = prosQ.trim().toLowerCase();
   return prosVivants().filter(p => {
     const st = prosStatut(p);
-    if (prosFiltre === "rappel" && st !== "rappel") return false;
+    if (prosFiltre === "rappel" && !prosARappeler(p)) return false;
     if (prosFiltre === "client" && st !== "client") return false;
     if (prosFiltre === "fin"    && st !== "fin")    return false;
+    if (prosFiltre === "nc"     && p.interet !== "nc")  return false;
     if (prosFiltre === "int"    && p.interet !== "int") return false;
     if (prosFiltre === "nrp"    && p.interet !== "nrp") return false;
     if (prosFiltre === "pas"    && p.interet !== "pas") return false;
@@ -11261,7 +11304,7 @@ function renderPros(){
   const body = $("prosBody");
   if (!body) return;
   const tous = prosVivants();
-  const aRappeler = tous.filter(p => prosStatut(p) === "rappel").length;
+  const aRappeler = tous.filter(p => prosARappeler(p)).length;
   $("prosSum").textContent = aRappeler;
   $("prosSumLab").textContent = aRappeler > 1 ? "Contacts à rappeler" : "Contact à rappeler";
 
@@ -11301,9 +11344,9 @@ function renderPros(){
           return pi.n ? tag(pi.n + (pi.n > 1 ? " promos" : " promo") + "  ·  dernière " + prosDate(pi.der), "inf")
                       : tag("aucune promo");
         })() +
-        tag("dernier message " + prosDate(prosDernier(p))) +
-        (st === "client" ? tag("devenu client  ·  " + esc(p.bon), "ok")
-          : (st === "fin" ? tag("sans suite") : tag("à rappeler", "att"))) +
+        (p.msg ? tag("mis à jour le " + prosDate(p.msg)) : "") +
+        (st === "client" ? tag("devenu client  ·  " + esc((prosBonDe(p) || {}).num || ""), "ok")
+          : (st === "fin" ? tag("sans suite") : (p.rappel ? tag("à rappeler", "att") : ""))) +
         (p.at ? tag("ajouté le " + prosDate(p.at)) : "") +
         (p.vu ? tag("contacté le " + prosDate(p.vu), "inf") : "") +
         (p.by ? tag(esc(nomDe(p.by))) : "") +
@@ -11330,9 +11373,10 @@ function renderPros(){
           '<button class="prbtn dev" type="button" data-prdev="' + p.id + '">Faire un devis</button>' +
           '<button class="prbtn prod" type="button" data-prprod="' + p.id + '">Commande ferme</button>') +
         '<span class="print">' +
-          ["int", "nrp", "pas"].map(k => '<button type="button" data-print="' + p.id + '|' + k + '" aria-pressed="' +
+          ["nc", "int", "nrp", "pas"].map(k => '<button type="button" data-print="' + p.id + '|' + k + '" aria-pressed="' +
             (p.interet === k ? "true" : "false") + '">' + PROS_INT[k] + '</button>').join("") +
-          '<button type="button" class="prmsg" data-prmsg="' + p.id + '">Il a écrit aujourd\'hui</button>' +
+          (st === "client" ? "" : '<button type="button" class="prmsg" data-prmsg="' + p.id + '" aria-pressed="' +
+            (p.rappel ? "true" : "false") + '">' + (p.rappel ? "À rappeler  ✓" : "Marquer à rappeler") + '</button>') +
         '</span>' +
         '<span class="pricons">' +
         '<button class="prbtn min" type="button" data-predit="' + p.id + '" title="Modifier">' +
@@ -11355,7 +11399,15 @@ function renderPros(){
 /* --- ce que le contact a demandé, au niveau de détail qu'on a pu obtenir --- */
 /* Rien ici n'est engageant : ni réservation de tissu, ni place dans l'atelier.
    C'est une prise de notes qui évitera de tout retaper le jour du devis. */
-function prosDVide(){ return {adresse:"", pose:"Pose", type:"ENR", refs:[], dims:[]}; }
+function prosDVide(){ return {adresse:"", pose:"Pose", type:"ENR", refs:[], dims:[],
+                              rappel:false, promoMan:0, promoDer:0}; }
+function renderProsSuivi(){
+  if (!$("prosRappel")) return;
+  $("prosRappel").setAttribute("aria-pressed", prosD.rappel ? "true" : "false");
+  $("prosPromoN").textContent = prosD.promoMan || 0;
+  $("prosPromoDer").textContent = prosD.promoDer
+    ? "dernière le " + prosDate(prosD.promoDer) : "aucune cochée à la main";
+}
 let prosD = prosDVide();
 
 function prosDimNette(d){
@@ -11380,6 +11432,7 @@ function typeCourt(t){
 
 function renderProsD(){
   if (!$("prosType")) return;
+  renderProsSuivi();
   [...$("prosPose").children].forEach(b =>
     b.setAttribute("aria-pressed", String(b.dataset.ppose === (prosD.pose || "Pose"))));
   [...$("prosType").children].forEach(b =>
@@ -11485,8 +11538,9 @@ $("prosRows").addEventListener("click", e => {
 function prosVide(){
   prosEdit = "";
   $("prosNom").value = ""; $("prosTel").value = ""; $("prosNote").value = "";
-  $("prosAdresse").value = ""; $("prosMsg").value = "";
+  $("prosAdresse").value = "";
   prosD = prosDVide();
+  try { renderProsSuivi(); } catch(e){}
   try { renderProsD(); } catch(e){}
 }
 /* Charge une fiche dans le formulaire du haut. */
@@ -11494,8 +11548,8 @@ function prosCharge(p){
   prosEdit = p.id;
   $("prosNom").value = p.nom || ""; $("prosTel").value = p.tel || "";
   $("prosNote").value = p.note || ""; $("prosAdresse").value = p.adresse || "";
-  $("prosMsg").value = p.msg ? jourISO(p.msg) : "";
   prosD = {adresse: p.adresse || "", pose: p.pose || "Pose", type: p.type || "ENR",
+           rappel: !!p.rappel, promoMan: p.promoMan || 0, promoDer: p.promoDer || 0,
            refs: (p.refs || []).slice(),
            dims: (p.dims || []).map(d => Object.assign({}, d))};
   renderProsD();
@@ -11506,9 +11560,11 @@ function prosApplique(p){
   p.tel = $("prosTel").value.trim();
   p.note = $("prosNote").value.trim();
   p.adresse = $("prosAdresse").value.trim();
-  const dm = $("prosMsg").value;
-  if (dm) p.msg = new Date(dm + "T12:00:00").getTime();
-  else if (!p.msg) p.msg = p.at || Date.now();
+  /* chaque enregistrement par Imane compte comme la dernière nouvelle du client */
+  p.msg = Date.now();
+  p.rappel = !!prosD.rappel;
+  p.promoMan = prosD.promoMan || 0;
+  p.promoDer = prosD.promoDer || 0;
   p.pose = prosD.pose || "Pose";
   p.type = prosD.type || "ENR";
   p.refs = prosD.refs.slice();
@@ -11517,6 +11573,15 @@ function prosApplique(p){
     .map(d => ({l:d.l || "", h:d.h || "", q:d.q || "", type:d.type || ""}));
   p.maj = Date.now();
 }
+$("prosRappel").addEventListener("click", () => { prosD.rappel = !prosD.rappel; renderProsSuivi(); });
+$("prosPromoPlus").addEventListener("click", () => {
+  prosD.promoMan = (prosD.promoMan || 0) + 1; prosD.promoDer = Date.now(); renderProsSuivi();
+});
+$("prosPromoMoins").addEventListener("click", () => {
+  prosD.promoMan = Math.max(0, (prosD.promoMan || 0) - 1);
+  if (!prosD.promoMan) prosD.promoDer = 0;
+  renderProsSuivi();
+});
 $("prosNom").addEventListener("input", renderPros);
 $("prosTel").addEventListener("input", renderPros);
 $("prosSave").addEventListener("click", () => {
@@ -11574,10 +11639,10 @@ $("prosBody").addEventListener("click", e => {
   if (pm){
     const p = PROS.find(x => x.id === pm.dataset.prmsg);
     if (!p) return;
-    p.msg = Date.now(); p.maj = Date.now();
-    if (p.fin) delete p.fin;
+    p.rappel = !p.rappel; p.maj = Date.now();
+    if (p.rappel && p.fin) delete p.fin;
     prosSave(); renderPros(); renderHome();
-    toast("Dernier message noté : aujourd'hui");
+    toast(p.rappel ? "À rappeler" : "Retiré des contacts à rappeler");
     return;
   }
   const wa = e.target.closest("[data-prwa]");
