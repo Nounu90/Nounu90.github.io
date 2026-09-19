@@ -847,6 +847,22 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .phl span{min-width:0; word-break:break-word}
 .phvide{font-size:13px; color:var(--muted)}
 .phplus{display:block; margin-top:4px; font-size:12px; color:var(--muted)}
+.phl em{flex:none; font-style:normal; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; padding:2px 6px; border-radius:6px;
+  background:var(--accent-soft); color:var(--accent); margin-top:1px}
+.pdtabs .pdnew{border-style:dashed}
+.pdgere{display:flex; gap:8px; margin:-6px 0 12px}
+.pdgere button{flex:1; padding:8px 6px; border-radius:9px; border:1px solid var(--line); background:var(--card2);
+  font-family:"Archivo",sans-serif; font-size:12px; font-weight:600; color:var(--muted)}
+.pdsel{display:flex; flex-wrap:wrap; gap:6px}
+.pdsel button{padding:7px 11px; border-radius:9px; border:1px solid var(--line); background:var(--card2);
+  font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--muted)}
+.pdsel button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.nedit{flex:none; width:30px; height:30px; border-radius:9px; border:1px solid var(--line);
+  background:var(--card2); color:var(--muted); display:grid; place-items:center}
+.mtper{margin-top:9px}
+.mtper label{flex:1; display:flex; flex-direction:column; gap:4px; font-family:"Archivo",sans-serif;
+  font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
 
 /* --- chercher un montant dans les dossiers --- */
 .mtcard{margin-bottom:14px}
@@ -2173,6 +2189,10 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
         <input id="docMontant" type="text" inputmode="decimal" placeholder="Ex : 2514,24" autocomplete="off">
       </div>
+      <div class="pyper mtper">
+        <label>Du<input id="docMtD1" type="date"></label>
+        <label>Au<input id="docMtD2" type="date"></label>
+      </div>
       <p class="hint">Virements, chèques, espèces encaissés, et totaux TTC et HT des bons. Du plus proche au plus loin.</p>
       <div id="docMontantRes"></div>
     </section>
@@ -2303,13 +2323,22 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   </div>
   <div class="sheet-body">
     <div class="sumline"><span id="persoSumLab">Note à faire</span><b id="persoSum">0</b></div>
+    <div class="filters pdtabs" id="persoDos"></div>
+    <div class="pdgere" id="persoDosGere" hidden>
+      <button type="button" id="persoDosRen">Renommer le dossier</button>
+      <button type="button" id="persoDosDel">Supprimer le dossier</button>
+    </div>
     <section class="card">
+      <div class="card-head"><div class="label" id="persoFormLab">Nouvelle note</div></div>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
         <input id="persoTxt" type="text" placeholder="Nouvelle note" autocomplete="off" enterkeyhint="done">
       </div>
-      <div class="seg" style="margin-top:11px; display:flex">
+      <div class="prsub"><span>Dossier</span></div>
+      <div class="pdsel" id="persoDosSel"></div>
+      <div class="seg" style="margin-top:11px; display:flex; gap:8px">
         <button type="button" id="persoAdd" style="flex:1" aria-pressed="true">Ajouter</button>
+        <button type="button" id="persoCancel" style="flex:0 0 auto" hidden>Annuler</button>
       </div>
     </section>
     <div class="filters" id="persoFiltres">
@@ -2652,6 +2681,13 @@ let QTY_COL = 27;      /* AB par défaut, ajusté d'après l'en-tête de la feui
 /* La feuille peut gagner des colonnes : on relit l'en-tête à chaque lecture et
    on retient la colonne « Qtés en stock Réel », sinon « Disponible ». */
 function trouveQtyCol(rows){
+  /* Inventaire SAGE : l'en-tête « Qtés » peut être dans n'importe quelle
+     colonne et la référence n'est plus forcément en A sur la ligne d'en-tête. */
+  for (let i = 0; i < Math.min(rows.length, 30); i++){
+    const r = rows[i] || [];
+    const j = r.findIndex(c => /^qt[ée]s?$/i.test(String(c || "").replace(/\s+/g, " ").trim()));
+    if (j >= 0) return j;
+  }
   for (let i = 0; i < Math.min(rows.length, 30); i++){
     const r = rows[i] || [];
     if (!/^r[ée]f[ée]rence$/i.test(String(r[0] || "").trim())) continue;
@@ -2665,11 +2701,18 @@ function trouveQtyCol(rows){
     if (reel >= 0) return reel;
     if (dispo >= 0) return dispo;
   }
-  return 27;
+  return 15;        /* P : colonne des quantités de l'inventaire SAGE */
 }
 /* Colonne du prix d'achat unitaire, repérée par son en-tête. */
 let PRIX_COL = -1;
 function trouvePrixCol(rows){
+  /* Inventaire SAGE : le coût d'achat moyen est dans la colonne « C.M.U.P. unitaire ». */
+  for (let i = 0; i < Math.min(rows.length, 30); i++){
+    const r = rows[i] || [];
+    const j = r.findIndex(c => /c\.?m\.?u\.?p/i.test(String(c || "")));
+    /* l'en-tête est fusionné sur trois colonnes : les chiffres sont dans l'une d'elles */
+    if (j >= 0) for (let k = j; k < j + 4; k++){ if (colonneChiffree(rows, k)) return k; }
+  }
   for (let i = 0; i < Math.min(rows.length, 30); i++){
     const r = rows[i] || [];
     if (!/^r[ée]f[ée]rence$/i.test(String(r[0] || "").trim())) continue;
@@ -4888,6 +4931,7 @@ async function syncAll(){
   flushSheetNum();
   flushSheetRows();
   flushPay();
+  try { flushProsFeuille(); } catch(e){}
   if (!SB || !USER) return;
   await flushTombs();
   await flushPending();
@@ -5382,7 +5426,17 @@ function laizeOf(ref){
 /* Articles hors tissu : tout ce qui ne commence pas par B-0, S-0 ou JN_0.
    Colonne A la référence, colonne E la désignation, colonne X la famille,
    colonne AB la quantité. */
-const NAME_COL = 4;    /* E */
+const NAME_COL = 5;    /* F dans l'inventaire SAGE */
+/* La désignation se déplace selon les cellules fusionnées : on prend le
+   premier texte qui n'est pas un nombre, entre la référence et les quantités. */
+function designationDe(r){
+  const fin = Math.min(r.length, QTY_COL > 0 ? QTY_COL : 15);
+  for (let j = 1; j < fin; j++){
+    const t = String(r[j] == null ? "" : r[j]).trim();
+    if (t && !/^[\d\s.,\-]+$/.test(t)) return t;
+  }
+  return "";
+}
 const SERVICES = ["ACOMPTE","POSE","LIVRAISON","INSTALLATION","DEPLACEMENT","REMISE","AVOIR"];
 
 function articlesFromRows(rows){
@@ -5390,7 +5444,7 @@ function articlesFromRows(rows){
   (rows || []).forEach(r => {
     const ref = String(r[0] == null ? "" : r[0]).trim();
     if (!ref) return;
-    if (/^(B-0|S-0|JN[_-]?0)/i.test(ref)) return;          /* les tissus ont leur écran */
+    if (/^(B-0|S-0|JN[_-])/i.test(ref)) return;             /* les tissus ont leur écran */
     if (/^(référence|reference)$/i.test(ref)) return;       /* ligne d'en-tête */
     let raw = r.length > QTY_COL ? r[QTY_COL] : "";
     if (raw === "" || raw === undefined || raw === null) raw = "";
@@ -5406,7 +5460,7 @@ function articlesFromRows(rows){
     const px = PRIX_COL >= 0 && r.length > PRIX_COL ? numFr(r[PRIX_COL]) : 0;
     out.push({
       ref: ref.toUpperCase(),
-      nom: String(r[NAME_COL] == null ? "" : r[NAME_COL]).trim(),
+      nom: designationDe(r),
       dispo: numFr(raw),
       prix: px > 0 ? px : 0,
       type: fam.indexOf("JOURNUIT") >= 0 ? "JN" : (fam.indexOf("ENROU") >= 0 ? "ENR" : ""),
@@ -5423,11 +5477,12 @@ function catalogueFromRows(rows){
   const direct = [];
   rows.forEach(r => {
     const ref = String(r[0] == null ? "" : r[0]).trim();
-    if (!/^(B-0|S-0|JN[_-]?0)/i.test(ref)) return;
+    if (!/^(B-0|S-0|JN[_-])/i.test(ref)) return;
     let raw = r.length > QTY_COL ? r[QTY_COL] : "";
     if (raw === "" || raw === undefined || raw === null) raw = "";
     const px = PRIX_COL >= 0 && r.length > PRIX_COL ? numFr(r[PRIX_COL]) : 0;
     direct.push({ref:ref.toUpperCase(), laize:laizeOf(ref), dispo:numFr(raw),
+                 nom: designationDe(r),
                  prix: px > 0 ? px : 0,
                  type:/^JN/i.test(ref) ? "JN" : "ENR"});
   });
@@ -6195,7 +6250,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "12.5";
+const APP_VERSION = "12.6";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -9047,17 +9102,18 @@ function montantsConnus(){
       const m = parseFloat(p.montant) || 0;
       if (m <= 0) return;
       out.push({o:o, v:m, quoi:(p.mode || "Paiement") + (p.date ? " du " + String(p.date).split("-").reverse().join("/") : ""),
-                client:client, cls:"ok"});
+                client:client, cls:"ok", d:String(p.date || o.date || "").slice(0, 10)});
     });
     if (etatDe(o) === "devis") return;
     const du = duDe(o);
-    if (du > 0) out.push({o:o, v:du, quoi:facture(o) ? "Total TTC du bon" : "Total du bon (sans facture)", client:client, cls:"inf"});
+    const dBon = String(o.date || "").slice(0, 10);
+    if (du > 0) out.push({o:o, v:du, quoi:facture(o) ? "Total TTC du bon" : "Total du bon (sans facture)", client:client, cls:"inf", d:dBon});
     const ht = htDe(o);
     if (facture(o) && ht > 0 && Math.abs(ht - du) > 0.01)
-      out.push({o:o, v:ht, quoi:"Total HT du bon", client:client, cls:""});
+      out.push({o:o, v:ht, quoi:"Total HT du bon", client:client, cls:"", d:dBon});
     const rs = soldeDe(o);
     if (rs > 0.01 && Math.abs(rs - du) > 0.01)
-      out.push({o:o, v:rs, quoi:"Reste à encaisser", client:client, cls:"att"});
+      out.push({o:o, v:rs, quoi:"Reste à encaisser", client:client, cls:"att", d:dBon});
   });
   return out;
 }
@@ -9067,11 +9123,14 @@ function renderMontant(){
   const brut = String($("docMontant").value || "").replace(/\s/g, "").replace(",", ".");
   const cible = parseFloat(brut);
   if (!(cible > 0)){ box.innerHTML = ""; return; }
+  const d1 = $("docMtD1").value || "", d2 = $("docMtD2").value || "";
   const list = montantsConnus()
+    .filter(x => (!d1 || (x.d && x.d >= d1)) && (!d2 || (x.d && x.d <= d2)))
     .map(x => Object.assign(x, {ec: Math.abs(x.v - cible)}))
     .sort((a, b) => a.ec - b.ec)
     .slice(0, 12);
-  if (!list.length){ box.innerHTML = '<div class="empty">Aucun montant enregistré.</div>'; return; }
+  if (!list.length){ box.innerHTML = '<div class="empty">' + ((d1 || d2)
+    ? "Aucun montant dans cette période." : "Aucun montant enregistré.") + '</div>'; return; }
   box.innerHTML = list.map(x => {
     const exact = x.ec < 0.005;
     const pct = cible > 0 ? x.ec / cible * 100 : 0;
@@ -9084,6 +9143,8 @@ function renderMontant(){
   }).join("");
 }
 $("docMontant").addEventListener("input", renderMontant);
+$("docMtD1").addEventListener("change", renderMontant);
+$("docMtD2").addEventListener("change", renderMontant);
 $("docMontantRes").addEventListener("click", e => {
   const b = e.target.closest("[data-mtdoc]");
   if (!b) return;
@@ -10283,7 +10344,15 @@ async function pullPerso(){
   } catch(e){}
   return false;
 }
-function persoVivantes(){ return PERSO.filter(n => n && !n.sup); }
+function persoVivantes(){ return PERSO.filter(n => n && !n.sup && !n.dos); }
+function persoDossiers(){
+  return PERSO.filter(n => n && !n.sup && n.dos).sort((a, b) => (a.at || 0) - (b.at || 0));
+}
+function persoDosNom(id){
+  const d = id ? PERSO.find(x => x.id === id && x.dos && !x.sup) : null;
+  return d ? d.nom : "";
+}
+let persoOnglet = "", persoEdit = "", persoDosChoix = "";
 
 function renderPersoHome(){
   const b = $("persoHome");
@@ -10294,20 +10363,42 @@ function renderPersoHome(){
   $("persoHomeN").textContent = af.length ? af.length + " à faire" : "";
   const MAX = 6;
   $("persoHomeList").innerHTML = af.length
-    ? af.slice(0, MAX).map(n => '<span class="phl"><i></i><span>' + esc(n.txt || "") + '</span></span>').join("") +
+    ? af.slice(0, MAX).map(n => '<span class="phl"><i></i><span>' + esc(n.txt || "") + '</span>' +
+        (persoDosNom(n.d) ? '<em>' + esc(persoDosNom(n.d)) + '</em>' : '') + '</span>').join("") +
       (af.length > MAX ? '<span class="phplus">+ ' + (af.length - MAX) + ' autres</span>' : '')
     : '<span class="phvide">Rien à faire. Touchez ici pour ajouter une note.</span>';
+}
+
+function renderPersoDos(){
+  const dos = persoDossiers();
+  if (persoOnglet && !dos.some(d => d.id === persoOnglet)) persoOnglet = "";
+  const nAf = id => persoVivantes().filter(n => !n.fait && (!id || n.d === id)).length;
+  const btn = (id, lab) => '<button type="button" data-pdos="' + id + '" aria-pressed="' +
+    (persoOnglet === id ? "true" : "false") + '">' + esc(lab) +
+    (nAf(id) ? "  ·  " + nAf(id) : "") + '</button>';
+  $("persoDos").innerHTML = btn("", "Toutes") +
+    dos.map(d => btn(d.id, d.nom)).join("") +
+    '<button type="button" class="pdnew" id="persoDosNew">+ Nouveau dossier</button>';
+  $("persoDosGere").hidden = !persoOnglet;
+  $("persoDosSel").innerHTML = [{id:"", nom:"Sans dossier"}].concat(dos).map(d =>
+    '<button type="button" data-pdsel="' + d.id + '" aria-pressed="' +
+    (persoDosChoix === d.id ? "true" : "false") + '">' + esc(d.nom) + '</button>').join("");
+  $("persoFormLab").textContent = persoEdit ? "Modifier la note" : "Nouvelle note";
+  $("persoAdd").textContent = persoEdit ? "Enregistrer" : "Ajouter";
+  $("persoCancel").hidden = !persoEdit;
 }
 
 function renderPerso(){
   const body = $("persoBody");
   if (!body) return;
+  renderPersoDos();
   const af = persoVivantes().filter(n => !n.fait).length;
   $("persoSum").textContent = af;
   $("persoSumLab").textContent = af > 1 ? "Notes à faire" : "Note à faire";
   [...$("persoFiltres").children].forEach(b =>
     b.setAttribute("aria-pressed", String(b.dataset.pf2 === persoFiltre)));
   const list = persoVivantes().filter(n => {
+    if (persoOnglet && n.d !== persoOnglet) return false;
     if (persoFiltre === "afaire") return !n.fait;
     if (persoFiltre === "fait") return !!n.fait;
     return true;
@@ -10330,24 +10421,83 @@ function renderPerso(){
       '<div class="nmid">' +
         '<div class="ntxt">' + esc(n.txt || "") + '</div>' +
         '<div class="ntags">' +
+          (persoDosNom(n.d) && !persoOnglet ? tag(esc(persoDosNom(n.d)), "att") : "") +
           tag("ajoutée le " + noteDate(n.at), "inf") +
           (n.fait ? tag("faite le " + noteDate(n.fait), "ok") : "") +
         '</div>' +
       '</div>' +
+      '<button class="nedit" type="button" data-pedit="' + n.id + '" aria-label="Modifier">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>' +
       '<button class="ndel" type="button" data-pdel="' + n.id + '" aria-label="Supprimer">' +
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>' +
     '</div>').join("");
 }
 
+function persoVide(){
+  persoEdit = ""; persoDosChoix = persoOnglet;
+  $("persoTxt").value = "";
+}
 function persoAjoute(){
   const txt = $("persoTxt").value.trim();
   if (!txt){ toast("Écrivez d'abord la note"); return; }
-  PERSO.unshift({id:"m" + Date.now() + Math.floor(Math.random()*900), txt:txt,
-                 at:Date.now(), maj:Date.now()});
-  $("persoTxt").value = "";
+  if (persoEdit){
+    const n = PERSO.find(x => x.id === persoEdit);
+    if (n){ n.txt = txt; n.d = persoDosChoix; n.maj = Date.now(); }
+    toast("Note modifiée");
+  } else {
+    PERSO.unshift({id:"m" + Date.now() + Math.floor(Math.random()*900), txt:txt,
+                   d:persoDosChoix, at:Date.now(), maj:Date.now()});
+    toast(persoDosNom(persoDosChoix) ? "Note ajoutée dans " + persoDosNom(persoDosChoix) : "Note ajoutée");
+  }
+  persoVide();
   persoSave(); renderPerso(); renderPersoHome();
-  toast("Note ajoutée");
 }
+$("persoCancel").addEventListener("click", () => { persoVide(); renderPerso(); });
+$("persoDosSel").addEventListener("click", e => {
+  const b = e.target.closest("[data-pdsel]");
+  if (!b) return;
+  persoDosChoix = b.dataset.pdsel;
+  renderPersoDos();
+});
+$("persoDos").addEventListener("click", e => {
+  if (e.target.closest("#persoDosNew")){
+    const nom = (window.prompt("Nom du nouveau dossier\nExemple : Comptable, Magasin", "") || "").trim();
+    if (!nom) return;
+    const d = {id:"d" + Date.now() + Math.floor(Math.random()*900), dos:true, nom:nom,
+               at:Date.now(), maj:Date.now()};
+    PERSO.push(d);
+    persoOnglet = d.id;
+    if (!persoEdit) persoDosChoix = d.id;
+    persoSave(); renderPerso();
+    toast("Dossier " + nom + " créé");
+    return;
+  }
+  const b = e.target.closest("[data-pdos]");
+  if (!b) return;
+  persoOnglet = b.dataset.pdos;
+  if (!persoEdit) persoDosChoix = persoOnglet;
+  renderPerso();
+});
+$("persoDosRen").addEventListener("click", () => {
+  const d = PERSO.find(x => x.id === persoOnglet && x.dos);
+  if (!d) return;
+  const nom = (window.prompt("Nouveau nom du dossier", d.nom) || "").trim();
+  if (!nom || nom === d.nom) return;
+  d.nom = nom; d.maj = Date.now();
+  persoSave(); renderPerso(); renderPersoHome();
+});
+$("persoDosDel").addEventListener("click", () => {
+  const d = PERSO.find(x => x.id === persoOnglet && x.dos);
+  if (!d) return;
+  ask("Supprimer le dossier « " + d.nom + " » ?",
+      "Les notes qu'il contient ne sont pas effacées : elles passent dans « Sans dossier ».", () => {
+    d.sup = true; d.maj = Date.now();
+    PERSO.forEach(n => { if (n.d === d.id){ n.d = ""; n.maj = Date.now(); } });
+    persoOnglet = ""; persoDosChoix = "";
+    persoSave(); renderPerso(); renderPersoHome();
+    toast("Dossier supprimé");
+  });
+});
 $("persoAdd").addEventListener("click", persoAjoute);
 $("persoTxt").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); persoAjoute(); } });
 $("persoFiltres").addEventListener("click", e => {
@@ -10357,6 +10507,17 @@ $("persoFiltres").addEventListener("click", e => {
   renderPerso();
 });
 $("persoBody").addEventListener("click", e => {
+  const ed = e.target.closest("[data-pedit]");
+  if (ed){
+    const n = PERSO.find(x => x.id === ed.dataset.pedit);
+    if (!n) return;
+    persoEdit = n.id; persoDosChoix = n.d || "";
+    $("persoTxt").value = n.txt || "";
+    renderPersoDos();
+    $("persoSheet").querySelector(".sheet-body").scrollTo({top:0, behavior:"smooth"});
+    setTimeout(() => { try { $("persoTxt").focus(); } catch(err){} }, 250);
+    return;
+  }
   const ch = e.target.closest("[data-pchk]");
   if (ch){
     const n = PERSO.find(x => x.id === ch.dataset.pchk);
@@ -10380,7 +10541,7 @@ $("persoBody").addEventListener("click", e => {
 });
 $("persoHome").addEventListener("click", () => {
   if (!persoAllowed()) return;
-  persoFiltre = "afaire";
+  persoFiltre = "afaire"; persoOnglet = ""; persoVide();
   renderPerso();
   nav("persoSheet");
   pullPerso().then(ok => { if (ok){ renderPerso(); renderPersoHome(); } });
@@ -10418,6 +10579,48 @@ function waLien(tel){
 function prosSave(){
   LS.set("mst_pros", PROS);
   pushPros();
+  prosFeuille();
+}
+
+/* --- copie des contacts dans l'onglet « Whatsapp » de la feuille Google ---
+   La base de l'app reste la référence ; la feuille est une copie lisible,
+   réécrite en entier à chaque changement (une ligne par contact). */
+const PROS_HEAD = ["Date d'ajout", "Nom", "Téléphone", "Lien WhatsApp", "Adresse",
+  "Pose / Livraison", "Type de store", "Tissus", "Dimensions", "Nb fenêtres", "m²",
+  "Demande / remarque", "Statut", "N° de bon", "Dernier contact", "Ajouté par", "Clé"];
+function jjmmaaaa(ms){
+  if (!ms) return "";
+  const d = new Date(ms);
+  return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear();
+}
+function prosLignes(){
+  return prosVivants().slice().sort((a, b) => (a.at || 0) - (b.at || 0)).map(p => {
+    const r = prosResume(p);
+    const dims = (p.dims || []).map(prosDimNette).filter(Boolean)
+      .map(d => d.l + "x" + d.h + (d.q > 1 ? " ×" + d.q : "")).join(" · ");
+    const st = prosStatut(p);
+    return [jjmmaaaa(p.at), p.nom || "", p.tel || "", waLien(p.tel), p.adresse || "",
+      p.pose || "", p.type ? typeCourt(p.type) : "", (p.refs || []).join(", "), dims,
+      r && r.nb ? r.nb : "", r && r.m2 ? Math.round(r.m2 * 100) / 100 : "",
+      p.note || "",
+      st === "client" ? "Devenu client" : (st === "fin" ? "Sans suite" : "À rappeler"),
+      p.bon || "", jjmmaaaa(p.vu), nomDe(p.vuBy || p.by || ""), p.id];
+  });
+}
+let prosFeuilleT = null;
+function prosFeuille(){
+  LS.set("mst_prossheet", 1);             /* un envoi est dû, même hors ligne */
+  clearTimeout(prosFeuilleT);
+  prosFeuilleT = setTimeout(flushProsFeuille, 1500);
+}
+function flushProsFeuille(){
+  const url = hookUrl();
+  if (!url || !LS.get("mst_prossheet", 1) || !prosAllowed()) return Promise.resolve();
+  return fetch(url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body: JSON.stringify({action:"whatsapp", head:PROS_HEAD, rows:prosLignes()})})
+    .then(r => r.text())
+    .then(t => { const j = JSON.parse(t); if (j && j.ok) LS.set("mst_prossheet", 0); })
+    .catch(() => {});
 }
 async function pushPros(){
   if (!SB || !USER) return false;
