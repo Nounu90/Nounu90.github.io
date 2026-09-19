@@ -809,7 +809,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 
 .prcard{background:var(--card); border:1px solid var(--line); border-radius:13px; padding:12px 13px; margin-bottom:9px}
 .prcard.fin{opacity:.6}
-.prcard.client{border-color:var(--ok)}
+.prcard.client{border-color:var(--line)}
 .prl1{display:flex; align-items:baseline; gap:9px}
 .prl1 b{flex:1; min-width:0; font-family:"Archivo",sans-serif; font-size:15.5px; font-weight:600;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -901,6 +901,28 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .print .prmsg{flex:1 1 100%}
 .print .prmsg[aria-pressed="true"]{background:var(--warn-soft,#FAEFDD); border-color:var(--warn); color:var(--warn)}
 .prsuivi{margin-top:8px}
+.prprix{display:flex; gap:8px}
+.prprix label{flex:1; min-width:0; font-family:"Archivo",sans-serif; font-size:11px; font-weight:700;
+  letter-spacing:.04em; text-transform:uppercase; color:var(--muted)}
+.prprix label span{display:flex; align-items:center; gap:6px; margin-top:5px; padding:0 10px; height:42px;
+  border:1px solid var(--line); border-radius:10px; background:var(--card2)}
+.prprix input{flex:1; min-width:0; border:0; background:none; font-family:"IBM Plex Mono",monospace;
+  font-size:16px; font-weight:600; color:var(--ink); text-align:right}
+.prprix input:focus{outline:none}
+.prprix em{flex:none; font-style:normal; font-size:9.5px; letter-spacing:.03em}
+.prestim{margin-top:8px; padding:8px 10px; border-radius:9px; border:1px dashed var(--line-strong);
+  font-size:12.5px; line-height:1.45; color:var(--ink)}
+.prestim b{font-family:"IBM Plex Mono",monospace}
+.prestim small{display:block; font-size:10.5px; color:var(--muted); margin-top:2px}
+/* une vraie pièce (devis, en production, prêt, livré) est colorée, une estimation ne l'est pas */
+.prcmdb{border-left:5px solid var(--c-encours) !important; background:#EEF3FD !important}
+.prcmdb.devis{border-left-color:var(--c-devis) !important; background:#F5EEFC !important}
+.prcmdb.livre{border-left-color:var(--c-fini) !important; background:#EAF6EF !important}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .prcmdb{background:#16233D !important}
+  :root:not([data-theme="light"]) .prcmdb.devis{background:#241A33 !important}
+  :root:not([data-theme="light"]) .prcmdb.livre{background:#132D1E !important}
+}
 .prsuiv{margin-top:8px; padding:8px 10px; border-radius:9px; background:var(--warn-soft,#FAEFDD);
   font-size:12.5px; line-height:1.45; color:var(--ink)}
 .prsuiv b{display:block; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
@@ -917,20 +939,32 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .prcmdr b{font-family:"IBM Plex Mono",monospace; font-weight:600}
 .prcmdr.pay span, .prcmdr.pay b{font-size:11.5px; font-weight:400}
 .prcmdr b.ok{color:var(--ok)} .prcmdr b.att{color:var(--warn)}
-.prl1 b.nm-fini{color:var(--ok)}
-.prl1 b.nm-encours{color:var(--info)}
-.prl1 b.nm-devis{color:#7B3FBF}
-.prl1 b.nm-rappel{color:var(--warn)}
-.prl1 b.nm-int{color:var(--accent)}
-.prl1 b.nm-nc{color:#0E8C8C}
-.prl1 b.nm-nrp{color:#8A6D3B}
-.prl1 b.nm-off{color:var(--muted); text-decoration:line-through; text-decoration-thickness:1px}
+/* Une couleur par situation, jamais deux proches l'une de l'autre. */
+:root{--c-fini:#12833F; --c-encours:#1F5FD1; --c-devis:#7A3BC4; --c-rappel:#8A5A2B;
+  --c-int:#EA7A00; --c-nc:#D6207E; --c-nrp:#6E7681; --c-off:#D5001F}
+.prl1 b.nm-fini{color:var(--c-fini)}
+.prl1 b.nm-encours{color:var(--c-encours)}
+.prl1 b.nm-devis{color:var(--c-devis)}
+.prl1 b.nm-rappel{color:var(--c-rappel)}
+.prl1 b.nm-int{color:var(--c-int)}
+.prl1 b.nm-nc{color:var(--c-nc)}
+.prl1 b.nm-nrp{color:var(--c-nrp)}
+.prl1 b.nm-off{color:var(--c-off); text-decoration:line-through; text-decoration-thickness:1px}
+.prtag.c-int{background:#FFF1E0; color:var(--c-int)}
+.prtag.c-nc{background:#FCE4F1; color:var(--c-nc)}
+.prtag.c-nrp{background:#EDEFF2; color:var(--c-nrp)}
+.prtag.c-pas{background:#FDE6E9; color:var(--c-off)}
+.prtag.c-rappel{background:#F3E9DE; color:var(--c-rappel)}
+.prtag.c-fini{background:#E3F4EA; color:var(--c-fini)}
+.prtag.c-encours{background:#E6EEFC; color:var(--c-encours)}
+.prtag.c-devis{background:#F0E7FA; color:var(--c-devis)}
 .prleg{display:flex; flex-wrap:wrap; gap:4px 12px; margin:10px 0 2px; font-size:11px; color:var(--muted)}
 .prleg span::before{content:""; display:inline-block; width:9px; height:9px; border-radius:50%;
   margin-right:5px; vertical-align:-1px; background:currentColor}
-.prleg .nm-fini{color:var(--ok)} .prleg .nm-encours{color:var(--info)} .prleg .nm-devis{color:#7B3FBF}
-.prleg .nm-rappel{color:var(--warn)} .prleg .nm-int{color:var(--accent)} .prleg .nm-nc{color:#0E8C8C}
-.prleg .nm-nrp{color:#8A6D3B} .prleg .nm-off{color:var(--muted)}
+.prleg .nm-fini{color:var(--c-fini)} .prleg .nm-encours{color:var(--c-encours)} .prleg .nm-devis{color:var(--c-devis)}
+.prleg .nm-rappel{color:var(--c-rappel)} .prleg .nm-int{color:var(--c-int)} .prleg .nm-nc{color:var(--c-nc)}
+.prleg .nm-nrp{color:var(--c-nrp)} .prleg .nm-off{color:var(--c-off)}
+.prleg span{font-weight:600}
 .prrap{display:flex; align-items:center; gap:10px; width:100%; padding:11px 12px; border-radius:10px;
   border:1px solid var(--line); background:var(--card2); font-family:"Archivo",sans-serif; font-size:14px;
   font-weight:600; color:var(--ink); text-align:left}
@@ -2380,6 +2414,13 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         Ajouter une fenêtre
       </button>
+
+      <div class="prsub"><span>Prix donné sur WhatsApp</span><b>estimation, pas un devis</b></div>
+      <div class="prprix">
+        <label id="prosPxEL">Enrouleur<span><input id="prosPxE" inputmode="decimal" placeholder="0"><em>MAD/m² HT</em></span></label>
+        <label id="prosPxJL">Jour et nuit<span><input id="prosPxJ" inputmode="decimal" placeholder="0"><em>MAD/m² HT</em></span></label>
+      </div>
+      <p class="hint" id="prosEstim" style="margin-top:6px"></p>
 
       <div class="field" style="margin-top:9px">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
@@ -6406,7 +6447,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "12.9";
+const APP_VERSION = "13.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -11230,7 +11271,8 @@ function prosLignes(){
     return [jjmmaaaa(p.at), p.nom || "", p.tel || "", waLien(p.tel), p.adresse || "",
       p.pose || "", p.type ? typeCourt(p.type) : "", (p.refs || []).join(", "), dims,
       r && r.nb ? r.nb : "", r && r.m2 ? Math.round(r.m2 * 100) / 100 : "",
-      [p.note || "", p.suivi ? "Suivi : " + p.suivi : ""].filter(Boolean).join(" · "),
+      [p.note || "", p.suivi ? "Suivi : " + p.suivi : "",
+       prosEstim(p) ? "Prix WhatsApp : " + prosEstimTexte(p) : ""].filter(Boolean).join(" · "),
       (st === "client" ? "Devenu client" : (st === "fin" ? "Sans suite" : (p.rappel ? "À rappeler" : "En cours"))) +
         (p.interet ? " · " + PROS_INT[p.interet] : ""),
       (prosBonDe(p) || {}).num || "", jjmmaaaa(p.msg || p.vu), nomDe(p.vuBy || p.by || ""), p.id];
@@ -11372,7 +11414,7 @@ function blocCommandes(bons){
     const du = duDe(o), pay = payeDe(o), rst = soldeDe(o);
     const et = etatDe(o);
     const pl = paiements(o).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
-    return '<div class="prcmdb">' +
+    return '<div class="prcmdb ' + (et === "devis" ? "devis" : (et === "livre" ? "livre" : "")) + '">' +
       '<div class="prcmdh"><b>' + esc(o.num || "") + '</b><span class="pketat ' + et + '">' + etatLabel(et) + '</span>' +
         '<em>' + (o.date ? dateFR(String(o.date).slice(0, 10)) : "") + '</em></div>' +
       '<div class="prcmdl">' + esc(storesParType(o).join("  ·  ")) + '  ·  <b>' + t.nb +
@@ -11431,7 +11473,7 @@ function renderNosClients(body){
     return '<div class="prcard client">' +
       '<div class="prl1"><b class="nm-' + c.etat + '">' + esc(c.nom) + '</b><em>' + esc(telAffiche(c.tel)) + '</em></div>' +
       '<div class="prtags">' +
-        tag(CLIENT_LAB[c.etat], c.etat === "fini" ? "ok" : "inf") +
+        tag(CLIENT_LAB[c.etat], "c-" + c.etat) +
         tag(c.bons.length + (c.bons.length > 1 ? " commandes" : " commande")) +
         (pi.n ? tag(pi.n + (pi.n > 1 ? " promos" : " promo") + "  ·  dernière " + prosDate(pi.der), "inf") : tag("aucune promo")) +
         (c.pros ? tag("dans les contacts") : "") +
@@ -11488,15 +11530,15 @@ function renderPros(){
       '<div class="prl1"><b class="' + prosCouleur(p) + '">' + esc(p.nom || "Sans nom") + '</b>' +
         '<em>' + esc(telAffiche(p.tel || "")) + '</em></div>' +
       '<div class="prtags">' +
-        (p.interet ? tag(PROS_INT[p.interet], p.interet === "int" ? "ok" : (p.interet === "pas" ? "" : "att")) : "") +
+        (p.interet ? tag(PROS_INT[p.interet], "c-" + p.interet) : "") +
         (function(){
           const pi = promoInfo(waNum(p.tel));
           return pi.n ? tag(pi.n + (pi.n > 1 ? " promos" : " promo") + "  ·  dernière " + prosDate(pi.der), "inf")
                       : tag("aucune promo");
         })() +
         (p.msg ? tag("mis à jour le " + prosDate(p.msg)) : "") +
-        (st === "client" ? tag("client  ·  " + (CLIENT_LAB[ce] || ""), ce === "fini" ? "ok" : "inf")
-          : (st === "fin" ? tag("sans suite") : (p.rappel ? tag("à rappeler", "att") : ""))) +
+        (st === "client" ? tag("client  ·  " + (CLIENT_LAB[ce] || ""), "c-" + ce)
+          : (st === "fin" ? tag("sans suite", "c-pas") : (p.rappel ? tag("à rappeler", "c-rappel") : ""))) +
         (p.at ? tag("ajouté le " + prosDate(p.at)) : "") +
         (p.vu ? tag("contacté le " + prosDate(p.vu), "inf") : "") +
         (p.by ? tag(esc(nomDe(p.by))) : "") +
@@ -11513,6 +11555,8 @@ function renderPros(){
         return bouts.length ? '<div class="prdem">' + bouts.join("  ·  ") + '</div>' : '';
       })() +
       (p.note ? '<div class="prnote">' + esc(p.note) + '</div>' : '') +
+      (prosEstim(p) ? '<div class="prestim">Prix WhatsApp  ·  ' + esc(prosEstimTexte(p)) +
+        '<small>Estimation donnée par message, pas un devis officiel.</small></div>' : '') +
       (p.suivi ? '<div class="prsuiv"><b>Suivi</b>' + esc(p.suivi) + '</div>' : '') +
       blocCommandes(bons) +
       '<div class="pract">' +
@@ -11553,8 +11597,16 @@ function renderPros(){
    C'est une prise de notes qui évitera de tout retaper le jour du devis. */
 function prosDVide(){ return {adresse:"", pose:"Pose", type:"ENR", refs:[], dims:[],
                               rappel:false, promoMan:0, promoDer:0}; }
+function renderProsPrix(){
+  if (!$("prosPxE")) return;
+  $("prosPxEL").hidden = prosD.type === "JN";
+  $("prosPxJL").hidden = prosD.type === "ENR";
+  const t = prosEstimTexte({type:prosD.type, dims:prosD.dims, pxE:$("prosPxE").value, pxJ:$("prosPxJ").value});
+  $("prosEstim").textContent = t ? "≈ " + t.split("≈ ").pop() : "Tapez le prix donné au client pour voir le total estimé.";
+}
 function renderProsSuivi(){
   if (!$("prosRappel")) return;
+  try { renderProsPrix(); } catch(e){}
   $("prosRappel").setAttribute("aria-pressed", prosD.rappel ? "true" : "false");
   $("prosPromoN").textContent = prosD.promoMan || 0;
   $("prosPromoDer").textContent = prosD.promoDer
@@ -11571,6 +11623,35 @@ function prosQty(d){
   return (n >= 1 && n <= 99) ? n : 1;
 }
 /* Ce que la demande représente, pour l'écrire sur la carte. */
+/* Le prix donné au téléphone : surface facturée (1 m minimum par côté)
+   multipliée par le prix de sa famille. Ce n'est pas un devis. */
+function prosEstim(p){
+  const pe = parseFloat(String(p.pxE || "").replace(",", ".")) || 0;
+  const pj = parseFloat(String(p.pxJ || "").replace(",", ".")) || 0;
+  if (!pe && !pj) return null;
+  let tot = 0, m2 = 0, manque = false;
+  (p.dims || []).forEach(d => {
+    const n = prosDimNette(d);
+    if (!n) return;
+    const fam = p.type === "MIX" ? (d.type || "ENR") : (p.type || "ENR");
+    const s2 = Math.max(n.l, MINCM) * Math.max(n.h, MINCM) / 10000 * n.q;
+    const px = fam === "JN" ? pj : pe;
+    if (!px) manque = true;
+    m2 += s2; tot += s2 * px;
+  });
+  return {pe:pe, pj:pj, m2:m2, tot:tot, manque:manque};
+}
+function prosEstimTexte(p){
+  const e = prosEstim(p);
+  if (!e) return "";
+  const px = [];
+  if (e.pe && p.type !== "JN") px.push("enrouleur " + fr(e.pe, 2));
+  if (e.pj && p.type !== "ENR") px.push("jour et nuit " + fr(e.pj, 2));
+  return px.join("  ·  ") + " MAD/m² HT" +
+    (e.m2 ? "  ·  " + fr(e.m2, 2) + " m² facturés  ·  ≈ " + fr(e.tot, 2) + " MAD HT" : "") +
+    (e.manque ? "  (prix manquant pour une famille)" : "");
+}
+
 function prosResume(p){
   const dims = (p.dims || []).map(prosDimNette).filter(Boolean);
   if (!dims.length && !(p.refs || []).length && !p.type) return null;
@@ -11672,6 +11753,7 @@ $("prosRows").addEventListener("input", e => {
   const clean = e.target.value.replace(/[^0-9.,]/g, "").replace(",", ".");
   if (clean !== e.target.value) e.target.value = clean;
   prosD.dims[i][e.target.dataset.prk] = clean;
+  try { renderProsPrix(); } catch(err){}
   const r = prosResume(prosD);
   $("prosDimTot").textContent = (r && r.nb)
     ? r.nb + (r.nb > 1 ? " fenêtres  ·  " : " fenêtre  ·  ") + fr(r.m2, 2) + " m²  ·  " + fr(r.ml, 2) + " ml"
@@ -11691,6 +11773,7 @@ function prosVide(){
   prosEdit = "";
   $("prosNom").value = ""; $("prosTel").value = ""; $("prosNote").value = "";
   $("prosAdresse").value = ""; $("prosSuivi").value = "";
+  $("prosPxE").value = ""; $("prosPxJ").value = "";
   prosD = prosDVide();
   try { renderProsSuivi(); } catch(e){}
   try { renderProsD(); } catch(e){}
@@ -11701,6 +11784,7 @@ function prosCharge(p){
   $("prosNom").value = p.nom || ""; $("prosTel").value = p.tel || "";
   $("prosNote").value = p.note || ""; $("prosAdresse").value = p.adresse || "";
   $("prosSuivi").value = p.suivi || "";
+  $("prosPxE").value = p.pxE || ""; $("prosPxJ").value = p.pxJ || "";
   prosD = {adresse: p.adresse || "", pose: p.pose || "Pose", type: p.type || "ENR",
            rappel: !!p.rappel, promoMan: p.promoMan || 0, promoDer: p.promoDer || 0,
            promoPrem: p.promoPrem || 0,
@@ -11718,6 +11802,8 @@ function prosApplique(p){
   p.msg = Date.now();
   p.rappel = !!prosD.rappel;
   p.suivi = $("prosSuivi").value.trim();
+  p.pxE = $("prosPxE").value.replace(",", ".").trim();
+  p.pxJ = $("prosPxJ").value.replace(",", ".").trim();
   p.promoMan = prosD.promoMan || 0;
   p.promoDer = prosD.promoDer || 0;
   p.promoPrem = prosD.promoMan ? (prosD.promoPrem || prosD.promoDer || 0) : 0;
@@ -11730,6 +11816,11 @@ function prosApplique(p){
   p.maj = Date.now();
 }
 $("prosRappel").addEventListener("click", () => { prosD.rappel = !prosD.rappel; renderProsSuivi(); });
+["prosPxE", "prosPxJ"].forEach(id => $(id).addEventListener("input", e => {
+  const c = e.target.value.replace(/[^0-9.,]/g, "");
+  if (c !== e.target.value) e.target.value = c;
+  renderProsPrix();
+}));
 $("prosPromoPlus").addEventListener("click", () => {
   prosD.promoMan = (prosD.promoMan || 0) + 1; prosD.promoDer = Date.now();
   if (!prosD.promoPrem) prosD.promoPrem = prosD.promoDer;
@@ -11887,6 +11978,9 @@ function prosVersBon(p, etat){
       type: S.type === "MIX" ? (d.type || "ENR") : S.type
     }));
   }
+  if (parseFloat(p.pxE) > 0){ S.prix = String(p.pxE); $("prix").value = S.prix; }
+  if (parseFloat(p.pxJ) > 0){ S.prixJN = String(p.pxJ); $("prixJN").value = S.prixJN; }
+  try { renderPrixFields(); } catch(e){}
   S.etat = etat;
   S.pros = p.id;
   formVenu = "pros";
