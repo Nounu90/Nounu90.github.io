@@ -901,6 +901,20 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .print .prmsg{flex:1 1 100%}
 .print .prmsg[aria-pressed="true"]{background:var(--warn-soft,#FAEFDD); border-color:var(--warn); color:var(--warn)}
 .prsuivi{margin-top:8px}
+.prouvrir{margin:0 0 12px; background:var(--card); font-weight:700}
+.field .unit{flex:none; font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:700;
+  letter-spacing:.04em; color:var(--muted); padding-right:4px}
+.prrecap{margin-top:11px; padding:10px 12px; border-radius:11px; border:1px dashed var(--line-strong)}
+.prrecap .r{display:flex; justify-content:space-between; gap:10px; padding:3px 0; font-size:13px}
+.prrecap .r span{color:var(--muted)}
+.prrecap .r b{font-family:"IBM Plex Mono",monospace; font-weight:600}
+.prrecap .r.gros{border-top:1px solid var(--line); margin-top:4px; padding-top:7px; font-size:15px}
+.prrecap .r.gros span{color:var(--ink); font-weight:600}
+.prrecap small{display:block; margin-top:6px; font-size:10.5px; color:var(--muted)}
+.prleg button{border:0; background:none; padding:4px 2px; font:inherit; font-weight:600; border-radius:6px}
+.prleg button[aria-pressed="true"]{background:var(--card2); outline:1.5px solid currentColor; padding:4px 7px}
+.prleg button::before{content:""; display:inline-block; width:9px; height:9px; border-radius:50%;
+  margin-right:5px; vertical-align:-1px; background:currentColor}
 .prprix{display:flex; gap:8px}
 .prprix label{flex:1; min-width:0; font-family:"Archivo",sans-serif; font-size:11px; font-weight:700;
   letter-spacing:.04em; text-transform:uppercase; color:var(--muted)}
@@ -2372,7 +2386,11 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>
       Promotions WhatsApp</button>
 
-    <section class="card">
+    <button class="add prouvrir" id="prosOpen" type="button">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Nouveau contact
+    </button>
+    <section class="card" id="prosForm" hidden>
       <div class="card-head"><div class="label" id="prosFormLab">Nouveau contact</div></div>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c0-3.7 3.4-5.6 7.5-5.6s7.5 1.9 7.5 5.6"/></svg>
@@ -2388,17 +2406,30 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <input id="prosAdresse" type="text" placeholder="Adresse (quartier, ville)" autocomplete="off">
       </div>
 
-      <div class="prsub"><span>Pose ou livraison</span></div>
-      <div class="seg" id="prosPose">
-        <button type="button" data-ppose="Pose" aria-pressed="true">Pose</button>
-        <button type="button" data-ppose="Livraison" aria-pressed="false">Livraison</button>
-      </div>
-
-      <div class="prsub"><span>Type de store</span></div>
+      <div class="prsub"><span>Type de store</span><b>prix donné sur WhatsApp, pas un devis</b></div>
       <div class="seg seg3" id="prosType">
-        <button type="button" data-ptype="ENR" aria-pressed="true">Enrouleur</button>
-        <button type="button" data-ptype="JN" aria-pressed="false">Jour et nuit</button>
-        <button type="button" data-ptype="MIX" aria-pressed="false">Les deux</button>
+        <button type="button" data-ptype="ENR" aria-pressed="true">Enrouleur<span class="sub">S-0</span></button>
+        <button type="button" data-ptype="JN" aria-pressed="false">Jour et nuit<span class="sub">JN_0</span></button>
+        <button type="button" data-ptype="MIX" aria-pressed="false">Les deux<span class="sub">S-0 + JN_0</span></button>
+      </div>
+      <div class="field" style="margin-top:9px" id="prosPxEL">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L3 13V3h10l7.6 7.6a2 2 0 010 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+        <input id="prosPxE" inputmode="decimal" placeholder="Prix enrouleur" autocomplete="off">
+        <span class="unit">MAD/m² HT</span>
+      </div>
+      <div class="field" style="margin-top:9px" id="prosPxJL">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L3 13V3h10l7.6 7.6a2 2 0 010 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+        <input id="prosPxJ" inputmode="decimal" placeholder="Prix jour et nuit" autocomplete="off">
+        <span class="unit">MAD/m² HT</span>
+      </div>
+      <div class="field" style="margin-top:9px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5L5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+        <input id="prosRemise" inputmode="decimal" placeholder="Remise" autocomplete="off">
+        <span class="unit">% HT</span>
+      </div>
+      <div class="seg" id="prosFact" style="margin-top:9px">
+        <button type="button" data-pfact="oui" aria-pressed="true">Facturée<span class="sub">TVA 20 %</span></button>
+        <button type="button" data-pfact="non" aria-pressed="false">Sans facture<span class="sub">prix HT</span></button>
       </div>
 
       <div class="prsub"><span>Tissus envisagés</span><b id="prosRefCount">aucun</b></div>
@@ -2415,12 +2446,22 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         Ajouter une fenêtre
       </button>
 
-      <div class="prsub"><span>Prix donné sur WhatsApp</span><b>estimation, pas un devis</b></div>
-      <div class="prprix">
-        <label id="prosPxEL">Enrouleur<span><input id="prosPxE" inputmode="decimal" placeholder="0"><em>MAD/m² HT</em></span></label>
-        <label id="prosPxJL">Jour et nuit<span><input id="prosPxJ" inputmode="decimal" placeholder="0"><em>MAD/m² HT</em></span></label>
+      <div class="prsub"><span>Pose ou livraison</span></div>
+      <div class="seg" id="prosPose">
+        <button type="button" data-ppose="Pose" aria-pressed="true">Pose</button>
+        <button type="button" data-ppose="Livraison" aria-pressed="false">Livraison</button>
       </div>
-      <p class="hint" id="prosEstim" style="margin-top:6px"></p>
+      <div class="field" style="margin-top:9px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        <input id="prosPoseP" inputmode="decimal" placeholder="Prix de la pose" autocomplete="off">
+        <span class="unit">MAD HT</span>
+      </div>
+      <div class="seg" id="prosPoseMode" style="margin-top:9px">
+        <button type="button" data-ppm="forfait" aria-pressed="true">Forfait</button>
+        <button type="button" data-ppm="fenetre" aria-pressed="false">Par fenêtre</button>
+      </div>
+
+      <div class="prrecap" id="prosRecap"></div>
 
       <div class="field" style="margin-top:9px">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
@@ -2461,11 +2502,15 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="prosSearch" type="search" placeholder="Nom ou numéro" autocomplete="off">
     </div>
-    <div class="prleg">
-      <span class="nm-fini">Livré et payé</span><span class="nm-encours">Commande en cours</span>
-      <span class="nm-devis">Devis envoyé</span><span class="nm-rappel">À rappeler</span>
-      <span class="nm-int">Intéressé</span><span class="nm-nc">Nouveau client</span>
-      <span class="nm-nrp">Ne répond pas</span><span class="nm-off">Pas intéressé ou sans suite</span>
+    <div class="prleg" id="prosLeg">
+      <button type="button" data-pcoul="fini" class="nm-fini">Livré et payé</button>
+      <button type="button" data-pcoul="encours" class="nm-encours">Commande en cours</button>
+      <button type="button" data-pcoul="devis" class="nm-devis">Devis envoyé</button>
+      <button type="button" data-pcoul="rappel" class="nm-rappel">À rappeler</button>
+      <button type="button" data-pcoul="int" class="nm-int">Intéressé</button>
+      <button type="button" data-pcoul="nc" class="nm-nc">Nouveau client</button>
+      <button type="button" data-pcoul="nrp" class="nm-nrp">Ne répond pas</button>
+      <button type="button" data-pcoul="off" class="nm-off">Pas intéressé ou sans suite</button>
     </div>
     <div id="prosBody" style="margin-top:11px"></div>
   </div>
@@ -6447,7 +6492,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "13.0";
+const APP_VERSION = "13.1";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -11353,12 +11398,13 @@ function prosStatut(p){
   return "ouvert";
 }
 function prosARappeler(p){ return !!p.rappel && prosStatut(p) !== "client"; }
-let prosFiltre = "tous", prosQ = "", prosEdit = "";
+let prosFiltre = "tous", prosQ = "", prosEdit = "", prosCoul = "";
 
 function prosListe(){
   const q = prosQ.trim().toLowerCase();
   return prosVivants().filter(p => {
     const st = prosStatut(p);
+    if (prosCoul && prosCouleur(p) !== "nm-" + prosCoul) return false;
     if (prosFiltre === "rappel" && !prosARappeler(p)) return false;
     if (prosFiltre === "client" && st !== "client") return false;
     if (prosFiltre === "fin"    && st !== "fin")    return false;
@@ -11460,6 +11506,7 @@ function nosClients(){
 }
 function renderNosClients(body){
   const L = nosClients().filter(c => {
+    if (prosCoul && c.etat !== prosCoul) return false;
     const q = prosQ.trim().toLowerCase();
     return !q || (c.nom + " " + c.tel + " " + c.bons.map(o => o.num).join(" ")).toLowerCase().indexOf(q) >= 0;
   });
@@ -11499,10 +11546,12 @@ function renderPros(){
 
   [...$("prosFiltres").children].forEach(b =>
     b.setAttribute("aria-pressed", String(b.dataset.pf === prosFiltre)));
+  [...$("prosLeg").children].forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.pcoul === prosCoul)));
 
   $("prosFormLab").textContent = prosEdit ? "Modifier le contact" : "Nouveau contact";
   $("prosSave").textContent = prosEdit ? "Enregistrer" : "Ajouter le contact";
-  $("prosCancel").hidden = !prosEdit;
+  $("prosCancel").hidden = false;
 
   const ap = $("prosTelApercu");
   if (ap){
@@ -11515,7 +11564,7 @@ function renderPros(){
   const list = prosListe();
   if (!list.length){
     body.innerHTML = '<div class="empty">' + (tous.length
-      ? "Aucun contact dans ce filtre."
+      ? "Aucun contact dans ce filtre" + (prosCoul ? " et cette couleur." : ".")
       : "Aucun contact pour l'instant.<br>Ajoutez le nom et le numéro de ceux qui écrivent pour se renseigner.") +
       '</div>';
     return;
@@ -11596,13 +11645,41 @@ function renderPros(){
 /* Rien ici n'est engageant : ni réservation de tissu, ni place dans l'atelier.
    C'est une prise de notes qui évitera de tout retaper le jour du devis. */
 function prosDVide(){ return {adresse:"", pose:"Pose", type:"ENR", refs:[], dims:[],
-                              rappel:false, promoMan:0, promoDer:0}; }
+                              rappel:false, promoMan:0, promoDer:0, fact:"oui", poseMode:"forfait"}; }
+function prosFormPrix(){
+  return {type:prosD.type, dims:prosD.dims, pxE:$("prosPxE").value, pxJ:$("prosPxJ").value,
+          remise:$("prosRemise").value, fact:prosD.fact || "oui",
+          poseP:$("prosPoseP").value, poseMode:prosD.poseMode || "forfait"};
+}
 function renderProsPrix(){
   if (!$("prosPxE")) return;
   $("prosPxEL").hidden = prosD.type === "JN";
   $("prosPxJL").hidden = prosD.type === "ENR";
-  const t = prosEstimTexte({type:prosD.type, dims:prosD.dims, pxE:$("prosPxE").value, pxJ:$("prosPxJ").value});
-  $("prosEstim").textContent = t ? "≈ " + t.split("≈ ").pop() : "Tapez le prix donné au client pour voir le total estimé.";
+  [...$("prosFact").children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.pfact === (prosD.fact || "oui"))));
+  [...$("prosPoseMode").children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.ppm === (prosD.poseMode || "forfait"))));
+  const e = prosEstim(prosFormPrix());
+  const r = prosResume(prosD);
+  let m2 = 0;
+  (prosD.dims || []).forEach(d => { const n = prosDimNette(d);
+    if (n) m2 += Math.max(n.l, MINCM) * Math.max(n.h, MINCM) / 10000 * n.q; });
+  const L = (a, b, c) => '<div class="r' + (c ? " " + c : "") + '"><span>' + a + '</span><b>' + b + '</b></div>';
+  let h = L("Surface facturée", fr(m2, 2) + " m²" + (r && r.nb ? "  ·  " + r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre") : ""));
+  if (!e){
+    h += '<small>Tapez le prix au m² pour voir le total. C\'est une estimation WhatsApp, pas un devis.</small>';
+  } else {
+    h += L("Stores HT", fr(e.tot, 2));
+    if (e.pose) h += L((prosD.pose === "Livraison" ? "Livraison" : "Pose") + (prosD.poseMode === "fenetre" ? " · " + e.nb + " × " + fr(parseFloat($("prosPoseP").value.replace(",", ".")) || 0, 2) : ""), fr(e.pose, 2));
+    if (e.rem) h += L("Remise " + fr(e.rp, 0) + " %", "\u2212 " + fr(e.rem, 2));
+    if (e.fact){
+      h += L("Total HT", fr(e.ht, 2));
+      h += L("TVA 20 %", fr(e.tva, 2));
+      h += L("Total TTC", fr(e.ttc, 2) + " MAD", "gros");
+    } else {
+      h += L("Total sans facture", fr(e.ht, 2) + " MAD", "gros");
+    }
+    h += '<small>Estimation donnée sur WhatsApp, pas un devis officiel.' + (e.manque ? " Prix manquant pour une famille." : "") + '</small>';
+  }
+  $("prosRecap").innerHTML = h;
 }
 function renderProsSuivi(){
   if (!$("prosRappel")) return;
@@ -11639,7 +11716,18 @@ function prosEstim(p){
     if (!px) manque = true;
     m2 += s2; tot += s2 * px;
   });
-  return {pe:pe, pj:pj, m2:m2, tot:tot, manque:manque};
+  let nb = 0;
+  (p.dims || []).forEach(d => { const n = prosDimNette(d); if (n) nb += n.q; });
+  const up = parseFloat(String(p.poseP || "").replace(",", ".")) || 0;
+  const pose = p.poseMode === "fenetre" ? up * nb : up;
+  const brut = tot + pose;
+  const rp = Math.min(100, Math.max(0, parseFloat(String(p.remise || "").replace(",", ".")) || 0));
+  const rem = brut * rp / 100;
+  const ht = brut - rem;
+  const fact = p.fact !== "non";
+  const tva = fact ? ht * TVA : 0;
+  return {pe:pe, pj:pj, m2:m2, tot:tot, manque:manque, nb:nb, pose:pose, rp:rp, rem:rem,
+          ht:ht, tva:tva, ttc:ht + tva, fact:fact};
 }
 function prosEstimTexte(p){
   const e = prosEstim(p);
@@ -11648,7 +11736,10 @@ function prosEstimTexte(p){
   if (e.pe && p.type !== "JN") px.push("enrouleur " + fr(e.pe, 2));
   if (e.pj && p.type !== "ENR") px.push("jour et nuit " + fr(e.pj, 2));
   return px.join("  ·  ") + " MAD/m² HT" +
-    (e.m2 ? "  ·  " + fr(e.m2, 2) + " m² facturés  ·  ≈ " + fr(e.tot, 2) + " MAD HT" : "") +
+    (e.m2 ? "  ·  " + fr(e.m2, 2) + " m²" +
+      (e.pose ? "  ·  pose " + fr(e.pose, 2) : "") +
+      (e.rem ? "  ·  remise " + fr(e.rp, 0) + " %" : "") +
+      "  ·  ≈ " + fr(e.fact ? e.ttc : e.ht, 2) + (e.fact ? " MAD TTC" : " MAD HT sans facture") : "") +
     (e.manque ? "  (prix manquant pour une famille)" : "");
 }
 
@@ -11716,6 +11807,7 @@ $("prosPose").addEventListener("click", e => {
   if (!b) return;
   prosD.pose = b.dataset.ppose;
   renderProsD();
+  try { renderProsPrix(); } catch(err){}
 });
 $("prosType").addEventListener("click", e => {
   const b = e.target.closest("[data-ptype]");
@@ -11774,6 +11866,7 @@ function prosVide(){
   $("prosNom").value = ""; $("prosTel").value = ""; $("prosNote").value = "";
   $("prosAdresse").value = ""; $("prosSuivi").value = "";
   $("prosPxE").value = ""; $("prosPxJ").value = "";
+  $("prosRemise").value = ""; $("prosPoseP").value = "";
   prosD = prosDVide();
   try { renderProsSuivi(); } catch(e){}
   try { renderProsD(); } catch(e){}
@@ -11785,9 +11878,11 @@ function prosCharge(p){
   $("prosNote").value = p.note || ""; $("prosAdresse").value = p.adresse || "";
   $("prosSuivi").value = p.suivi || "";
   $("prosPxE").value = p.pxE || ""; $("prosPxJ").value = p.pxJ || "";
+  $("prosRemise").value = p.remise || ""; $("prosPoseP").value = p.poseP || "";
   prosD = {adresse: p.adresse || "", pose: p.pose || "Pose", type: p.type || "ENR",
            rappel: !!p.rappel, promoMan: p.promoMan || 0, promoDer: p.promoDer || 0,
-           promoPrem: p.promoPrem || 0,
+           promoPrem: p.promoPrem || 0, fact: p.fact === "non" ? "non" : "oui",
+           poseMode: p.poseMode === "fenetre" ? "fenetre" : "forfait",
            refs: (p.refs || []).slice(),
            dims: (p.dims || []).map(d => Object.assign({}, d))};
   renderProsD();
@@ -11804,6 +11899,10 @@ function prosApplique(p){
   p.suivi = $("prosSuivi").value.trim();
   p.pxE = $("prosPxE").value.replace(",", ".").trim();
   p.pxJ = $("prosPxJ").value.replace(",", ".").trim();
+  p.remise = $("prosRemise").value.replace(",", ".").trim();
+  p.poseP = $("prosPoseP").value.replace(",", ".").trim();
+  p.fact = prosD.fact === "non" ? "non" : "oui";
+  p.poseMode = prosD.poseMode === "fenetre" ? "fenetre" : "forfait";
   p.promoMan = prosD.promoMan || 0;
   p.promoDer = prosD.promoDer || 0;
   p.promoPrem = prosD.promoMan ? (prosD.promoPrem || prosD.promoDer || 0) : 0;
@@ -11816,7 +11915,15 @@ function prosApplique(p){
   p.maj = Date.now();
 }
 $("prosRappel").addEventListener("click", () => { prosD.rappel = !prosD.rappel; renderProsSuivi(); });
-["prosPxE", "prosPxJ"].forEach(id => $(id).addEventListener("input", e => {
+$("prosFact").addEventListener("click", e => {
+  const b = e.target.closest("[data-pfact]"); if (!b) return;
+  prosD.fact = b.dataset.pfact; renderProsPrix();
+});
+$("prosPoseMode").addEventListener("click", e => {
+  const b = e.target.closest("[data-ppm]"); if (!b) return;
+  prosD.poseMode = b.dataset.ppm; renderProsPrix();
+});
+["prosPxE", "prosPxJ", "prosRemise", "prosPoseP"].forEach(id => $(id).addEventListener("input", e => {
   const c = e.target.value.replace(/[^0-9.,]/g, "");
   if (c !== e.target.value) e.target.value = c;
   renderProsPrix();
@@ -11861,9 +11968,23 @@ $("prosSave").addEventListener("click", () => {
     PROS.unshift(p);
     toast("Contact ajouté");
   }
-  prosVide(); prosSave(); renderPros(); renderHome();
+  prosVide(); prosFormOuvre(false); prosSave(); renderPros(); renderHome();
 });
-$("prosCancel").addEventListener("click", () => { prosVide(); renderPros(); });
+function prosFormOuvre(ouvre){
+  $("prosForm").hidden = !ouvre;
+  $("prosOpen").hidden = !!ouvre;
+}
+$("prosOpen").addEventListener("click", () => {
+  prosVide(); prosFormOuvre(true); renderPros();
+  setTimeout(() => { try { $("prosNom").focus(); } catch(e){} }, 120);
+});
+$("prosLeg").addEventListener("click", e => {
+  const b = e.target.closest("[data-pcoul]");
+  if (!b) return;
+  prosCoul = prosCoul === b.dataset.pcoul ? "" : b.dataset.pcoul;
+  renderPros();
+});
+$("prosCancel").addEventListener("click", () => { prosVide(); prosFormOuvre(false); renderPros(); });
 $("prosSearch").addEventListener("input", e => { prosQ = e.target.value; renderPros(); });
 $("prosFiltres").addEventListener("click", e => {
   const b = e.target.closest("[data-pf]");
@@ -11917,6 +12038,7 @@ $("prosBody").addEventListener("click", e => {
     const p = PROS.find(x => x.id === ed.dataset.predit);
     if (!p) return;
     prosCharge(p);
+    prosFormOuvre(true);
     renderPros();
     $("prosSheet").querySelector(".sheet-body").scrollTo({top:0, behavior:"smooth"});
     return;
@@ -11978,6 +12100,12 @@ function prosVersBon(p, etat){
       type: S.type === "MIX" ? (d.type || "ENR") : S.type
     }));
   }
+  if (parseFloat(p.remise) > 0){ S.remise = String(p.remise); $("remise").value = S.remise; }
+  S.fact = p.fact === "non" ? "non" : "oui";
+  [...$("segFact").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.fact === S.fact)));
+  if (parseFloat(p.poseP) > 0){ S.posePrix = String(p.poseP); $("posePrix").value = S.posePrix; }
+  if (p.poseMode) S.poseMode = p.poseMode === "fenetre" ? "fenetre" : "forfait";
+  try { renderPoseMode(); } catch(e){}
   if (parseFloat(p.pxE) > 0){ S.prix = String(p.pxE); $("prix").value = S.prix; }
   if (parseFloat(p.pxJ) > 0){ S.prixJN = String(p.pxJ); $("prixJN").value = S.prixJN; }
   try { renderPrixFields(); } catch(e){}
@@ -12009,6 +12137,7 @@ function prosLie(rec){
 $("tilePros").addEventListener("click", () => {
   if (!prosAllowed()) return;
   prosVide(); prosQ = ""; $("prosSearch").value = "";
+  prosFormOuvre(false);
   renderPros();
   nav("prosSheet");
   pullPros().then(() => renderPros());
