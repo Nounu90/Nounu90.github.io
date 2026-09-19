@@ -1009,6 +1009,42 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .prrap[aria-pressed="true"]{border-color:var(--warn); background:var(--warn-soft,#FAEFDD)}
 .prrap[aria-pressed="true"] i{background:var(--warn); border-color:var(--warn);
   box-shadow:inset 0 0 0 3px var(--warn-soft,#FAEFDD)}
+/* --- v13.3 : liste simplifiée des contacts --- */
+.prpuces{display:flex; flex-wrap:wrap; gap:7px; margin:10px 0 4px}
+.prchip{display:inline-flex; align-items:center; gap:6px; padding:7px 11px; border-radius:999px;
+  background:var(--card); border:1px solid var(--line); font-family:"Archivo",sans-serif; font-size:12.5px;
+  font-weight:600; color:var(--ink)}
+.prchip i{flex:none; width:9px; height:9px; border-radius:50%; display:inline-block}
+.prchip b{font-weight:700; background:var(--card2); border-radius:9px; padding:0 6px; font-size:11px; color:var(--muted)}
+.prchip[aria-pressed="true"]{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
+.prchip.plus{color:var(--muted)}
+.prtodo{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--c-rappel);
+  border-radius:14px; padding:11px 13px; margin:4px 0 11px}
+.prtodo h4{margin:0 0 4px; font-family:"Archivo",sans-serif; font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--c-rappel)}
+.prtodo button{display:flex; align-items:center; width:100%; gap:9px; border:0; border-top:1px solid var(--line);
+  background:none; padding:8px 0; font:inherit; font-size:14px; text-align:left; color:var(--ink)}
+.prtodo button:first-of-type{border-top:0}
+.prtodo button i{flex:none; width:9px; height:9px; border-radius:50%}
+.prtodo button span{flex:1; min-width:0}
+.prtodo button em{flex:none; font-style:normal; color:var(--muted); font-size:12px}
+.prtodo p{margin:6px 0 0; font-size:12px; color:var(--muted)}
+.pract.duo .prbtn.wa{flex:1 1 40%}
+.prbtn.fiche{flex:1 1 40%}
+.prsec{margin:14px 0 7px; font-family:"Archivo",sans-serif; font-size:11px; font-weight:700; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted)}
+.prsec.urg{color:var(--warn)}
+.prreste{margin-top:8px; display:flex; justify-content:space-between; align-items:baseline; padding:8px 10px;
+  border-radius:9px; background:var(--warn-soft,#FAEFDD); font-size:13px}
+.prreste b{font-family:"IBM Plex Mono",monospace; font-size:15px; color:var(--warn)}
+#prosSheet.fiche #prosLst, #prosSheet.fiche .refresh, #prosSheet.fiche .sumline{display:none}
+.prsit{grid-template-columns:1fr 1fr; margin-bottom:9px}
+.prsit button[data-psit="nc"][aria-pressed="true"]{background:var(--c-nc); border-color:var(--c-nc); color:#fff}
+.prsit button[data-psit="int"][aria-pressed="true"]{background:var(--c-int); border-color:var(--c-int); color:#fff}
+.prsit button[data-psit="nrp"][aria-pressed="true"]{background:var(--c-nrp); border-color:var(--c-nrp); color:#fff}
+.prsit button[data-psit="pas"][aria-pressed="true"]{background:var(--c-off); border-color:var(--c-off); color:#fff}
+.prficheh{display:flex; gap:8px; margin:-4px 0 10px}
+.prficheh .prbtn.wa{flex:1 1 auto}
 .prpromo{display:flex; align-items:center; gap:9px; margin-top:8px; padding:9px 12px; border-radius:10px;
   border:1px solid var(--line); background:var(--card2)}
 .prpromo > span{flex:1; min-width:0}
@@ -2400,7 +2436,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 <div class="sheet" id="prosSheet">
   <div class="sheet-top">
     <button class="icon-btn" data-close="prosSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <h2>Contacts WhatsApp</h2>
+    <h2 id="prosTitre">Contacts WhatsApp</h2>
   </div>
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
@@ -2415,6 +2451,11 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
     </button>
     <section class="card" id="prosForm" hidden>
       <div class="card-head"><div class="label" id="prosFormLab">Nouveau contact</div></div>
+      <div class="prficheh" id="prosFicheH" hidden>
+        <a class="prbtn wa" id="prosFicheWa" href="#" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg>
+          Ouvrir la conversation</a>
+      </div>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c0-3.7 3.4-5.6 7.5-5.6s7.5 1.9 7.5 5.6"/></svg>
         <input id="prosNom" type="text" placeholder="Nom du contact" autocomplete="off">
@@ -2490,9 +2531,21 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
         <input id="prosNote" type="text" placeholder="Ce qu'il demande (budget, délai, remarque...)">
       </div>
+      <div class="prsub"><span>Situation</span></div>
+      <div class="seg prsit" id="prosSit">
+        <button type="button" data-psit="nc" aria-pressed="false">Nouveau client</button>
+        <button type="button" data-psit="int" aria-pressed="false">Intéressé</button>
+        <button type="button" data-psit="nrp" aria-pressed="false">Ne répond pas</button>
+        <button type="button" data-psit="pas" aria-pressed="false">Pas intéressé</button>
+      </div>
       <div class="prsub"><span>Suivi</span></div>
       <button type="button" class="prrap" id="prosRappel" aria-pressed="false">
         <i></i><span>À rappeler</span></button>
+      <div class="field" id="prosRappelLeL" style="margin-top:8px" hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        <input id="prosRappelLe" type="date">
+        <span class="unit">jour du rappel</span>
+      </div>
       <textarea class="dknote prsuivi" id="prosSuivi" rows="2" placeholder="Note de suivi (ex. rappeler après l'Aïd, attend le devis du voisin...)"></textarea>
       <div class="prsub"><span>Promos envoyées</span><b id="prosPromoCnt">aucune</b></div>
       <div id="prosPromoListe"></div>
@@ -2512,36 +2565,22 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         Ajouter une promo envoyée
       </button>
+      <div class="prsub" id="prosFicheActLab" hidden><span>Actions</span></div>
+      <div class="pract" id="prosFicheAct" hidden style="margin-top:4px"></div>
       <div class="seg" id="prosBtns" style="margin-top:11px; display:flex; gap:8px">
         <button type="button" id="prosSave" style="flex:1" aria-pressed="true">Ajouter le contact</button>
         <button type="button" id="prosCancel" style="flex:0 0 auto">Annuler</button>
       </div>
     </section>
 
-    <div class="filters" id="prosFiltres">
-      <button type="button" data-pf="tous" aria-pressed="true">Tous</button>
-      <button type="button" data-pf="client" aria-pressed="false">Devenus clients</button>
-      <button type="button" data-pf="promo" aria-pressed="false">Promos envoyées</button>
-      <button type="button" data-pf="nos" aria-pressed="false">Nos clients</button>
-      <button type="button" data-pf="m1" aria-pressed="false">Sans nouvelles +1 mois</button>
-      <button type="button" data-pf="m2" aria-pressed="false">Sans nouvelles +2 mois</button>
-      <button type="button" data-pf="nopromo" aria-pressed="false">Jamais reçu de promo</button>
-    </div>
+    <div id="prosLst">
     <div class="field" style="margin-top:9px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="prosSearch" type="search" placeholder="Nom ou numéro" autocomplete="off">
     </div>
-    <div class="prleg" id="prosLeg">
-      <button type="button" data-pcoul="fini" class="nm-fini">Livré et payé</button>
-      <button type="button" data-pcoul="encours" class="nm-encours">Commande en cours</button>
-      <button type="button" data-pcoul="devis" class="nm-devis">Devis envoyé</button>
-      <button type="button" data-pcoul="rappel" class="nm-rappel">À rappeler</button>
-      <button type="button" data-pcoul="int" class="nm-int">Intéressé</button>
-      <button type="button" data-pcoul="nc" class="nm-nc">Nouveau client</button>
-      <button type="button" data-pcoul="nrp" class="nm-nrp">Ne répond pas</button>
-      <button type="button" data-pcoul="off" class="nm-off">Pas intéressé ou sans suite</button>
+    <div class="prpuces" id="prosPuces"></div>
+    <div id="prosBody" style="margin-top:9px"></div>
     </div>
-    <div id="prosBody" style="margin-top:11px"></div>
   </div>
 </div>
 
@@ -6524,7 +6563,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "13.2";
+const APP_VERSION = "13.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -11438,31 +11477,33 @@ function prosStatut(p){
 function prosARappeler(p){ return !!p.rappel && prosStatut(p) !== "client"; }
 let prosFiltre = "tous", prosQ = "", prosEdit = "", prosCoul = "";
 
-function prosListe(){
-  const q = prosQ.trim().toLowerCase();
+function prosListe(f, compte){
+  const F = f || prosFiltre;
+  const q = compte ? "" : prosQ.trim().toLowerCase();
   return prosVivants().filter(p => {
     const st = prosStatut(p);
-    if (prosCoul && prosCouleur(p) !== "nm-" + prosCoul) return false;
-    if (prosFiltre === "rappel" && !prosARappeler(p)) return false;
-    if (prosFiltre === "client" && st !== "client") return false;
-    if (prosFiltre === "fin"    && st !== "fin")    return false;
-    if (prosFiltre === "nc"     && p.interet !== "nc")  return false;
-    if (prosFiltre === "int"    && p.interet !== "int") return false;
-    if (prosFiltre === "nrp"    && p.interet !== "nrp") return false;
-    if (prosFiltre === "pas"    && p.interet !== "pas") return false;
-    if (prosFiltre === "m1" || prosFiltre === "m2"){
+    const ch = PCHIPS.find(c => c.k === F);
+    if (ch && ch.coul && prosCouleur(p) !== "nm-" + F) return false;
+    if (F === "client" && st !== "client") return false;
+    if (F === "fin"    && st !== "fin")    return false;
+    if (F === "nc"     && p.interet !== "nc")  return false;
+    if (F === "int"    && p.interet !== "int") return false;
+    if (F === "nrp"    && p.interet !== "nrp") return false;
+    if (F === "pas"    && p.interet !== "pas") return false;
+    if (F === "m1" || F === "m2"){
       if (st === "client" || p.interet === "pas") return false;
       const j = (Date.now() - prosDernier(p)) / 86400000;
-      if (j < (prosFiltre === "m1" ? 30 : 60)) return false;
+      if (j < (F === "m1" ? 30 : 60)) return false;
     }
-    if (prosFiltre === "nopromo" && promoInfo(waNum(p.tel)).n > 0) return false;
-    if (prosFiltre === "promo" && (st === "client" || !promoInfo(waNum(p.tel)).n)) return false;
+    if (F === "nopromo" && promoInfo(waNum(p.tel)).n > 0) return false;
+    if (F === "promo" && (st === "client" || !promoInfo(waNum(p.tel)).n)) return false;
     if (!q) return true;
     return (String(p.nom || "") + " " + String(p.tel || "") + " " + String(p.note || "") + " " + String(p.suivi || ""))
       .toLowerCase().indexOf(q) >= 0;
   }).sort((a, b) => {
+    if (compte) return 0;
     /* promos envoyées : celui qui a reçu sa première promo il y a le plus longtemps d'abord */
-    if (prosFiltre === "promo")
+    if (F === "promo")
       return (promoInfo(waNum(a.tel)).prem || 0) - (promoInfo(waNum(b.tel)).prem || 0);
     return (b.at || 0) - (a.at || 0);
   });
@@ -11632,7 +11673,6 @@ function nosClients(){
 }
 function renderNosClients(body){
   const L = nosClients().filter(c => {
-    if (prosCoul && c.etat !== prosCoul) return false;
     const q = prosQ.trim().toLowerCase();
     return !q || (c.nom + " " + c.tel + " " + c.bons.map(o => o.num).join(" ")).toLowerCase().indexOf(q) >= 0;
   });
@@ -11668,6 +11708,139 @@ function renderNosClients(body){
   chargeVignettes(body);
 }
 
+/* ---- v13.3 : une seule rangée de puces, avec le nombre de fiches dans chacune ---- */
+const PCHIPS = [
+  {k:"tous",    lab:"Tous"},
+  {k:"rappel",  lab:"À rappeler",     c:"var(--c-rappel)",  coul:1},
+  {k:"int",     lab:"Intéressés",     c:"var(--c-int)",     coul:1},
+  {k:"nc",      lab:"Nouveaux",       c:"var(--c-nc)",      coul:1},
+  {k:"encours", lab:"En cours",       c:"var(--c-encours)", coul:1},
+  {k:"fini",    lab:"Livrés et payés", c:"var(--c-fini)",   coul:1},
+  {k:"nrp",     lab:"Ne répond pas",  c:"var(--c-nrp)",     coul:1},
+  {k:"reste",   lab:"Reste à payer",  c:"var(--warn)"},
+  {k:"devis",   lab:"Devis envoyé",   c:"var(--c-devis)",   coul:1, plus:1},
+  {k:"off",     lab:"Pas intéressé ou sans suite", c:"var(--c-off)", coul:1, plus:1},
+  {k:"promo",   lab:"Promos envoyées", plus:1},
+  {k:"nopromo", lab:"Jamais reçu de promo", plus:1},
+  {k:"m1",      lab:"Sans nouvelles +1 mois", plus:1},
+  {k:"m2",      lab:"Sans nouvelles +2 mois", plus:1},
+  {k:"nos",     lab:"Nos clients", plus:1}
+];
+let prosPlus = false;
+function jourCourt(iso){
+  if (!iso) return "";
+  const d = new Date(String(iso).slice(0, 10) + "T12:00:00");
+  if (isNaN(d.getTime())) return "";
+  return ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."][d.getDay()] + " " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1);
+}
+/* Les clients qui nous doivent encore de l'argent, sur des bons confirmés (pas les devis). */
+function resteClients(){
+  const par = {};
+  (ORDERS || []).forEach(o => {
+    if (!o || o.status !== "sent" || etatDe(o) === "devis") return;
+    const r = soldeDe(o);
+    if (r <= 0.01) return;
+    const n = waNum(o.tel) || ("bon:" + o.id);
+    if (!par[n]) par[n] = {num:n, tel:o.tel || "", nom:o.nom || "Client", bons:[], reste:0, livre:false};
+    const c = par[n];
+    c.bons.push(o); c.reste += r;
+    if (o.nom) c.nom = o.nom;
+    if (etatDe(o) === "livre") c.livre = true;
+  });
+  return Object.keys(par).map(k => {
+    const c = par[k];
+    c.bons.sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+    c.pros = c.num.indexOf("bon:") === 0 ? null : (prosVivants().find(p => waNum(p.tel) === c.num) || null);
+    return c;
+  }).sort((a, b) => b.reste - a.reste);
+}
+function renderPuces(){
+  const el = $("prosPuces");
+  if (!el) return;
+  const plusActif = PCHIPS.some(c => c.plus && c.k === prosFiltre);
+  const voir = prosPlus || plusActif;
+  const nb = k => {
+    if (k === "reste") return resteClients().length;
+    if (k === "nos") return nosClients().length;
+    return prosListe(k, true).length;
+  };
+  el.innerHTML = PCHIPS.filter(c => !c.plus || voir).map(c =>
+    '<button type="button" class="prchip" data-pf="' + c.k + '" aria-pressed="' + (c.k === prosFiltre) + '">' +
+      (c.c ? '<i style="background:' + c.c + '"></i>' : '') + c.lab + ' <b>' + nb(c.k) + '</b></button>').join("") +
+    (plusActif ? '' : '<button type="button" class="prchip plus" data-pplus="1">' + (voir ? "moins" : "＋ plus") + '</button>');
+}
+/* Ce qu'il faut faire aujourd'hui : rappels du jour, intéressés oubliés, livrés pas soldés. */
+function prosTodo(){
+  const auj = jourISO(new Date());
+  const L = [];
+  prosVivants().forEach(p => {
+    if (prosStatut(p) === "client" || p.fin || p.interet === "pas") return;
+    const nom = p.nom || telAffiche(p.tel || "") || "Sans nom";
+    if (p.rappel){
+      const d = p.rappelLe || "";
+      if (d && d > auj) return;
+      L.push({id:p.id, o:d ? 0 : 1, t:nom + "  ·  rappeler", s:d ? (d === auj ? "prévu aujourd'hui" : "prévu le " + jourCourt(d)) : "à rappeler",
+              c:"var(--c-rappel)", tri:d || "9"});
+      return;
+    }
+    if (p.interet === "int" || p.interet === "nc"){
+      const j = Math.floor((Date.now() - prosDernier(p)) / 86400000);
+      if (j >= 30) L.push({id:p.id, o:2, t:nom + "  ·  sans nouvelles", s:"depuis " + j + " j",
+                           c:p.interet === "int" ? "var(--c-int)" : "var(--c-nc)", tri:String(99999 - j)});
+    }
+  });
+  resteClients().filter(c => c.livre).forEach(c => {
+    L.push({num:c.num, o:3, t:c.nom + "  ·  reste " + fr(c.reste, 0) + " MAD", s:"livré, pas soldé", c:"var(--warn)", tri:""});
+  });
+  return L.sort((a, b) => a.o - b.o || String(a.tri).localeCompare(String(b.tri)));
+}
+function blocTodo(){
+  const L = prosTodo();
+  if (!L.length) return "";
+  const vus = L.slice(0, 6);
+  return '<div class="prtodo"><h4>À faire aujourd\'hui  ·  ' + L.length + '</h4>' +
+    vus.map(x => '<button type="button" ' + (x.id ? 'data-predit="' + x.id + '"' : 'data-cfiche="' + x.num + '"') + '>' +
+      '<i style="background:' + x.c + '"></i><span>' + esc(x.t) + '</span><em>' + esc(x.s) + '</em></button>').join("") +
+    (L.length > vus.length ? '<p>et ' + (L.length - vus.length) + ' autres : puces « À rappeler » et « Reste à payer »</p>' : '') +
+    '</div>';
+}
+function renderReste(body){
+  const q = prosQ.trim().toLowerCase();
+  const L = resteClients().filter(c =>
+    !q || (c.nom + " " + c.tel + " " + c.bons.map(o => o.num).join(" ")).toLowerCase().indexOf(q) >= 0);
+  const tot = L.reduce((a, c) => a + c.reste, 0);
+  $("prosSum").textContent = fr(tot, 2) + " MAD";
+  $("prosSumLab").textContent = L.length + (L.length > 1 ? " clients" : " client") + "  ·  à encaisser";
+  if (!L.length){ body.innerHTML = '<div class="empty">Personne ne nous doit d\'argent sur un bon confirmé.</div>'; return; }
+  const tag = (t, c) => '<span class="prtag' + (c ? " " + c : "") + '">' + t + '</span>';
+  const carte = c => {
+    const lien = c.num.indexOf("bon:") === 0 ? "" : "https://wa.me/" + c.num;
+    const pi = promoInfo(lien ? c.num : "");
+    return '<div class="prcard client">' +
+      '<div class="prl1"><b class="nm-encours">' + esc(c.nom) + '</b><em>' + esc(telAffiche(c.tel)) + '</em></div>' +
+      '<div class="prtags">' +
+        tag(c.livre ? "livré, pas soldé" : "pas encore livré", c.livre ? "att" : "c-encours") +
+        tag(c.bons.length + (c.bons.length > 1 ? " bons" : " bon")) +
+        (pi.n ? tag(pi.n + (pi.n > 1 ? " promos" : " promo"), "inf") : "") +
+        (c.pros && c.pros.by ? tag(esc(nomDe(c.pros.by))) : "") +
+      '</div>' +
+      '<div class="prreste"><span>Reste à payer</span><b>' + fr(c.reste, 2) + ' MAD</b></div>' +
+      blocCommandes(c.bons) +
+      '<div class="pract duo">' +
+        (lien ? '<a class="prbtn wa" href="' + lien + '" target="_blank" rel="noopener">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg>' +
+          'WhatsApp</a>' +
+          '<button class="prbtn fiche" type="button" data-cfiche="' + c.num + '">Ouvrir la fiche  ›</button>'
+          : '<span class="prbtn" style="flex:1 1 100%">Numéro manquant</span>') +
+      '</div>' +
+    '</div>';
+  };
+  const liv = L.filter(c => c.livre), pas = L.filter(c => !c.livre);
+  body.innerHTML =
+    (liv.length ? '<div class="prsec urg">Livré mais pas soldé  ·  ' + fr(liv.reduce((a, c) => a + c.reste, 0), 2) + ' MAD</div>' + liv.map(carte).join("") : '') +
+    (pas.length ? '<div class="prsec">Pas encore livré  ·  ' + fr(pas.reduce((a, c) => a + c.reste, 0), 2) + ' MAD</div>' + pas.map(carte).join("") : '');
+}
+
 function renderPros(){
   const body = $("prosBody");
   if (!body) return;
@@ -11675,11 +11848,8 @@ function renderPros(){
   const aRappeler = tous.filter(p => prosARappeler(p)).length;
   $("prosSum").textContent = aRappeler;
   $("prosSumLab").textContent = aRappeler > 1 ? "Contacts à rappeler" : "Contact à rappeler";
-
-  [...$("prosFiltres").children].forEach(b =>
-    b.setAttribute("aria-pressed", String(b.dataset.pf === prosFiltre)));
-  [...$("prosLeg").children].forEach(b =>
-    b.setAttribute("aria-pressed", String(b.dataset.pcoul === prosCoul)));
+  try { renderPuces(); } catch(e){}
+  try { renderProsFicheAct(); } catch(e){}
 
   $("prosFormLab").textContent = prosEdit ? "Modifier le contact" : "Nouveau contact";
   $("prosSave").textContent = prosEdit ? "Enregistrer" : "Ajouter le contact";
@@ -11693,15 +11863,17 @@ function renderPros(){
   }
 
   if (prosFiltre === "nos"){ renderNosClients(body); return; }
+  if (prosFiltre === "reste"){ renderReste(body); return; }
   const list = prosListe();
+  const todo = (prosFiltre === "tous" && !prosQ.trim()) ? blocTodo() : "";
   if (!list.length){
-    body.innerHTML = '<div class="empty">' + (tous.length
-      ? "Aucun contact dans ce filtre" + (prosCoul ? " et cette couleur." : ".")
+    body.innerHTML = todo + '<div class="empty">' + (tous.length
+      ? "Aucun contact dans ce filtre."
       : "Aucun contact pour l'instant.<br>Ajoutez le nom et le numéro de ceux qui écrivent pour se renseigner.") +
       '</div>';
     return;
   }
-  body.innerHTML = list.map(p => {
+  body.innerHTML = todo + list.map(p => {
     const st = prosStatut(p);
     const lien = waLien(p.tel);
     const tag = (t, c) => '<span class="prtag' + (c ? " " + c : "") + '">' + t + '</span>';
@@ -11719,7 +11891,7 @@ function renderPros(){
         })() +
         (p.msg ? tag("mis à jour le " + prosDate(p.msg)) : "") +
         (st === "client" ? tag("client  ·  " + (CLIENT_LAB[ce] || ""), "c-" + ce)
-          : (st === "fin" ? tag("sans suite", "c-pas") : (p.rappel ? tag("à rappeler", "c-rappel") : ""))) +
+          : (st === "fin" ? tag("sans suite", "c-pas") : (p.rappel ? tag("à rappeler" + (p.rappelLe ? "  ·  " + jourCourt(p.rappelLe) : ""), "c-rappel") : ""))) +
         (p.at ? tag("ajouté le " + prosDate(p.at)) : "") +
         (p.vu ? tag("contacté le " + prosDate(p.vu), "inf") : "") +
         (p.by ? tag(esc(nomDe(p.by))) : "") +
@@ -11747,34 +11919,13 @@ function renderPros(){
           (L.length > 6 ? '<em>+' + (L.length - 6) + '</em>' : '') + '</div>';
       })() +
       blocCommandes(bons) +
-      '<div class="pract">' +
+      '<div class="pract duo">' +
         (lien
           ? '<a class="prbtn wa" href="' + lien + '" target="_blank" rel="noopener" data-prwa="' + p.id + '">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg>' +
-            'Ouvrir la conversation</a>'
-          : '<span class="prbtn" style="flex:1 1 100%">Numéro manquant</span>') +
-        (st === "client" ? '' :
-          '<button class="prbtn dev" type="button" data-prdev="' + p.id + '">Faire un devis</button>' +
-          '<button class="prbtn prod" type="button" data-prprod="' + p.id + '">Commande ferme</button>') +
-        '<span class="print">' +
-          ["nc", "int", "nrp", "pas"].map(k => '<button type="button" data-print="' + p.id + '|' + k + '" aria-pressed="' +
-            (p.interet === k ? "true" : "false") + '">' + PROS_INT[k] + '</button>').join("") +
-          (st === "client" ? "" : '<button type="button" class="prmsg" data-prmsg="' + p.id + '" aria-pressed="' +
-            (p.rappel ? "true" : "false") + '">' + (p.rappel ? "À rappeler  ✓" : "Marquer à rappeler") + '</button>') +
-        '</span>' +
-        '<span class="pricons">' +
-        '<button class="prbtn min" type="button" data-predit="' + p.id + '" title="Modifier">' +
-          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>' +
-        (st === "client" ? '' :
-          '<button class="prbtn min" type="button" data-prfin="' + p.id + '" title="' +
-          (p.fin ? "Remettre à rappeler" : "Classer sans suite") + '">' +
-          (p.fin
-            ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg>'
-            : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>') +
-          '</button>') +
-        '<button class="prbtn min" type="button" data-prdel="' + p.id + '" title="Supprimer">' +
-          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>' +
-        '</span>' +
+            'WhatsApp</a>'
+          : '<span class="prbtn">Numéro manquant</span>') +
+        '<button class="prbtn fiche" type="button" data-predit="' + p.id + '">Ouvrir la fiche  ›</button>' +
       '</div>' +
     '</div>';
   }).join("");
@@ -11785,7 +11936,7 @@ function renderPros(){
 /* Rien ici n'est engageant : ni réservation de tissu, ni place dans l'atelier.
    C'est une prise de notes qui évitera de tout retaper le jour du devis. */
 function prosDVide(){ return {adresse:"", pose:"Pose", type:"ENR", refs:[], dims:[],
-                              rappel:false, promoMan:0, promoDer:0, fact:"oui", poseMode:"forfait",
+                              rappel:false, rappelLe:"", interet:"nc", promoMan:0, promoDer:0, fact:"oui", poseMode:"forfait",
                               promos:[]}; }
 function prosFormPrix(){
   return {type:prosD.type, dims:prosD.dims, pxE:$("prosPxE").value, pxJ:$("prosPxJ").value,
@@ -11826,6 +11977,9 @@ function renderProsSuivi(){
   if (!$("prosRappel")) return;
   try { renderProsPrix(); } catch(e){}
   $("prosRappel").setAttribute("aria-pressed", prosD.rappel ? "true" : "false");
+  $("prosRappelLeL").hidden = !prosD.rappel;
+  $("prosRappelLe").value = prosD.rappelLe || "";
+  [...$("prosSit").children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.psit === prosD.interet)));
   renderProsPromos();
 }
 let prosPromoTmp = "";
@@ -12042,7 +12196,7 @@ function prosCharge(p){
   $("prosPxE").value = p.pxE || ""; $("prosPxJ").value = p.pxJ || "";
   $("prosRemise").value = p.remise || ""; $("prosPoseP").value = p.poseP || "";
   prosD = {adresse: p.adresse || "", pose: p.pose || "Pose", type: p.type || "ENR",
-           rappel: !!p.rappel, promoMan: p.promoMan || 0, promoDer: p.promoDer || 0,
+           rappel: !!p.rappel, rappelLe: p.rappelLe || "", interet: p.interet || "", promoMan: p.promoMan || 0, promoDer: p.promoDer || 0,
            promoPrem: p.promoPrem || 0, fact: p.fact === "non" ? "non" : "oui",
            promos: promosDe(p).map(x => Object.assign({}, x)),
            poseMode: p.poseMode === "fenetre" ? "fenetre" : "forfait",
@@ -12059,6 +12213,9 @@ function prosApplique(p){
   /* chaque enregistrement par Imane compte comme la dernière nouvelle du client */
   p.msg = Date.now();
   p.rappel = !!prosD.rappel;
+  p.rappelLe = p.rappel ? ($("prosRappelLe").value || "") : "";
+  p.interet = prosD.interet || "";
+  if (p.rappel && p.fin) delete p.fin;
   p.suivi = $("prosSuivi").value.trim();
   p.pxE = $("prosPxE").value.replace(",", ".").trim();
   p.pxJ = $("prosPxJ").value.replace(",", ".").trim();
@@ -12078,7 +12235,40 @@ function prosApplique(p){
     .map(d => ({l:d.l || "", h:d.h || "", q:d.q || "", type:d.type || ""}));
   p.maj = Date.now();
 }
-$("prosRappel").addEventListener("click", () => { prosD.rappel = !prosD.rappel; renderProsSuivi(); });
+$("prosRappel").addEventListener("click", () => {
+  prosD.rappel = !prosD.rappel;
+  if (prosD.rappel && !prosD.rappelLe){
+    const d = new Date(); d.setDate(d.getDate() + 1); prosD.rappelLe = jourISO(d);
+  }
+  renderProsSuivi();
+});
+$("prosRappelLe").addEventListener("change", e => { prosD.rappelLe = e.target.value || ""; });
+$("prosSit").addEventListener("click", e => {
+  const b = e.target.closest("[data-psit]"); if (!b) return;
+  prosD.interet = prosD.interet === b.dataset.psit ? "" : b.dataset.psit;
+  renderProsSuivi();
+});
+/* Les boutons qui étaient sur chaque carte vivent maintenant dans la fiche. */
+function renderProsFicheAct(){
+  const box = $("prosFicheAct"), h = $("prosFicheH");
+  const p = prosEdit && PROS.find(x => x.id === prosEdit);
+  if (!p){ box.hidden = true; box.innerHTML = ""; h.hidden = true; $("prosFicheActLab").hidden = true; return; }
+  const st = prosStatut(p);
+  const l = waLien(p.tel);
+  h.hidden = !l;
+  if (l){ $("prosFicheWa").href = l; $("prosFicheWa").dataset.prwa = p.id; }
+  $("prosFicheActLab").hidden = false;
+  box.hidden = false;
+  box.innerHTML =
+    (st === "client" ? '' :
+      '<button class="prbtn dev" type="button" data-prdev="' + p.id + '">Faire un devis</button>' +
+      '<button class="prbtn prod" type="button" data-prprod="' + p.id + '">Commande ferme</button>') +
+    '<span class="pricons">' +
+    (st === "client" ? '' :
+      '<button class="prbtn" type="button" data-prfin="' + p.id + '">' + (p.fin ? "Remettre en cours" : "Classer sans suite") + '</button>') +
+    '<button class="prbtn" type="button" data-prdel="' + p.id + '" style="color:var(--accent)">Supprimer</button>' +
+    '</span>';
+}
 $("prosFact").addEventListener("click", e => {
   const b = e.target.closest("[data-pfact]"); if (!b) return;
   prosD.fact = b.dataset.pfact; renderProsPrix();
@@ -12160,32 +12350,41 @@ $("prosSave").addEventListener("click", () => {
 function prosFormOuvre(ouvre){
   $("prosForm").hidden = !ouvre;
   $("prosOpen").hidden = !!ouvre;
+  $("prosSheet").classList.toggle("fiche", !!ouvre);
+  $("prosTitre").textContent = ouvre ? (prosEdit ? "Fiche contact" : "Nouveau contact") : "Contacts WhatsApp";
+  try { renderProsFicheAct(); } catch(e){}
+  if (ouvre) try { $("prosSheet").querySelector(".sheet-body").scrollTo({top:0}); } catch(e){}
 }
+function prosFicheFerme(){ prosVide(); prosFormOuvre(false); renderPros(); }
+/* la flèche du haut ferme d'abord la fiche, puis la liste */
+document.addEventListener("click", e => {
+  const b = e.target.closest('[data-close="prosSheet"]');
+  if (b && $("prosSheet").classList.contains("fiche")){
+    e.stopPropagation(); e.preventDefault(); prosFicheFerme();
+  }
+}, true);
 $("prosOpen").addEventListener("click", () => {
   prosVide(); prosFormOuvre(true); renderPros();
   setTimeout(() => { try { $("prosNom").focus(); } catch(e){} }, 120);
 });
-$("prosLeg").addEventListener("click", e => {
-  const b = e.target.closest("[data-pcoul]");
-  if (!b) return;
-  prosCoul = prosCoul === b.dataset.pcoul ? "" : b.dataset.pcoul;
-  renderPros();
-});
-$("prosCancel").addEventListener("click", () => { prosVide(); prosFormOuvre(false); renderPros(); });
+$("prosCancel").addEventListener("click", prosFicheFerme);
 $("prosSearch").addEventListener("input", e => { prosQ = e.target.value; renderPros(); });
-$("prosFiltres").addEventListener("click", e => {
+$("prosPuces").addEventListener("click", e => {
+  if (e.target.closest("[data-pplus]")){ prosPlus = !prosPlus; renderPuces(); return; }
   const b = e.target.closest("[data-pf]");
   if (!b) return;
-  prosFiltre = b.dataset.pf;
+  prosFiltre = (prosFiltre === b.dataset.pf && b.dataset.pf !== "tous") ? "tous" : b.dataset.pf;
   renderPros();
 });
 
 /* --- ce qu'on fait d'un contact --- */
-$("prosBody").addEventListener("click", e => {
-  const cp = e.target.closest("[data-cpromo]");
+function prosClic(e){
+  const dansFiche = !!e.target.closest("#prosForm");
+  const cp = e.target.closest("[data-cpromo]") || e.target.closest("[data-cfiche]");
   if (cp){
     /* le client n'est peut-être pas dans la liste WhatsApp : on l'y ajoute */
-    const num = cp.dataset.cpromo;
+    const num = cp.dataset.cpromo || cp.dataset.cfiche;
+    const avecPromo = !!cp.dataset.cpromo;
     let p = prosVivants().find(x => waNum(x.tel) === num);
     if (!p){
       const c = nosClients().find(x => x.num === num);
@@ -12193,10 +12392,11 @@ $("prosBody").addEventListener("click", e => {
            at:Date.now(), maj:Date.now(), by:moiLogin()};
       PROS.unshift(p); prosSave();
     }
-    prosFiltre = "tous"; prosCoul = "";
     prosCharge(p); prosFormOuvre(true); renderPros();
-    $("prosPromoOuvre").click();
-    setTimeout(() => $("prosPromoAdd").scrollIntoView({behavior:"smooth", block:"center"}), 80);
+    if (avecPromo){
+      $("prosPromoOuvre").click();
+      setTimeout(() => $("prosPromoAdd").scrollIntoView({behavior:"smooth", block:"center"}), 80);
+    }
     return;
   }
   const pi = e.target.closest("[data-print]");
@@ -12236,7 +12436,6 @@ $("prosBody").addEventListener("click", e => {
     prosCharge(p);
     prosFormOuvre(true);
     renderPros();
-    $("prosSheet").querySelector(".sheet-body").scrollTo({top:0, behavior:"smooth"});
     return;
   }
   const fin = e.target.closest("[data-prfin]");
@@ -12244,8 +12443,9 @@ $("prosBody").addEventListener("click", e => {
     const p = PROS.find(x => x.id === fin.dataset.prfin);
     if (!p) return;
     if (p.fin) delete p.fin; else p.fin = Date.now();
+    if (p.fin) p.rappel = false;
     p.maj = Date.now();
-    prosSave(); renderPros(); renderHome();
+    prosSave(); if (dansFiche) prosFicheFerme(); else renderPros(); renderHome();
     toast(p.fin ? "Classé sans suite" : "Remis dans les contacts à rappeler");
     return;
   }
@@ -12258,7 +12458,7 @@ $("prosBody").addEventListener("click", e => {
       /* on garde une tombe : sinon la fiche revient au prochain échange */
       p.sup = true; p.maj = Date.now();
       p.nom = ""; p.tel = ""; p.note = "";
-      prosSave(); renderPros(); renderHome();
+      prosSave(); if (dansFiche) prosFicheFerme(); else renderPros(); renderHome();
       toast("Contact supprimé");
     });
     return;
@@ -12268,8 +12468,15 @@ $("prosBody").addEventListener("click", e => {
   if (dev || prod){
     const p = PROS.find(x => x.id === (dev ? dev.dataset.prdev : prod.dataset.prprod));
     if (!p) return;
+    /* ce qui vient d'être tapé dans la fiche part aussi dans le bon */
+    if (dansFiche && prosEdit === p.id){ prosApplique(p); prosSave(); }
     prosVersBon(p, dev ? "devis" : "production");
+    if (dansFiche){ prosVide(); prosFormOuvre(false); }
   }
+}
+$("prosBody").addEventListener("click", prosClic);
+$("prosForm").addEventListener("click", e => {
+  if (e.target.closest("#prosFicheAct") || e.target.closest("#prosFicheH")) prosClic(e);
 });
 
 /* Le contact devient un bon : on reprend son nom, son numéro et sa demande.
@@ -13776,6 +13983,7 @@ function backOneStep(){
   if ($("resSheet").classList.contains("open")){ closeSheet("resSheet"); return true; }
   if ($("cliOneSheet").classList.contains("open")){ nav("cliSheet"); renderCli(); return true; }
   if ($("promoSheet").classList.contains("open")){ nav("prosSheet"); renderPros(); return true; }
+  if ($("prosSheet").classList.contains("open") && $("prosSheet").classList.contains("fiche")){ prosFicheFerme(); return true; }
   if ($("cutSheet").classList.contains("open")){ retourCut(); return true; }
   if ($("histSheet").classList.contains("open") ||
       $("stockSheet").classList.contains("open") ||
