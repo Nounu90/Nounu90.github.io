@@ -1638,6 +1638,80 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   font-family:"Archivo",sans-serif; font-weight:600; font-size:13px; color:var(--muted);
 }
 .filters button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+/* --- v13.7 : Historique, cartes « ticket » (style retenu pour toute l'app) --- */
+.hseg{display:flex; gap:3px; padding:4px; margin:10px 0 0; background:var(--card); border:1px solid var(--line); border-radius:12px}
+.hseg button{flex:1; padding:8px 0; border:0; border-radius:9px; background:none; font-family:"Archivo",sans-serif;
+  font-size:12.5px; font-weight:700; color:var(--muted)}
+.hseg button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+.hsort{display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:9px}
+.hsort > span{font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.htiles{display:flex; gap:8px; margin:10px 0 2px}
+.htiles div{flex:1; min-width:0; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:8px 10px;
+  font-size:10.5px; font-weight:600; color:var(--muted)}
+.htiles b{display:block; font-family:"IBM Plex Mono",monospace; font-size:15px; color:var(--ink); margin-top:2px; white-space:nowrap}
+.htiles b.att{color:var(--warn)}
+.hday{display:flex; justify-content:space-between; margin:14px 0 7px; font-family:"Archivo",sans-serif; font-size:10.5px;
+  font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.hday.r{color:var(--accent)}
+.hc{--ec:#7A3BC4; --es:#F5EEFC; --et:#7A3BC4; background:var(--card); border:1px solid var(--line); border-left:5px solid var(--ec);
+  border-radius:16px; margin-bottom:11px; overflow:hidden}
+.hc.production{--ec:#EA7A00; --es:#FFF1E0; --et:#B25A00}
+.hc.pret{--ec:#1F5FD1; --es:#E6EEFC; --et:#1F5FD1}
+.hc.livre{--ec:#12833F; --es:#E3F4EA; --et:#12833F}
+.hc.fini{opacity:.62}
+.hc.fini .hcnm b{text-decoration:line-through}
+.hch{display:flex; align-items:center; gap:10px; padding:12px 13px 0}
+.hco{flex:1; min-width:0; display:flex; align-items:center; gap:10px; padding:0; border:0; background:none; text-align:left; color:var(--ink); font:inherit}
+.hcav{width:40px; height:40px; border-radius:12px; display:grid; place-items:center; flex:none; background:var(--ec); color:#fff;
+  font-family:"Archivo",sans-serif; font-weight:800; font-size:14.5px}
+.hcnm{flex:1; min-width:0}
+.hcnm b{display:block; font-family:"Archivo",sans-serif; font-size:16px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.hcnm small{display:block; font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted); margin-top:1px}
+.hc .etatsel{flex:none}
+.hc .etatsel select{width:auto; padding-right:28px; background:var(--es) !important; color:var(--et) !important; border-color:transparent !important;
+  border-radius:999px; font-weight:700; font-size:12px}
+.hcb{display:block; width:100%; padding:0; border:0; background:none; text-align:left; color:var(--ink); font:inherit}
+.hcmid{display:flex; align-items:flex-end; justify-content:space-between; gap:10px; padding:10px 13px 0}
+.hcamt b{font-family:"IBM Plex Mono",monospace; font-size:21px; font-weight:800}
+.hcamt b span{font-family:"Archivo",sans-serif; font-size:14px; font-weight:700}
+.hcamt small{display:block; font-size:11px; color:var(--muted); margin-top:1px}
+.hcamt.rien b{color:var(--muted); font-size:15px}
+.hcliv{text-align:right; font-size:11.5px; color:var(--muted)}
+.hcliv b{display:block; font-family:"IBM Plex Mono",monospace; font-size:13.5px; color:var(--ink)}
+.hcliv em{font-style:normal; font-weight:700}
+.hcliv em.r{color:var(--accent)} .hcliv em.ok{color:var(--ok)}
+.hcpg{display:flex; gap:10px; padding:10px 13px 0}
+.hcpg div{flex:1; font-size:11px; color:var(--muted)}
+.hcpg div span{display:flex; justify-content:space-between}
+.hcpg b{font-family:"IBM Plex Mono",monospace; color:var(--ink)}
+.hbar{display:flex; height:6px; border-radius:6px; background:var(--card2); margin-top:4px; overflow:hidden}
+.hbar i{display:block; height:100%; background:#EA7A00}
+.hbar i.ok{background:var(--ok)} .hbar i.w{background:#F0B429}
+.hcwhat{padding:9px 13px 0; font-size:12.5px; font-weight:600; line-height:1.45}
+.hcchips{display:flex; flex-wrap:wrap; gap:5px; padding:7px 13px 0}
+.hcchips .hprog{margin:0}
+.hcpay{margin:10px 13px 0; background:var(--card2); border-radius:12px; padding:9px 11px}
+.hcpay .ph{display:flex; justify-content:space-between; align-items:baseline; font-family:"Archivo",sans-serif; font-size:10.5px;
+  font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.hcpay .ph span:last-child{text-transform:none; letter-spacing:0; font-weight:600}
+.hcpay .ps{display:flex; justify-content:space-between; font-size:12.5px; margin-top:6px}
+.hcpay .ps b{font-family:"IBM Plex Mono",monospace}
+.hcpay .ps b.ok{color:var(--ok)} .hcpay .ps b.att{color:var(--warn)}
+.hcpl{display:flex; align-items:center; gap:6px; font-size:12px; padding:5px 0 0; margin-top:5px; border-top:1px dashed var(--line)}
+.hcpl .d{flex:none; width:40px; font-family:"IBM Plex Mono",monospace; color:var(--muted)}
+.hcpl .m{flex:1; min-width:0}
+.hcpl .v{flex:none; font-family:"IBM Plex Mono",monospace; font-weight:700}
+.hcbdg{font-family:"Archivo",sans-serif; font-size:9px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
+  padding:2px 6px; border-radius:5px; margin-left:5px; white-space:nowrap}
+.hcbdg.y{background:var(--ok-soft); color:var(--ok)} .hcbdg.n{background:#FFF1D6; color:var(--warn)}
+.hcact{display:flex; align-items:center; gap:6px; padding:10px 13px 11px; margin-top:10px; border-top:1px solid var(--line)}
+.hcact .sp{flex:1}
+.hcact .hchk{width:auto; min-width:0; height:32px; padding:0 9px; border-radius:8px; font-size:10.5px}
+.hcact .hchk.on{border-color:var(--ok) !important; background:var(--ok-soft) !important; color:var(--ok) !important}
+.hcib{width:34px; height:34px; border-radius:10px; display:grid; place-items:center; flex:none; border:1px solid var(--line);
+  background:var(--card); color:var(--muted); padding:0}
+.hcib.wa{background:#128C7E; border-color:#128C7E; color:#fff}
+.hcib.danger:active{color:var(--accent); border-color:var(--accent)}
 .hrow{
   display:flex; align-items:center; gap:12px; padding:13px 14px; background:var(--card);
   border:1px solid var(--line); border-radius:12px; margin-bottom:9px;
@@ -1724,6 +1798,18 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .srow .sref small{display:block; color:var(--muted); font-size:12px; margin-top:2px}
 .srow .sqty{font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; text-align:right}
 .srow .sqty em{display:block; font-style:normal; font-size:11px; font-weight:500; color:var(--muted); margin-top:1px}
+.srow .srl{flex:none; width:62px; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600;
+  font-variant-numeric:tabular-nums; color:var(--ink); padding-left:10px; border-left:1px solid var(--line)}
+.srow .srl em{display:block; font-style:normal; font-family:"Archivo",sans-serif; font-size:10px; font-weight:600; color:var(--muted); margin-top:2px}
+.srow .srl input{width:48px; padding:5px 6px; border-radius:8px; border:1px solid var(--line); background:var(--card2);
+  font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; color:var(--ink); text-align:center}
+.rlbox{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:0 0 12px; padding:10px 12px; border:1px solid var(--line);
+  border-radius:12px; background:var(--card); font-size:12.5px; color:var(--muted)}
+.rlbox b{font-family:"Archivo",sans-serif; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); flex:1 1 100%}
+.rlbox label{display:flex; align-items:center; gap:6px}
+.rlbox input{width:64px; padding:6px 8px; border-radius:8px; border:1px solid var(--line); background:var(--card2);
+  font-family:"IBM Plex Mono",monospace; font-size:14px; color:var(--ink); text-align:right}
+.rlbox .rlv{font-family:"IBM Plex Mono",monospace; font-size:14px; color:var(--ink)}
 .srow .sqty.ok{color:var(--ok)} .srow .sqty.low{color:var(--warn)} .srow .sqty.out{color:var(--muted)}
 .sumline{
   display:flex; justify-content:space-between; gap:10px; padding:13px 15px; border-radius:12px;
@@ -2142,7 +2228,6 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   </div>
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
-    <div class="sumline"><span id="stockSumLabel">Références</span><b id="stockSum">0</b></div>
     <div class="field" style="margin-bottom:12px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
       <input id="stockSearch" type="search" placeholder="Rechercher une référence" autocomplete="off">
@@ -3005,43 +3090,38 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <h2>Historique</h2>
+    <button class="icon-btn" type="button" data-refresh aria-label="Actualiser"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
   </div>
   <div class="sheet-body">
-    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
-    <div class="sumline"><span id="histSumLab">Bons enregistrés</span><b id="histSum">0</b></div>
-    <div class="field" style="margin-bottom:12px">
+    <div class="field">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input id="histSearch" type="search" placeholder="Client, numéro ou référence tissu" autocomplete="off">
+      <input id="histSearch" type="search" placeholder="Client, numéro, téléphone ou tissu" autocomplete="off">
     </div>
-    <div class="filters" id="histFilters">
-      <button type="button" data-f="all" aria-pressed="true">Tous</button>
-      <button type="button" data-f="mine" aria-pressed="false">Mes bons</button>
-      <button type="button" data-f="mois" aria-pressed="false">Ce mois</button>
-      <button type="button" data-f="annee" aria-pressed="false">Cette année</button>
-      <button type="button" data-f="periode" aria-pressed="false">Période</button>
-      <button type="button" data-f="paye" aria-pressed="false">Payés</button>
-      <button type="button" data-f="impaye" aria-pressed="false">Non payés</button>
-      <button type="button" data-f="devis" aria-pressed="false">Devis</button>
-      <button type="button" data-f="production" aria-pressed="false">En production</button>
-      <button type="button" data-f="pret" aria-pressed="false">Prêt</button>
-      <button type="button" data-f="livre" aria-pressed="false">Livré</button>
+    <div class="hseg" id="histPer">
+      <button type="button" data-p="tous" aria-pressed="true">Tout</button>
+      <button type="button" data-p="mois" aria-pressed="false">Mois</button>
+      <button type="button" data-p="trim" aria-pressed="false">Trimestre</button>
+      <button type="button" data-p="annee" aria-pressed="false">Année</button>
+      <button type="button" data-p="periode" aria-pressed="false">Période</button>
     </div>
-    <div class="pyper" id="histPeriode" hidden>
+    <div class="pyper" id="histPeriode" hidden style="margin-top:8px">
       <input id="histD1" type="date" aria-label="Du">
       <input id="histD2" type="date" aria-label="Au">
     </div>
-    <div class="filters" id="histDossier" hidden>
-      <button type="button" data-d="tous" aria-pressed="true">Tous les dossiers</button>
-      <button type="button" data-d="encours" aria-pressed="false">En cours</button>
-      <button type="button" data-d="fini" aria-pressed="false">Terminés</button>
-      <button type="button" data-d="sage" aria-pressed="false">Saisis SAGE</button>
-      <button type="button" data-d="pasage" aria-pressed="false">Pas encore SAGE</button>
+    <div class="pypuces" id="histFilters"></div>
+    <div class="pypuces" id="histDossier" hidden style="margin-top:0">
+      <button type="button" class="prchip" data-d="tous">Tous les dossiers</button>
+      <button type="button" class="prchip" data-d="encours">En cours</button>
+      <button type="button" class="prchip" data-d="fini">Terminés</button>
+      <button type="button" class="prchip" data-d="sage">Saisis SAGE</button>
+      <button type="button" class="prchip" data-d="pasage">Pas encore SAGE</button>
     </div>
-    <div class="filters" id="histSort">
-      <button type="button" data-s="recent" aria-pressed="true">Plus récents</button>
-      <button type="button" data-s="ech" aria-pressed="false">Échéance la plus proche</button>
+    <div class="hsort" id="histSort"><span>Trier</span>
+      <button type="button" class="prchip" data-s="recent">Plus récents</button>
+      <button type="button" class="prchip" data-s="ech">Échéance la plus proche</button>
     </div>
-    <div id="histBody"></div>
+    <div class="htiles" id="histTiles"></div>
+    <div id="histBody"></div>    <div id="histBody"></div>
   </div>
 </div>
 
@@ -5741,6 +5821,9 @@ let stockFilter = "stock";
 let stockSort = LS.get("mst_stocksort", "sheet");   /* sheet | asc | desc */
 
 function renderStock(){
+  /* on ne redessine pas sous les doigts de celui qui tape un nombre de rouleaux */
+  const act = document.activeElement;
+  if (act && act.matches && act.matches("input[data-nroul]")) return;
   const q = ($("stockSearch").value || "").trim().toLowerCase();
   let list = CATALOGUE.filter(f => f.ref.toLowerCase().includes(q));
   if (stockFilter === "stock") list = list.filter(f => f.dispo >= 1);
@@ -5751,17 +5834,6 @@ function renderStock(){
   if (stockSort === "asc")       list = list.slice().sort((a,b) => a.dispo - b.dispo || a.ref.localeCompare(b.ref));
   else if (stockSort === "desc") list = list.slice().sort((a,b) => b.dispo - a.dispo || a.ref.localeCompare(b.ref));
   else                           list = list.slice();
-
-  /* Chaque famille dans son unité : enrouleur en m², jour et nuit en ml. */
-  const enr = list.filter(stockEnM2), jn = list.filter(f => !stockEnM2(f));
-  const totM2  = enr.reduce((s,f) => s + stockM2(f), 0);
-  const totM2l = enr.reduce((s,f) => s + stockMl(f), 0);   /* l'enrouleur en mètres */
-  const totMl  = jn.reduce((s,f) => s + stockMl(f), 0);
-  $("stockSumLabel").textContent = list.length + (list.length > 1 ? " références" : " référence");
-  const parts = [];
-  if (totM2 > 0) parts.push("Enrouleur " + fr(totM2) + " m² / " + fr(totM2l) + " ml");
-  if (totMl > 0) parts.push("Jour et nuit " + fr(totMl) + " ml");
-  $("stockSum").textContent = parts.join("  ·  ") || "0";
 
   const box = $("stockList");
   box.innerHTML = "";
@@ -5777,14 +5849,42 @@ function renderStock(){
       '<small>' + (f.type === "JN" ? "Jour et nuit" : "Enrouleur") + '  ·  laize ' +
         (f.laize/100).toFixed(2).replace(".",",") + ' m  ·  ' +
         (stockEnM2(f) ? fr(stockMl(f)) + ' ml' : fr(stockM2(f)) + ' m²') + '</small></span>' +
-      '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : stockDeux(f)) + '</span>';
+      '<span class="sqty ' + cls + '">' + (f.dispo < 1 ? "rupture" : stockDeux(f)) + '</span>' +
+      (function(){
+        const r = nbRouleaux(f);
+        return '<span class="srl">' + (adminAllowed()
+          ? '<input inputmode="numeric" data-nroul="' + esc(f.ref) + '" value="' + r + '" aria-label="Nombre de rouleaux">'
+          : r) + '<em>' + (r > 1 ? "rouleaux" : "rouleau") + '</em></span>';
+      })();
     box.appendChild(d);
   });
   [...$("stockSort").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.s === stockSort)));
-  $("srcInfo").innerHTML = srcLabel() + ".<br>Le nombre affiché est celui de la colonne <b>AB</b> de votre feuille, sans aucun calcul, dans l'unité de la famille : les tissus <b>B-0</b> et <b>S-0</b> en <b>m²</b>, les tissus <b>JN_</b> en <b>mètres linéaires</b>. L'autre unité est rappelée en petit sous chaque référence, convertie par la laize du rouleau. Seules les lignes commençant par B-0, S-0 ou JN_0 sont reprises, et la feuille doit rester partagée en lecture par lien.";
+  $("srcInfo").innerHTML = srcLabel() + ".<br>Le nombre affiché est celui de la colonne <b>P</b> (Qtés) de l'inventaire SAGE, sans aucun calcul, dans l'unité de la famille : les tissus <b>B-0</b> et <b>S-0</b> en <b>m²</b>, les tissus <b>JN_</b> en <b>mètres linéaires</b>. L'autre unité est rappelée en petit sous chaque référence, convertie par la laize du rouleau. Seules les lignes commençant par B-0, S-0 ou JN_0 sont reprises, et la feuille doit rester partagée en lecture par lien.";
 }
 
 $("stockSearch").addEventListener("input", renderStock);
+/* v13.6 : le nombre de rouleaux est saisi à la main, tissu par tissu (1 par défaut).
+   Il voyage avec les réglages d'atelier partagés : même chiffre sur tous les téléphones. */
+function nbRouleaux(f){
+  const m = ATL.rouleaux || {};
+  const v = parseInt(m[f.ref], 10);
+  return v >= 0 ? v : 1;
+}
+$("stockList").addEventListener("change", e => {
+  const i = e.target.closest("input[data-nroul]");
+  if (!i || !adminAllowed()) return;
+  const v = parseInt(String(i.value).replace(/[^0-9]/g, ""), 10);
+  if (!(v >= 0)){ i.value = nbRouleaux({ref:i.dataset.nroul}); return; }
+  if (!ATL.rouleaux || typeof ATL.rouleaux !== "object") ATL.rouleaux = {};
+  ATL.rouleaux[i.dataset.nroul] = v;
+  atlSave();
+  i.blur();
+  renderStock();
+  toast(i.dataset.nroul + " : " + v + (v > 1 ? " rouleaux" : " rouleau"));
+});
+$("stockList").addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.matches("input[data-nroul]")) e.target.blur();
+});
 $("stockSort").addEventListener("click", e => {
   const b = e.target.closest("button[data-s]");
   if (!b) return;
@@ -6234,6 +6334,48 @@ function dansPeriodeHist(o){
 }
 
 let histDossier = "tous";
+let histPer = LS.get("mst_histper", "tous");
+/* La période regarde la date du bon. */
+function dansPerHist(o){
+  if (histPer === "tous") return true;
+  const d = new Date(o.date || 0);
+  if (isNaN(d.getTime())) return false;
+  const n = new Date();
+  if (histPer === "mois") return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth();
+  if (histPer === "trim") return d.getFullYear() === n.getFullYear() && Math.floor(d.getMonth() / 3) === Math.floor(n.getMonth() / 3);
+  if (histPer === "annee") return d.getFullYear() === n.getFullYear();
+  if (histPer === "periode") return dansPeriodeHist(o);
+  return true;
+}
+function initiales(nom){
+  const m = String(nom || "").trim().split(/\s+/).filter(Boolean);
+  if (!m.length) return "?";
+  return (m.length > 1 ? m[0][0] + m[1][0] : m[0].slice(0, 2)).toUpperCase();
+}
+const JOURS_L = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+const MOIS_L = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+function jourTitre(d){ return JOURS_L[d.getDay()] + " " + d.getDate() + " " + MOIS_L[d.getMonth()]; }
+function jourCourtLiv(iso){
+  const d = new Date(String(iso) + "T12:00:00");
+  if (isNaN(d.getTime())) return "";
+  return ["dim.","lun.","mar.","mer.","jeu.","ven.","sam."][d.getDay()] + " " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1);
+}
+/* Où en est l'échéance, en mots, pour la carte. */
+function echEtat(o){
+  if (!o || !o.ech) return null;
+  const p = new Date(String(o.ech) + "T12:00:00");
+  if (isNaN(p.getTime())) return null;
+  const t = new Date(); t.setHours(12, 0, 0, 0);
+  const j = Math.round((p - t) / 86400000);
+  if (etatDe(o) === "livre") return {j:j, txt:"livré", cls:"ok"};
+  if (j < 0) return {j:j, txt:"en retard de " + (-j) + " j", cls:"r"};
+  if (j === 0) return {j:0, txt:"aujourd'hui", cls:"ok"};
+  return {j:j, txt:"dans " + j + " j", cls:""};
+}
+function hBarre(fait, tot){
+  const p = tot ? Math.round(fait / tot * 100) : 0;
+  return '<div class="hbar"><i class="' + (tot && fait >= tot ? "ok" : "") + '" style="width:' + p + '%"></i></div>';
+}
 
 function renderHist(){
   const all = ORDERS;
@@ -6253,9 +6395,7 @@ function renderHist(){
     if (histDossier === "sage"    && !estSage(o)) return false;
     if (histDossier === "pasage"  && estSage(o)) return false;
     if (histFilter === "mine" && USER && o.author !== USER.login) return false;
-    if (histFilter === "mois" && !ceMois(o)) return false;
-    if (histFilter === "annee" && new Date(o.date || 0).getFullYear() !== new Date().getFullYear()) return false;
-    if (histFilter === "periode" && !dansPeriodeHist(o)) return false;
+    if (!dansPerHist(o)) return false;
     if (histFilter === "paye"   && !paySolde(o)) return false;
     if (histFilter === "impaye" && paySolde(o)) return false;
     /* Un bon livré n'a plus d'échéance à surveiller, sauf si on le demande. */
@@ -6265,6 +6405,7 @@ function renderHist(){
     const hay = [o.nom, o.num, o.tel, o.author, (o.refs || []).join(" ")].join(" ").toLowerCase();
     return hay.includes(q);
   });
+  if (histSort !== "ech") list = list.slice().sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
   /* Tri par échéance : la plus proche en tête, les bons sans date à la fin.
      Une échéance passée reste devant, c'est un retard qu'il faut voir. */
   if (histSort === "ech"){
@@ -6276,107 +6417,159 @@ function renderHist(){
       return ta - tb;
     });
   }
-  [...$("histSort").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.s === histSort)));
-  [...$("histFilters").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.f === histFilter)));
-  $("histPeriode").hidden = histFilter !== "periode";
+  [...$("histSort").querySelectorAll("button")].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.s === histSort)));
+  [...$("histPer").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.p === histPer)));
+  $("histPeriode").hidden = histPer !== "periode";
   $("histD1").value = histDu; $("histD2").value = histAu;
 
-  if (finAllowed()){
-    const ouverts = all.filter(o => !estFini(o)).length;
-    $("histSum").textContent = ouverts + " / " + all.length;
-    $("histSumLab").textContent = "Dossiers en cours";
-  } else {
-    $("histSum").textContent = all.length;
-    $("histSumLab").textContent = "Bons enregistrés";
-  }
+  /* Les puces comptent les bons de la période choisie. */
+  const base = all.filter(o => dansPerHist(o));
+  const cnt = f => base.filter(o => {
+    if (f === "all") return true;
+    if (f === "mine") return USER && o.author === USER.login;
+    if (f === "paye") return paySolde(o);
+    if (f === "impaye") return !paySolde(o) && etatDe(o) !== "devis";
+    return etatDe(o) === f;
+  }).length;
+  const PUCES = [["all","Tous",""],["devis","Devis","#7A3BC4"],["production","En production","#EA7A00"],
+                 ["pret","Prêt","#1F5FD1"],["livre","Livré","#12833F"],["mine","Mes bons",""],
+                 ["impaye","Non payés","var(--warn)"],["paye","Payés","var(--ok)"]];
+  $("histFilters").innerHTML = PUCES.map(p => '<button type="button" class="prchip" data-f="' + p[0] + '" aria-pressed="' +
+    (histFilter === p[0]) + '">' + (p[2] ? '<i style="background:' + p[2] + '"></i>' : '') + p[1] + ' <b>' + cnt(p[0]) + '</b></button>').join("");
+
+  const totDu = list.reduce((t, o) => t + (etatDe(o) === "devis" ? 0 : duDe(o)), 0);
+  const totRe = list.reduce((t, o) => t + (etatDe(o) === "devis" ? 0 : soldeDe(o)), 0);
+  const fmt = n => { const x = fr(n, 0).split(","); return x[0].replace(/\B(?=(\d{3})+(?!\d))/g, " "); };
+  $("histTiles").innerHTML = '<div>Bons<b>' + list.length + '</b></div><div>Total confirmé<b>' + fmt(totDu) + '</b></div>' +
+    '<div>Reste à encaisser<b class="att">' + fmt(totRe) + '</b></div>';
+
   const body = $("histBody");
   body.innerHTML = "";
   if (!list.length){
     body.innerHTML = '<div class="empty">' + (all.length ? "Aucun bon ne correspond." : "Aucun bon enregistré pour le moment.<br>Les brouillons et les bons envoyés apparaîtront ici.") + '</div>';
     return;
   }
+  /* Les titres de groupe : par jour du bon, ou par urgence de l'échéance. */
+  const groupe = o => {
+    if (histSort === "ech"){
+      const e = echEtat(o);
+      if (!e) return ["z", "Sans échéance"];
+      if (e.j < 0) return ["a", "⚠ En retard"];
+      if (e.j === 0) return ["b", "Aujourd'hui"];
+      if (e.j <= 7) return ["c", "Cette semaine"];
+      return ["d", "Plus tard"];
+    }
+    const d = new Date(o.date || 0);
+    return isNaN(d.getTime()) ? ["?", "Sans date"] : [d.toDateString(), jourTitre(d)];
+  };
+  const nbG = {};
+  list.forEach(o => { const g = groupe(o)[0]; nbG[g] = (nbG[g] || 0) + 1; });
+  let gCour = null;
+  const fmt2 = n => { const x = fr(n, 2).split(","); return x[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ") + "," + x[1]; };
   list.forEach(o => {
+    const g = groupe(o);
+    if (g[0] !== gCour){
+      gCour = g[0];
+      const h = document.createElement("div");
+      h.className = "hday" + (g[0] === "a" ? " r" : "");
+      h.innerHTML = '<span>' + g[1] + '</span><span>' + nbG[g[0]] + (nbG[g[0]] > 1 ? " bons" : " bon") + '</span>';
+      body.appendChild(h);
+    }
+    body.appendChild(histCarte(o, fmt2));
+  });
+}
+
+/* v13.7 : une carte « ticket » par bon, tout visible sans l'ouvrir. */
+function histCarte(o, fmt2){
+  {
     const t = orderTotals(o);
     const d = new Date(o.date);
     const av = avancement(o);
-    const row = document.createElement("div");
-    const paye = paySolde(o);
-    row.className = "hrow" + (paye ? " paye" : "") + (estFini(o) ? " fini" : "");
     const et = etatDe(o);
+    const paye = paySolde(o);
+    const row = document.createElement("div");
+    row.className = "hc " + et + (estFini(o) ? " fini" : "");
+    const e = echEtat(o);
+    const du = duDe(o), pp = payeDe(o), rs = soldeDe(o);
+    const L = paiements(o).slice().sort((x, y) => String(x.date).localeCompare(String(y.date)));
+    const conf = L.filter(x => x.recu).reduce((s2, x) => s2 + (parseFloat(x.montant) || 0), 0);
+    const att = pp - conf;
+    const ico = (p, sz) => '<svg width="' + (sz || 16) + '" height="' + (sz || 16) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+    const chips =
+      (o.status !== "sent" ? '<span class="hprog br">brouillon, jamais envoyé</span>' : '') +
+      (et === "devis" && !o.ech ? pucedelai(o) : '') +
+      (!ordDims(o).length ? '<span class="hprog br">aucune mesure exploitable</span>' : '') +
+      (t.pose ? '<span class="hprog">' + (t.poseLab === "Livraison" ? "Livraison" : "Pose") + ' + ' + fr(t.pose) + '</span>' : '') +
+      (o.pending ? '<span class="hprog br">à envoyer</span>' : '');
     row.innerHTML =
-      '<button class="hmain" data-open="' + o.id + '">' +
-        '<span class="hl1"><b><span class="etat-box etat-' + et + '">' + (o.nom || "Client sans nom") + '</span></b></span>' +
-        ((t.prix || t.pose)
-          ? '<span class="httc">' + fr(prixClient(o, htDe(o))) + ' MAD' +
-            '<em>' + (facture(o) ? "TTC" : "HT") + '</em>' +
-            (facture(o) ? '<i>' + fr(htDe(o)) + ' HT</i>' : '<i>sans facture</i>') +
-            (paye ? '<u>payé</u>' : '') +
-            '</span>'
-          : '') +
-        '<span class="hl2"><small>' + (o.author ? nomDe(o.author) + '  ·  ' : '') + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + '</small>' +
-          '<span class="hright">' +
-
-            (t.pose ? '<span class="hpose">' + (t.poseLab === "Livraison" ? "Livr." : "Pose") + ' + ' + fr(t.pose) + '</span>' : '') +
-            echSuffix(o) +
-            '<span class="hnum">' + o.num + '</span>' +
-          '</span>' +
-          ((o.status !== "sent" || av.tube.tot || av.fen.tot || !ordDims(o).length)
-            ? '<span class="hchips">' +
-              (o.status !== "sent"
-                 ? '<span class="hprog br">brouillon, jamais envoyé</span>' : '') +
-              (et === "devis" && !o.ech ? pucedelai(o) : '') +
-              (!ordDims(o).length
-                 ? '<span class="hprog br">aucune mesure exploitable</span>' : '') +
-              (av.tube.tot ? '<span class="hprog ' + (av.tube.fait === av.tube.tot ? "ok" : "att") + '">' +
-                 'tubes ' + av.tube.fait + '/' + av.tube.tot + '</span>' : '') +
-              (av.fen.tot ? '<span class="hprog ' + (av.fen.fait === av.fen.tot ? "ok" : "att") + '">' +
-                 'fenêtres ' + av.fen.fait + '/' + av.fen.tot + '</span>' : '') +
-              '</span>'
-            : '') +
-          '<span class="hstores">' + (storesParType(o).map(esc).join("<br>") || "Aucun store") + '</span>' +
-        '</span>' +
-      '</button>' +
-      '<span class="hside">' +
+      '<div class="hch">' +
+        '<button class="hco" type="button" data-open="' + o.id + '">' +
+          '<span class="hcav">' + esc(initiales(o.nom)) + '</span>' +
+          '<span class="hcnm"><b>' + esc(o.nom || "Client sans nom") + '</b>' +
+            '<small>' + esc(o.num || "") + (o.author ? '  ·  ' + esc(nomDe(o.author)) : '') + '  ·  ' + pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + '</small></span>' +
+        '</button>' +
         '<span class="etatsel ' + et + '">' +
           '<select data-etat="' + o.id + '" aria-label="État de la commande">' +
-            ETATS.map(e => '<option value="' + e.k + '"' + (e.k === et ? " selected" : "") + '>' + e.label + '</option>').join("") +
+            ETATS.map(x => '<option value="' + x.k + '"' + (x.k === et ? " selected" : "") + '>' + x.label + '</option>').join("") +
           '</select>' +
-          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>' +
+          ico('<path d="M6 9l6 6 6-6"/>', 13) +
         '</span>' +
-        (finAllowed() || sageAllowed()
-          ? '<span class="hmark">' +
-            (finAllowed()
-              ? '<button class="hchk' + (estFini(o) ? " on" : "") + (finPossible(o) ? "" : " bloque") +
-                '" type="button" data-fini="' + o.id + '" title="Dossier terminé">' +
-                (estFini(o)
-                  ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
-                  : 'FIN') + '</button>'
-              : '') +
-            (sageAllowed()
-              ? '<button class="hchk sagedev' + (estSageDev(o) ? " on" : "") +
-                '" type="button" data-sagedev="' + o.id + '" ' +
-                'title="Devis déjà créé dans SAGE">DEV</button>' +
-                '<button class="hchk sage' + (estSage(o) ? " on" : "") +
-                '" type="button" data-sage="' + o.id + '" title="Commande saisie dans SAGE">SAGE</button>'
-              : '') +
-            (finAllowed()
-              ? '<button class="hchk grp" type="button" data-resume="' + o.id + '" title="Résumé pour le groupe">' +
-                '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/><path d="M8.6 9.4c0 3.3 2.7 6 6 6"/></svg>' +
-                '</button>'
-              : '') +
+      '</div>' +
+      '<button class="hcb" type="button" data-open="' + o.id + '">' +
+        '<span class="hcmid">' +
+          ((t.prix || t.pose)
+            ? '<span class="hcamt"><b' + (pp <= 0 && rs > 0.01 && et !== "devis" ? ' style="color:var(--accent)"' : '') + '>' + fmt2(du) + ' <span>MAD</span></b>' +
+              '<small>' + (facture(o) ? "TTC · facturé · " + fmt2(htDe(o)) + " HT" : "HT · sans facture") + (paye ? "  ·  payé" : "") + '</small></span>'
+            : '<span class="hcamt rien"><b>Prix à saisir</b></span>') +
+          (o.ech
+            ? '<span class="hcliv">' + (o.pose === "Livraison" ? "Livraison" : "Pose") + '<b>' + jourCourtLiv(o.ech) + '</b>' +
+              (e ? '<em class="' + e.cls + '">' + e.txt + '</em>' : '') + '</span>'
+            : '<span class="hcliv">Échéance<b>—</b></span>') +
+        '</span>' +
+        ((av.tube.tot || av.fen.tot)
+          ? '<span class="hcpg">' +
+              '<div><span>Tubes <b>' + av.tube.fait + '/' + av.tube.tot + '</b></span>' + hBarre(av.tube.fait, av.tube.tot) + '</div>' +
+              '<div><span>Fenêtres <b>' + av.fen.fait + '/' + av.fen.tot + '</b></span>' + hBarre(av.fen.fait, av.fen.tot) + '</div>' +
             '</span>'
           : '') +
-        '<span style="display:flex; align-items:center; gap:6px">' +
-          (o.pending ? '<span class="badge warn">À envoyer</span>' : '') +
-          (adminAllowed()
-            ? '<button class="hact" data-num="' + o.id + '" aria-label="Renommer le bon">' +
-              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'
-            : '') +
-          '<button class="hact danger" data-del="' + o.id + '" aria-label="Supprimer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>' +
-        '</span>' +
-      '</span>';
-    body.appendChild(row);
-  });
+        '<span class="hcwhat">' + (storesParType(o).map(esc).join("  ·  ") || "Aucun store") + '</span>' +
+        (chips ? '<span class="hcchips">' + chips + '</span>' : '') +
+      '</button>' +
+      ((et !== "devis" || L.length) && du > 0
+        ? '<div class="hcpay"><div class="ph"><span>Paiements</span><span>' +
+            (L.length ? L.length + (L.length > 1 ? " paiements" : " paiement") : "aucun paiement") + '</span></div>' +
+            '<div class="hbar" style="margin-top:7px"><i class="ok" style="width:' + Math.min(100, conf / du * 100).toFixed(1) + '%"></i>' +
+              '<i class="w" style="width:' + Math.max(0, Math.min(100 - conf / du * 100, att / du * 100)).toFixed(1) + '%"></i></div>' +
+            '<div class="ps"><span>Payé <b class="ok">' + fmt2(pp) + '</b></span><span>' +
+              (rs > 0.01 ? 'Reste <b class="att">' + fmt2(rs) + '</b>' : '<b class="ok">Soldé</b>') + '</span></div>' +
+            L.map(x => '<div class="hcpl"><span class="d">' + jjmm(x.date) + '</span><span class="m">' + esc(x.mode || "Paiement") +
+              '<span class="hcbdg ' + (x.recu ? "y" : "n") + '">' + (x.recu ? "reçu" : "à confirmer") + '</span></span>' +
+              '<span class="v">' + fmt2(parseFloat(x.montant) || 0) + '</span></div>').join("") +
+          '</div>'
+        : '') +
+      '<div class="hcact">' +
+        (finAllowed()
+          ? '<button class="hchk' + (estFini(o) ? " on" : "") + (finPossible(o) ? "" : " bloque") +
+            '" type="button" data-fini="' + o.id + '" title="Dossier terminé">' + (estFini(o) ? "✓ FIN" : "FIN") + '</button>'
+          : '') +
+        (sageAllowed()
+          ? '<button class="hchk sagedev' + (estSageDev(o) ? " on" : "") + '" type="button" data-sagedev="' + o.id + '" title="Devis déjà créé dans SAGE">' + (estSageDev(o) ? "✓ DEV" : "DEV") + '</button>' +
+            '<button class="hchk sage' + (estSage(o) ? " on" : "") + '" type="button" data-sage="' + o.id + '" title="Commande saisie dans SAGE">' + (estSage(o) ? "✓ SAGE" : "SAGE") + '</button>'
+          : '') +
+        '<span class="sp"></span>' +
+        (finAllowed()
+          ? '<button class="hcib wa" type="button" data-resume="' + o.id + '" title="Résumé pour le groupe">' +
+            ico('<path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/>', 17) + '</button>'
+          : '') +
+        (adminAllowed()
+          ? '<button class="hcib" type="button" data-num="' + o.id + '" aria-label="Renommer le bon">' +
+            ico('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>') + '</button>'
+          : '') +
+        '<button class="hcib danger" type="button" data-del="' + o.id + '" aria-label="Supprimer">' +
+          ico('<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>', 17) + '</button>' +
+      '</div>';
+    return row;
+  }
 }
 
 $("histSearch").addEventListener("input", renderHist);
@@ -6398,8 +6591,14 @@ $("histDossier").addEventListener("click", e => {
 $("histFilters").addEventListener("click", e => {
   const b = e.target.closest("button[data-f]");
   if (!b) return;
-  histFilter = b.dataset.f;
-  [...$("histFilters").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  histFilter = (histFilter === b.dataset.f && b.dataset.f !== "all") ? "all" : b.dataset.f;
+  renderHist();
+});
+$("histPer").addEventListener("click", e => {
+  const b = e.target.closest("button[data-p]");
+  if (!b) return;
+  histPer = b.dataset.p;
+  LS.set("mst_histper", histPer);
   renderHist();
 });
 
@@ -6441,8 +6640,8 @@ $("histBody").addEventListener("change", e => {
   o.etat = sel.value;
   noteEtat(o);
   touche(o); persistOrders();
-  const box = sel.closest(".hrow");
-  if (box){
+  const box = sel.closest(".hrow, .hc");
+  if (box && box.classList.contains("hrow")){
     const wrap = sel.closest(".etatsel");
     wrap.className = "etatsel " + o.etat;
     const nom = box.querySelector(".etat-box");
@@ -6633,6 +6832,17 @@ function stockM2(f){
   const lz = f.laize > 0 ? f.laize / 100 : 1;
   return stockEnM2(f) ? f.dispo : f.dispo * lz;
 }
+/* v13.5 : nombre de rouleaux = mètres linéaires en stock ÷ longueur d'un rouleau neuf.
+   La longueur se règle par famille dans Stock de tissu et voyage avec les réglages d'atelier. */
+function roulLong(f){
+  const v = parseFloat(String(stockEnM2(f) ? ATL.roulENR : ATL.roulJN).replace(",", "."));
+  return v > 0 ? v : 0;
+}
+function stockRouleaux(f){
+  const L = roulLong(f);
+  return L > 0 ? stockMl(f) / L : null;
+}
+function frRoul(n){ return n === null ? "—" : fr(n, n >= 10 ? 0 : 1); }
 function stockTxt(f){
   return stockEnM2(f) ? fr(stockM2(f)) + " m²" : fr(stockMl(f)) + " ml";
 }
@@ -6663,7 +6873,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "13.4";
+const APP_VERSION = "13.7";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -10474,7 +10684,8 @@ const FERIES_DEF = [
   {d:"2027-11-06", n:"Marche Verte"},
   {d:"2027-11-18", n:"Fête de l'Indépendance"}
 ];
-const ATL_DEF = {cap:3, marge:2, four:3, deduit:"sage", feries:FERIES_DEF.slice(), v:2};
+const ATL_DEF = {cap:3, marge:2, four:3, deduit:"sage", feries:FERIES_DEF.slice(), v:2,
+                 roulENR:0, roulJN:104};   /* longueur d'un rouleau neuf, en ml (0 = pas encore réglée) */
 let ATL = Object.assign({}, ATL_DEF, LS.get("mst_atl", {}));
 if (!Array.isArray(ATL.feries)) ATL.feries = FERIES_DEF.slice();
 delete ATL.etats;      /* réglage retiré : la file prend tout ce qui reste à monter */
