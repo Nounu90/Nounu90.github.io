@@ -1281,6 +1281,79 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   text-transform:uppercase; color:var(--muted)}
 .atfil .s{grid-column:1 / -1; font-size:11.5px; color:var(--muted); line-height:1.45}
 
+/* --- Dossiers v14.0 : la carte ticket, comme l'Historique --- */
+/* les tuiles chiffrees des Dossiers gardent l'ancienne mise en page */
+.dkstat{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:12px 0}
+.dkstat > div, .dkstat > button{padding:12px 8px; border-radius:12px; background:var(--card2);
+  border:1px solid var(--line); text-align:center}
+.dkstat > button{display:block; width:100%; font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent}
+.dkstat > button:active{background:var(--accent-soft)}
+.dkstat > button.on{border-color:var(--accent); background:var(--accent-soft)}
+.dkstat > button.on small{color:var(--accent)}
+.dkstat b{display:block; font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:600;
+  color:var(--ink); line-height:1.1}
+.dkstat small{display:block; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
+  letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-top:5px; line-height:1.3}
+.dkstat .v b{color:var(--ok)}
+.dkstat .i b{color:var(--info)}
+.dkstat .a b{color:var(--accent)}
+.dkstat .w b{color:var(--warn)}
+.dkstat > div.nul b, .dkstat > button.nul b{color:var(--line-strong)}
+.dkstat > .full{grid-column:1 / -1}
+.dkstat > .full b{font-size:27px}
+/* la carte d'un dossier */
+.dkcard{--ec:#7A3BC4; background:var(--card); border:1px solid var(--line); border-left:5px solid var(--ec);
+  border-radius:16px; margin-bottom:11px; overflow:hidden; padding:0}
+.dkcard.production{--ec:#EA7A00}
+.dkcard.pret{--ec:#1F5FD1}
+.dkcard.livre{--ec:#12833F}
+.dkcard.fini{opacity:.7}
+.dkcard.ouvert{border-color:var(--ink); border-left-color:var(--ec)}
+.dkopen{display:block; width:100%; text-align:left; background:none; border:0; padding:0 0 11px; color:inherit}
+.dkh{display:flex; align-items:center; gap:10px; padding:12px 13px 0}
+.dkav{flex:none; width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
+  background:var(--ec); color:#fff; font-family:"Archivo",sans-serif; font-weight:700; font-size:14.5px}
+.dknm{flex:1; min-width:0}
+.dknm b{display:block; font-family:"Archivo",sans-serif; font-size:16px; font-weight:700;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.dknm small{display:block; font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted); margin-top:2px}
+.dkring{flex:none; width:44px; height:44px; border-radius:50%; display:grid; place-items:center}
+.dkring i{width:34px; height:34px; border-radius:50%; background:var(--card); display:grid; place-items:center;
+  font-style:normal; font-family:"Archivo",sans-serif; font-size:11px; font-weight:700}
+.dkmid{display:flex; justify-content:space-between; align-items:flex-end; gap:10px; padding:9px 13px 0}
+.dkamt{min-width:0}
+.dkamt b{display:block; font-family:"IBM Plex Mono",monospace; font-size:21px; font-weight:600; color:var(--ink)}
+.dkamt b.acc{color:var(--accent)}
+.dkamt b i{font-style:normal; font-size:13px}
+.dkamt small{display:block; font-size:11px; color:var(--muted); margin-top:2px}
+.dkliv{flex:none; text-align:right; font-size:11.5px; color:var(--muted)}
+.dkliv b{display:block; font-family:"IBM Plex Mono",monospace; font-size:13.5px; font-weight:600; color:var(--ink)}
+.dkliv i{display:block; font-style:normal; font-weight:700; margin-top:1px}
+.dkliv i.r{color:var(--accent)}
+.dkliv i.ok{color:var(--ok)}
+.dkl2{display:flex; flex-wrap:wrap; align-items:center; gap:5px; padding:9px 13px 0; margin:0}
+.dkpg{display:flex; gap:10px; padding:9px 13px 0}
+.dkpg > span{flex:1; min-width:0; font-size:11px; color:var(--muted)}
+.dkpg em{display:flex; justify-content:space-between; font-style:normal}
+.dkpg em b{font-family:"IBM Plex Mono",monospace; color:var(--ink)}
+.dkpay2{display:block; margin:10px 13px 0; background:var(--card2); border-radius:12px; padding:9px 11px}
+.dkpay2 .ph{display:flex; justify-content:space-between; font-family:"Archivo",sans-serif; font-size:10.5px;
+  font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.dkpay2 .ps{display:flex; justify-content:space-between; font-size:12.5px; margin-top:6px}
+.dkpay2 .ps b{font-family:"IBM Plex Mono",monospace}
+.dkpay2 .ps b.ok{color:var(--ok)} .dkpay2 .ps b.att{color:var(--warn)}
+.dkact2{display:flex; align-items:center; gap:6px; padding:10px 13px 11px; border-top:1px solid var(--line)}
+.dkact2 .sp{flex:1}
+.dknav{display:flex; gap:6px; overflow-x:auto; padding:11px 13px 0; -webkit-overflow-scrolling:touch}
+.dknav::-webkit-scrollbar{display:none}
+.dknav button{flex:none; padding:7px 12px; border-radius:999px; border:1px solid var(--line);
+  background:var(--card); font-family:"Archivo",sans-serif; font-size:12px; font-weight:700; color:var(--muted)}
+.dknav button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--card)}
+.dkbody{background:var(--card2); border-top:1px solid var(--line)}
+.dkbloc{border:1px solid var(--line); background:var(--card); border-radius:12px; margin:11px 13px; padding:11px 12px}
+.dkbloc:first-child{border-top:1px solid var(--line)}
+.dkapercu{display:block; margin:10px 13px 0; padding:8px 10px; border-radius:10px;
+  background:var(--warn-soft,#FAEFDD); color:var(--warn); font-size:12px; line-height:1.45}
 /* --- journal de fabrication --- */
 /* --- Logs v13.9 : la journee en haut, les compteurs, puis qui a fait quoi --- */
 .lgjour{display:flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--line);
@@ -2704,40 +2777,27 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   <div class="sheet-top">
     <button class="icon-btn" data-close="docSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <h2>Dossiers</h2>
+    <button class="icon-btn" type="button" data-refresh aria-label="Actualiser"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
   </div>
   <div class="sheet-body">
-    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
     <div class="field" style="margin-bottom:12px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
       <input id="docSearch" type="search" placeholder="Client, numéro, téléphone ou tissu" autocomplete="off">
     </div>
-    <div class="filters" id="docFiltres">
-      <button type="button" data-f="all" aria-pressed="true">Tous</button>
-      <button type="button" data-f="mois" aria-pressed="false">Ce mois</button>
-      <button type="button" data-f="annee" aria-pressed="false">Cette année</button>
-      <button type="button" data-f="periode" aria-pressed="false">Période</button>
-      <button type="button" data-f="impaye" aria-pressed="false">Non payés</button>
-      <button type="button" data-f="paye" aria-pressed="false">Payés</button>
-      <button type="button" data-f="devis" aria-pressed="false">Devis</button>
-      <button type="button" data-f="production" aria-pressed="false">En production</button>
-      <button type="button" data-f="pret" aria-pressed="false">Prêt</button>
-      <button type="button" data-f="livre" aria-pressed="false">Livré</button>
+    <div class="hseg" id="docPer">
+      <button type="button" data-p="all" aria-pressed="true">Tout</button>
+      <button type="button" data-p="mois" aria-pressed="false">Mois</button>
+      <button type="button" data-p="trim" aria-pressed="false">Trimestre</button>
+      <button type="button" data-p="annee" aria-pressed="false">Année</button>
+      <button type="button" data-p="periode" aria-pressed="false">Période</button>
     </div>
-    <div class="pyper" id="docPeriode" hidden>
+    <div class="pyper" id="docPeriode" hidden style="margin-top:8px">
       <input id="docD1" type="date" aria-label="Du">
       <input id="docD2" type="date" aria-label="Au">
     </div>
-    <div class="filters" id="docDossier">
-      <button type="button" data-d="tous" aria-pressed="true">Tous les dossiers</button>
-      <button type="button" data-d="encours" aria-pressed="false">En cours</button>
-      <button type="button" data-d="fini" aria-pressed="false">Terminés</button>
-      <button type="button" data-d="sage" aria-pressed="false">Saisis SAGE</button>
-      <button type="button" data-d="pasage" aria-pressed="false">Pas encore SAGE</button>
-      <button type="button" data-d="banque" aria-pressed="false">Virements à vérifier</button>
-      <button type="button" data-d="note" aria-pressed="false">Avec note</button>
-      <button type="button" data-d="apresage" aria-pressed="false">Pièces faites, pas SAGE</button>
-      <button type="button" data-d="hors" aria-pressed="false">Pas dans le tableau</button>
-    </div>
+    <div class="pypuces" id="docEtats"></div>
+    <div class="pypuces" id="docDossier" style="margin-top:0"></div>
+    <div class="htiles" id="docTiles"></div>
     <section class="card mtcard">
       <div class="card-head"><div class="label">Chercher un montant</div></div>
       <div class="field">
@@ -2751,7 +2811,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <p class="hint">Virements, chèques, espèces encaissés, et totaux TTC et HT des bons. Du plus proche au plus loin.</p>
       <div id="docMontantRes"></div>
     </section>
-    <div class="lgstat" id="docStat"></div>
+    <div class="dkstat" id="docStat"></div>
     <div id="docList"></div>
     <p class="hint" id="docHint"></p>
   </div>
@@ -7257,7 +7317,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "13.9";
+const APP_VERSION = "14.0";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -9572,7 +9632,7 @@ $("payList").addEventListener("click", e => {
     const o = ORDERS.find(x => x.id === doc.dataset.pydoc);
     if (!o || !docAllowed()) return;
     docQ = String(o.num || o.nom || ""); $("docSearch").value = docQ;
-    docFiltre = "all"; docDossier = "tous"; docOuvert[o.id] = true;
+    docFiltre = "all"; docEtat = "tous"; docDossier = "tous"; docOuvert[o.id] = true;
     renderDoc(); nav("docSheet");
     return;
   }
@@ -10263,7 +10323,8 @@ function docAllowed(){
   return !!USER && DOC_USERS.indexOf(String(USER.login || "").toLowerCase()) >= 0;
 }
 
-let docQ = "", docFiltre = "all", docDossier = "tous", docD1 = "", docD2 = "";
+let docQ = "", docFiltre = "all", docEtat = "tous", docDossier = "tous", docD1 = "", docD2 = "";
+let docTab = {};   /* l'onglet ouvert, dossier par dossier */
 let docOuvert = {};
 
 /* Un virement annoncé n'est pas un virement encaissé : tant que la case n'est
@@ -10301,16 +10362,26 @@ function docDansPeriode(o){
   return true;
 }
 
-function docListe(sansDossier){
+/* v14.0 : la periode, la situation et le dossier sont trois filtres separes,
+   pour pouvoir les combiner et compter chaque puce. */
+function docPasse(o, opt){
+  opt = opt || {};
   const q = docQ.trim().toLowerCase();
-  const dos = sansDossier ? "tous" : docDossier;
-  return (ORDERS || []).filter(o => {
-    if (docFiltre === "mois"    && !ceMois(o)) return false;
-    if (docFiltre === "annee"   && new Date(o.date || 0).getFullYear() !== new Date().getFullYear()) return false;
-    if (docFiltre === "periode" && !docDansPeriode(o)) return false;
-    if (docFiltre === "paye"    && !paySolde(o)) return false;
-    if (docFiltre === "impaye"  && paySolde(o)) return false;
-    if (ETATS.some(e => e.k === docFiltre) && etatDe(o) !== docFiltre) return false;
+  const dos = opt.sansDossier ? "tous" : docDossier;
+  const eta = opt.sansEtat ? "tous" : docEtat;
+  const n = new Date(), d = new Date(o.date || 0);
+  if (docFiltre === "mois"    && !ceMois(o)) return false;
+  if (docFiltre === "trim"    && !(d.getFullYear() === n.getFullYear() &&
+                                   Math.floor(d.getMonth()/3) === Math.floor(n.getMonth()/3))) return false;
+  if (docFiltre === "annee"   && d.getFullYear() !== n.getFullYear()) return false;
+  if (docFiltre === "periode" && !docDansPeriode(o)) return false;
+  if (eta === "paye"   && !paySolde(o)) return false;
+  if (eta === "impaye" && paySolde(o)) return false;
+  if (ETATS.some(e => e.k === eta) && etatDe(o) !== eta) return false;
+  return docPasseDossier(o, dos, q);
+}
+function docPasseDossier(o, dos, q){
+  {
     if (dos === "fini"    && !estFini(o)) return false;
     if (dos === "encours" && estFini(o)) return false;
     if (dos === "sage"    && !estSage(o)) return false;
@@ -10326,8 +10397,12 @@ function docListe(sansDossier){
     if (dos === "m2enr" && !(etatDe(o) !== "devis" && m2Par(o).ENR)) return false;
     if (dos === "m2jn"  && !(etatDe(o) !== "devis" && m2Par(o).JN)) return false;
     if (!q) return true;
-    return docFoin(o).indexOf(q.replace("×", "x")) >= 0;
-  }).sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
+    return docFoin(o).indexOf(q.replace("\u00d7", "x")) >= 0;
+  }
+}
+function docListe(sansDossier){
+  return (ORDERS || []).filter(o => docPasse(o, {sansDossier:sansDossier}))
+    .sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
 }
 
 /* Le plan de coupe et la fiche de production d'un bon donné. Ces fonctions
@@ -10426,6 +10501,16 @@ function docFoin(o){
     .concat(nums).join(" ").toLowerCase();
 }
 
+/* v14.0 : la carte d'un dossier, même esprit que l'Historique.
+   Fermée, elle dit l'essentiel. Ouverte, elle range tout derrière des onglets. */
+function dkAnneau(p){
+  const c = p >= 100 ? "var(--ok)" : (p >= 50 ? "var(--warn)" : "var(--accent)");
+  return '<span class="dkring" style="background:conic-gradient(' + c + ' ' + p + '%, var(--line) 0)">' +
+    '<i style="color:' + c + '">' + p + '%</i></span>';
+}
+const DK_ONGLETS = [["resume","Résumé"],["mesures","Mesures"],["atelier","Atelier"],
+                    ["paie","Paiements"],["cout","Coût"],["journal","Journal"],["note","Note"]];
+
 function docCarte(o){
   const t = orderTotals(o);
   const d = new Date(o.date || 0);
@@ -10445,71 +10530,89 @@ function docCarte(o){
   const cp = completude(o);
   const pe = piecesEtat(o);
   const note = String(o.dnote || "").trim();
-  /* Le prix au m², lisible sans ouvrir la fiche. Un bon mixte en porte deux. */
   const puE = puFam("ENR", o), puJ = puFam("JN", o);
   const puTxt = o.type === "MIX"
     ? ((puE || puJ) ? fr(puE, 2) + " / " + fr(puJ, 2) + " MAD/m²" : "")
     : (puE ? fr(puE, 2) + " MAD/m²" : "");
-  /* L'échéance du bon, le délai projeté tant que c'est un devis, et le temps
-     que la commande a réellement pris une fois confirmée. */
   const enRetard = echRetard(o);
   let dj = null;
   if (et === "devis" && !o.ech){ try { dj = delaiDevis(o); } catch(e){} }
   let dr = null;
   try { dr = dureeReelle(o); } catch(e){}
-  let h = '<div class="dkcard' + (estFini(o) ? " fini" : "") + (ouvert ? " ouvert" : "") + '">' +
-    '<div class="dkhead">' +
+
+  /* --- le haut de la carte --- */
+  const livLab = (o.pose === "Livraison" ? "Livraison" : "Pose");
+  const ee = echEtat(o);
+  let liv = "";
+  if (o.ech){
+    liv = '<span class="dkliv">' + (et === "livre" ? "Livré" : livLab) +
+      '<b>' + esc(jourCourtLiv(o.ech)) + '</b>' +
+      (ee && ee.txt ? '<i class="' + (ee.cls === "r" ? "r" : (ee.cls === "ok" ? "ok" : "")) + '">' +
+        esc(ee.txt) + '</i>' : '') + '</span>';
+  } else if (dr && dr.fini){
+    liv = '<span class="dkliv">Durée<b>' + dr.ouvres + ' j</b><i class="ok">livrée</i></span>';
+  } else if (dj){
+    liv = '<span class="dkliv">Délai<b>≈ ' + dj.j + ' j</b><i>après acompte</i></span>';
+  } else if (dr){
+    liv = '<span class="dkliv">En cours<b>' + dr.ouvres + ' j</b><i>ouvrés</i></span>';
+  }
+
+  const rouge = (et !== "devis" && pay <= 0 && rst > 0.01);
+  const tags =
+    chip(etatLabel(et), et === "livre" ? "ok" : (et === "devis" ? "" : "att")) +
+    (estFini(o) ? chip("terminé", "ok") : "") +
+    (o.status !== "sent" ? chip("brouillon", "acc") : "") +
+    (pe.tot ? chip(pe.ok ? "pièces ok" : "pièces à remplir", pe.ok ? "ok" : "acc") : "") +
+    (nv ? chip(nv + " à vérifier", "att") : "") +
+    (estSageDev(o) ? chip("devis SAGE", "att") : "") +
+    (estSage(o) ? chip("SAGE", "inf") : "") +
+    (!ordDims(o).length ? chip("sans mesure", "acc") : "") +
+    (sheetManquant(o) ? chip("pas au tableau", "att") : "") +
+    (note ? chip("note", "inf") : "") +
+    chip(esc(storesParType(o).join("  ·  ")) + '  ·  ' + fr(t.m2 || 0, 2) + ' m²');
+
+  const barre = (lab, f, tt) => '<span><em>' + lab + ' <b>' + f + '/' + tt + '</b></em>' +
+    hBarre(f, tt) + '</span>';
+
+  let h = '<div class="dkcard ' + et + (estFini(o) ? " fini" : "") + (ouvert ? " ouvert" : "") + '">' +
     '<button class="dkopen" type="button" data-doc="' + o.id + '">' +
-      '<span class="dkl1"><b>' + esc(o.nom || "Client sans nom") + '</b>' +
-        '<em>' + fr(du, 2) + '</em></span>' +
-      '<span class="dkl2">' +
-        chip(esc(o.num || ""), "acc") +
-        chip(etatLabel(et), et === "livre" ? "ok" : (et === "devis" ? "" : "att")) +
-        chip(facture(o) ? "facturée" : "sans facture", facture(o) ? "" : "att") +
-        (estSageDev(o) ? chip("devis SAGE", "att") : "") +
-        (estSage(o) ? chip("SAGE", "inf") : "") +
-        (estFini(o) ? chip("terminé", "ok") : "") +
-        (nv ? chip(nv + " à vérifier", "att") : "") +
-        (pe.tot ? chip(pe.ok ? "pièces ok" : "pièces à remplir", pe.ok ? "ok" : "acc") : "") +
-        (note ? chip("note", "inf") : "") +
-        (o.status !== "sent" ? chip("brouillon", "acc") : "") +
-        (!ordDims(o).length ? chip("sans mesure", "acc") : "") +
-        (sheetManquant(o) ? chip("pas au tableau", "att") : "") +
-        (av.tube.tot ? chip("tubes " + av.tube.fait + "/" + av.tube.tot,
-                            av.tube.fait === av.tube.tot ? "ok" : "att") : "") +
-        (av.fen.tot ? chip("fenêtres " + av.fen.fait + "/" + av.fen.tot,
-                           av.fen.fait === av.fen.tot ? "ok" : "att") : "") +
-        (o.ech
-          ? chip("échéance " + jjmm(o.ech) + (et === "livre" ? "" : "  ·  " + echMot(o.ech)),
-                 enRetard ? "att" : "inf")
-          : "") +
-        (dj ? chip("\u2248 " + dj.j + " j après acompte" +
-                   (dj.manque.length ? "  ·  tissu à commander" : ""),
-                   dj.manque.length ? "att" : "inf") : "") +
-        (dr ? chip(dr.fini
-                     ? "livrée en " + dr.ouvres + " j ouvrés"
-                     : "en cours depuis " + dr.ouvres + " j ouvrés",
-                   dr.fini ? "ok" : "") : "") +
+      '<span class="dkh">' +
+        '<span class="dkav">' + esc(initiales(o.nom || "?")) + '</span>' +
+        '<span class="dknm"><b>' + esc(o.nom || "Client sans nom") + '</b>' +
+          '<small>' + esc(o.num || "sans numéro") +
+            (o.author ? "  ·  " + esc(nomDe(o.author)) : "") +
+            "  ·  " + pad(d.getDate()) + "/" + pad(d.getMonth()+1) + '</small></span>' +
+        dkAnneau(cp.pct) +
       '</span>' +
-      '<span class="dkl3">' + esc(storesParType(o).join("  ·  ")) +
-        '  ·  ' + fr(t.m2 || 0, 2) + ' m²' +
-        (puTxt ? '  ·  <b>' + puTxt + '</b>' : '  ·  <b>prix au m² manquant</b>') + '<br>' +
-        (o.author ? esc(nomDe(o.author)) + "  ·  " : "") +
-        pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + d.getFullYear() +
-        (o.ech ? '  ·  <b>' + (o.pose === "Livraison" ? "Livraison" : "Pose") + " " +
-                 esc(String(o.ech).split("-").reverse().join("/")) + '</b>' : '') +
-        (et === "devis"
-          ? '  ·  <b>devis, rien à encaisser</b>'
-          : (rst > 0.01 ? '  ·  reste <b>' + fr(rst, 2) + ' MAD</b>' : '  ·  <b>soldé</b>')) +
+      '<span class="dkmid">' +
+        '<span class="dkamt"><b' + (rouge ? ' class="acc"' : '') + '>' + frm(du, 2) +
+          ' <i>MAD</i></b><small>' +
+          (facture(o) ? "TTC  ·  facturée" : "HT  ·  sans facture") +
+          (puTxt ? "  ·  " + puTxt : "  ·  prix au m² manquant") + '</small></span>' +
+        liv +
       '</span>' +
+      '<span class="dkl2">' + tags + '</span>' +
+      ((av.tube.tot || av.fen.tot)
+        ? '<span class="dkpg">' +
+            (av.tube.tot ? barre("Tubes", av.tube.fait, av.tube.tot) : "") +
+            (av.fen.tot ? barre("Fenêtres", av.fen.fait, av.fen.tot) : "") +
+          '</span>'
+        : "") +
+      (et === "devis"
+        ? '<span class="dkpay2"><span class="ph"><span>Paiements</span><span>devis, rien à encaisser</span></span></span>'
+        : '<span class="dkpay2"><span class="ph"><span>Paiements</span><span>' +
+            (paiements(o).length ? paiements(o).length + " paiement" + (paiements(o).length > 1 ? "s" : "")
+                                 : "aucun paiement") + '</span></span>' +
+          hBarre(pay, du) +
+          '<span class="ps"><span>Payé <b class="ok">' + frm(pay, 2) + '</b></span>' +
+          '<span>' + (rst > 0.01 ? 'Reste <b class="att">' + frm(rst, 2) + '</b>' : '<b class="ok">soldé</b>') +
+          '</span></span></span>') +
       (note && !ouvert
         ? '<span class="dkapercu">' +
-          esc(note.length > 220 ? note.slice(0, 220) + "\u2026" : note) + '</span>'
+          esc(note.length > 200 ? note.slice(0, 200) + "…" : note) + '</span>'
         : '') +
     '</button>' +
-    '<span class="dkmark">' +
-      '<span class="dkpct' + (cp.pct === 100 ? " ok" : (cp.pct >= 50 ? " mi" : "")) + '" ' +
-        'title="' + cp.faits + ' points sur ' + cp.total + ' renseignés">' + cp.pct + '%</span>' +
+    '<div class="dkact2">' +
       '<button class="hchk pcs' + (pe.ok ? " on" : (pe.tot ? " ko" : "")) + '" type="button" ' +
         'data-docpcs="' + o.id + '" title="Pièces utilisées">' +
         (pe.ok ? "O" : (pe.tot ? "X" : "—")) + '</button>' +
@@ -10520,195 +10623,216 @@ function docCarte(o){
         (estFini(o)
           ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
           : 'FIN') + '</button>' +
+      '<span class="sp"></span>' +
       '<button class="hchk ren" type="button" data-docnum="' + o.id + '" ' +
         'title="Renommer le bon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>' +
-    '</span>' +
+      '<button class="hchk ren" type="button" data-doc="' + o.id + '" aria-label="Ouvrir">' +
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
+        (ouvert ? '<path d="M18 15l-6-6-6 6"/>' : '<path d="M6 9l6 6 6-6"/>') + '</svg></button>' +
     '</div>';
 
   if (!ouvert) return h + '</div>';
 
-  h += '<div class="dkbody">';
+  const tab = docTab[o.id] || "resume";
+  h += '<div class="dkbody">' +
+    '<div class="dknav">' + DK_ONGLETS.map(x =>
+      '<button type="button" data-doctab="' + o.id + '|' + x[0] + '" aria-pressed="' +
+      (tab === x[0] ? "true" : "false") + '">' + x[1] + '</button>').join("") + '</div>';
 
-  /* --- la situation, modifiable ici comme dans l'historique --- */
-  h += '<div class="dkbloc"><h4>Situation</h4>' +
-    '<div class="seg dketat">' +
-      ETATS.map(e => '<button type="button" data-docetat="' + o.id + '|' + e.k + '" aria-pressed="' +
-        (e.k === et ? "true" : "false") + '">' + e.label + '</button>').join("") +
-    '</div></div>';
+  /* ------------------------------------------------ Résumé */
+  if (tab === "resume"){
+    h += '<div class="dkbloc"><h4>Situation</h4>' +
+      '<div class="seg dketat">' +
+        ETATS.map(e => '<button type="button" data-docetat="' + o.id + '|' + e.k + '" aria-pressed="' +
+          (e.k === et ? "true" : "false") + '">' + e.label + '</button>').join("") +
+      '</div></div>';
 
-  /* --- le bon de commande --- */
-  h += '<div class="dkbloc"><h4>Bon de commande</h4>' +
-    r("Type", esc(typeLabel(o))) +
-    r(o.pose === "Livraison" ? "Livraison" : "Pose", t.pose ? fr(t.pose, 2) + " MAD" : "sans") +
-    r("Stores", t.nb + "  ·  " + fr(t.m2 || 0, 2) + " m²") +
-    (t.prix ? r("Stores HT", fr(t.prix, 2)) : "") +
-    (rem > 0 ? r("Remise " + String(fr(remisePct(o), 2)).replace(",00", "") + " %", "\u2212 " + fr(rem, 2), "acc") : "") +
-    ((facture(o) || rem > 0) ? r("Total HT", fr(ht, 2)) : "") +
-    (facture(o) ? r("TVA 20 %", fr(tvaDe(ht), 2)) : "") +
-    '<div class="dkr gros"><span>' + (facture(o) ? "Total TTC" : "Total HT") + '</span><b>' + fr(du, 2) + ' MAD</b></div>' +
-    (o.ech
-      ? r((o.pose === "Livraison" ? "Livraison" : "Pose") + " prévue",
-          esc(String(o.ech).split("-").reverse().join("/")) +
-          (et === "livre" ? "" : "  ·  " + echMot(o.ech)),
-          enRetard ? "acc" : "")
-      : (dj ? r("Délai si confirmée", "\u2248 " + dj.j + " j ouvrés après acompte") : "")) +
-    (dr
-      ? r(dr.fini ? "Confirmée à livrée" : "En cours depuis",
-          dr.ouvres + " j ouvrés  ·  " + dr.jours + " j",
-          dr.fini ? "ok" : "")
-      : "") +
-    (o.tel ? r("Téléphone", esc(telAffiche(o.tel))) : "") +
-    (o.ice ? r("ICE", esc(o.ice)) : "") +
-    (o.adresse ? r("Adresse", esc(o.adresse)) : "") +
-    (o.notes ? r("Remarque", esc(o.notes)) : "") +
-  '</div>';
+    h += '<div class="dkbloc"><h4>Bon de commande</h4>' +
+      r("Type", esc(typeLabel(o))) +
+      r(o.pose === "Livraison" ? "Livraison" : "Pose", t.pose ? frm(t.pose, 2) + " MAD" : "sans") +
+      r("Stores", t.nb + "  ·  " + fr(t.m2 || 0, 2) + " m²") +
+      (t.prix ? r("Stores HT", frm(t.prix, 2)) : "") +
+      (rem > 0 ? r("Remise " + String(fr(remisePct(o), 2)).replace(",00", "") + " %", "− " + frm(rem, 2), "acc") : "") +
+      ((facture(o) || rem > 0) ? r("Total HT", frm(ht, 2)) : "") +
+      (facture(o) ? r("TVA 20 %", frm(tvaDe(ht), 2)) : "") +
+      '<div class="dkr gros"><span>' + (facture(o) ? "Total TTC" : "Total HT") + '</span><b>' + frm(du, 2) + ' MAD</b></div>' +
+      (o.ech
+        ? r((o.pose === "Livraison" ? "Livraison" : "Pose") + " prévue",
+            esc(String(o.ech).split("-").reverse().join("/")) +
+            (et === "livre" ? "" : "  ·  " + echMot(o.ech)),
+            enRetard ? "acc" : "")
+        : (dj ? r("Délai si confirmée", "≈ " + dj.j + " j ouvrés après acompte") : "")) +
+      (dr
+        ? r(dr.fini ? "Confirmée à livrée" : "En cours depuis",
+            dr.ouvres + " j ouvrés  ·  " + dr.jours + " j",
+            dr.fini ? "ok" : "")
+        : "") +
+      (o.tel ? r("Téléphone", esc(telAffiche(o.tel))) : "") +
+      (o.ice ? r("ICE", esc(o.ice)) : "") +
+      (o.adresse ? r("Adresse", esc(o.adresse)) : "") +
+      (o.notes ? r("Remarque", esc(o.notes)) : "") +
+    '</div>';
 
-  /* --- toutes les mesures, une par une --- */
-  const dims = ordDims(o);
-  const done = faites(o);
-  h += '<div class="dkbloc"><h4>Mesures  ·  ' + dims.length + '</h4>';
-  if (!dims.length) h += '<div class="dkr"><span>Aucune mesure exploitable</span></div>';
-  dims.forEach(dm => {
-    const ok = done.indexOf(dm.key) >= 0;
-    const m2 = (Math.max(dm.l, MINCM) * Math.max(dm.h, MINCM)) / 10000;
-    h += '<div class="dkmes"><i class="' + (ok ? "on" : "") + '"></i>' +
-      '<span><b>' + fr(dm.l,0) + ' × ' + fr(dm.h,0) + ' cm</b>' +
-        '<small>fenêtre ' + dm.n + '  ·  ' + (dm.t === "JN" ? "jour et nuit" : "enrouleur") +
-        (dm.ref ? '  ·  ' + esc(dm.ref) : '  ·  sans tissu') +
-        (ok ? '  ·  fabriquée' : '') + '</small></span>' +
-      '<em>' + fr(m2, 2) + ' m²</em></div>';
-  });
-  h += '</div>';
-
-  /* --- ce qu'il reste à renseigner --- */
-  if (cp.manque.length){
-    h += '<div class="dkbloc"><h4>Il manque  ·  ' + cp.manque.length + ' point' +
+    h += '<div class="dkbloc"><h4>Ce qui manque  ·  ' + cp.manque.length + ' point' +
       (cp.manque.length > 1 ? 's' : '') + ' sur ' + cp.total + '</h4>' +
-      '<ul class="dkmanque">' + cp.manque.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul></div>';
+      (cp.manque.length
+        ? '<ul class="dkmanque">' + cp.manque.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>'
+        : '<div class="dkr"><span>Fiche complète.</span><b class="ok">100 %</b></div>') + '</div>';
   }
 
-  /* --- l'atelier --- */
-  h += '<div class="dkbloc"><h4>Atelier</h4>' +
-    (av.tube.tot ? r("Découpes au magasin 2", av.tube.fait + " / " + av.tube.tot,
-                     av.tube.fait === av.tube.tot ? "ok" : "att") : "") +
-    (av.fen.tot ? r("Fenêtres fabriquées", av.fen.fait + " / " + av.fen.tot,
-                    av.fen.fait === av.fen.tot ? "ok" : "att") : "") +
-    r("Reste à couper", Math.max(0, av.tube.tot - av.tube.fait) + " découpe" +
-      (av.tube.tot - av.tube.fait > 1 ? "s" : ""), av.tube.fait === av.tube.tot ? "ok" : "att") +
-    r("Reste à fabriquer", Math.max(0, av.fen.tot - av.fen.fait) + " fenêtre" +
-      (av.fen.tot - av.fen.fait > 1 ? "s" : ""), av.fen.fait === av.fen.tot ? "ok" : "att") +
-  '</div>';
+  /* ------------------------------------------------ Mesures */
+  if (tab === "mesures"){
+    const dims = ordDims(o);
+    const done = faites(o);
+    h += '<div class="dkbloc"><h4>Mesures  ·  ' + dims.length + '</h4>';
+    if (!dims.length) h += '<div class="dkr"><span>Aucune mesure exploitable</span></div>';
+    dims.forEach(dm => {
+      const ok = done.indexOf(dm.key) >= 0;
+      const m2 = (Math.max(dm.l, MINCM) * Math.max(dm.h, MINCM)) / 10000;
+      h += '<div class="dkmes"><i class="' + (ok ? "on" : "") + '"></i>' +
+        '<span><b>' + fr(dm.l,0) + ' × ' + fr(dm.h,0) + ' cm</b>' +
+          '<small>fenêtre ' + dm.n + '  ·  ' + (dm.t === "JN" ? "jour et nuit" : "enrouleur") +
+          (dm.ref ? '  ·  ' + esc(dm.ref) : '  ·  sans tissu') +
+          (ok ? '  ·  fabriquée' : '') + '</small></span>' +
+        '<em>' + fr(m2, 2) + ' m²</em></div>';
+    });
+    h += '</div>';
 
-  /* --- le plan de coupe --- */
-  const fc = ficheCoupe(o);
-  h += '<div class="dkbloc"><h4>Plan de coupe et pièces' +
-       (pe.tot ? '  ·  ' + (pe.ok ? "fiche complète" : "il manque " + pe.manque.length + " case" +
-                                     (pe.manque.length > 1 ? "s" : "")) : "") + '</h4>' +
-       (pe.tot && !pe.ok ? '<ul class="dkmanque">' +
-          pe.manque.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>' : '');
-  if (!fc.length) h += '<div class="dkr"><span>Aucune dimension exploitable</span></div>';
-  fc.forEach(f => {
-    h += '<div class="dkfam"><span>' + (f.fam === "JN" ? "Jour et nuit" : "Enrouleur") +
-         "  ·  " + f.nb + " store" + (f.nb > 1 ? "s" : "") + '</span>' +
-      f.tissu.map(x => r(x.l, (x.v === "" ? "—" : fr(x.v, 2)) + " " + x.u)).join("") +
-      f.pieces.map(x => r(x.l + (x.m ? '  <em style="font-style:normal;color:var(--accent)">' + esc(x.m) + '</em>' : ""),
-                          (x.v === "" ? "—" : (typeof x.v === "number" ? fr(x.v, 2) : esc(String(x.v)))) + " " + x.u)).join("") +
+    const fc = ficheCoupe(o);
+    h += '<div class="dkbloc"><h4>Plan de coupe et pièces' +
+         (pe.tot ? '  ·  ' + (pe.ok ? "fiche complète" : "il manque " + pe.manque.length + " case" +
+                                       (pe.manque.length > 1 ? "s" : "")) : "") + '</h4>' +
+         (pe.tot && !pe.ok ? '<ul class="dkmanque">' +
+            pe.manque.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>' : '');
+    if (!fc.length) h += '<div class="dkr"><span>Aucune dimension exploitable</span></div>';
+    fc.forEach(f => {
+      h += '<div class="dkfam"><span>' + (f.fam === "JN" ? "Jour et nuit" : "Enrouleur") +
+           "  ·  " + f.nb + " store" + (f.nb > 1 ? "s" : "") + '</span>' +
+        f.tissu.map(x => r(x.l, (x.v === "" ? "—" : fr(x.v, 2)) + " " + x.u)).join("") +
+        f.pieces.map(x => r(x.l + (x.m ? '  <em style="font-style:normal;color:var(--accent)">' + esc(x.m) + '</em>' : ""),
+                            (x.v === "" ? "—" : (typeof x.v === "number" ? fr(x.v, 2) : esc(String(x.v)))) + " " + x.u)).join("") +
+      '</div>';
+    });
+    h += '</div>';
+  }
+
+  /* ------------------------------------------------ Atelier */
+  if (tab === "atelier"){
+    h += '<div class="dkbloc"><h4>Atelier</h4>' +
+      (av.tube.tot ? r("Découpes au magasin 2", av.tube.fait + " / " + av.tube.tot,
+                       av.tube.fait === av.tube.tot ? "ok" : "att") : "") +
+      (av.fen.tot ? r("Fenêtres fabriquées", av.fen.fait + " / " + av.fen.tot,
+                      av.fen.fait === av.fen.tot ? "ok" : "att") : "") +
+      r("Reste à couper", Math.max(0, av.tube.tot - av.tube.fait) + " découpe" +
+        (av.tube.tot - av.tube.fait > 1 ? "s" : ""), av.tube.fait === av.tube.tot ? "ok" : "att") +
+      r("Reste à fabriquer", Math.max(0, av.fen.tot - av.fen.fait) + " fenêtre" +
+        (av.fen.tot - av.fen.fait > 1 ? "s" : ""), av.fen.fait === av.fen.tot ? "ok" : "att") +
+      (o.ech ? r((o.pose === "Livraison" ? "Livraison" : "Pose") + " prévue",
+                 esc(String(o.ech).split("-").reverse().join("/")) +
+                 (et === "livre" ? "" : "  ·  " + echMot(o.ech)), enRetard ? "acc" : "") : "") +
     '</div>';
-  });
-  h += '</div>';
-
-  /* --- coût de revient et bénéfice --- */
-  const C = calcCout(o);
-  h += '<div class="dkbloc"><h4>Coût de revient</h4>';
-  if (!C){
-    h += '<div class="dkr"><span>Aucune dimension exploitable</span></div>';
-  } else if (C.manque && C.manque.length){
-    h += '<div class="dkr"><span>Prix manquants dans la nomenclature</span><b class="att">incomplet</b></div>' +
-         '<div class="dkr"><span>' + esc(C.manque.join(", ")) + '</span></div>';
   }
-  if (C){
-    h += r("Tissu déroulé", fr(C.m2tissu, 2) + " m²") +
-      (C.m2stock > 0 ? r("Tissu repris du stock", fr(C.m2stock, 2) + " m²", "ok") : "") +
-      r("Chute de tissu", fr(C.chuteTissu, 2) + " m²") +
-      r("Chute de barre", fr(C.chuteBarre, 2) + " m") +
-      '<div class="dkr gros"><span>Coût de revient</span><b>' + fr(C.cout, 2) + ' MAD</b></div>' +
-      r("Soit au m²", fr(C.coutM2, 2) + " MAD/m²") +
-      r("Vente des stores HT", fr(C.vente, 2)) +
-      '<div class="dkr gros"><span>Bénéfice</span><b class="' + (C.benef >= 0 ? "ok" : "acc") + '">' +
-        fr(C.benef, 2) + ' MAD</b></div>' +
-      r("Marge", fr(C.marge * 100, 1) + " %", C.marge >= 0 ? "ok" : "acc") +
-      r(C.poseLab + " facturée", fr(C.posePrix, 2) + "  ·  hors bénéfice");
-  }
-  h += '</div>';
 
-  /* --- les paiements --- */
-  const pl = paiements(o).slice().sort((a,b) => String(a.date).localeCompare(String(b.date)));
-  h += '<div class="dkbloc"><h4>Paiements</h4>';
-  if (!pl.length) h += '<div class="dkr"><span>Aucun paiement enregistré</span><b>0,00</b></div>';
-  pl.forEach(x => {
-    h += '<div class="dkpay' + (payVu(x) ? " vu" : "") + '">' +
-      '<button class="dkbank' + (payVu(x) ? " on" : "") + '" type="button" ' +
-        'data-bank="' + o.id + ':' + x.id + '" title="' +
-        (payVu(x) ? "Vu sur le compte" : "Cocher quand l\'argent est sur le compte") + '">' +
-        (payVu(x) ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : '') +
-      '</button>' +
-      '<span class="d">' + esc(dateFR(x.date)) + '</span>' +
-      '<span class="m">' + esc(x.mode || "") + (payVu(x) ? "" : "  ·  à vérifier") + '</span>' +
-      '<span class="v">' + fr(parseFloat(x.montant) || 0, 2) + '</span>' +
+  /* ------------------------------------------------ Paiements */
+  if (tab === "paie"){
+    const pl = paiements(o).slice().sort((a,b) => String(a.date).localeCompare(String(b.date)));
+    h += '<div class="dkbloc"><h4>Paiements</h4>';
+    if (!pl.length) h += '<div class="dkr"><span>Aucun paiement enregistré</span><b>0,00</b></div>';
+    pl.forEach(x => {
+      h += '<div class="dkpay' + (payVu(x) ? " vu" : "") + '">' +
+        '<button class="dkbank' + (payVu(x) ? " on" : "") + '" type="button" ' +
+          'data-bank="' + o.id + ':' + x.id + '" title="' +
+          (payVu(x) ? "Vu sur le compte" : "Cocher quand l\'argent est sur le compte") + '">' +
+          (payVu(x) ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : '') +
+        '</button>' +
+        '<span class="d">' + esc(dateFR(x.date)) + '</span>' +
+        '<span class="m">' + esc(x.mode || "") + (payVu(x) ? "" : "  ·  à vérifier") + '</span>' +
+        '<span class="v">' + frm(parseFloat(x.montant) || 0, 2) + '</span>' +
+      '</div>';
+    });
+    h += '<div class="dkr gros"><span>Encaissé</span><b class="ok">' + frm(pay, 2) + ' MAD</b></div>' +
+      '<div class="dkr"><span>' + (rst > 0.01 ? "Reste à payer" : "Soldé") + '</span><b class="' +
+        (rst > 0.01 ? "att" : "ok") + '">' + frm(rst, 2) + ' MAD</b></div>' +
     '</div>';
-  });
-  h += '<div class="dkr gros"><span>Encaissé</span><b class="ok">' + fr(pay, 2) + ' MAD</b></div>' +
-    '<div class="dkr"><span>' + (rst > 0.01 ? "Reste à payer" : "Soldé") + '</span><b class="' +
-      (rst > 0.01 ? "att" : "ok") + '">' + fr(rst, 2) + ' MAD</b></div>' +
-  '</div>';
+  }
 
-  /* --- le journal --- */
-  const jl = (o.log || []).slice().sort((a,b) => b.at - a.at).slice(0, 12);
-  h += '<div class="dkbloc"><h4>Journal</h4><div class="dkjour">';
-  if (!jl.length) h += '<div class="l"><span></span><span>Aucun geste enregistré sur ce bon.</span></div>';
-  jl.forEach(e => {
-    const dd = new Date(e.at);
-    const kind = e.kind || "fab";
-    const quoi = kind === "etat" ? (e.lab || etatLabel(e.etat))
-               : kind === "edit" ? "bon modifié" +
-                   ((e.champs && e.champs.length) ? "  ·  " + e.champs.join(", ") : "")
-               : kind === "tube" ? (e.on ? "découpe livrée " : "découpe décochée ") + (e.dim || "")
-               : kind === "livr" ? "livraison " + (e.dim || "")
-               : (e.on ? "fenêtre faite " : "fenêtre décochée ") + (e.dim || "");
-    h += '<div class="l"><span>' + pad(dd.getDate()) + "/" + pad(dd.getMonth()+1) + '</span>' +
-         '<span>' + pad(dd.getHours()) + ":" + pad(dd.getMinutes()) + "  " + esc(quoi) +
-         (e.by ? "  ·  " + esc(nomDe(e.by)) : "") + '</span></div>';
-  });
-  h += '</div></div>';
+  /* ------------------------------------------------ Coût de revient */
+  if (tab === "cout"){
+    const C = calcCout(o);
+    h += '<div class="dkbloc"><h4>Coût de revient</h4>';
+    if (!C){
+      h += '<div class="dkr"><span>Aucune dimension exploitable</span></div>';
+    } else if (C.manque && C.manque.length){
+      h += '<div class="dkr"><span>Prix manquants dans la nomenclature</span><b class="att">incomplet</b></div>' +
+           '<div class="dkr"><span>' + esc(C.manque.join(", ")) + '</span></div>';
+    }
+    if (C){
+      h += r("Tissu déroulé", fr(C.m2tissu, 2) + " m²") +
+        (C.m2stock > 0 ? r("Tissu repris du stock", fr(C.m2stock, 2) + " m²", "ok") : "") +
+        r("Chute de tissu", fr(C.chuteTissu, 2) + " m²") +
+        r("Chute de barre", fr(C.chuteBarre, 2) + " m") +
+        '<div class="dkr gros"><span>Coût de revient</span><b>' + frm(C.cout, 2) + ' MAD</b></div>' +
+        r("Soit au m²", fr(C.coutM2, 2) + " MAD/m²") +
+        r("Vente des stores HT", frm(C.vente, 2)) +
+        '<div class="dkr gros"><span>Bénéfice</span><b class="' + (C.benef >= 0 ? "ok" : "acc") + '">' +
+          frm(C.benef, 2) + ' MAD</b></div>' +
+        r("Marge", fr(C.marge * 100, 1) + " %", C.marge >= 0 ? "ok" : "acc") +
+        r(C.poseLab + " facturée", fr(C.posePrix, 2) + "  ·  hors bénéfice");
+    }
+    h += '</div>';
+  }
 
-  /* --- la note, en dernier --- */
-  h += '<div class="dkbloc"><h4>Note</h4>' +
-    '<textarea class="dknote" data-dnote="' + o.id + '" rows="4" ' +
-      'placeholder="Ce qu\'il faut savoir sur ce dossier : accord avec le client, retard, litige, rappel..."' +
-      '>' + esc(o.dnote || "") + '</textarea>' +
-    '<p class="dknsub">' + (note
-      ? "Enregistrée sur ce dossier."
-      : "Rien pour l'instant. Ce que vous écrivez reste sur ce dossier.") + '</p>' +
-    '<div class="dktag">' +
-      '<span>Envoyer cette note à</span>' +
-      '<div class="dktagb">' +
-        ["ahmed", "imane", "soufiane"].map(u =>
-          '<button type="button" data-dktag="' + u + '" data-dko="' + o.id + '" aria-pressed="' +
-          ((DKSEL[o.id] || {})[u] ? "true" : "false") + '">' + nomDe(u) + '</button>').join("") +
+  /* ------------------------------------------------ Journal */
+  if (tab === "journal"){
+    const jl = (o.log || []).slice().sort((a,b) => b.at - a.at).slice(0, 12);
+    h += '<div class="dkbloc"><h4>Journal</h4><div class="dkjour">';
+    if (!jl.length) h += '<div class="l"><span></span><span>Aucun geste enregistré sur ce bon.</span></div>';
+    jl.forEach(e => {
+      const dd = new Date(e.at);
+      const kind = e.kind || "fab";
+      const quoi = kind === "etat" ? (e.lab || etatLabel(e.etat))
+                 : kind === "edit" ? "bon modifié" +
+                     ((e.champs && e.champs.length) ? "  ·  " + e.champs.join(", ") : "")
+                 : kind === "tube" ? (e.on ? "découpe livrée " : "découpe décochée ") + (e.dim || "")
+                 : kind === "livr" ? "livraison " + (e.dim || "")
+                 : (e.on ? "fenêtre faite " : "fenêtre décochée ") + (e.dim || "");
+      h += '<div class="l"><span>' + pad(dd.getDate()) + "/" + pad(dd.getMonth()+1) + '</span>' +
+           '<span>' + pad(dd.getHours()) + ":" + pad(dd.getMinutes()) + "  " + esc(quoi) +
+           (e.by ? "  ·  " + esc(nomDe(e.by)) : "") + '</span></div>';
+    });
+    h += '</div></div>';
+  }
+
+  /* ------------------------------------------------ Note */
+  if (tab === "note"){
+    h += '<div class="dkbloc"><h4>Note</h4>' +
+      '<textarea class="dknote" data-dnote="' + o.id + '" rows="4" ' +
+        'placeholder="Ce qu\'il faut savoir sur ce dossier : accord avec le client, retard, litige, rappel..."' +
+        '>' + esc(o.dnote || "") + '</textarea>' +
+      '<p class="dknsub">' + (note
+        ? "Enregistrée sur ce dossier."
+        : "Rien pour l'instant. Ce que vous écrivez reste sur ce dossier.") + '</p>' +
+      '<div class="dktag">' +
+        '<span>Envoyer cette note à</span>' +
+        '<div class="dktagb">' +
+          ["ahmed", "imane", "soufiane"].map(u =>
+            '<button type="button" data-dktag="' + u + '" data-dko="' + o.id + '" aria-pressed="' +
+            ((DKSEL[o.id] || {})[u] ? "true" : "false") + '">' + nomDe(u) + '</button>').join("") +
+        '</div>' +
+        '<button type="button" class="dksend" data-dksend="' + o.id + '">Envoyer la note</button>' +
+        (function(){
+          const env = (typeof NOTES !== "undefined" ? NOTES : [])
+            .filter(nn => nn && !nn.sup && nn.bon === o.id && nn.pour);
+          if (!env.length) return "";
+          return '<div class="dkenv">' + env.slice(0, 6).map(nn =>
+            '<span class="prtag ' + (nn.fait ? "ok" : "att") + '">' + esc(nomDe(nn.pour)) + '  ·  ' +
+            (nn.fait ? "fait " + noteDate(nn.fait) : "envoyée " + noteDate(nn.at)) + '</span>').join("") + '</div>';
+        })() +
       '</div>' +
-      '<button type="button" class="dksend" data-dksend="' + o.id + '">Envoyer la note</button>' +
-      (function(){
-        const env = (typeof NOTES !== "undefined" ? NOTES : [])
-          .filter(nn => nn && !nn.sup && nn.bon === o.id && nn.pour);
-        if (!env.length) return "";
-        return '<div class="dkenv">' + env.slice(0, 6).map(nn =>
-          '<span class="prtag ' + (nn.fait ? "ok" : "att") + '">' + esc(nomDe(nn.pour)) + '  ·  ' +
-          (nn.fait ? "fait " + noteDate(nn.fait) : "envoyée " + noteDate(nn.at)) + '</span>').join("") + '</div>';
-      })() +
-    '</div>' +
-  '</div>';
+    '</div>';
+  }
 
-  /* --- les gestes --- */
+  /* --- les gestes, toujours en bas --- */
   const wa = telWa(o.tel);
   h += '<div class="dkact">' +
     '<button type="button" class="wa" data-docwa="' + esc(wa) + '"' + (wa ? "" : " disabled") + '>' +
@@ -10720,20 +10844,66 @@ function docCarte(o){
   return h + '</div></div>';
 }
 
+/* Les puces de situation : payé, pas payé, et les quatre situations du bon. */
+function docEtatOk(o, k){
+  if (k === "tous") return true;
+  if (k === "paye") return paySolde(o);
+  if (k === "impaye") return !paySolde(o);
+  return etatDe(o) === k;
+}
+const DOC_ETATS = [["tous","Tous",""],["impaye","Non soldés","#8F5400"],["paye","Soldés","#12833F"],
+  ["devis","Devis","#7A3BC4"],["production","En production","#EA7A00"],
+  ["pret","Prêts","#1F5FD1"],["livre","Livrés","#12833F"]];
+const DOC_DOS = [["tous","Tous les dossiers"],["encours","En cours"],["fini","Terminés"],
+  ["sage","Saisis SAGE"],["pasage","Pas encore SAGE"],["banque","Virements à vérifier"],
+  ["note","Avec note"],["apresage","Pièces faites, pas SAGE"],["hors","Pas dans le tableau"]];
+
+/* Ce qui presse d'abord : fiche incomplète, pièces à remplir, retard, virement
+   à vérifier. Ensuite les dossiers en cours, et les dossiers finis à la fin. */
+function docUrgent(o){
+  if (estFini(o)) return false;
+  if (completude(o).pct < 100) return true;
+  const pe = piecesEtat(o);
+  if (pe.tot && !pe.ok) return true;
+  if (echRetard(o) && etatDe(o) !== "livre") return true;
+  return false;
+}
+
 function renderDoc(){
   if (!docAllowed()) return;
-  Array.prototype.forEach.call($("docFiltres").querySelectorAll("button"),
-    b => b.setAttribute("aria-pressed", String(b.dataset.f === docFiltre)));
-  Array.prototype.forEach.call($("docDossier").querySelectorAll("button"),
-    b => b.setAttribute("aria-pressed", String(b.dataset.d === docDossier)));
+  Array.prototype.forEach.call($("docPer").querySelectorAll("button"),
+    b => b.setAttribute("aria-pressed", String(b.dataset.p === docFiltre)));
   $("docPeriode").hidden = docFiltre !== "periode";
   $("docD1").value = docD1; $("docD2").value = docD2;
+
+  /* Chaque puce dit combien de dossiers elle garde. Une puce vide disparaît. */
+  const q = docQ.trim().toLowerCase();
+  $("docEtats").innerHTML = DOC_ETATS.map(x => {
+    const n = (ORDERS || []).filter(o => docPasse(o, {sansEtat:true}) && docEtatOk(o, x[0])).length;
+    if (!n && x[0] !== "tous" && docEtat !== x[0]) return "";
+    return '<button type="button" class="prchip" data-e="' + x[0] + '" aria-pressed="' +
+      (docEtat === x[0]) + '">' + (x[2] ? '<i style="background:' + x[2] + '"></i>' : '') +
+      x[1] + ' <b>' + n + '</b></button>';
+  }).join("");
+  $("docDossier").innerHTML = DOC_DOS.map(x => {
+    const n = (ORDERS || []).filter(o => docPasse(o, {sansDossier:true}) &&
+                                         docPasseDossier(o, x[0], q)).length;
+    if (!n && x[0] !== "tous" && docDossier !== x[0]) return "";
+    return '<button type="button" class="prchip" data-d="' + x[0] + '" aria-pressed="' +
+      (docDossier === x[0]) + '">' + x[1] + ' <b>' + n + '</b></button>';
+  }).join("");
 
   const list = docListe();
   const du    = list.reduce((t,o) => t + duDe(o), 0);
   /* Un devis ne compte pas dans la créance : rien n'est encore engagé. */
   const reste = list.reduce((t,o) => t + resteDe(o), 0);
   const ouverts = list.filter(o => !estFini(o)).length;
+  const nVerif = list.reduce((n,o) => n + paiements(o).filter(p => !payVu(p)).length, 0);
+
+  $("docTiles").innerHTML =
+    '<div>Dossiers en cours<b>' + ouverts + '</b></div>' +
+    '<div>À encaisser<b class="att">' + frm(reste, 0) + '</b></div>' +
+    '<div>À vérifier<b' + (nVerif ? ' class="att"' : '') + '>' + nVerif + '</b></div>';
 
   /* Les tuiles qui servent de filtre gardent leur compte complet, sinon le
      chiffre changerait sous le doigt au moment où on appuie dessus. */
@@ -10762,16 +10932,16 @@ function renderDoc(){
        : '<div class="' + cls + (v ? "" : " nul") + '">') +
     '<b>' + v + '</b><small>' + lab + '</small>' + (t ? '</button>' : '</div>');
   $("docStat").innerHTML =
-    '<div class="full v"><b>' + fr(caTot, 2) + '</b><small>chiffre d\'affaires HT, pose comprise</small></div>' +
-    tuile(fr(caE, 2), "CA enrouleur HT", "v") +
-    tuile(fr(caJ, 2), "CA jour et nuit HT", "v") +
+    '<div class="full v"><b>' + frm(caTot, 2) + '</b><small>chiffre d\'affaires HT, pose comprise</small></div>' +
+    tuile(frm(caE, 2), "CA enrouleur HT", "v") +
+    tuile(frm(caJ, 2), "CA jour et nuit HT", "v") +
     tuile(fr(m2E, 2), "m² enrouleur vendus", "a", "m2enr") +
     tuile(fr(m2J, 2), "m² jour et nuit vendus", "a", "m2jn") +
     tuile(fENR, "fenêtres enrouleur fabriquées", "i", "fenr") +
     tuile(fJN, "fenêtres jour et nuit fabriquées", "i", "fjn") +
     tuile(list.length, "dossiers", "a") +
     tuile(ouverts, "en cours", "i") +
-    tuile(fr(reste, 0), "reste à encaisser", "w") +
+    tuile(frm(reste, 0), "reste à encaisser", "w") +
     tuile(aVerif, "virements à vérifier", "w", "banque");
 
   const box = $("docList");
@@ -10780,14 +10950,26 @@ function renderDoc(){
     $("docHint").textContent = "";
     return;
   }
-  box.innerHTML = list.map(docCarte).join("");
+
+  /* Trois sections : ce qui presse, ce qui tourne, ce qui est classé. */
+  const urg = list.filter(o => docUrgent(o));
+  const enc = list.filter(o => !docUrgent(o) && !estFini(o));
+  const fin = list.filter(o => estFini(o));
+  const sec = (cls, titre, arr) => !arr.length ? "" :
+    '<div class="pysec' + cls + '"><span>' + titre + '</span><b>' + arr.length + ' dossier' +
+    (arr.length > 1 ? "s" : "") + '</b></div>' + arr.map(docCarte).join("");
+  box.innerHTML =
+    sec(" urg", "⚠ À compléter en priorité", urg) +
+    sec("", "Dossiers en cours", enc) +
+    sec("", "Dossiers terminés", fin);
+
   const TLAB = {fenr:"fenêtres enrouleur fabriquées", fjn:"fenêtres jour et nuit fabriquées",
                 m2enr:"m² enrouleur vendus", m2jn:"m² jour et nuit vendus",
                 banque:"virements à vérifier", apresage:"pièces faites, pas encore SAGE"};
   $("docHint").textContent = list.length + " dossier" + (list.length > 1 ? "s" : "") +
     (TLAB[docDossier] ? "  ·  filtre : " + TLAB[docDossier] + ", appuyez de nouveau pour tout revoir" : "") +
-    "  ·  " + fr(du, 2) + " MAD au total" +
-    (reste > 0.01 ? ",  " + fr(reste, 2) + " MAD à encaisser" : ",  tout est encaissé") +
+    "  ·  " + frm(du, 2) + " MAD au total" +
+    (reste > 0.01 ? ",  " + frm(reste, 2) + " MAD à encaisser" : ",  tout est encaissé") +
     ".  Appuyez sur une fiche pour tout voir.";
 }
 
@@ -10857,7 +11039,7 @@ $("docMontantRes").addEventListener("click", e => {
   /* on ouvre le dossier concerné, seul dans la liste */
   docQ = String(o.num || o.nom || "");
   $("docSearch").value = docQ;
-  docFiltre = "all"; docDossier = "tous";
+  docFiltre = "all"; docEtat = "tous"; docDossier = "tous";
   docOuvert[o.id] = true;
   renderDoc();
   const c = $("docList");
@@ -10898,18 +11080,32 @@ $("docStat").addEventListener("click", e => {
 $("docSearch").addEventListener("input", e => { docQ = e.target.value; renderDoc(); });
 $("docD1").addEventListener("change", e => { docD1 = e.target.value; renderDoc(); });
 $("docD2").addEventListener("change", e => { docD2 = e.target.value; renderDoc(); });
-$("docFiltres").addEventListener("click", e => {
-  const b = e.target.closest("button[data-f]");
+$("docPer").addEventListener("click", e => {
+  const b = e.target.closest("button[data-p]");
   if (!b) return;
-  docFiltre = b.dataset.f; renderDoc();
+  docFiltre = b.dataset.p; renderDoc();
+});
+$("docEtats").addEventListener("click", e => {
+  const b = e.target.closest("button[data-e]");
+  if (!b) return;
+  docEtat = (docEtat === b.dataset.e) ? "tous" : b.dataset.e;
+  renderDoc();
 });
 $("docDossier").addEventListener("click", e => {
   const b = e.target.closest("button[data-d]");
   if (!b) return;
-  docDossier = b.dataset.d; renderDoc();
+  docDossier = (docDossier === b.dataset.d) ? "tous" : b.dataset.d;
+  renderDoc();
 });
 
 $("docList").addEventListener("click", e => {
+  const ong = e.target.closest("button[data-doctab]");
+  if (ong){
+    const p = ong.dataset.doctab.split("|");
+    docTab[p[0]] = p[1];
+    renderDoc();
+    return;
+  }
   const dt = e.target.closest("button[data-dktag]");
   if (dt){
     const sel = DKSEL[dt.dataset.dko] || (DKSEL[dt.dataset.dko] = {});
