@@ -1282,57 +1282,96 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .atfil .s{grid-column:1 / -1; font-size:11.5px; color:var(--muted); line-height:1.45}
 
 /* --- journal de fabrication --- */
-/* --- journal du jour : le résumé, puis qui a fait quoi --- */
-.lgstat{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px}
-.lgstat > div, .lgstat > button{padding:12px 8px; border-radius:12px; background:var(--card2);
-  border:1px solid var(--line); text-align:center}
-.lgstat > button{display:block; width:100%; font:inherit; cursor:pointer;
-  -webkit-tap-highlight-color:transparent}
-.lgstat > button:active{background:var(--accent-soft)}
-.lgstat > button.on{border-color:var(--accent); background:var(--accent-soft)}
-.lgstat > button.on small{color:var(--accent)}
-.lgstat b{display:block; font-family:"IBM Plex Mono",monospace; font-size:22px;
-  font-weight:600; color:var(--ink); line-height:1.1}
-.lgstat small{display:block; font-family:"Archivo",sans-serif; font-size:9.5px;
-  font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted);
-  margin-top:5px; line-height:1.3}
-.lgstat .v b{color:var(--ok)}
-.lgstat .i b{color:var(--info)}
-.lgstat .a b{color:var(--accent)}
-.lgstat > div.nul b, .lgstat > button.nul b{color:var(--line-strong)}
-.lgstat > .full{grid-column:1 / -1}
-.lgstat > .full b{font-size:27px}
+/* --- Logs v13.9 : la journee en haut, les compteurs, puis qui a fait quoi --- */
+.lgjour{display:flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--line);
+  border-radius:14px; padding:8px 10px}
+.lgnav{flex:none; width:36px; height:36px; border-radius:11px; border:1px solid var(--line); background:var(--card2);
+  color:var(--muted); display:grid; place-items:center; cursor:pointer; position:relative; padding:0}
+.lgnav:active{background:var(--accent-soft)}
+.lgnav[disabled]{opacity:.35}
+.lgcal input{position:absolute; inset:0; width:100%; height:100%; opacity:0; border:0; padding:0; cursor:pointer}
+.lglab{flex:1; min-width:0; text-align:center; border:0; background:none; font:inherit; color:var(--ink); padding:2px 0; cursor:pointer}
+.lglab b{display:block; font-family:"Archivo",sans-serif; font-size:14px; font-weight:700}
+.lglab small{display:block; font-size:11px; font-weight:700; color:var(--ok); margin-top:1px}
+.lgsem{display:flex; gap:5px; margin-top:8px}
+.lgsem button{flex:1; min-width:0; background:var(--card); border:1px solid var(--line); border-radius:11px;
+  padding:6px 0 5px; text-align:center; cursor:pointer; color:var(--ink); font:inherit}
+.lgsem em{display:block; font-style:normal; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; color:var(--muted)}
+.lgsem b{display:block; font-family:"IBM Plex Mono",monospace; font-size:14px; font-weight:600; margin-top:1px}
+.lgsem i{display:block; width:5px; height:5px; border-radius:50%; background:var(--line-strong); margin:4px auto 0}
+.lgsem i.peu{background:#E4B3B8}
+.lgsem i.on{background:var(--accent)}
+.lgsem button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--card)}
+.lgsem button[aria-pressed="true"] em{color:#C9C2C4}
+.lgsem button[aria-pressed="true"] i{background:var(--card)}
+.lghero{background:var(--ink); color:var(--card); border-radius:18px; padding:14px 15px; margin-top:11px}
+.lgh1{display:flex; align-items:flex-end; gap:14px}
+.lgh1 > div{flex:1; min-width:0}
+.lgh1 b{display:block; font-family:"IBM Plex Mono",monospace; font-size:25px; font-weight:600; line-height:1}
+.lgh1 small{display:block; font-size:11px; opacity:.72; margin-top:4px; line-height:1.3}
+.lgh1 .r{text-align:right}
+.lgwa{display:flex; width:100%; align-items:center; justify-content:center; gap:9px; margin-top:12px;
+  background:rgba(255,255,255,.15); border:0; border-radius:12px; padding:11px; color:#fff;
+  font-family:"Archivo",sans-serif; font-size:13.5px; font-weight:700; cursor:pointer}
+.lgwa:active{background:rgba(255,255,255,.28)}
+.lgstat{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:11px}
+.lgstat > div{display:flex; align-items:center; gap:9px; background:var(--card); border:1px solid var(--line);
+  border-radius:14px; padding:9px 11px; min-width:0}
+.lgstat .ic{flex:none; width:30px; height:30px; border-radius:9px; display:grid; place-items:center}
+.lgstat .tx{min-width:0}
+.lgstat b{display:block; font-family:"IBM Plex Mono",monospace; font-size:17px; font-weight:600; line-height:1}
+.lgstat small{display:block; font-size:10.5px; color:var(--muted); margin-top:3px; line-height:1.25}
+.lgstat > div.nul{opacity:.45}
 /* la carte d'un agent */
-.agcard{border:1px solid var(--line); border-radius:13px; background:var(--card);
+.agcard{border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:16px; background:var(--card);
   margin-bottom:11px; overflow:hidden}
-.aghead{display:flex; align-items:center; gap:11px; padding:12px 14px;
-  background:var(--card2); border-bottom:1px solid var(--line)}
-.agini{width:34px; height:34px; flex:none; border-radius:50%; display:grid;
-  place-items:center; background:var(--accent); color:#fff;
-  font-family:"Archivo",sans-serif; font-weight:700; font-size:14px}
+.aghead{display:flex; align-items:center; gap:10px; padding:12px 13px 10px}
+.agini{width:38px; height:38px; flex:none; border-radius:12px; display:grid; place-items:center;
+  background:var(--accent); color:#fff; font-family:"Archivo",sans-serif; font-weight:700; font-size:14px}
 .agnom{flex:1; min-width:0}
-.agnom b{display:block; font-family:"Archivo",sans-serif; font-size:14px; font-weight:600}
-.agnom small{display:block; font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.35}
-.agtot{flex:none; font-family:"IBM Plex Mono",monospace; font-size:15px;
-  font-weight:600; color:var(--accent)}
-.agline{display:grid; grid-template-columns:38px 9px 1fr auto; gap:9px;
-  align-items:baseline; padding:9px 14px; border-top:1px solid var(--line)}
-.agline:first-child{border-top:0}
-.agh{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted)}
-.agdot{width:7px; height:7px; border-radius:50%; background:var(--muted); align-self:center}
+.agnom b{display:block; font-family:"Archivo",sans-serif; font-size:15px; font-weight:700}
+.agnom small{display:block; font-size:11px; color:var(--muted); margin-top:2px; line-height:1.35}
+.agtot{flex:none; font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:700; color:var(--muted);
+  background:var(--card2); border-radius:999px; padding:4px 10px}
+.agmini{display:flex; flex-wrap:wrap; gap:5px; padding:0 13px 10px}
+.agmini span{display:inline-flex; align-items:center; gap:5px; font-family:"Archivo",sans-serif; font-size:10px;
+  font-weight:700; padding:3px 7px; border-radius:6px; background:var(--card2); color:var(--muted)}
+.agmini i{flex:none; width:7px; height:7px; border-radius:50%}
+.agline{display:grid; grid-template-columns:38px 9px 1fr auto; gap:9px; align-items:start;
+  padding:8px 13px; border-top:1px solid var(--line)}
+.agh{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted); padding-top:3px}
+.agdot{width:9px; height:9px; border-radius:50%; background:var(--muted); margin-top:5px}
 .agdot.bon{background:var(--accent)}
-.agdot.edit{background:var(--info)}
-.agdot.fab{background:var(--ok)}
-.agdot.tube{background:var(--info)}
-.agdot.etat{background:var(--warn)}
-.agdot.paie{background:var(--ok)}
-.agdot.pros{background:#128C7E}
-.agdot.note{background:var(--accent)}
-.agt{min-width:0; font-size:12.5px; line-height:1.4}
-.agt b{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink)}
-.agt small{display:block; font-size:11px; color:var(--muted); margin-top:1px}
+.agdot.edit{background:var(--c-encours)}
+.agdot.fab{background:var(--c-fini)}
+.agdot.tube{background:var(--c-int)}
+.agdot.etat{background:var(--c-devis)}
+.agdot.paie{background:var(--warn)}
+.agdot.pros{background:var(--c-nc)}
+.agdot.note{background:var(--c-nrp)}
+.agt{min-width:0; font-size:13px; line-height:1.4}
+.agt b{font-family:"Archivo",sans-serif; font-size:13.5px; font-weight:700; color:var(--ink)}
+.agt small{display:block; font-size:11.5px; color:var(--muted); margin-top:1px; line-height:1.35}
 .agv{font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:600;
-  color:var(--ok); white-space:nowrap}
+  color:var(--ok); white-space:nowrap; padding-top:3px}
+/* la journee dans l'ordre : un fil, un point par operation */
+.lgmoment{font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted); margin:14px 0 8px}
+.lgtl{position:relative; padding-left:16px}
+.lgtl:before{content:""; position:absolute; left:4px; top:10px; bottom:14px; width:2px; background:var(--line)}
+.tlc{position:relative; display:grid; grid-template-columns:38px 1fr auto; gap:9px; align-items:start;
+  background:var(--card); border:1px solid var(--line); border-radius:13px; padding:9px 11px; margin-bottom:8px}
+.tlc:before{content:""; position:absolute; left:-16px; top:14px; width:10px; height:10px; border-radius:50%;
+  background:var(--muted); border:2px solid var(--ground)}
+.tlc.bon:before{background:var(--accent)}
+.tlc.edit:before{background:var(--c-encours)}
+.tlc.fab:before{background:var(--c-fini)}
+.tlc.tube:before{background:var(--c-int)}
+.tlc.etat:before{background:var(--c-devis)}
+.tlc.paie:before{background:var(--warn)}
+.tlc.pros:before{background:var(--c-nc)}
+.tlc.note:before{background:var(--c-nrp)}
 .lgday{
   display:flex; align-items:center; gap:10px; margin:16px 0 10px;
   font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.08em;
@@ -1340,10 +1379,10 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 }
 .lgday:before, .lgday:after{content:""; height:1px; background:var(--line); flex:1}
 .lgrow{
-  background:var(--card); border:1px solid var(--line); border-left:3px solid var(--ok);
-  border-radius:11px; padding:11px 13px; margin-bottom:8px;
+  background:var(--card); border:1px solid var(--line); border-left:4px solid var(--c-int);
+  border-radius:12px; padding:11px 13px; margin-bottom:8px;
 }
-.lgrow.off{border-left-color:var(--line-strong); opacity:.72}
+.lgrow.off{border-left-color:var(--line-strong); opacity:.66}
 .lgrow.tube{border-left-color:var(--info)}
 .lgrow.tube .lgb{background:var(--info-soft); color:var(--info)}
 .lgrow.livr{border-left-color:var(--accent)}
@@ -1353,29 +1392,14 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .lgh{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); flex:none}
 .lgd{font-family:"Archivo",sans-serif; font-weight:600; font-size:14px; flex:1; min-width:0}
 .lgb{
-  flex:none; font-family:"IBM Plex Mono",monospace; font-size:11px; padding:2px 7px;
-  border-radius:6px; background:var(--ok-soft); color:var(--ok);
+  flex:none; font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; padding:2px 8px;
+  border-radius:7px; background:var(--warn-soft); color:var(--warn);
 }
-.lgrow.off .lgb{background:var(--card2); color:var(--muted)}
 .lgsub{display:block; font-size:12.5px; color:var(--muted); margin-top:4px; line-height:1.5}
 .lgsub b{color:var(--ink); font-weight:600}
 .lgbar{display:flex; gap:3px; margin-top:8px}
-.lgseg{height:4px; flex:1; border-radius:2px; background:var(--line)}
+.lgseg{height:5px; flex:1; border-radius:3px; background:var(--line)}
 .lgseg.on{background:var(--ok)}
-.lgdate{
-  display:flex; align-items:center; gap:9px; background:var(--card); border:1px solid var(--line);
-  border-radius:12px; padding:11px 13px; margin-bottom:12px;
-}
-.lgdate input{
-  flex:1; border:0; background:transparent; color:var(--ink); font-size:14.5px;
-  font-family:"IBM Plex Mono",monospace;
-}
-.lgdate input:focus{outline:none}
-.lgdate button{
-  flex:none; border:1px solid var(--line); background:var(--card2); color:var(--muted);
-  border-radius:8px; padding:6px 10px; font-size:12px; font-family:"Archivo",sans-serif; font-weight:600; cursor:pointer;
-}
-.lgdate button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
 /* --- nomenclature --- */
 .nrow{
   background:var(--card); border:1px solid var(--line); border-radius:12px;
@@ -3134,22 +3158,29 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   <div class="sheet-top">
     <button class="icon-btn" data-close="logSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     <h2>Logs</h2>
+    <button class="icon-btn" type="button" data-refresh aria-label="Actualiser"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
   </div>
   <div class="sheet-body">
-    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
-    <div class="lgdate">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-      <input id="logDate" type="date">
-      <button id="logToday" type="button" aria-pressed="true">Aujourd'hui</button>
+    <div class="lgjour">
+      <button class="lgnav" id="logPrev" type="button" aria-label="Jour précédent"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="lglab" id="logToday" type="button"><b id="logJourLab"></b><small id="logJourSub"></small></button>
+      <label class="lgnav lgcal" aria-label="Choisir une date"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><input id="logDate" type="date"></label>
+      <button class="lgnav" id="logNext" type="button" aria-label="Jour suivant"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
     </div>
-    <p class="hint" id="logJourLab" style="margin:0 2px 11px; font-family:Archivo,sans-serif; font-weight:600; color:var(--ink)"></p>
+    <div class="lgsem" id="logSem"></div>
+    <div class="lghero">
+      <div class="lgh1">
+        <div><b id="logOps">0</b><small id="logOpsSub">opération dans la journée</small></div>
+        <div class="r"><b id="logCash">0</b><small id="logCashSub">MAD encaissés</small></div>
+      </div>
+      <button class="lgwa" id="logPartage" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/><path d="M8.6 9.4c0 3.3 2.7 6 6 6"/></svg>
+        Résumé de la journée à partager
+      </button>
+    </div>
     <div class="lgstat" id="logStat"></div>
-    <div class="sumline"><span>Encaissé ce jour là</span><b id="logCash">0</b></div>
-    <button class="btn primary" id="logPartage" type="button" style="width:100%; margin-bottom:14px">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/><path d="M8.6 9.4c0 3.3 2.7 6 6 6"/></svg>
-      Résumé de la journée à partager
-    </button>
-    <div class="seg" id="logVue" style="margin-bottom:14px">
+    <div class="pypuces" id="logFiltres"></div>
+    <div class="hseg" id="logVue" style="margin-bottom:12px">
       <button type="button" data-v="agent" aria-pressed="true">Par agent</button>
       <button type="button" data-v="heure" aria-pressed="false">Chronologie</button>
     </div>
@@ -3273,7 +3304,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <button type="button" class="prchip" data-s="ech">Échéance la plus proche</button>
     </div>
     <div class="htiles" id="histTiles"></div>
-    <div id="histBody"></div>    <div id="histBody"></div>
+    <div id="histBody"></div>
   </div>
 </div>
 
@@ -7226,7 +7257,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "13.8";
+const APP_VERSION = "13.9";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -14112,7 +14143,7 @@ function evenementsDuJour(iso){
                 titre:"Bon créé  ·  " + (o.num || "sans numéro"),
                 sous:(o.nom || "Client sans nom") + "  ·  " + t.nb + " store" +
                      (t.nb > 1 ? "s" : "") + "  ·  " + ne,
-                val:(t.prix || t.pose) ? fr(prixClient(o, htDe(o)), 0) + " MAD" : ""});
+                val:(t.prix || t.pose) ? frm(prixClient(o, htDe(o)), 0) + " MAD" : ""});
     }
 
     /* Chaque passage d'une situation à l'autre, avec son auteur. Deux agents
@@ -14180,7 +14211,7 @@ function evenementsDuJour(iso){
       out.push({at:p.at || new Date(iso + "T12:00:00").getTime(), by:p.by || "", type:"paie",
                 titre:"Encaissé  ·  " + (p.mode || "Paiement"),
                 sous:(o.nom || "Client sans nom") + "  ·  " + (o.num || ""),
-                val:fr(m, 2) + " MAD", montant:m});
+                val:frm(m, 2) + " MAD", montant:m});
     });
   });
 
@@ -14223,12 +14254,70 @@ function evenementsDuJour(iso){
 }
 
 let logVue = LS.get("mst_logvue", "agent");
+let logFiltre = "tous";
+
+/* Chaque agent garde la même couleur dans toute la page. */
+const AG_COUL = {noureddine:"#D5001F", imane:"#D6207E", soufiane:"#12833F", ahmed:"#8F5400"};
+function couleurAgent(login){ return AG_COUL[String(login || "").toLowerCase()] || "#6F6569"; }
+
+/* Les puces de filtre : une puce peut couvrir plusieurs types d'opérations. */
+const LOG_FAM = {
+  tous: {lab:"Tout",       types:null,           coul:""},
+  bon:  {lab:"Bons",       types:["bon","edit"], coul:"#D5001F"},
+  atl:  {lab:"Atelier",    types:["fab","tube"], coul:"#12833F"},
+  paie: {lab:"Paiements",  types:["paie"],       coul:"#8F5400"},
+  etat: {lab:"Livraisons", types:["etat"],       coul:"#7A3BC4"},
+  pros: {lab:"WhatsApp",   types:["pros"],       coul:"#D6207E"},
+  note: {lab:"Notes",      types:["note"],       coul:"#6E7681"}
+};
+function dansFam(x, f){
+  const F = LOG_FAM[f];
+  return !F || !F.types || F.types.indexOf(x.type) >= 0;
+}
+
+/* Les petites icônes des compteurs. */
+const LGSVG = {
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  crayon: '<path d="M4 20h4l10-10-4-4L4 16v4z"/>',
+  carre: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/>',
+  ciseaux: '<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M20 4L8.5 16.5M20 20L8.5 7.5"/>',
+  camion: '<rect x="2" y="7" width="12" height="9" rx="1.5"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="6.5" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>',
+  carte: '<rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 10h19"/>',
+  bulle: '<path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/>',
+  lettre: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'
+};
+function lgIcone(p, coul){
+  return '<span class="ic" style="background:' + coul + '1A; color:' + coul + '">' +
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + LGSVG[p] + '</svg></span>';
+}
+
+/* Le lundi de la semaine où se trouve ce jour là. */
+function lundiDe(iso){
+  const d = new Date(iso + "T12:00:00");
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return d;
+}
+const JC_SEM = ["lun","mar","mer","jeu","ven","sam","dim"];
+function renderLogSem(){
+  const L = lundiDe(logJour), auj = jourISO(new Date());
+  let h = "";
+  for (let i = 0; i < 7; i++){
+    const d = new Date(L.getFullYear(), L.getMonth(), L.getDate() + i);
+    const iso = jourISO(d);
+    const n = iso > auj ? 0 : evenementsDuJour(iso).length;
+    h += '<button type="button" data-lj="' + iso + '" aria-pressed="' + (iso === logJour) + '">' +
+      '<em>' + JC_SEM[i] + '</em><b>' + d.getDate() + '</b>' +
+      '<i class="' + (n >= 5 ? "on" : (n ? "peu" : "")) + '"></i></button>';
+  }
+  $("logSem").innerHTML = h;
+}
 
 function renderLog(){
   renderTodo();
   $("logDate").value = logJour;
-  const auj = logJour === jourISO(new Date());
-  $("logToday").setAttribute("aria-pressed", String(auj));
+  const ajd = jourISO(new Date());
+  const auj = logJour === ajd;
 
   const ev = evenementsDuJour(logJour);
   const n = t => ev.filter(x => x.type === t).length;
@@ -14237,33 +14326,58 @@ function renderLog(){
   const nPaie  = n("paie");
   const nFab   = n("fab");
   const nTube  = n("tube");
+  const nNote  = n("note");
   const nLivre = ev.filter(x => x.type === "etat" && x.etat === "livre").length;
   const nPros  = n("pros");
   const cash   = ev.filter(x => x.type === "paie").reduce((s,x) => s + (x.montant || 0), 0);
 
+  /* le jour, écrit en toutes lettres, et à quelle distance d'aujourd'hui */
   const a = new Date(logJour + "T12:00:00");
-  const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+  const JOURS = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
   const MOIS  = ["janvier","février","mars","avril","mai","juin","juillet","août",
                  "septembre","octobre","novembre","décembre"];
-  $("logJourLab").textContent = (auj ? "Aujourd'hui  ·  " : "") +
-    JOURS[a.getDay()] + " " + a.getDate() + " " + MOIS[a.getMonth()] + " " + a.getFullYear();
+  $("logJourLab").textContent = JOURS[a.getDay()] + " " + a.getDate() + " " + MOIS[a.getMonth()] +
+    " " + a.getFullYear();
+  const ec = Math.round((new Date(ajd + "T12:00:00") - a) / 86400000);
+  $("logJourSub").textContent = ec === 0 ? "Aujourd'hui" : ec === 1 ? "Hier" :
+    ec > 1 ? "Il y a " + ec + " jours" : ec === -1 ? "Demain" : "Dans " + (-ec) + " jours";
+  $("logNext").disabled = logJour >= ajd;
+  renderLogSem();
 
-  const tuile = (v, un, plus, cls) =>
-    '<div class="' + cls + (v ? "" : " nul") + '"><b>' + v + '</b><small>' +
-    (v > 1 ? plus : un) + '</small></div>';
+  /* le bandeau : la journée en deux chiffres */
+  $("logOps").textContent = ev.length;
+  $("logOpsSub").textContent = "opération" + (ev.length > 1 ? "s" : "") + " dans la journée";
+  $("logCash").textContent = frm(cash, 2);
+  $("logCashSub").textContent = "MAD encaissés  ·  " + nPaie + " paiement" + (nPaie > 1 ? "s" : "");
+
+  const tuile = (v, ic, coul, un, plus) =>
+    '<div' + (v ? "" : ' class="nul"') + '>' + lgIcone(ic, coul) +
+    '<span class="tx"><b>' + v + '</b><small>' + (v > 1 ? plus : un) + '</small></span></div>';
   $("logStat").innerHTML =
-    tuile(nBons,  "bon créé",             "bons créés",            "a") +
-    tuile(nEdit,  "bon modifié",          "bons modifiés",         "i") +
-    tuile(nFab,   "fenêtre fabriquée",    "fenêtres fabriquées",   "v") +
-    tuile(nTube,  "découpe au magasin 2", "découpes au magasin 2", "i") +
-    tuile(nLivre, "commande livrée",      "commandes livrées",     "a") +
-    tuile(nPaie,  "paiement encaissé",    "paiements encaissés",   "v") +
-    tuile(nPros,  "contact WhatsApp",     "contacts WhatsApp",     "i");
-  $("logCash").textContent = fr(cash, 2) + " MAD";
+    tuile(nBons,  "plus",    "#D5001F", "bon créé",          "bons créés") +
+    tuile(nEdit,  "crayon",  "#1F5FD1", "bon modifié",       "bons modifiés") +
+    tuile(nFab,   "carre",   "#12833F", "fenêtre fabriquée", "fenêtres fabriquées") +
+    tuile(nTube,  "ciseaux", "#EA7A00", "découpe magasin 2", "découpes magasin 2") +
+    tuile(nLivre, "camion",  "#7A3BC4", "commande livrée",   "commandes livrées") +
+    tuile(nPaie,  "carte",   "#8F5400", "paiement encaissé", "paiements encaissés") +
+    tuile(nPros,  "bulle",   "#D6207E", "contact WhatsApp",  "contacts WhatsApp") +
+    tuile(nNote,  "lettre",  "#6E7681", "note d'équipe",     "notes d'équipe");
+
+  /* les puces : on ne montre que celles qui ont quelque chose ce jour là */
+  if (logFiltre !== "tous" && !ev.filter(x => dansFam(x, logFiltre)).length) logFiltre = "tous";
+  $("logFiltres").innerHTML = Object.keys(LOG_FAM).map(f => {
+    const c = f === "tous" ? ev.length : ev.filter(x => dansFam(x, f)).length;
+    if (!c && f !== "tous") return "";
+    return '<button type="button" class="prchip" data-lf="' + f + '" aria-pressed="' +
+      (logFiltre === f) + '">' +
+      (LOG_FAM[f].coul ? '<i style="background:' + LOG_FAM[f].coul + '"></i>' : "") +
+      LOG_FAM[f].lab + ' <b>' + c + '</b></button>';
+  }).join("");
 
   Array.prototype.forEach.call($("logVue").children,
     b => b.setAttribute("aria-pressed", String(b.dataset.v === logVue)));
 
+  const vu = ev.filter(x => dansFam(x, logFiltre));
   const box = $("logList");
   if (!ev.length){
     box.innerHTML = '<div class="empty">Rien ce jour là.<br>' +
@@ -14273,18 +14387,24 @@ function renderLog(){
     $("logHint").textContent = "";
     return;
   }
+  if (!vu.length){
+    box.innerHTML = '<div class="empty">Rien dans ce filtre ce jour là.</div>';
+    $("logHint").textContent = "";
+    return;
+  }
 
-  box.innerHTML = logVue === "agent" ? vueAgent(ev) : vueHeure(ev);
+  box.innerHTML = logVue === "agent" ? vueAgent(vu) : vueHeure(vu);
 
-  const agents = ev.map(x => x.by).filter(Boolean).filter((v,i,z) => z.indexOf(v) === i);
-  $("logHint").textContent = ev.length + " opération" + (ev.length > 1 ? "s" : "") +
+  const agents = vu.map(x => x.by).filter(Boolean).filter((v,i,z) => z.indexOf(v) === i);
+  $("logHint").textContent = vu.length + " opération" + (vu.length > 1 ? "s" : "") +
+    (logFiltre !== "tous" ? " sur " + ev.length : "") +
     (agents.length ? "  ·  " + agents.map(nomDe).join(", ") : "") +
     ".  Une découpe cochée veut dire coupée et portée au magasin 2.";
 }
 
-function ligneEv(x, avecHeure){
+function ligneEv(x, avecHeure, avecQui){
   const d = new Date(x.at);
-  const qui = x.by ? nomDe(x.by) : "";
+  const qui = (avecQui === false || !x.by) ? "" : nomDe(x.by);
   return '<div class="agline">' +
     '<span class="agh">' + (avecHeure ? pad(d.getHours()) + ":" + pad(d.getMinutes()) : "") + '</span>' +
     '<span class="agdot ' + x.type + '"></span>' +
@@ -14296,6 +14416,17 @@ function ligneEv(x, avecHeure){
 }
 
 /* Qui a fait quoi : une carte par agent, la plus chargée en premier. */
+const LOG_ORDRE = ["bon", "edit", "fab", "tube", "etat", "paie", "pros", "note"];
+const LOG_LABS = {
+  bon:  ["bon créé",           "bons créés"],
+  edit: ["bon modifié",        "bons modifiés"],
+  fab:  ["fenêtre fabriquée",  "fenêtres fabriquées"],
+  tube: ["découpe livrée",     "découpes livrées"],
+  etat: ["changement d'état",  "changements d'état"],
+  paie: ["paiement",           "paiements"],
+  pros: ["contact WhatsApp",   "contacts WhatsApp"],
+  note: ["note d'équipe",      "notes d'équipe"]
+};
 function vueAgent(ev){
   const par = {};
   ev.forEach(x => {
@@ -14303,54 +14434,63 @@ function vueAgent(ev){
     if (!par[k]) par[k] = [];
     par[k].push(x);
   });
-  const ORDRE = ["bon", "edit", "fab", "tube", "etat", "paie", "pros", "note"];
-  const LABS = {
-    bon:  ["bon créé",           "bons créés"],
-    edit: ["bon modifié",        "bons modifiés"],
-    fab:  ["fenêtre fabriquée",  "fenêtres fabriquées"],
-    tube: ["découpe livrée",     "découpes livrées"],
-    etat: ["changement d'état",  "changements d'état"],
-    paie: ["paiement",           "paiements"],
-    pros: ["contact WhatsApp",   "contacts WhatsApp"],
-    note: ["note d'équipe",      "notes d'équipe"]
-  };
   return Object.keys(par)
     .sort((a,b) => par[b].length - par[a].length)
     .map(k => {
       const list = par[k];
       const nom = k === "?" ? "Sans agent" : nomDe(k);
+      const coul = k === "?" ? "#6F6569" : couleurAgent(k);
       const cpt = {};
       list.forEach(x => { cpt[x.type] = (cpt[x.type] || 0) + 1; });
-      const resume = ORDRE.filter(t => cpt[t]).map(t =>
-        cpt[t] + " " + LABS[t][cpt[t] > 1 ? 1 : 0]).join("  ·  ");
+      const resume = LOG_ORDRE.filter(t => cpt[t]).map(t =>
+        cpt[t] + " " + LOG_LABS[t][cpt[t] > 1 ? 1 : 0]).join("  ·  ");
       const enc = list.filter(x => x.type === "paie").reduce((s,x) => s + (x.montant || 0), 0);
-      return '<div class="agcard">' +
+      const nLiv = list.filter(x => x.type === "etat" && x.etat === "livre").length;
+      const mini = [];
+      if (enc) mini.push(['#8F5400', frm(enc, 0) + " MAD encaissés"]);
+      if (nLiv) mini.push(['#7A3BC4', nLiv + " commande" + (nLiv > 1 ? "s" : "") + " livrée" + (nLiv > 1 ? "s" : "")]);
+      if (cpt.fab) mini.push(['#12833F', cpt.fab + " fenêtre" + (cpt.fab > 1 ? "s" : "")]);
+      if (cpt.tube) mini.push(['#EA7A00', cpt.tube + " découpe" + (cpt.tube > 1 ? "s" : "")]);
+      return '<div class="agcard" style="border-left-color:' + coul + '">' +
         '<div class="aghead">' +
-          '<span class="agini">' + esc(nom.slice(0,1).toUpperCase()) + '</span>' +
-          '<span class="agnom"><b>' + esc(nom) + '</b><small>' + esc(resume) +
-            (enc ? '  ·  ' + fr(enc,0) + ' MAD encaissés' : '') + '</small></span>' +
+          '<span class="agini" style="background:' + coul + '">' +
+            esc(initiales(nom)) + '</span>' +
+          '<span class="agnom"><b>' + esc(nom) + '</b><small>' + esc(resume) + '</small></span>' +
           '<span class="agtot">' + list.length + '</span>' +
         '</div>' +
-        list.map(x => ligneEv(x, true)).join("") +
+        (mini.length ? '<div class="agmini">' + mini.map(m =>
+          '<span><i style="background:' + m[0] + '"></i>' + esc(m[1]) + '</span>').join("") + '</div>' : "") +
+        list.map(x => ligneEv(x, true, false)).join("") +
       '</div>';
     }).join("");
 }
 
-/* La journée dans l'ordre, du plus récent au plus ancien. */
-function vueHeure(ev){
-  return '<div class="agcard">' +
-    ev.map(x => {
-      const d = new Date(x.at);
-      const qui = x.by ? nomDe(x.by) : "";
-      return '<div class="agline">' +
-        '<span class="agh">' + pad(d.getHours()) + ":" + pad(d.getMinutes()) + '</span>' +
-        '<span class="agdot ' + x.type + '"></span>' +
-        '<span class="agt"><b>' + esc(x.titre) + '</b>' +
-          '<small>' + esc(x.sous) + (qui ? '  ·  par ' + esc(qui) : '') + '</small></span>' +
-        '<span class="agv">' + esc(x.val || "") + '</span>' +
-      '</div>';
-    }).join("") +
+/* La journée dans l'ordre, coupée en matin, après midi et soir. */
+function tlCarte(x){
+  const d = new Date(x.at);
+  const qui = x.by ? nomDe(x.by) : "";
+  return '<div class="tlc ' + x.type + '">' +
+    '<span class="agh">' + pad(d.getHours()) + ":" + pad(d.getMinutes()) + '</span>' +
+    '<span class="agt"><b>' + esc(x.titre) + '</b>' +
+      '<small>' + esc(x.sous || "") +
+        (qui ? (x.sous ? '  ·  ' : '') + 'par ' + esc(qui) : '') + '</small></span>' +
+    '<span class="agv">' + esc(x.val || "") + '</span>' +
   '</div>';
+}
+function vueHeure(ev){
+  const heure = x => new Date(x.at).getHours();
+  const blocs = [
+    ["Soir",        x => heure(x) >= 18],
+    ["Après midi",  x => heure(x) >= 12 && heure(x) < 18],
+    ["Matin",       x => heure(x) < 12]
+  ];
+  return blocs.map(b => {
+    const l = ev.filter(b[1]);
+    if (!l.length) return "";
+    return '<div class="lgmoment">' + b[0] + '  ·  ' + l.length +
+      ' opération' + (l.length > 1 ? "s" : "") + '</div>' +
+      '<div class="lgtl">' + l.map(tlCarte).join("") + '</div>';
+  }).join("");
 }
 
 $("logVue").addEventListener("click", e => {
@@ -14361,6 +14501,31 @@ $("logVue").addEventListener("click", e => {
   renderLog();
 });
 
+$("logFiltres").addEventListener("click", e => {
+  const b = e.target.closest("button[data-lf]");
+  if (!b) return;
+  logFiltre = logFiltre === b.dataset.lf ? "tous" : b.dataset.lf;
+  renderLog();
+});
+
+$("logSem").addEventListener("click", e => {
+  const b = e.target.closest("button[data-lj]");
+  if (!b) return;
+  logJour = b.dataset.lj;
+  renderLog();
+});
+
+/* Reculer ou avancer d'un jour : on ne va pas au delà d'aujourd'hui. */
+function logDecale(p){
+  const d = new Date(logJour + "T12:00:00");
+  d.setDate(d.getDate() + p);
+  const iso = jourISO(d);
+  if (iso > jourISO(new Date())) return;
+  logJour = iso;
+  renderLog();
+}
+$("logPrev").addEventListener("click", () => logDecale(-1));
+$("logNext").addEventListener("click", () => logDecale(1));
 
 $("logDate").addEventListener("change", e => {
   logJour = e.target.value || jourISO(new Date());
