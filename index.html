@@ -1882,6 +1882,38 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .tile.primary .tt small{opacity:.85}
 .home-foot{margin-top:26px; text-align:center; font-size:12px; color:var(--muted); line-height:1.7}
 
+/* --- v14.5 : l'accueil en icônes, quatre groupes de couleur --- */
+.home .tiles{margin-bottom:16px}
+.tile.primary{background:linear-gradient(135deg, var(--accent), #A10018); box-shadow:0 10px 24px rgba(213,0,31,.25)}
+.hgrp{margin-bottom:16px}
+.hgrp h4{margin:0 2px 8px; font-family:"Archivo",sans-serif; font-size:11.5px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.hgrid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
+.hgrid .tile{position:relative; flex-direction:column; justify-content:flex-start; align-items:center; gap:8px;
+  padding:14px 4px 12px; min-height:98px; text-align:center; border-radius:16px; box-shadow:none}
+.hgrid .tile .ti{width:46px; height:46px; border-radius:14px; background:var(--gs); color:var(--gc)}
+.hgrid .tile .tt{flex:none; width:100%}
+.hgrid .tile .tt b{font-size:12.5px; line-height:1.2; letter-spacing:0; padding:0 3px; hyphens:manual}
+.hgrid .tile .tt small, .hgrid .tile .tc{display:none}
+.hgrid .tile .tbadge{position:absolute; top:6px; right:6px; min-width:20px; height:20px; padding:0 6px;
+  border-radius:10px; font-size:11px}
+/* sur le dégradé rouge, le texte reste blanc, en clair comme en sombre */
+.tile.primary .ti, .tile.primary .tt b, .tile.primary .tt small, .tile.primary .tc{color:#FFFFFF}
+.g-cmd{--gc:#D5001F; --gs:#FCEAEC} .g-stk{--gc:#1F5FD1; --gs:#E7EFFB}
+.g-arg{--gc:#12833F; --gs:#E4F3EA} .g-eqp{--gc:#7A3BC4; --gs:#F1E8FB}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .g-cmd{--gc:#FF4257; --gs:#3A1419}
+  :root:not([data-theme="light"]) .g-stk{--gc:#7FB0FF; --gs:#14243F}
+  :root:not([data-theme="light"]) .g-arg{--gc:#4ADE80; --gs:#12291B}
+  :root:not([data-theme="light"]) .g-eqp{--gc:#C49BFF; --gs:#271A3A}
+  :root:not([data-theme="light"]) .tile.primary{background:linear-gradient(135deg, #C8102E, #7A0012)}
+}
+:root[data-theme="dark"] .g-cmd{--gc:#FF4257; --gs:#3A1419}
+:root[data-theme="dark"] .g-stk{--gc:#7FB0FF; --gs:#14243F}
+:root[data-theme="dark"] .g-arg{--gc:#4ADE80; --gs:#12291B}
+:root[data-theme="dark"] .g-eqp{--gc:#C49BFF; --gs:#271A3A}
+:root[data-theme="dark"] .tile.primary{background:linear-gradient(135deg, #C8102E, #7A0012)}
+
 /* ---------- listes historique et stock ---------- */
 .filters{display:flex; gap:7px; margin-bottom:14px; overflow-x:auto; scrollbar-width:none}
 .filters::-webkit-scrollbar{display:none}
@@ -2360,84 +2392,105 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <span class="tt"><b>Créer un bon de commande</b><small id="tileNewSub">Nouveau bon</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
-      <button class="tile" id="tileHist" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/><circle cx="19" cy="19" r="3"/></svg></span>
-        <span class="tt"><b>Historique</b><small id="tileHistSub">Aucun bon enregistré</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileCut" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8 8l12 10M8 16L20 6"/></svg></span>
-        <span class="tt"><b>Plan de coupe</b><small id="tileCutSub">Barres et tissu d'un bon</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileStock" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="7" cy="6" rx="3" ry="3"/><path d="M7 3h10a3 3 0 010 6H7M7 9v12M17 9v9a3 3 0 01-3 3H7"/></svg></span>
-        <span class="tt"><b>Stock de tissu</b><small id="tileStockSub">50 références</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileArt" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span>
-        <span class="tt"><b>Stock des articles</b><small id="tileArtSub">Mécanismes, tubes, accessoires</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileDoc" type="button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h10l6 6v10a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M14 4v6h6M7 14h8M7 17h5"/></svg>
-        <span class="tt"><b>Dossiers</b><small id="tileDocSub">Tout un bon sur une seule fiche</small></span>
-      </button>
-      <button class="tile" id="tilePros" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg></span>
-        <span class="tt"><b>Contacts WhatsApp</b><small id="tileProsSub">Demandes de renseignement à rappeler</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileNote" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2 2 4-4"/><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M8 2v4M16 2v4"/></svg></span>
-        <span class="tt"><b>Notes de l'équipe</b><small id="tileNoteSub">Ce qu'on se demande l'un à l'autre</small></span>
-        <span class="tbadge" id="tileNoteBadge" hidden>0</span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileCli" type="button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.4 2.9-5.2 6.5-5.2s6.5 1.8 6.5 5.2"/><path d="M17 8.5a3 3 0 010 5M19.5 6a6 6 0 010 10"/></svg>
-        <span class="tt"><b>Clients</b><small id="tileCliSub">Historique et paiements par client</small></span>
-      </button>
-      <button class="tile" id="tilePay" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg></span>
-        <span class="tt"><b>Paiements</b><small id="tilePaySub">Encaissements et impayés</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileAtl" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 15h3"/></svg></span>
-        <span class="tt"><b>Atelier</b><small id="tileAtlSub">Capacité, jours fériés, échéances</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileRemu" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M16 6H10a3 3 0 000 6h4a3 3 0 010 6H8"/></svg></span>
-        <span class="tt"><b>Rémunération</b><small id="tileRemuSub">Salaires et primes du mois</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileTri" type="button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v14H3z"/><path d="M3 10h18M9 10v9"/></svg>
-        <span class="tt"><b>Encaissements du trimestre</b><small id="tileTriSub">Banque et espèce, bon par bon</small></span>
-      </button>
-      <button class="tile" id="tileLog" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h9M9 12h9M9 19h9"/><path d="M4.5 5l1 1 2-2M4.5 12l1 1 2-2M4.5 19l1 1 2-2"/></svg></span>
-        <span class="tt"><b>Logs</b><small id="tileLogSub">Fenêtres fabriquées, jour par jour</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileNom" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h10M4 12h10M4 19h10"/><path d="M18 4v16M16 6l2-2 2 2"/></svg></span>
-        <span class="tt"><b>Nomenclature et prix</b><small id="tileNomSub">Articles et prix par type de store</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileCout" type="button">
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span>
-        <span class="tt"><b>Coût de revient</b><small id="tileCoutSub">Coût, bénéfice et marge d'un bon</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
-      <button class="tile" id="tileInv" type="button" hidden>
-        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 12h6M9 16h4"/></svg></span>
-        <span class="tt"><b>Inventaire atelier</b><small id="tileInvSub">Compter le stock réel, sans toucher au stock</small></span>
-        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-      </button>
+    </div>
+    <!-- v14.5 : les autres écrans en icônes, rangés en quatre groupes de couleur -->
+    <div class="hgrp g-cmd">
+      <h4>Commandes</h4>
+      <div class="hgrid">
+        <button class="tile" id="tileHist" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/><circle cx="19" cy="19" r="3"/></svg></span>
+          <span class="tt"><b>Historique</b><small id="tileHistSub">Aucun bon enregistré</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tileDoc" type="button">
+          <span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h10l6 6v10a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M14 4v6h6M7 14h8M7 17h5"/></svg></span>
+          <span class="tt"><b>Dossiers</b><small id="tileDocSub">Tout un bon sur une seule fiche</small></span>
+        </button>
+        <button class="tile" id="tileCut" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8 8l12 10M8 16L20 6"/></svg></span>
+          <span class="tt"><b>Plan de coupe</b><small id="tileCutSub">Barres et tissu d'un bon</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tileCli" type="button">
+          <span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.4 2.9-5.2 6.5-5.2s6.5 1.8 6.5 5.2"/><path d="M17 8.5a3 3 0 010 5M19.5 6a6 6 0 010 10"/></svg></span>
+          <span class="tt"><b>Clients</b><small id="tileCliSub">Historique et paiements par client</small></span>
+        </button>
+        <button class="tile" id="tileAtl" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 15h3"/></svg></span>
+          <span class="tt"><b>Atelier</b><small id="tileAtlSub">Capacité, jours fériés, échéances</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tileLog" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h9M9 12h9M9 19h9"/><path d="M4.5 5l1 1 2-2M4.5 12l1 1 2-2M4.5 19l1 1 2-2"/></svg></span>
+          <span class="tt"><b>Logs</b><small id="tileLogSub">Fenêtres fabriquées, jour par jour</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+      </div>
+    </div>
+    <div class="hgrp g-stk">
+      <h4>Stock</h4>
+      <div class="hgrid">
+        <button class="tile" id="tileStock" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="7" cy="6" rx="3" ry="3"/><path d="M7 3h10a3 3 0 010 6H7M7 9v12M17 9v9a3 3 0 01-3 3H7"/></svg></span>
+          <span class="tt"><b>Stock de tissu</b><small id="tileStockSub">50 références</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tileArt" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span>
+          <span class="tt"><b>Articles</b><small id="tileArtSub">Mécanismes, tubes, accessoires</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tileInv" type="button" hidden>
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M9 12h6M9 16h4"/></svg></span>
+          <span class="tt"><b>Inventaire</b><small id="tileInvSub">Compter le stock réel, sans toucher au stock</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+      </div>
+    </div>
+    <div class="hgrp g-arg">
+      <h4>Argent</h4>
+      <div class="hgrid">
+        <button class="tile" id="tilePay" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg></span>
+          <span class="tt"><b>Paiements</b><small id="tilePaySub">Encaissements et impayés</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tileTri" type="button">
+          <span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v14H3z"/><path d="M3 10h18M9 10v9"/></svg></span>
+          <span class="tt"><b>Encaisse&shy;ments</b><small id="tileTriSub">Banque et espèce, bon par bon</small></span>
+        </button>
+        <button class="tile" id="tileCout" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span>
+          <span class="tt"><b>Coût de revient</b><small id="tileCoutSub">Coût, bénéfice et marge d'un bon</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tileRemu" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M16 6H10a3 3 0 000 6h4a3 3 0 010 6H8"/></svg></span>
+          <span class="tt"><b>Rémuné&shy;ration</b><small id="tileRemuSub">Salaires et primes du mois</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tileNom" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h10M4 12h10M4 19h10"/><path d="M18 4v16M16 6l2-2 2 2"/></svg></span>
+          <span class="tt"><b>Nomen&shy;clature</b><small id="tileNomSub">Articles et prix par type de store</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+      </div>
+    </div>
+    <div class="hgrp g-eqp">
+      <h4>Équipe</h4>
+      <div class="hgrid">
+        <button class="tile" id="tileNote" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2 2 4-4"/><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M8 2v4M16 2v4"/></svg></span>
+          <span class="tt"><b>Notes équipe</b><small id="tileNoteSub">Ce qu'on se demande l'un à l'autre</small></span>
+          <span class="tbadge" id="tileNoteBadge" hidden>0</span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tilePros" type="button">
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg></span>
+          <span class="tt"><b>Contacts WhatsApp</b><small id="tileProsSub">Demandes de renseignement à rappeler</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+      </div>
     </div>
     <div class="home-foot" id="homeFoot"></div>
     <div class="userline" id="userLine"></div>
@@ -2554,7 +2607,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
       <p class="hint">Cochez chaque fenêtre une fois fabriquée. La coche apparaît sur les téléphones de toute l'équipe.</p>
     </div>
 
-    <div class="seg" id="cutModeSeg" style="margin-bottom:14px">
+    <div class="seg" id="cutModeSeg" style="margin-bottom:14px" hidden>
       <button type="button" data-mode="tube" aria-pressed="false">Découpe des tubes<span class="sub">barres et profilés</span></button>
       <button type="button" data-mode="tissu" aria-pressed="false">Découpe du tissu<span class="sub">bandes et chutes</span></button>
     </div>
@@ -6131,7 +6184,7 @@ $("homeTodo").addEventListener("click", e => {
   const g = b.dataset.hgo;
   if (g.indexOf("cut:") === 0){
     if (!cutAllowed()) return;
-    cutMode = modeImpose() || CUT.mode || "tube";
+    cutMode = "tissu";
     cutOrderId = g.slice(4);
     renderCut(); nav("cutSheet");
     $("cutSheet").querySelector(".sheet-body").scrollTop = 0;
@@ -6303,6 +6356,9 @@ function renderHome(){
     if (tubeSeul() || fabSeul()) homeBadge("tileCut", resteAtelier(tubeSeul() ? "tube" : "fen").length);
   } catch(e){}
   $("homeFoot").innerHTML = srcLabel() + "<br>MSTORECASA · Casablanca · version " + APP_VERSION;
+  /* un groupe dont l'agent ne voit aucune icône disparaît avec son titre */
+  document.querySelectorAll("#home .hgrp").forEach(g =>
+    g.hidden = ![...g.querySelectorAll(".tile")].some(t => !t.hidden));
 }
 
 function srcLabel(){
@@ -7475,7 +7531,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.4";
+const APP_VERSION = "14.5";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -7972,7 +8028,7 @@ if ((CUT_SAVED.v || 0) < 3){
 }
 function surplusDe(t){ return t === "JN" ? CUT.surJN : CUT.surENR; }
 let cutOrderId = null;
-let cutMode = "tube";   /* "tube" | "tissu" */
+let cutMode = "tissu";  /* v14.5 : la découpe des tubes (barres) est retirée, seul le tissu reste */
 
 function cm(v){ return fr(v, Math.abs(v % 1) > 0.001 ? 1 : 0); }
 
@@ -8362,12 +8418,12 @@ $("cutTube").addEventListener("click", e => {
 });
 
 function renderMode(){
-  const impose = modeImpose();
-  if (impose) cutMode = impose;
-  [...$("cutModeSeg").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === cutMode)));
-  $("cutModeSeg").hidden = !!impose;
-  $("cutTubeParams").hidden = cutMode !== "tube" || fabSeul();
-  $("cutFabParams").hidden = cutMode !== "tissu" || tubeSeul();
+  /* v14.5 : plus de « Découpe des tubes, barres et profilés ». Le plan de coupe
+     ne calcule plus que le tissu ; la liste des découpes qu'Ahmed coche reste. */
+  cutMode = "tissu";
+  $("cutModeSeg").hidden = true;
+  $("cutTubeParams").hidden = true;
+  $("cutFabParams").hidden = tubeSeul();
 }
 
 $("cutModeSeg").addEventListener("click", e => {
@@ -8452,11 +8508,10 @@ function renderPlan(){
   const fSeul = fabSeul();
   /* Chacun son poste : ahmed ne voit que les tubes, soufiane que le tissu.
      Le choix du mode disparaît dès l'ouverture de la page, quel que soit le bon. */
-  const impose = modeImpose();
-  $("cutModeSeg").hidden = !!impose;
-  if (impose) cutMode = impose;
+  cutMode = "tissu";                         /* v14.5 : tissu seulement */
+  $("cutModeSeg").hidden = true;
+  $("cutTubeParams").hidden = true;
   if (tSeul) $("cutFabParams").hidden = true;
-  if (fSeul) $("cutTubeParams").hidden = true;
   const o = all.find(x => x.id === cutOrderId);
   if (!o){
     $("cutOrderName").textContent = "Choisir un bon de commande";
@@ -8496,6 +8551,8 @@ function renderPlan(){
   renderTube(o);
   $("cutFaitCard").hidden = tSeul;
   if (tSeul) $("piecesCard").hidden = true;
+  /* Ahmed ne coupe que les tubes : sans plan de barres, il garde sa liste à cocher. */
+  if (tSeul){ out.innerHTML = ""; return; }
 
   if (!cutMode){
     out.innerHTML = '<div class="empty">Choisissez ci dessus ce que vous voulez couper : les tubes ou le tissu.</div>';
@@ -8973,7 +9030,7 @@ $("tileCut").addEventListener("click", () => {
   if (!cutAllowed()) return;
   /* Le mode imposé gagne toujours ; sinon on reprend le dernier choix, et à
      défaut les tubes : personne ne tombe sur un écran qui demande de choisir. */
-  cutMode = modeImpose() || CUT.mode || "tube";
+  cutMode = "tissu";
   renderCut(); nav("cutSheet");
   /* Aucun bon en mémoire : on demande tout de suite lequel. */
   if (!cutOrderId) ouvrirPickBon("cut");
