@@ -5512,6 +5512,14 @@ async function syncNums(force){
    à chaque synchronisation, et l'application relit la feuille pour retrouver
    d'elle même les bons qui n'y sont pas. */
 let SHEETROWS = LS.get("mst_sheetrows", {});
+/* v14.4, une seule fois par téléphone : la file d'attente a pu recevoir des
+   fiches que la v14.2 envoyait toute seule. On la vide ; une fiche vraiment
+   confirmée par un agent se renvoie d'un clic. */
+if (!LS.get("mst_sheetrows_v144", false)){
+  SHEETROWS = {};
+  LS.set("mst_sheetrows", SHEETROWS);
+  LS.set("mst_sheetrows_v144", true);
+}
 
 function sheetQueue(payload){
   if (!payload || !payload.key) return Promise.resolve(0);
@@ -5539,7 +5547,40 @@ function marqueEnvoye(num){
   const o = (ORDERS || []).find(x => String(x.num || "") === num);
   if (!o) return;
   o.sheetAt = new Date().toISOString();
+  o.sheetManuel = true;            /* v14.4 : seul un clic d'agent remplit cette file */
   touche(o); persistOrders(); pushBon(o);
+}
+
+/* v14.4 : un bon n'entre au tableau que par le bouton « Confirmer et envoyer au
+   tableau » du Plan de coupe. Un devis n'y a jamais sa place : la commande n'a
+   pas commencé. retirerDuTableau enlève la ligne et la marque verte. */
+function retirerDuTableau(o){
+  const num = String((o && o.num) || "");
+  if (!num) return false;
+  let bouge = false;
+  if (o.sheetAt){ delete o.sheetAt; bouge = true; }
+  if (o.sheetManuel){ delete o.sheetManuel; bouge = true; }
+  if (SHEETROWS[num]){ delete SHEETROWS[num]; LS.set("mst_sheetrows", SHEETROWS); bouge = true; }
+  if (bouge || (SHEETVUS && SHEETVUS[num])){
+    sheetDelete(num);
+    if (SHEETVUS) delete SHEETVUS[num];
+  }
+  return bouge;
+}
+/* Le 26/09/2026 à partir de 13h40, la v14.2 a envoyé seule au tableau des bons
+   que personne n'avait confirmés. Tout envoi de ce jour là sans clic d'agent
+   (pas de sheetManuel) est annulé, comme tous les devis. */
+const RESET_AUTO_DEBUT = new Date(2026, 8, 26, 13, 40).getTime();
+function nettoyageTableau(){
+  let n = 0;
+  (ORDERS || []).forEach(o => {
+    const t = o.sheetAt ? new Date(o.sheetAt).getTime() : 0;
+    const auto = t >= RESET_AUTO_DEBUT && !o.sheetManuel;
+    if (etatDe(o) !== "devis" && !auto) return;
+    if (retirerDuTableau(o)){ touche(o); pushBon(o); n++; }
+  });
+  if (n) persistOrders();
+  return n;
 }
 
 /* La fiche de production d'un bon quelconque, sans passer par l'écran :
@@ -5595,6 +5636,7 @@ async function verifSheet(force){
   const vus = await clesFeuille();
   if (!vus) return false;
   SHEETVUS = vus;
+  try { if (nettoyageTableau()) renderTout(); } catch(e){}
   let n = 0;
   (ORDERS || []).forEach(o => {
     const num = String(o.num || "");
@@ -5603,11 +5645,10 @@ async function verifSheet(force){
     if (SHEETDEL.indexOf(num) >= 0) return;        /* on est en train de l'effacer */
     /* On renvoie un bon dont la fiche est complète, ou un bon déjà parti une
        fois au tableau : dans ce cas là, sa disparition est une vraie perte. */
-    if (!o.sheetAt){
-      let pe = null;
-      try { pe = piecesEtat(o); } catch(e){ return; }
-      if (!pe || !pe.ok) return;                   /* fiche pas encore remplie */
-    }
+    /* v14.4 : on ne remet dans le tableau qu'un bon qu'un agent y a déjà
+       envoyé et dont la ligne a disparu. Jamais un bon jamais envoyé, jamais
+       un devis. */
+    if (!o.sheetAt || etatDe(o) === "devis") return;
     const p = fichePayload(o);
     if (!p) return;
     SHEETROWS[num] = p; n++;
@@ -5630,10 +5671,8 @@ function sheetManquant(o){
   if (SHEETROWS[num]) return true;
   if (!SHEETVUS) return false;
   if (SHEETVUS[num]) return false;
-  if (o.sheetAt) return true;                      /* parti une fois, plus là */
-  let pe = null;
-  try { pe = piecesEtat(o); } catch(e){ return false; }
-  return !!(pe && pe.ok);
+  if (etatDe(o) === "devis") return false;          /* un devis n'y va jamais */
+  return !!o.sheetAt;                              /* parti une fois, plus là */
 }
 
 /* --- suppression de la ligne dans le tableau de production --- */
@@ -5792,6 +5831,7 @@ async function syncAll(){
   await flushTombs();
   await flushPending();
   await pullBons();
+  try { if (nettoyageTableau()) renderTout(); } catch(e){}
   pullAtl();                  /* réglages d'atelier partagés */
   syncNums();                 /* renommages faits directement dans la feuille */
   verifSheet();               /* et personne ne manque dans le tableau */
@@ -7184,9 +7224,10 @@ function changeEtat(o, k){
   if (!o || !k || etatDe(o) === k) return false;
   o.etat = k;
   noteEtat(o);
+  if (k === "devis") retirerDuTableau(o);     /* redevenu devis : hors du tableau */
   touche(o); persistOrders();
   pushBon(o);
-  sheetSituation(o.num, etatLabel(o.etat));
+  if (k !== "devis") sheetSituation(o.num, etatLabel(o.etat));
   if (S && S.id === o.id){ S.etat = o.etat; S.ech = o.ech; S.plan = o.plan; try { renderEch(); } catch(err){} }
   toast(etatLabel(o.etat) + "  ·  " + (o.nom || "client") +
         (o.ech ? "  ·  échéance " + String(o.ech).split("-").reverse().join("/") : ""));
@@ -7434,7 +7475,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.3";
+const APP_VERSION = "14.4";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -7686,6 +7727,9 @@ function etatFiche(o){
   if (!o) return null;
   const num = String(o.num || "");
   if (!num) return null;
+  if (etatDe(o) === "devis")
+    return {cls:"", t:"Devis : ne va pas au tableau",
+            d:"Passez le bon en commande (En production), puis « Confirmer et envoyer au tableau »."};
   if (SHEETROWS[num])
     return {cls:"att", t:"En attente de réseau",
             d:"La fiche est gardée sur ce téléphone, elle partira toute seule dès que la connexion revient."};
@@ -7850,6 +7894,11 @@ function pcConfirm(){
   const fams = famsPresent();
   const b = pcO();
   if (!fams.length || !b) return;
+  /* v14.4 : un devis n'est pas une commande, il ne va pas au tableau */
+  if (etatDe(b) === "devis"){
+    toast("C'est un devis : passez d'abord le bon en commande (En production), puis envoyez");
+    return;
+  }
   const url = hookUrl();
   if (!url){ askHook(); return; }
   const btn = $("btnPieces"), lbl = "Confirmer et envoyer au tableau";
@@ -7870,6 +7919,7 @@ function pcConfirm(){
       btn.textContent = "Envoyé au tableau"; btn.classList.add("done");
       toast(j.updated ? "Ligne mise à jour dans le tableau" : "Ligne ajoutée au tableau");
       b.sheetAt = new Date().toISOString();
+      b.sheetManuel = true;                    /* envoyé par un agent, pas par l'app */
       if (SHEETVUS) SHEETVUS[b.num] = true;
       touche(b); persistOrders(); pushBon(b);
       try { renderPcSheet(); } catch(e){}
