@@ -7434,7 +7434,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.2";
+const APP_VERSION = "14.3";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -10590,7 +10590,15 @@ function piecesEtat(o){
     });
   } catch(e){}
   cutOrderId = avant; pcData = avantData;
-  return {tot:tot, remplis:remplis, manque:manque, ok: tot > 0 && remplis === tot};
+  /* v14.3 : la fiche n'est faite que si l'agent l'a confirmée et envoyée au
+     tableau depuis le Plan de coupe, c'est à dire si « Envoyé au tableau » y est
+     en vert. Sinon le bouton des pièces reste rouge dans les Dossiers. Cela
+     garde aussi la relance automatique du tableau sur les seuls bons déjà
+     partis une fois : aucun bon jamais envoyé n'y part tout seul. */
+  let envoye = false;
+  try { const ef = etatFiche(o); envoye = !!(ef && ef.cls === "ok"); } catch(e){}
+  const rempli = tot > 0 && remplis === tot;
+  return {tot:tot, remplis:remplis, manque:manque, rempli:rempli, envoye:envoye, ok: rempli && envoye};
 }
 
 /* Un dossier complet, c'est un bon renseigné jusqu'au bout : les coordonnées du
@@ -11304,8 +11312,10 @@ $("docList").addEventListener("click", e => {
     const o = ORDERS.find(x => x.id === pcs.dataset.docpcs);
     if (!o) return;
     const e2 = piecesEtat(o);
-    toast(!e2.tot ? "Aucune pièce à saisir sur ce bon"
-        : e2.ok  ? "Pièces utilisées : tout est rempli"
+    toast(!e2.tot ? "Aucune mesure sur ce bon"
+        : e2.ok  ? "Pièces utilisées : remplies et envoyées au tableau"
+        : !e2.envoye ? "Pas encore envoyé au tableau : Plan de coupe, « Confirmer et envoyer au tableau »" +
+                       (e2.manque.length ? ". Il manque aussi : " + e2.manque.join(", ") : "")
         : "Il manque : " + e2.manque.join(", "));
     return;
   }
