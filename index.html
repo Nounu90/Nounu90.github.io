@@ -1882,6 +1882,136 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .tile.primary .tt small{opacity:.85}
 .home-foot{margin-top:26px; text-align:center; font-size:12px; color:var(--muted); line-height:1.7}
 
+/* --- v14.8 : le système WhatsApp (onglets, liste du jour, brouillons) --- */
+.watabs{display:flex; background:var(--card); border:1px solid var(--line); border-radius:13px; padding:4px; margin:0 0 12px; gap:3px}
+.watabs button{flex:1; padding:9px 4px; border-radius:9px; background:none; font-family:"Archivo",sans-serif; font-size:12.5px;
+  font-weight:600; color:var(--muted); display:flex; align-items:center; justify-content:center; gap:5px}
+.watabs button[aria-pressed="true"]{background:#1FA855; color:#fff}
+.watabs em{font-style:normal; font-family:"IBM Plex Mono",monospace; font-size:10.5px; background:var(--accent); color:#fff; border-radius:99px; padding:0 6px}
+#prosSheet.fiche .watabs, #prosSheet.fiche #waToday, #prosSheet.fiche #waPromos, #prosSheet.fiche #waMsgs{display:none}
+.wagoal{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:13px; padding:10px 13px; margin-bottom:10px}
+.wagoal b{font-family:"IBM Plex Mono",monospace; font-size:21px; font-weight:600; color:#1FA855}
+.wagoal span{flex:1; font-size:12.5px; color:var(--muted)}
+.wagoal i, .wacamp i{display:block; height:6px; border-radius:6px; background:var(--card2); overflow:hidden; margin-top:5px}
+.wagoal em, .wacamp em{display:block; height:100%; background:#1FA855}
+.wagh{font-family:"Archivo",sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:14px 2px 7px}
+.watask{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--c); border-radius:13px; padding:10px 11px; margin-bottom:8px}
+.watask .h{display:flex; align-items:center; gap:8px}
+.watask .h b{flex:1; min-width:0; font-family:"Archivo",sans-serif; font-size:14.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.watask .why{flex:none; font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:99px; background:var(--card2); color:var(--c)}
+.watask .why.late{background:var(--accent); color:#fff}
+.watask .sub{font-size:12px; color:var(--muted); margin:4px 0 8px}
+.watask .acts{display:flex; gap:7px}
+.watask .acts button{padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--ink)}
+.watask .acts button.wa{flex:1; background:#1FA855; border-color:#1FA855; color:#fff}
+.wahint{font-size:12px; color:var(--muted); line-height:1.5; margin:8px 2px 0}
+.wacard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 13px; margin-bottom:11px}
+.walab{font-family:"Archivo",sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:9px}
+.wasub{display:flex; justify-content:space-between; align-items:center; font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; margin:12px 0 7px}
+.walink{background:none; color:#1FA855; font-family:"Archivo",sans-serif; font-size:12px; font-weight:600; padding:0}
+.wachips{display:flex; flex-wrap:wrap; gap:6px}
+.wachips button{padding:7px 11px; border-radius:99px; border:1px solid var(--line); background:var(--card); font-family:"Archivo",sans-serif; font-size:12px; font-weight:600; color:var(--muted)}
+.wachips button[aria-pressed="true"]{background:#E3F5EA; border-color:#1FA855; color:#127A3D}
+.wainp, .wareg input, .wasel select{width:100%; border:1px solid var(--line); background:var(--card2); border-radius:10px; padding:10px 11px; font-size:14px; color:var(--ink)}
+.wareg{display:grid; gap:9px}
+.wareg label, .wasel{display:grid; gap:4px; font-size:12.5px; color:var(--muted)}
+.wareg em{font-style:normal; font-size:11px}
+.wasel{margin-top:8px}
+.watog{display:flex; align-items:center; gap:8px; font-size:13px; margin-top:10px}
+.wafiles{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:7px}
+.wafiles button{text-align:left; padding:9px 10px; border-radius:11px; border:1px solid var(--line); background:var(--card)}
+.wafiles button[aria-pressed="true"]{border-color:#1FA855; background:#E3F5EA}
+.wafiles b{display:block; font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.wafiles small{font-size:11px; color:var(--muted)}
+.waduo{display:flex; gap:8px; margin-top:12px}
+.waduo button, button.wa.full{padding:11px 12px; border-radius:11px; border:1px solid var(--line); background:var(--card); font-family:"Archivo",sans-serif; font-size:13px; font-weight:600; color:var(--ink)}
+.waduo button.wa, button.wa.full{flex:1; background:#1FA855; border-color:#1FA855; color:#fff}
+button.wa.full{width:100%}
+.wacamp{display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--line)}
+.wacamp:first-of-type{border-top:0}
+.wacamp > div{flex:1; min-width:0}
+.wacamp b{display:block; font-family:"Archivo",sans-serif; font-size:13.5px}
+.wacamp small{font-size:11.5px; color:var(--muted)}
+.wacamp button{flex:none; padding:7px 10px; border-radius:9px; border:1px solid var(--line); background:var(--card); font-size:12px; font-weight:600; color:var(--ink)}
+.watpl{display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:none; padding:10px 2px; border-top:1px solid var(--line); color:var(--ink)}
+.watpl:first-of-type{border-top:0}
+.watpl b{display:block; font-family:"Archivo",sans-serif; font-size:13.5px}
+.watpl small{font-size:11.5px; color:var(--muted)}
+.watpl span{margin-left:auto; color:var(--muted); font-size:18px}
+.watxt{width:100%; border:1.5px solid #1FA855; border-radius:12px; background:var(--card); padding:10px 11px; font-size:14px; line-height:1.55; color:var(--ink); resize:vertical; margin-top:8px}
+.watxt.rtl, .wabul.rtl{direction:rtl; text-align:right}
+.wains{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px}
+.wains button{padding:4px 8px; border-radius:7px; border:1px dashed #1F5FD1; background:none; color:#1F5FD1; font-family:"Archivo",sans-serif; font-size:11.5px; font-weight:600}
+.waap{margin-top:8px}
+.waap em{font-style:normal; font-size:11px; color:var(--muted)}
+.wabul{background:#E3F5EA; color:#191315; border-radius:12px 12px 12px 4px; padding:9px 11px; font-size:13px; line-height:1.5; margin-top:3px}
+.waseg{display:flex; background:var(--card2); border:1px solid var(--line); border-radius:10px; padding:3px; margin-bottom:8px}
+.waseg button{flex:1; padding:8px; border-radius:7px; background:none; font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--muted)}
+.waseg button[aria-pressed="true"]{background:var(--card); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.wamodal{position:fixed; inset:0; z-index:62; background:rgba(0,0,0,.45); display:flex; align-items:flex-end; justify-content:center}
+.wamodal[hidden]{display:none}
+.wabox{background:var(--card); width:100%; max-width:560px; max-height:92vh; overflow-y:auto; border-radius:20px 20px 0 0;
+  padding:16px 15px calc(18px + env(safe-area-inset-bottom))}
+.wabh{display:flex; align-items:center; gap:10px; margin-bottom:10px}
+.wabh b{font-family:"Archivo",sans-serif; font-size:16px}
+.wabh span{flex:1; min-width:0; font-size:12.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.waclose{flex:none; width:34px; height:34px; border-radius:10px; border:1px solid var(--line); background:var(--card); font-size:15px; color:var(--ink)}
+.waused{display:flex; flex-wrap:wrap; gap:5px}
+.waused span{font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:99px}
+.waused .y{background:#E3F5EA; color:#127A3D} .waused .n{background:var(--warn-soft); color:var(--warn)}
+.wavar{display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); margin:8px 2px}
+.wavar button{background:#F1E8FB; color:#7A3BC4; border-radius:99px; padding:6px 11px; font-family:"Archivo",sans-serif; font-size:12px; font-weight:600}
+.wapj{display:flex; justify-content:space-between; gap:8px; border:1px solid var(--line); border-radius:10px; padding:8px 10px; margin-bottom:6px; font-size:12.5px}
+.wapj em{font-style:normal; color:var(--muted); font-size:11.5px}
+.wasend{width:100%; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:6px; padding:14px; border-radius:13px;
+  background:#1FA855; color:#fff; font-family:"Archivo",sans-serif; font-size:15px; font-weight:700}
+.wares{display:grid; grid-template-columns:1fr 1fr; gap:7px}
+.wares button{display:flex; flex-direction:column; gap:3px; text-align:left; padding:11px; border-radius:12px; border:1px solid var(--line);
+  background:var(--card); font-family:"Archivo",sans-serif; font-size:13px; font-weight:600; color:var(--ink)}
+.wares button small{font-family:"IBM Plex Sans",sans-serif; font-size:11.5px; font-weight:400; color:var(--muted)}
+.wares button.full{grid-column:1 / -1}
+.wares button[disabled]{opacity:.45}
+.waraisons{display:grid; gap:7px}
+.waraisons button{text-align:left; padding:12px; border-radius:11px; border:1px solid var(--line); background:var(--card); font-size:14px; color:var(--ink)}
+.wafiche{margin:0 0 12px}
+.waetp{display:flex; gap:3px}
+.waetp span{flex:1; height:6px; border-radius:4px; background:var(--card2)}
+.waetp span.on{background:var(--c)}
+.waetl{display:grid; grid-template-columns:repeat(5,1fr); margin-top:4px; font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:600; text-transform:uppercase; color:var(--muted); text-align:center}
+.waetl .on{color:var(--c)}
+.wanext{display:flex; align-items:center; gap:8px; background:#E3F5EA; color:#127A3D; border-radius:11px; padding:9px 11px; margin-top:10px; font-size:12.8px}
+.wanext b{flex:1}
+.wanext small{font-size:11px; opacity:.8}
+.wanext.pause{background:var(--card2); color:var(--muted)}
+.wanext button{padding:6px 10px; border-radius:9px; border:1px solid var(--line); background:var(--card); font-size:12px; font-weight:600; color:var(--ink)}
+.waenv{display:grid; gap:3px; margin-top:9px; font-size:12px; color:var(--muted)}
+.waenv em{font-style:normal; font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase}
+.wastar{display:flex; align-items:center; gap:10px; width:100%; margin-top:10px; padding:10px 12px; border-radius:11px; border:1px solid var(--line); background:var(--card); font-size:13.5px; color:var(--ink); text-align:left}
+.wastar i{width:38px; height:22px; border-radius:99px; background:var(--line-strong); position:relative; flex:none}
+.wastar i::after{content:""; position:absolute; left:3px; top:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:left .15s}
+.wastar[aria-pressed="true"]{border-color:#B7791F; background:#FDF3DC}
+.wastar[aria-pressed="true"] i{background:#B7791F}
+.wastar[aria-pressed="true"] i::after{left:19px}
+.prtag.etp{color:#fff; background:var(--c)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .wachips button[aria-pressed="true"], :root:not([data-theme="light"]) .wanext,
+  :root:not([data-theme="light"]) .waused .y, :root:not([data-theme="light"]) .wafiles button[aria-pressed="true"]{background:#12291B; color:#4ADE80}
+  :root:not([data-theme="light"]) .wastar[aria-pressed="true"]{background:#33280F}
+}
+:root[data-theme="dark"] .wachips button[aria-pressed="true"], :root[data-theme="dark"] .wanext,
+:root[data-theme="dark"] .waused .y, :root[data-theme="dark"] .wafiles button[aria-pressed="true"]{background:#12291B; color:#4ADE80}
+:root[data-theme="dark"] .wastar[aria-pressed="true"]{background:#33280F}
+
+/* --- v14.7 : le nombre de fenêtres d'un contact WhatsApp, même sans mesures --- */
+.prnbf{display:flex; align-items:center; gap:10px}
+.prnbf button{flex:none; width:44px; height:44px; border-radius:12px; border:1px solid var(--line); background:var(--card);
+  font-family:"Archivo",sans-serif; font-size:20px; font-weight:700; color:var(--ink)}
+.prnbf input{flex:1; min-width:0; height:44px; text-align:center; border:1px solid var(--line); border-radius:12px;
+  background:var(--card2); font-family:"IBM Plex Mono",monospace; font-size:19px; font-weight:600; color:var(--ink)}
+.prnbf input:focus{outline:none; border-color:var(--accent); background:var(--card)}
+.prnbf.auto button{opacity:.35; pointer-events:none}
+.prnbf.auto input{background:var(--card); color:var(--muted)}
+
 /* --- v14.6 : tablette paysage et PC. Tout est dans la requête média ci-dessous :
    sous 900 px de large ou 600 px de haut (téléphone, portrait comme paysage,
    tablette en portrait), rien de ceci ne s'applique et l'app reste identique. --- */
@@ -3107,6 +3237,16 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
     <div class="sumline"><span id="prosSumLab">Contacts à rappeler</span><b id="prosSum">0</b></div>
+    <!-- v14.8 : les 4 onglets d'Imane -->
+    <div class="watabs" role="tablist">
+      <button type="button" data-watab="today" aria-pressed="true">Aujourd'hui<em hidden></em></button>
+      <button type="button" data-watab="contacts" aria-pressed="false">Contacts</button>
+      <button type="button" data-watab="promos" aria-pressed="false">Promos</button>
+      <button type="button" data-watab="msgs" aria-pressed="false">Messages</button>
+    </div>
+    <div id="waToday"></div>
+    <div id="waPromos" hidden></div>
+    <div id="waMsgs" hidden></div>
     <button class="prbtn wa promobtn" id="prosPromoBtn" type="button" hidden>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>
       Promotions WhatsApp</button>
@@ -3117,6 +3257,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
     </button>
     <section class="card" id="prosForm" hidden>
       <div class="card-head"><div class="label" id="prosFormLab">Nouveau contact</div></div>
+      <div class="wafiche" id="waFicheEtat" hidden></div>
       <div class="prficheh" id="prosFicheH" hidden>
         <a class="prbtn wa" id="prosFicheWa" href="#" target="_blank" rel="noopener">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg>
@@ -3135,6 +3276,14 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.6 7-11a7 7 0 10-14 0c0 5.4 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
         <input id="prosAdresse" type="text" placeholder="Adresse (quartier, ville)" autocomplete="off">
       </div>
+      <div class="prsub"><span>Langue des messages</span></div>
+      <div class="seg" id="waLangSeg">
+        <button type="button" data-wafl="fr" aria-pressed="true">Français</button>
+        <button type="button" data-wafl="ar" aria-pressed="false">الدارجة</button>
+      </div>
+      <div class="prsub"><span>Venu par</span></div>
+      <div class="wachips" id="waSrc"></div>
+      <button type="button" class="wastar" id="waStar" aria-pressed="false"><i></i><span>⭐ Gros client (Noureddine s'en occupe)</span></button>
 
       <div class="prsub"><span>Type de store</span><b>prix donné sur WhatsApp, pas un devis</b></div>
       <div class="seg seg3" id="prosType">
@@ -3169,6 +3318,13 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <span>Choisir un tissu</span>
       </button>
 
+      <div class="prsub"><span>Nombre de fenêtres</span><b id="prosNbFenLab">même sans mesures</b></div>
+      <div class="prnbf" id="prosNbFenBox">
+        <button type="button" data-pnbf="-1" aria-label="Une fenêtre de moins">−</button>
+        <input id="prosNbFen" inputmode="numeric" placeholder="?" autocomplete="off" aria-label="Nombre de fenêtres">
+        <button type="button" data-pnbf="1" aria-label="Une fenêtre de plus">+</button>
+      </div>
+
       <div class="prsub"><span>Dimensions</span><b id="prosDimTot">—</b></div>
       <div id="prosRows"></div>
       <button class="add" id="prosAddRow" type="button">
@@ -3197,17 +3353,17 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
         <input id="prosNote" type="text" placeholder="Ce qu'il demande (budget, délai, remarque...)">
       </div>
-      <div class="prsub"><span>Situation</span></div>
-      <div class="seg prsit" id="prosSit">
+      <div class="prsub" hidden><span>Situation</span></div>
+      <div class="seg prsit" id="prosSit" hidden>
         <button type="button" data-psit="nc" aria-pressed="false">Nouveau client</button>
         <button type="button" data-psit="int" aria-pressed="false">Intéressé</button>
         <button type="button" data-psit="nrp" aria-pressed="false">Ne répond pas</button>
         <button type="button" data-psit="pas" aria-pressed="false">Pas intéressé</button>
       </div>
       <div class="prsub"><span>Suivi</span></div>
-      <button type="button" class="prrap" id="prosRappel" aria-pressed="false">
+      <button type="button" class="prrap" id="prosRappel" aria-pressed="false" hidden>
         <i></i><span>À rappeler</span></button>
-      <div class="field" id="prosRappelLeL" style="margin-top:8px" hidden>
+      <div class="field wacache" id="prosRappelLeL" style="margin-top:8px" hidden>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
         <input id="prosRappelLe" type="date">
         <span class="unit">jour du rappel</span>
@@ -3248,6 +3404,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
     <div id="prosBody" style="margin-top:9px"></div>
     </div>
   </div>
+  <div class="wamodal" id="waModal" hidden><div class="wabox" id="waBox"></div></div>
 </div>
 
 <!-- PROMOTIONS WHATSAPP -->
@@ -5904,6 +6061,7 @@ async function pullBons(){
         return;
       }
       if (String(r.id).indexOf("pimg-") === 0) return;
+      if (r.id === WA_ID){ fusionWa(r.data); return; }     /* v14.8 : messages et campagnes WhatsApp */
       if (r.id === PROMO_ID){
         if (r.data) fusionPromo(r.data);
         return;
@@ -6299,7 +6457,7 @@ $("homeTodo").addEventListener("click", e => {
   if (g === "hist"){ histSort = "ech"; LS.set("mst_histsort", "ech"); histFilter = "all"; renderHist(); nav("histSheet"); return; }
   if (g === "pay"){ if (!payAllowed()) return; payVue = "attendre"; payChip = "tous"; payBon = ""; renderPay(); nav("paySheet"); return; }
   if (g === "note"){ if (!noteAllowed()) return; renderNote(); nav("noteSheet"); return; }
-  if (g === "pros"){ if (!prosAllowed()) return; prosFiltre = "rappel"; prosFormOuvre(false); renderPros(); nav("prosSheet"); return; }
+  if (g === "pros"){ if (!prosAllowed()) return; WA_TAB = "today"; prosFormOuvre(false); waRendTout(); nav("prosSheet"); return; }
 });
 
 function renderHome(){
@@ -6458,7 +6616,7 @@ function renderHome(){
   try { renderHomeK3(); } catch(e){}
   try {
     homeBadge("tileHist", bonsEnRetard().length);
-    homeBadge("tilePros", prosAllowed() ? prosVivants().filter(p => prosARappeler(p)).length : 0);
+    homeBadge("tilePros", prosAllowed() ? waNbDuJour() : 0);
     if (tubeSeul() || fabSeul()) homeBadge("tileCut", resteAtelier(tubeSeul() ? "tube" : "fen").length);
   } catch(e){}
   $("homeFoot").innerHTML = srcLabel() + "<br>MSTORECASA · Casablanca · version " + APP_VERSION;
@@ -7719,7 +7877,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.6";
+const APP_VERSION = "14.8";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -12684,7 +12842,7 @@ $("tileNote").addEventListener("click", () => {
    le message, compte chaque envoi par numéro et retient la date. Les anciens
    clients (numéro pris sur leurs bons) sont dans la liste avec les contacts. */
 const PROS_INT = {nc:"Nouveau client", int:"Intéressé", nrp:"Ne répond pas", pas:"Pas intéressé"};
-function prosDernier(p){ return p.msg || p.at || 0; }
+function prosDernier(p){ return Math.max(p.msg || 0, p.vu || 0) || p.at || 0; }
 const PROMO_ID = "cfg-promos";
 let PROMO = LS.get("mst_promo", {promos:[], envois:[]});
 if (!PROMO || !Array.isArray(PROMO.promos)) PROMO = {promos:[], envois:[]};
@@ -13293,7 +13451,7 @@ function prosLignes(){
        prosEstim(p) ? "Prix WhatsApp : " + prosEstimTexte(p) : ""].filter(Boolean).join(" · "),
       (st === "client" ? "Devenu client" : (st === "fin" ? "Sans suite" : (p.rappel ? "À rappeler" : "En cours"))) +
         (p.interet ? " · " + PROS_INT[p.interet] : ""),
-      (prosBonDe(p) || {}).num || "", jjmmaaaa(p.msg || p.vu), nomDe(p.vuBy || p.by || ""), p.id];
+      (prosBonDe(p) || {}).num || "", jjmmaaaa(Math.max(p.msg || 0, p.vu || 0)), nomDe(p.vuBy || p.by || ""), p.id];
   });
 }
 let prosFeuilleT = null;
@@ -13378,8 +13536,9 @@ function prosListe(f, compte){
   const q = compte ? "" : prosQ.trim().toLowerCase();
   return prosVivants().filter(p => {
     const st = prosStatut(p);
-    const ch = PCHIPS.find(c => c.k === F);
-    if (ch && ch.coul && prosCouleur(p) !== "nm-" + F) return false;
+    if (F.indexOf("e-") === 0 && prosEtape(p) !== F.slice(2)) return false;
+    if (F === "star" && !p.star) return false;
+    if (F === "incomp" && !prosIncomplete(p)) return false;
     if (F === "client" && st !== "client") return false;
     if (F === "fin"    && st !== "fin")    return false;
     if (F === "nc"     && p.interet !== "nc")  return false;
@@ -13605,23 +13764,27 @@ function renderNosClients(body){
 }
 
 /* ---- v13.3 : une seule rangée de puces, avec le nombre de fiches dans chacune ---- */
+/* v14.8 : les puces suivent les 5 étapes du système WhatsApp */
 const PCHIPS = [
-  {k:"tous",    lab:"Tous"},
-  {k:"rappel",  lab:"À rappeler",     c:"var(--c-rappel)",  coul:1},
-  {k:"int",     lab:"Intéressés",     c:"var(--c-int)",     coul:1},
-  {k:"nc",      lab:"Nouveaux",       c:"var(--c-nc)",      coul:1},
-  {k:"encours", lab:"En cours",       c:"var(--c-encours)", coul:1},
-  {k:"fini",    lab:"Livrés et payés", c:"var(--c-fini)",   coul:1},
-  {k:"nrp",     lab:"Ne répond pas",  c:"var(--c-nrp)",     coul:1},
-  {k:"reste",   lab:"Reste à payer",  c:"var(--warn)"},
-  {k:"devis",   lab:"Devis envoyé",   c:"var(--c-devis)",   coul:1, plus:1},
-  {k:"off",     lab:"Pas intéressé ou sans suite", c:"var(--c-off)", coul:1, plus:1},
-  {k:"promo",   lab:"Promos envoyées", plus:1},
-  {k:"nopromo", lab:"Jamais reçu de promo", plus:1},
-  {k:"m1",      lab:"Sans nouvelles +1 mois", plus:1},
-  {k:"m2",      lab:"Sans nouvelles +2 mois", plus:1},
-  {k:"nos",     lab:"Nos clients", plus:1}
+  {k:"tous",     lab:"Tous"},
+  {k:"e-dem",    lab:"Demande",      c:"var(--c-nc)"},
+  {k:"e-prix",   lab:"Prix envoyé",  c:"var(--c-devis)"},
+  {k:"e-int",    lab:"Intéressé",    c:"var(--c-int)"},
+  {k:"e-devis",  lab:"Devis",        c:"#0E8A8A"},
+  {k:"e-client", lab:"Client",       c:"var(--c-encours)"},
+  {k:"e-pause",  lab:"En pause",     c:"var(--c-nrp)"},
+  {k:"star",     lab:"⭐ Gros clients", plus:1},
+  {k:"incomp",   lab:"Fiche incomplète", c:"var(--warn)", plus:1},
+  {k:"reste",    lab:"Reste à payer",  c:"var(--warn)", plus:1},
+  {k:"nos",      lab:"Nos clients", plus:1}
 ];
+/* Une fiche est complète quand on peut écrire la réponse au prix : type, fenêtres, prix au m². */
+function prosIncomplete(p){
+  const e = prosEtape(p);
+  if (e === "client" || e === "pause") return false;
+  const r = prosResume(p);
+  return !(r && r.nb) || !(parseFloat(p.pxE) > 0 || parseFloat(p.pxJ) > 0);
+}
 let prosPlus = false;
 function jourCourt(iso){
   if (!iso) return "";
@@ -13740,10 +13903,10 @@ function renderReste(body){
 function renderPros(){
   const body = $("prosBody");
   if (!body) return;
+  try { waNorm(); renderWaFiche(); } catch(e){}
   const tous = prosVivants();
-  const aRappeler = tous.filter(p => prosARappeler(p)).length;
-  $("prosSum").textContent = aRappeler;
-  $("prosSumLab").textContent = aRappeler > 1 ? "Contacts à rappeler" : "Contact à rappeler";
+  try { $("prosSum").textContent = waNbDuJour(); } catch(e){}
+  $("prosSumLab").textContent = "À envoyer aujourd'hui";
   try { renderPuces(); } catch(e){}
   try { renderProsFicheAct(); } catch(e){}
 
@@ -13761,7 +13924,7 @@ function renderPros(){
   if (prosFiltre === "nos"){ renderNosClients(body); return; }
   if (prosFiltre === "reste"){ renderReste(body); return; }
   const list = prosListe();
-  const todo = (prosFiltre === "tous" && !prosQ.trim()) ? blocTodo() : "";
+  const todo = "";   /* v14.8 : la liste du jour est dans l'onglet « Aujourd'hui » */
   if (!list.length){
     body.innerHTML = todo + '<div class="empty">' + (tous.length
       ? "Aucun contact dans ce filtre."
@@ -13779,15 +13942,20 @@ function renderPros(){
       '<div class="prl1"><b class="' + prosCouleur(p) + '">' + esc(p.nom || "Sans nom") + '</b>' +
         '<em>' + esc(telAffiche(p.tel || "")) + '</em></div>' +
       '<div class="prtags">' +
-        (p.interet ? tag(PROS_INT[p.interet], "c-" + p.interet) : "") +
+        (function(){
+          const e = prosEtape(p), t = waTache(p);
+          return '<span class="prtag etp" style="--c:' + waEtapeCoul(e) + '">' + (p.star ? "⭐ " : "") + waEtapeLab(e) + '</span>' +
+            (e === "pause" && p.pause ? tag(esc(p.pause.r)) : "") +
+            (t && e !== "pause" ? tag("rappel " + (t.due <= Date.now() ? "aujourd'hui" : "le " + prosDate(t.due)), "inf") : "") +
+            (prosIncomplete(p) ? tag("fiche incomplète", "att") : "");
+        })() +
         (function(){
           const pi = promoInfo(waNum(p.tel));
           return pi.n ? tag(pi.n + (pi.n > 1 ? " promos" : " promo") + "  ·  dernière " + prosDate(pi.der), "inf")
                       : tag("aucune promo");
         })() +
-        (p.msg ? tag("mis à jour le " + prosDate(p.msg)) : "") +
-        (st === "client" ? tag("client  ·  " + (CLIENT_LAB[ce] || ""), "c-" + ce)
-          : (st === "fin" ? tag("sans suite", "c-pas") : (p.rappel ? tag("à rappeler" + (p.rappelLe ? "  ·  " + jourCourt(p.rappelLe) : ""), "c-rappel") : ""))) +
+        (prosDernier(p) ? tag("dernier contact le " + prosDate(prosDernier(p))) : "") +
+        (st === "client" ? tag("client  ·  " + (CLIENT_LAB[ce] || ""), "c-" + ce) : "") +
         (p.at ? tag("ajouté le " + prosDate(p.at)) : "") +
         (p.vu ? tag("contacté le " + prosDate(p.vu), "inf") : "") +
         (p.by ? tag(esc(nomDe(p.by))) : "") +
@@ -13797,8 +13965,10 @@ function renderPros(){
         const bouts = [];
         if (p.adresse) bouts.push(esc(p.adresse));
         if (p.pose) bouts.push(p.pose === "Livraison" ? "livraison" : "pose");
-        if (r && r.nb) bouts.push('<b>' + r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre") + '</b>' +
-          '  ·  <b>' + fr(r.m2, 2) + ' m²</b>  ·  <b>' + fr(r.ml, 2) + ' ml</b>');
+        if (r && r.nb) bouts.push(r.sansMesure
+          ? '<b>' + r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre") + '</b> (sans mesures)'
+          : '<b>' + r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre") + '</b>' +
+            '  ·  <b>' + fr(r.m2, 2) + ' m²</b>  ·  <b>' + fr(r.ml, 2) + ' ml</b>');
         if (p.type) bouts.push(typeCourt(p.type));
         if (r && r.refs.length) bouts.push('<b>' + r.refs.map(esc).join(", ") + '</b>');
         return bouts.length ? '<div class="prdem">' + bouts.join("  ·  ") + '</div>' : '';
@@ -13833,7 +14003,7 @@ function renderPros(){
    C'est une prise de notes qui évitera de tout retaper le jour du devis. */
 function prosDVide(){ return {adresse:"", pose:"Pose", type:"ENR", refs:[], dims:[],
                               rappel:false, rappelLe:"", interet:"nc", promoMan:0, promoDer:0, fact:"oui", poseMode:"forfait",
-                              promos:[]}; }
+                              promos:[], nbFen:"", lang:"fr", src:"", star:false}; }
 function prosFormPrix(){
   return {type:prosD.type, dims:prosD.dims, pxE:$("prosPxE").value, pxJ:$("prosPxJ").value,
           remise:$("prosRemise").value, fact:prosD.fact || "oui",
@@ -13954,19 +14124,65 @@ function prosEstimTexte(p){
     (e.manque ? "  (prix manquant pour une famille)" : "");
 }
 
+/* v14.7 : le nombre de fenêtres tapé par Imane quand le client ne connaît pas
+   ses mesures. Dès qu'une mesure existe, c'est le compte des mesures qui gagne. */
+function prosNbFenSaisi(p){
+  const n = Math.round(parseFloat(String((p && p.nbFen) || "").replace(",", ".")));
+  return (n >= 1 && n <= 999) ? n : 0;
+}
 function prosResume(p){
   const dims = (p.dims || []).map(prosDimNette).filter(Boolean);
   if (!dims.length && !(p.refs || []).length && !p.type) return null;
   let nb = 0, m2 = 0, ml = 0;
   dims.forEach(d => { nb += d.q; m2 += d.q * d.l * d.h / 10000; ml += d.q * d.h / 100; });
-  return {nb:nb, m2:m2, ml:ml, refs:(p.refs || []).slice(), type:p.type || ""};
+  const sansMesure = !nb;
+  if (sansMesure) nb = prosNbFenSaisi(p);
+  return {nb:nb, m2:m2, ml:ml, sansMesure:sansMesure, refs:(p.refs || []).slice(), type:p.type || ""};
 }
+/* « 4 fenêtres » seul quand il n'y a pas de mesures, sinon avec m² et ml. */
+function prosNbTexte(r){
+  if (!r || !r.nb) return "";
+  const f = r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre");
+  return r.sansMesure ? f + " (sans mesures)" : f + "  ·  " + fr(r.m2, 2) + " m²  ·  " + fr(r.ml, 2) + " ml";
+}
+function renderProsNbFen(){
+  const box = $("prosNbFenBox"), inp = $("prosNbFen");
+  if (!box || !inp) return;
+  let nbMes = 0;
+  (prosD.dims || []).forEach(d => { const n = prosDimNette(d); if (n) nbMes += n.q; });
+  const auto = nbMes > 0;
+  box.classList.toggle("auto", auto);
+  inp.readOnly = auto;
+  if (auto){ inp.value = nbMes; $("prosNbFenLab").textContent = "compté depuis les mesures"; }
+  else {
+    if (document.activeElement !== inp) inp.value = prosNbFenSaisi(prosD) || "";
+    $("prosNbFenLab").textContent = "même sans mesures";
+  }
+}
+function prosDimTotTexte(){
+  const r = prosResume(prosD);
+  $("prosDimTot").textContent = (r && r.nb && !r.sansMesure) ? prosNbTexte(r) : "—";
+  renderProsNbFen();
+}
+$("prosNbFen").addEventListener("input", e => {
+  const clean = e.target.value.replace(/[^0-9]/g, "").slice(0, 3);
+  if (clean !== e.target.value) e.target.value = clean;
+  prosD.nbFen = clean;
+});
+$("prosNbFenBox").addEventListener("click", e => {
+  const b = e.target.closest("[data-pnbf]");
+  if (!b || $("prosNbFenBox").classList.contains("auto")) return;
+  const n = Math.max(0, Math.min(999, prosNbFenSaisi(prosD) + parseInt(b.dataset.pnbf, 10)));
+  prosD.nbFen = n ? String(n) : "";
+  renderProsNbFen();
+});
 function typeCourt(t){
   return t === "JN" ? "jour et nuit" : (t === "MIX" ? "enrouleur et jour/nuit" : "enrouleur");
 }
 
 function renderProsD(){
   if (!$("prosType")) return;
+  try { renderWaChamps(); } catch(e){}
   renderProsSuivi();
   [...$("prosPose").children].forEach(b =>
     b.setAttribute("aria-pressed", String(b.dataset.ppose === (prosD.pose || "Pose"))));
@@ -14007,10 +14223,7 @@ function renderProsD(){
       : "")
   ).join("");
 
-  const r = prosResume(prosD);
-  $("prosDimTot").textContent = (r && r.nb)
-    ? r.nb + (r.nb > 1 ? " fenêtres  ·  " : " fenêtre  ·  ") + fr(r.m2, 2) + " m²  ·  " + fr(r.ml, 2) + " ml"
-    : "—";
+  prosDimTotTexte();
 }
 
 $("prosPose").addEventListener("click", e => {
@@ -14057,10 +14270,7 @@ $("prosRows").addEventListener("input", e => {
   if (clean !== e.target.value) e.target.value = clean;
   prosD.dims[i][e.target.dataset.prk] = clean;
   try { renderProsPrix(); } catch(err){}
-  const r = prosResume(prosD);
-  $("prosDimTot").textContent = (r && r.nb)
-    ? r.nb + (r.nb > 1 ? " fenêtres  ·  " : " fenêtre  ·  ") + fr(r.m2, 2) + " m²  ·  " + fr(r.ml, 2) + " ml"
-    : "—";
+  prosDimTotTexte();
 });
 $("prosRows").addEventListener("click", e => {
   const t = e.target.closest("[data-prtype]");
@@ -14097,7 +14307,8 @@ function prosCharge(p){
            promos: promosDe(p).map(x => Object.assign({}, x)),
            poseMode: p.poseMode === "fenetre" ? "fenetre" : "forfait",
            refs: (p.refs || []).slice(),
-           dims: (p.dims || []).map(d => Object.assign({}, d))};
+           dims: (p.dims || []).map(d => Object.assign({}, d)),
+           nbFen: p.nbFen || "", lang: p.lang === "ar" ? "ar" : "fr", src: p.src || "", star: !!p.star};
   renderProsD();
 }
 /* Recopie le formulaire du haut dans une fiche. */
@@ -14106,8 +14317,13 @@ function prosApplique(p){
   p.tel = $("prosTel").value.trim();
   p.note = $("prosNote").value.trim();
   p.adresse = $("prosAdresse").value.trim();
-  /* chaque enregistrement par Imane compte comme la dernière nouvelle du client */
-  p.msg = Date.now();
+  /* v14.7 : corriger ou compléter une fiche ne change plus la date du dernier
+     contact. Elle est posée à la création, puis par le bouton WhatsApp (p.vu). */
+  if (!p.msg && !p.vu) p.msg = p.at || Date.now();
+  p.nbFen = prosNbFenSaisi(prosD) ? String(prosNbFenSaisi(prosD)) : "";
+  p.lang = prosD.lang === "ar" ? "ar" : "fr";
+  p.src = prosD.src || "";
+  p.star = !!prosD.star;
   p.rappel = !!prosD.rappel;
   p.rappelLe = p.rappel ? ($("prosRappelLe").value || "") : "";
   p.interet = prosD.interet || "";
@@ -14161,7 +14377,9 @@ function renderProsFicheAct(){
       '<button class="prbtn prod" type="button" data-prprod="' + p.id + '">Commande ferme</button>') +
     '<span class="pricons">' +
     (st === "client" ? '' :
-      '<button class="prbtn" type="button" data-prfin="' + p.id + '">' + (p.fin ? "Remettre en cours" : "Classer sans suite") + '</button>') +
+      (prosEtape(p) === "pause"
+        ? '<button class="prbtn" type="button" data-wareprend="' + p.id + '">Reprendre</button>'
+        : '<button class="prbtn" type="button" data-wapausebtn="' + p.id + '">Mettre en pause</button>')) +
     '<button class="prbtn" type="button" data-prdel="' + p.id + '" style="color:var(--accent)">Supprimer</button>' +
     '</span>';
 }
@@ -14247,11 +14465,13 @@ function prosFormOuvre(ouvre){
   $("prosForm").hidden = !ouvre;
   $("prosOpen").hidden = !!ouvre;
   $("prosSheet").classList.toggle("fiche", !!ouvre);
+  try { ["waToday", "waPromos", "waMsgs"].forEach(id => { if (ouvre) $(id).hidden = true; });
+        $("prosLst").hidden = !!ouvre || (typeof WA_TAB !== "undefined" && WA_TAB !== "contacts"); } catch(e){}
   $("prosTitre").textContent = ouvre ? (prosEdit ? "Fiche contact" : "Nouveau contact") : "Contacts WhatsApp";
   try { renderProsFicheAct(); } catch(e){}
   if (ouvre) try { $("prosSheet").querySelector(".sheet-body").scrollTo({top:0}); } catch(e){}
 }
-function prosFicheFerme(){ prosVide(); prosFormOuvre(false); renderPros(); }
+function prosFicheFerme(){ prosVide(); prosFormOuvre(false); renderPros(); try { waRendTout(); } catch(e){} }
 /* la flèche du haut ferme d'abord la fiche, puis la liste */
 document.addEventListener("click", e => {
   const b = e.target.closest('[data-close="prosSheet"]');
@@ -14437,11 +14657,860 @@ $("tilePros").addEventListener("click", () => {
   if (!prosAllowed()) return;
   prosVide(); prosQ = ""; $("prosSearch").value = "";
   prosFormOuvre(false);
-  renderPros();
+  WA_TAB = "today"; WA_ED = null; WA_CAMP_NEUF = null;
+  waRendTout();
   nav("prosSheet");
-  pullPros().then(() => renderPros());
+  pullPros().then(() => waRendTout());
+  pullWa().then(ch => { if (ch) waRendTout(); });
   pullPromo().then(() => renderPros());
 });
+
+/* ============ v14.8 : le système WhatsApp d'Imane ============
+   L'app ne lit pas WhatsApp et Imane ne note pas chaque réponse. Le système
+   fait donc une seule chose : dire chaque jour quels messages envoyer, avec
+   un brouillon prêt (français ou darija) qu'Imane relit et envoie elle-même.
+   Chaque contact est à une étape ; chaque étape a ses rappels, à des délais
+   fixes réglés par Noureddine. Imane ne choisit jamais une date : après un
+   envoi, elle dit ce qui s'est passé et l'app fixe le rappel suivant. */
+const WA_ID = "cfg-wamsg";          /* rangée réservée : modèles, réglages, campagnes */
+const WA_J = 86400000;
+const WA_DEF_REG = {pxE:230, pxJ:260, r1:2, r2:7, r3:30, disc:3, tard:7, tardMax:2,
+  d1:2, d2:5, avis:7, parrMax:6, quota:20, ecart:14, lienAvis:"", ficheENR:"", ficheJN:""};
+let WA = LS.get("mst_wa", null);
+if (!WA || typeof WA !== "object") WA = {v:1, maj:0, reg:{}, msg:{}, camp:[]};
+if (!WA.reg) WA.reg = {};
+if (!WA.msg) WA.msg = {};
+if (!Array.isArray(WA.camp)) WA.camp = [];
+/* Les contacts saisis avant le système sont repris 20 par jour, pas tous d'un coup. */
+if (!LS.get("mst_wa_depart", 0)) LS.set("mst_wa_depart", Date.now());
+const WA_DEPART = LS.get("mst_wa_depart", Date.now());
+
+function waReg(k){
+  const v = WA.reg ? WA.reg[k] : undefined;
+  return (v === undefined || v === null || v === "") ? WA_DEF_REG[k] : v;
+}
+function waSave(){ WA.maj = Date.now(); LS.set("mst_wa", WA); pushWa(); }
+async function pushWa(){
+  if (!SB || !USER) return false;
+  try {
+    const {error} = await SB.from("bons").upsert({id:WA_ID, num:"__WHATSAPP__", author:USER.login,
+      data:WA, updated_at:new Date().toISOString()});
+    if (error) throw error;
+    return true;
+  } catch(e){ return false; }
+}
+function fusionWa(d){
+  if (!d || typeof d !== "object") return false;
+  if ((d.maj || 0) <= (WA.maj || 0)) return false;
+  WA = d;
+  if (!WA.reg) WA.reg = {};
+  if (!WA.msg) WA.msg = {};
+  if (!Array.isArray(WA.camp)) WA.camp = [];
+  LS.set("mst_wa", WA);
+  return true;
+}
+async function pullWa(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", WA_ID).limit(1);
+    if (error) throw error;
+    return fusionWa(data && data[0] && data[0].data);
+  } catch(e){ return false; }
+}
+
+/* ---------- les 5 étapes ---------- */
+const WA_ETAPES = [
+  {k:"dem",    lab:"Demande",     c:"var(--c-nc)"},
+  {k:"prix",   lab:"Prix envoyé", c:"var(--c-devis)"},
+  {k:"int",    lab:"Intéressé",   c:"var(--c-int)"},
+  {k:"devis",  lab:"Devis envoyé", c:"#0E8A8A"},
+  {k:"client", lab:"Client",      c:"var(--c-encours)"},
+  {k:"pause",  lab:"En pause",    c:"var(--c-nrp)"}
+];
+function waEtapeLab(k){ const e = WA_ETAPES.find(x => x.k === k); return e ? e.lab : ""; }
+function waEtapeCoul(k){ const e = WA_ETAPES.find(x => x.k === k); return e ? e.c : "var(--muted)"; }
+const WA_RAISONS = ["Trop cher", "Délai trop long", "A acheté ailleurs", "Voulait juste une idée du prix",
+                    "Ne répond plus", "A dit STOP", "Autre"];
+
+function prosEtape(p){
+  if (p.pause) return "pause";
+  const bons = bonsDuTel(p.tel, p.bon);
+  if (bons.some(o => etatDe(o) !== "devis")) return "client";
+  if (bons.length) return "devis";
+  if (p.fin || p.interet === "pas") return "pause";
+  if (p.interet === "int") return "int";
+  if (parseFloat(p.pxE) > 0 || parseFloat(p.pxJ) > 0) return "prix";
+  return "dem";
+}
+/* Le rappel suivant part du moment où le contact entre dans son étape. */
+function waSeq(p){
+  const e = prosEtape(p);
+  if (p.seq && p.seq.e === e) return false;
+  const neuf = !p.seq;
+  p.seq = {e:e, base: neuf ? (prosDernier(p) || Date.now()) : Date.now(), n:0, pt:0, last:0,
+           mig: neuf && (p.at || 0) < WA_DEPART};
+  return true;
+}
+function waNorm(){
+  let ch = false;
+  prosVivants().forEach(p => { if (waSeq(p)){ p.maj = Date.now(); ch = true; } });
+  if (ch){ LS.set("mst_pros", PROS); pushPros(); }
+}
+function waDevisBon(p){
+  const b = bonsDuTel(p.tel, p.bon).filter(o => etatDe(o) === "devis");
+  return b.length ? b[b.length - 1] : null;
+}
+function waDernierBon(p){
+  const b = bonsDuTel(p.tel, p.bon).filter(o => etatDe(o) !== "devis");
+  return b.length ? b[b.length - 1] : null;
+}
+
+/* ---------- ce qu'il faut envoyer, et quand ---------- */
+function waDebutJour(){ const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
+function waTache(p){
+  const s = p.seq || {};
+  const der = s.last || s.base || p.at || 0;
+  if (s.next) return {k:"rappel", due:s.next, bloc:"rappel", why:"Rappel promis"};
+  switch (s.e){
+    case "dem":
+      return {k:"prix", due: s.mig ? Math.max(s.base || 0, WA_DEPART) : (s.base || p.at || 0), bloc: s.mig ? "relance" : "new",
+              why: s.mig ? "Reprise · réponse au prix" : "Nouvelle demande"};
+    case "prix": {
+      const pas = [["r1", "r1", "Relance 1"], ["r2", "r2", "Relance 2 · promo"], ["r3", "r3", "Relance 3 · nouveauté"]];
+      if ((s.n || 0) < 3){ const x = pas[s.n || 0]; return {k:x[0], due:(s.base || 0) + waReg(x[1]) * WA_J, bloc:"relance", why:x[2]}; }
+      return {k:"fin", due:(s.base || 0) + (waReg("r3") + 7) * WA_J, bloc:"relance", why:"3 relances sans suite"};
+    }
+    case "int":
+      if ((s.n || 0) < 3) return {k:"int", due:der + waReg("disc") * WA_J, bloc:"rappel", why:"Intéressé · suivi"};
+      return {k:"fin", due:der + waReg("disc") * WA_J, bloc:"rappel", why:"3 suivis sans suite"};
+    case "devis": {
+      if ((s.n || 0) < 2){ const d = s.n ? waReg("d2") : waReg("d1");
+        return {k: s.n ? "d2" : "d1", due:(s.base || 0) + d * WA_J, bloc:"rappel", why:"Devis · J+" + d}; }
+      return {k:"fin", due:(s.base || 0) + (waReg("d2") + 7) * WA_J, bloc:"rappel", why:"Devis sans réponse"};
+    }
+    case "client": {
+      const o = waDernierBon(p);
+      if (!o || !estFini(o)) return null;              /* FIN dans Dossiers */
+      const fin = (o.fini && o.fini.at) || Date.now();
+      if (!p.avisAt) return {k:"avis", due:fin + waReg("avis") * WA_J, bloc:"client", why:"Avis Google"};
+      if ((p.parrN || 0) >= waReg("parrMax")) return null;
+      return {k:"parr", due:Math.max(fin, p.avisAt || 0, p.parrDer || 0) + 30 * WA_J, bloc:"client", why:"Parrainage du mois"};
+    }
+  }
+  return null;
+}
+/* Une campagne de promo en cours : un contact de la cible, pas encore servi,
+   sans promo depuis 14 jours, et qui n'a rien d'autre à recevoir aujourd'hui. */
+function waCampActive(){ return WA.camp.filter(c => c && c.actif && !c.sup); }
+function waPromoPour(p, tache){
+  if (tache) return null;
+  if (p.pause && p.pause.r === "A dit STOP") return null;
+  const e = prosEtape(p);
+  /* en pause : seulement les grandes promos, une tous les 2 mois au plus */
+  if (Date.now() - (p.promoDer || 0) < (e === "pause" ? 60 : waReg("ecart")) * WA_J) return null;
+  const c = waCampActive().find(c => (c.cible || []).indexOf(e) >= 0 && (c.faits || []).indexOf(p.id) < 0);
+  return c ? {k:"promo", due:c.at || 0, bloc:"promo", why:"Promo · " + (c.nom || ""), camp:c.id} : null;
+}
+function waEnvoisDuJour(){
+  const t0 = waDebutJour();
+  let n = 0;
+  prosVivants().forEach(p => (p.env || []).forEach(x => { if (x.at >= t0 && x.bloc !== "new") n++; }));
+  return n;
+}
+/* La liste du jour, déjà triée ; « cache » = ce qui dépasse le quota de 20. */
+function waListeDuJour(){
+  const fin = waDebutJour() + WA_J;
+  const nouv = [], autres = [];
+  prosVivants().forEach(p => {
+    let t = waTache(p);
+    if (t && t.due >= fin) t = null;
+    const pr = t ? null : waPromoPour(p, null);
+    const x = t || pr;
+    if (!x) return;
+    x.p = p;
+    const r = prosResume(p);
+    x.poids = (p.star ? 1e6 : 0) + (r ? (r.m2 || 0) * 100 + (r.nb || 0) : 0);
+    (x.bloc === "new" ? nouv : autres).push(x);
+  });
+  const ordre = {rappel:0, relance:1, client:2, promo:3};
+  autres.sort((a, b) => ordre[a.bloc] - ordre[b.bloc] || b.poids - a.poids || a.due - b.due);
+  nouv.sort((a, b) => a.due - b.due);
+  const reste = Math.max(0, waReg("quota") - waEnvoisDuJour());
+  return {nouv:nouv, vus:autres.slice(0, reste), cache:autres.length - Math.min(reste, autres.length), fait:waEnvoisDuJour()};
+}
+function waNbDuJour(){ const L = waListeDuJour(); return L.nouv.length + L.vus.length; }
+
+/* ---------- les modèles de messages ---------- */
+const WA_MSG_DEF = {
+  prix_mes: {lab:"Réponse au prix · avec mesures", quand:"dès la demande, si les mesures sont connues",
+    fr:["[Bonjour {prénom}|Bonjour], merci pour votre message 🙂\nPour vos {fenêtres} ({m²}) en {type}, le prix est de {total}[, {pose}].\nJe vous envoie notre fiche technique. Vous avez une couleur en tête ?",
+        "[Bonjour {prénom}|Bonjour] 🙂 Voici le prix pour vos {fenêtres} en {type} : {total}[, {pose}] ({m²}).\nLa fiche technique est jointe. Dites-moi si vous avez des questions."],
+    ar:["[السلام عليكم {prénom}|السلام عليكم] 🙂 شكراً على الميساج ديالك.\nبالنسبة لـ {fenêtres} ({m²}) ديال {type}، الثمن هو {total}[، {pose}].\nها الفيش التقنية. واش عندك شي لون فبالك؟",
+        "[السلام عليكم {prénom}|السلام عليكم] 🙂 ها الثمن ديال {fenêtres} ديال {type}: {total}[، {pose}] ({m²}).\nصيفطت ليك الفيش التقنية، إلا عندك شي سؤال أنا هنا."]},
+  prix_sans: {lab:"Réponse au prix · sans mesures", quand:"dès la demande, sans mesures : seulement le prix au m²",
+    fr:["[Bonjour {prénom}|Bonjour], merci pour votre message 🙂\nLe {type} est à {prix m²}. [Pour calculer le prix de vos {fenêtres}, envoyez-moi les mesures (largeur × hauteur) de chacune.|Pour calculer votre prix, envoyez-moi le nombre de fenêtres et leurs mesures (largeur × hauteur).]\nVoici notre fiche technique.",
+        "[Bonjour {prénom}|Bonjour] 🙂 Notre {type} est à {prix m²}. [Envoyez-moi les mesures de vos {fenêtres} et je vous calcule le prix exact.|Envoyez-moi les mesures de vos fenêtres et je vous calcule le prix exact.]\nLa fiche technique est jointe."],
+    ar:["[السلام عليكم {prénom}|السلام عليكم] 🙂 شكراً على الميساج ديالك.\nالثمن ديال {type} هو {prix m²}. [باش نحسبو ليك الثمن ديال {fenêtres}، صيفط ليا القياسات (العرض × الطول) ديال كل واحد.|باش نحسبو ليك الثمن، صيفط ليا شحال من شرجم عندك والقياسات ديالهم (العرض × الطول).]\nها الفيش التقنية.",
+        "[السلام عليكم {prénom}|السلام عليكم] 🙂 {type} عندنا بـ {prix m²}. [صيفط ليا القياسات ديال {fenêtres} ونحسب ليك الثمن بالضبط.|صيفط ليا القياسات ديال الشراجم ونحسب ليك الثمن بالضبط.]\nصيفطت ليك الفيش التقنية."]},
+  r1: {lab:"Relance 1", quand:"2 jours après le prix, sans commande",
+    fr:["[Bonjour {prénom}|Bonjour], avez-vous une question sur le tissu ou les couleurs du {type} ? Je peux vous envoyer des photos de nos réalisations.",
+        "[Bonjour {prénom}|Bonjour] 🙂 Je reviens vers vous pour le {type}. Vous voulez voir des photos de stores déjà posés chez nos clients ?"],
+    ar:["[السلام عليكم {prénom}|السلام عليكم]، واش عندك شي سؤال على الثوب ولا الألوان ديال {type}؟ نقدر نصيفط ليك تصاور ديال الخدمة ديالنا.",
+        "[السلام عليكم {prénom}|السلام عليكم] 🙂 رجعت ليك على {type}. بغيتي نصيفط ليك تصاور ديال ستورات ركبناهم عند الكليان ديالنا؟"]},
+  r2: {lab:"Relance 2 · promo", quand:"7 jours après le prix, avec l'image de la promo en cours",
+    fr:["[Bonjour {prénom}|Bonjour], nous avons une offre en ce moment sur le {type}. Je vous l'envoie en image, elle est valable quelques jours seulement.",
+        "[Bonjour {prénom}|Bonjour] 🙂 Bonne nouvelle : une offre spéciale sur le {type} cette semaine. Tous les détails sont dans l'image."],
+    ar:["[السلام عليكم {prénom}|السلام عليكم]، عندنا عرض دابا على {type}. صيفطت ليك التصويرة، العرض صالح غير لشي أيام.",
+        "[السلام عليكم {prénom}|السلام عليكم] 🙂 خبر زوين: عرض خاص على {type} هاد السيمانة. كلشي مكتوب فالتصويرة."]},
+  r3: {lab:"Relance 3 · nouveauté", quand:"30 jours après le prix, dernier essai avant la pause",
+    fr:["[Bonjour {prénom}|Bonjour], nous venons de recevoir de nouveaux tissus et de nouvelles couleurs pour le {type}. Voulez-vous que je vous envoie le catalogue ?\n(Répondez STOP pour ne plus recevoir nos messages.)"],
+    ar:["[السلام عليكم {prénom}|السلام عليكم]، وصلونا ثواب وألوان جداد ديال {type}. بغيتي نصيفط ليك الكتالوج؟\n(كتب STOP إلا ما بغيتيش توصلك الميساجات ديالنا.)"]},
+  int: {lab:"Suivi d'un intéressé", quand:"tous les 3 jours quand on discute",
+    fr:["[Bonjour {prénom}|Bonjour], je reviens vers vous pour votre projet de {type}. Avez-vous pu avancer ? Je reste disponible pour toute question."],
+    ar:["[السلام عليكم {prénom}|السلام عليكم]، رجعت ليك على المشروع ديال {type}. واش قررتي؟ أنا هنا لأي سؤال."]},
+  d1: {lab:"Relance devis 1", quand:"2 jours après le devis",
+    fr:["[Bonjour {prénom}|Bonjour], avez-vous pu regarder le devis[ {n° devis}][ de {total}] ? Si vous avez une question sur le tissu ou le délai, je suis là. Dès que vous validez, on fixe la date de pose."],
+    ar:["[السلام عليكم {prénom}|السلام عليكم]، واش شفتي الدوفي[ {n° devis}][ ديال {total}]؟ إلا عندك شي سؤال على الثوب ولا المدة، أنا هنا. غير توافق، نحددو نهار التركيب."]},
+  d2: {lab:"Relance devis 2", quand:"5 jours après le devis",
+    fr:["[Bonjour {prénom}|Bonjour], je me permets de revenir vers vous pour le devis[ {n° devis}]. Voulez-vous qu'on réserve une date de pose ?"],
+    ar:["[السلام عليكم {prénom}|السلام عليكم]، رجعت ليك على الدوفي[ {n° devis}]. بغيتي نحجزو ليك نهار التركيب؟"]},
+  rappel: {lab:"Rappel promis", quand:"quand le client a dit « plus tard »",
+    fr:["[Bonjour {prénom}|Bonjour], comme convenu je reviens vers vous pour le {type}. Êtes-vous toujours intéressé ?"],
+    ar:["[السلام عليكم {prénom}|السلام عليكم]، كيف تفاهمنا، رجعت ليك على {type}. واش باقي مهتم؟"]},
+  avis: {lab:"Avis Google", quand:"7 jours après FIN dans Dossiers",
+    fr:["[Bonjour {prénom}|Bonjour] 🙂 Tout va bien avec vos stores ? Si vous êtes satisfait, un avis nous aide beaucoup[ : {lien avis}]. Merci !"],
+    ar:["[السلام عليكم {prénom}|السلام عليكم] 🙂 كلشي مزيان مع الستورات؟ إلا عجباتك الخدمة، شي تقييم كيعاونا بزاف[: {lien avis}]. شكراً!"]},
+  parr: {lab:"Parrainage", quand:"chaque mois après FIN, 6 fois au plus",
+    fr:["[Bonjour {prénom}|Bonjour] 🙂 Merci encore pour votre confiance ! Si un proche cherche des stores, voici notre offre parrainage."],
+    ar:["[السلام عليكم {prénom}|السلام عليكم] 🙂 شكراً مرة أخرى على الثقة ديالك! إلا شي حد من العائلة ولا الصحاب كيقلب على ستورات، ها العرض ديال الباراناج."]},
+  promo: {lab:"Promo (campagne)", quand:"texte qui accompagne l'image d'une campagne",
+    fr:["[Bonjour {prénom}|Bonjour] 🙂 Voici notre offre du moment.\n(Répondez STOP pour ne plus recevoir nos offres.)"],
+    ar:["[السلام عليكم {prénom}|السلام عليكم] 🙂 ها العرض ديالنا دابا.\n(كتب STOP إلا ما بغيتيش العروض ديالنا.)"]}
+};
+const WA_TOKENS = ["prénom", "type", "fenêtres", "prix m²", "m²", "total", "pose", "n° devis", "quartier", "lien avis"];
+function waVersions(k, lang){
+  const perso = WA.msg && WA.msg[k] && Array.isArray(WA.msg[k][lang]) ? WA.msg[k][lang].filter(x => String(x || "").trim()) : null;
+  if (perso && perso.length) return perso;
+  const d = WA_MSG_DEF[k];
+  return d ? d[lang] || d.fr : [""];
+}
+function waPrix(p){
+  return {e: parseFloat(p.pxE) > 0 ? parseFloat(p.pxE) : waReg("pxE"),
+          j: parseFloat(p.pxJ) > 0 ? parseFloat(p.pxJ) : waReg("pxJ")};
+}
+/* Les valeurs d'un contact, dans la langue du message. Une valeur vide retire
+   sa phrase : jamais de trou, jamais de prix inventé. */
+function waValeurs(p, lang){
+  const ar = lang === "ar";
+  const t = p.type || "ENR";
+  const px = waPrix(p);
+  const r = prosResume(p);
+  const nb = r ? r.nb : 0;
+  const mes = !!(r && r.m2 && !r.sansMesure);
+  const e = mes ? prosEstim(Object.assign({}, p, {pxE:px.e, pxJ:px.j})) : null;
+  const o = waDevisBon(p);
+  const typeTxt = ar ? {ENR:"ستور رولو", JN:"ستور زيبرا (جور إي نوي)", MIX:"ستور رولو وستور زيبرا"}[t]
+                     : {ENR:"store enrouleur", JN:"store jour et nuit", MIX:"store enrouleur et jour et nuit"}[t];
+  const pm = v => ar ? fr(v, 0) + " درهم للمتر مربع HT" : fr(v, 0) + " DH le m² HT";
+  const prixM2 = t === "JN" ? pm(px.j) : (t === "MIX"
+    ? (ar ? "رولو " + pm(px.e) + " وزيبرا " + pm(px.j) : pm(px.e) + " pour l'enrouleur et " + pm(px.j) + " pour le jour et nuit")
+    : pm(px.e));
+  let total = "";
+  if (o){ total = frm(Math.round(duDe(o)), 0) + (ar ? " درهم" : " DH") + (facture(o) ? " TTC" : " HT"); }
+  else if (e && e.m2){ total = frm(Math.round(e.fact ? e.ttc : e.ht), 0) + (ar ? " درهم" : " DH") + (e.fact ? " TTC" : " HT"); }
+  const nom = String(p.nom || "").trim();
+  return {
+    "prénom": nom.length <= 30 && !/\d/.test(nom) ? nom : "",
+    "type": typeTxt,
+    "fenêtres": nb ? (ar ? (nb === 1 ? "شرجم واحد" : nb + " ديال الشراجم") : nb + (nb > 1 ? " fenêtres" : " fenêtre")) : "",
+    "prix m²": prixM2,
+    "m²": mes ? fr(r.m2, 2) + (ar ? " م²" : " m²") : "",
+    "total": total,
+    "pose": (e && e.pose > 0) ? (ar ? "مع التركيب" : "pose comprise") : "",
+    "n° devis": o ? (o.num || "") : "",
+    "quartier": String(p.adresse || "").trim(),
+    "lien avis": String(waReg("lienAvis") || "").trim()
+  };
+}
+function waRemplit(modele, V){
+  const plein = seg => {
+    const toks = seg.match(/\{[^}]+\}/g) || [];
+    return toks.every(t => String(V[t.slice(1, -1)] || "").trim());
+  };
+  let s = String(modele || "").replace(/\[([^\[\]]*)\]/g, (m, inner) => {
+    const alts = inner.split("|");
+    const ok = alts.find(plein);
+    return ok === undefined ? "" : ok;
+  });
+  s = s.replace(/\{([^}]+)\}/g, (m, k) => String(V[k] || ""));
+  return s.replace(/[ \t]{2,}/g, " ").replace(/ +([,.،])/g, "$1").replace(/\( *\)/g, "")
+          .replace(/\n{3,}/g, "\n\n").trim();
+}
+function waCleModele(p, t){
+  if (t.k === "prix"){ const r = prosResume(p); return (r && r.m2 && !r.sansMesure) ? "prix_mes" : "prix_sans"; }
+  if (t.k === "fin") return "";
+  return t.k;
+}
+
+/* ---------- les fichiers du dossier Drive « PROMOS » (lus par le script Google) ---------- */
+let WA_DRIVE = null;              /* la liste du dossier, lue une fois par ouverture */
+const WA_FICH = {};               /* id -> {nom, type, data} en mémoire */
+function waDriveListe(force){
+  if (WA_DRIVE && !force) return Promise.resolve(WA_DRIVE);
+  const url = hookUrl();
+  if (!url) return Promise.resolve([]);
+  return fetch(url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body: JSON.stringify({action:"promos"})})
+    .then(r => r.text()).then(t => { const j = JSON.parse(t); WA_DRIVE = (j && j.ok && j.files) || []; return WA_DRIVE; })
+    .catch(() => { WA_DRIVE = WA_DRIVE || []; return WA_DRIVE; });
+}
+function waFichier(id){
+  if (!id) return Promise.resolve(null);
+  if (WA_FICH[id]) return Promise.resolve(WA_FICH[id]);
+  const url = hookUrl();
+  if (!url) return Promise.resolve(null);
+  return fetch(url, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body: JSON.stringify({action:"promoFichier", id:id})})
+    .then(r => r.text()).then(t => {
+      const j = JSON.parse(t);
+      if (!j || !j.ok) return null;
+      WA_FICH[id] = {nom:j.nom, type:j.type, data:j.data};
+      return WA_FICH[id];
+    }).catch(() => null);
+}
+function waFichierVersFile(f){
+  const bin = atob(f.data), u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new File([u], f.nom || "piece", {type:f.type || "application/octet-stream"});
+}
+/* Les pièces jointes d'un message : la fiche technique du type, ou l'image de la promo. */
+function waPieces(p, k, campId){
+  const L = [];
+  if (k === "prix_mes" || k === "prix_sans"){
+    const t = p.type || "ENR";
+    if (t !== "JN" && waReg("ficheENR")) L.push(waReg("ficheENR"));
+    if (t !== "ENR" && waReg("ficheJN")) L.push(waReg("ficheJN"));
+  }
+  if (k === "promo" || k === "r2" || k === "parr"){
+    const c = campId ? WA.camp.find(x => x.id === campId) : (k === "parr" ? WA.camp.find(x => x.parr && !x.sup) : waCampActive()[0]);
+    if (c && c.fichier) L.push(c.fichier);
+  }
+  return L;
+}
+
+/* ---------- le brouillon ---------- */
+let WA_BR = null;       /* {pid, t, cle, lang, v, texte, pieces:[id]} */
+function waModal(html){
+  const m = $("waModal");
+  $("waBox").innerHTML = html;
+  m.hidden = false;
+}
+function waModalFerme(){ $("waModal").hidden = true; $("waBox").innerHTML = ""; WA_BR = null; }
+function waOuvreBrouillon(pid, tache){
+  const p = PROS.find(x => x.id === pid);
+  if (!p) return;
+  const t = tache || waTache(p) || waPromoPour(p, null);
+  if (!t) return;
+  if (t.k === "fin"){ waFinSuggeree(p); return; }
+  const cle = waCleModele(p, t);
+  const lang = p.lang === "ar" ? "ar" : "fr";
+  WA_BR = {pid:pid, t:t, cle:cle, lang:lang, v:0, texte:"", pieces:waPieces(p, cle, t.camp)};
+  waBrouillonRend(true);
+  WA_BR.pieces.forEach(id => waFichier(id).then(() => { if (WA_BR && WA_BR.pid === pid) waBrouillonPieces(); }));
+}
+function waBrouillonRend(recalc){
+  const B = WA_BR;
+  if (!B) return;
+  const p = PROS.find(x => x.id === B.pid);
+  const V = waValeurs(p, B.lang);
+  const vers = waVersions(B.cle, B.lang);
+  if (recalc){
+    const camp = B.t.camp ? WA.camp.find(x => x.id === B.t.camp) : null;
+    const modele = (camp && camp.texte && String(camp.texte[B.lang] || "").trim()) || vers[B.v % vers.length];
+    B.texte = waRemplit(modele, V);
+  }
+  const used = [["prénom", "prénom"], ["fenêtres", "fenêtres"], ["m²", "mesures"], ["total", "total"], ["prix m²", "prix m²"]]
+    .map(([k, l]) => '<span class="' + (V[k] ? "y" : "n") + '">' + (V[k] ? "✓ " : "— ") + l + '</span>').join("");
+  waModal(
+    '<div class="wabh"><b>' + esc((WA_MSG_DEF[B.cle] || {}).lab || B.t.why) + '</b><span>' + esc(p.nom || telAffiche(p.tel || "")) + '</span>' +
+      '<button type="button" class="waclose" data-waclose aria-label="Fermer">✕</button></div>' +
+    '<div class="waseg"><button type="button" data-walang="fr" aria-pressed="' + (B.lang === "fr") + '">Français</button>' +
+      '<button type="button" data-walang="ar" aria-pressed="' + (B.lang === "ar") + '">الدارجة</button></div>' +
+    '<div class="waused">' + used + '</div>' +
+    '<textarea class="watxt' + (B.lang === "ar" ? " rtl" : "") + '" id="waTexte" rows="8">' + esc(B.texte) + '</textarea>' +
+    '<div class="wavar"><span>Modifiable avant l\'envoi</span>' + (vers.length > 1 && !B.t.camp
+      ? '<button type="button" data-wavar>Autre version ↻ ' + ((B.v % vers.length) + 1) + '/' + vers.length + '</button>' : '') + '</div>' +
+    '<div id="waPiecesBox"></div>' +
+    '<button type="button" class="wasend" data-wasend>' +
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg>' +
+      'Envoyer sur WhatsApp</button>' +
+    '<p class="wahint">Jamais de visite gratuite. Sans mesures : seulement le prix au m².</p>');
+  waBrouillonPieces();
+}
+function waBrouillonPieces(){
+  const box = $("waPiecesBox");
+  if (!box || !WA_BR) return;
+  box.innerHTML = WA_BR.pieces.map(id => {
+    const f = WA_FICH[id];
+    const d = (WA_DRIVE || []).find(x => x.id === id);
+    const nom = (f && f.nom) || (d && d.nom) || "pièce jointe";
+    return '<div class="wapj"><b>' + esc(nom) + '</b><em>' + (f ? "prête" : "chargement…") + '</em></div>';
+  }).join("");
+}
+async function waEnvoie(){
+  const B = WA_BR;
+  if (!B) return;
+  const p = PROS.find(x => x.id === B.pid);
+  const txt = ($("waTexte") && $("waTexte").value || B.texte).trim();
+  const lien = waLien(p.tel);
+  const files = B.pieces.map(id => WA_FICH[id]).filter(Boolean).map(waFichierVersFile);
+  let parti = false;
+  if (files.length && navigator.canShare && navigator.canShare({files:files})){
+    try { if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(() => {}); } catch(e){}
+    try { await navigator.share({files:files, text:txt}); parti = true; }
+    catch(e){ if (e && e.name === "AbortError"){ toast("Envoi annulé"); return; } }
+  }
+  if (!parti){
+    if (!lien){ toast("Numéro manquant"); return; }
+    window.open(lien + "?text=" + encodeURIComponent(txt), "_blank");
+    if (files.length) toast("Le texte est parti ; ajoutez la pièce jointe dans WhatsApp");
+  }
+  waNoteEnvoi(p, B);
+}
+/* Ce qui est noté quand un message part : le journal, la date du contact, et
+   ce que l'app doit savoir pour la suite. */
+function waNoteEnvoi(p, B){
+  const now = Date.now();
+  if (!Array.isArray(p.env)) p.env = [];
+  p.env.push({at:now, k:B.cle || B.t.k, bloc:B.t.bloc, by:(USER && USER.login) || ""});
+  if (p.env.length > 60) p.env = p.env.slice(-60);
+  p.vu = now; p.vuBy = (USER && USER.login) || "";
+  const s = p.seq || (waSeq(p), p.seq);
+  if (B.t.k === "prix"){
+    /* le prix au m² envoyé est noté : le contact passe en « Prix envoyé » */
+    const px = waPrix(p);
+    if (!(parseFloat(p.pxE) > 0) && (p.type || "ENR") !== "JN") p.pxE = String(px.e);
+    if (!(parseFloat(p.pxJ) > 0) && (p.type || "ENR") !== "ENR") p.pxJ = String(px.j);
+    waSeq(p);
+    p.maj = now; prosSave();
+    waModalFerme(); waRendTout();
+    toast("Prix envoyé · relance le " + prosDate(p.seq.base + waReg("r1") * WA_J));
+    return;
+  }
+  if (B.t.k === "avis"){ p.avisAt = now; }
+  if (B.t.k === "parr"){ p.parrDer = now; p.parrN = (p.parrN || 0) + 1; }
+  if (B.t.k === "promo"){
+    p.promoDer = now;
+    const c = WA.camp.find(x => x.id === B.t.camp);
+    if (c){ c.faits = c.faits || []; if (c.faits.indexOf(p.id) < 0) c.faits.push(p.id); waSave(); }
+  }
+  if (B.t.k === "r2") p.promoDer = now;
+  p.maj = now; prosSave();
+  if (B.t.bloc === "client" || B.t.bloc === "promo"){ waModalFerme(); waRendTout(); toast("Noté"); return; }
+  waResultat(p);
+}
+/* Après l'envoi : Imane dit ce qui s'est passé, l'app fixe la suite. */
+function waResultat(p){
+  const s = p.seq || {};
+  const tard = (s.pt || 0) < waReg("tardMax");
+  const suiv = (() => {
+    const t = Object.assign({}, p, {seq:Object.assign({}, s, {n:(s.n || 0) + 1, last:Date.now(), next:0})});
+    const x = waTache(t);
+    return x ? (x.k === "fin" ? "fin des relances le " : "prochain rappel le ") + prosDate(x.due) : "plus de rappel prévu";
+  })();
+  WA_BR = WA_BR || {pid:p.id};
+  waModal(
+    '<div class="wabh"><b>Qu\'est-ce qui s\'est passé ?</b><span>' + esc(p.nom || telAffiche(p.tel || "")) + '</span></div>' +
+    '<p class="wahint" style="margin:0 0 10px">L\'app fixe le prochain rappel toute seule.</p>' +
+    '<div class="wares">' +
+      '<button type="button" data-wares="rien">Envoyé, pas de réponse<small>' + esc(suiv) + '</small></button>' +
+      '<button type="button" data-wares="disc">Il répond, on discute<small>rappel dans ' + waReg("disc") + ' jours</small></button>' +
+      '<button type="button" data-wares="tard"' + (tard ? '' : ' disabled') + '>Il a dit « plus tard »<small>' +
+        (tard ? 'rappel dans ' + waReg("tard") + ' jours' : 'déjà reporté ' + waReg("tardMax") + ' fois') + '</small></button>' +
+      '<button type="button" data-wares="devis">Il veut un devis<small>ouvre le devis</small></button>' +
+      '<button type="button" data-wares="pas" class="full">Pas intéressé<small>pause, avec la raison</small></button>' +
+    '</div>');
+}
+function waResultatChoix(pid, r){
+  const p = PROS.find(x => x.id === pid);
+  if (!p) return;
+  const now = Date.now();
+  const s = p.seq || (waSeq(p), p.seq);
+  if (r === "pas"){ waPauseDemande(p); return; }
+  if (r === "devis"){ waModalFerme(); prosVersBon(p, "devis"); return; }
+  if (r === "disc"){
+    if (s.e === "devis"){ s.next = now + waReg("disc") * WA_J; s.last = now; }
+    else { p.interet = "int"; waSeq(p); p.seq.last = now; }
+  } else if (r === "tard" && (s.pt || 0) < waReg("tardMax")){
+    s.pt = (s.pt || 0) + 1; s.next = now + waReg("tard") * WA_J; s.last = now;
+  } else {
+    s.n = (s.n || 0) + (s.next ? 0 : 1); s.next = 0; s.last = now;
+  }
+  p.maj = now; prosSave();
+  waModalFerme(); waRendTout();
+}
+function waPauseDemande(p){
+  WA_BR = {pid:p.id};
+  waModal(
+    '<div class="wabh"><b>Pourquoi il ne commande pas ?</b><span>' + esc(p.nom || telAffiche(p.tel || "")) + '</span>' +
+      '<button type="button" class="waclose" data-waclose aria-label="Fermer">✕</button></div>' +
+    '<p class="wahint" style="margin:0 0 10px">Obligatoire. Le contact passe en pause et ne reçoit plus que les grandes promos (sauf STOP : plus rien).</p>' +
+    '<div class="waraisons">' + WA_RAISONS.map(r => '<button type="button" data-wapause="' + esc(r) + '">' + esc(r) + '</button>').join("") + '</div>');
+}
+function waPause(pid, raison){
+  const p = PROS.find(x => x.id === pid);
+  if (!p) return;
+  p.pause = {r:raison, at:Date.now(), by:(USER && USER.login) || ""};
+  p.maj = Date.now(); waSeq(p); prosSave();
+  waModalFerme(); waRendTout();
+  if (prosEdit === pid) try { prosCharge(p); renderPros(); } catch(e){}
+  toast("En pause · " + raison);
+}
+function waReprend(pid){
+  const p = PROS.find(x => x.id === pid);
+  if (!p) return;
+  delete p.pause; delete p.fin;
+  if (p.interet === "pas") p.interet = "";
+  p.maj = Date.now(); waSeq(p); prosSave(); waRendTout();
+  toast("Contact repris");
+}
+/* 3 relances sans suite : l'app propose la pause, ou un dernier essai dans 7 jours. */
+function waFinSuggeree(p){
+  WA_BR = {pid:p.id};
+  waModal(
+    '<div class="wabh"><b>Plus de relance prévue</b><span>' + esc(p.nom || telAffiche(p.tel || "")) + '</span>' +
+      '<button type="button" class="waclose" data-waclose aria-label="Fermer">✕</button></div>' +
+    '<p class="wahint" style="margin:0 0 10px">Toutes les relances de son étape sont parties sans commande.</p>' +
+    '<div class="wares">' +
+      '<button type="button" data-wafin="pause" class="full">Mettre en pause<small>avec la raison</small></button>' +
+      '<button type="button" data-wafin="encore" class="full">Un dernier essai<small>rappel dans ' + waReg("tard") + ' jours</small></button>' +
+    '</div>');
+}
+
+/* ---------- l'onglet « Aujourd'hui » ---------- */
+function waCarte(x){
+  const p = x.p;
+  const late = x.due < waDebutJour();
+  const j = late ? Math.max(1, Math.round((waDebutJour() - x.due) / WA_J)) : 0;
+  const r = prosResume(p);
+  const quoi = [typeCourt(p.type || "ENR")];
+  if (r && r.nb) quoi.push(r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre") + (r.sansMesure ? "" : " · " + fr(r.m2, 2) + " m²"));
+  const px = [];
+  if (parseFloat(p.pxE) > 0) px.push(fr(parseFloat(p.pxE), 0));
+  if (parseFloat(p.pxJ) > 0) px.push(fr(parseFloat(p.pxJ), 0));
+  if (px.length) quoi.push(px.join(" / ") + " MAD/m²");
+  const e = prosEtape(p);
+  return '<div class="watask" style="--c:' + (p.star ? "#B7791F" : waEtapeCoul(e)) + '">' +
+    '<div class="h"><b>' + (p.star ? "⭐ " : "") + esc(p.nom || telAffiche(p.tel || "") || "Sans nom") + '</b>' +
+      '<span class="why' + (late ? " late" : "") + '">' + esc(x.why) + (late ? " · en retard de " + j + " j" : "") + '</span></div>' +
+    '<div class="sub">' + esc(quoi.join(" · ")) + '</div>' +
+    '<div class="acts"><button type="button" class="wa" data-wabr="' + p.id + '"' + (x.camp ? ' data-wacamp="' + x.camp + '"' : '') + '>' +
+      (x.k === "fin" ? 'Décider' : 'Brouillon') + '</button>' +
+      '<button type="button" data-predit="' + p.id + '">Fiche</button></div>' +
+  '</div>';
+}
+function renderWaToday(){
+  const box = $("waToday");
+  if (!box) return;
+  const L = waListeDuJour();
+  const tot = L.nouv.length + L.vus.length;
+  const q = waReg("quota");
+  const grp = (titre, arr) => arr.length ? '<div class="wagh">' + titre + ' · ' + arr.length + '</div>' + arr.map(waCarte).join("") : '';
+  box.innerHTML =
+    '<div class="wagoal"><b>' + L.fait + '/' + q + '</b><span>relances et promos envoyées aujourd\'hui' +
+      '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span></div>' +
+    (tot ? '' : '<div class="empty">Rien à envoyer aujourd\'hui.' + (L.cache ? '' : '<br>Les prochains rappels arrivent tout seuls.') + '</div>') +
+    grp("Nouvelles demandes", L.nouv) +
+    grp("Rappels promis", L.vus.filter(x => x.bloc === "rappel")) +
+    grp("Relances", L.vus.filter(x => x.bloc === "relance")) +
+    grp("Clients : avis et parrainage", L.vus.filter(x => x.bloc === "client")) +
+    grp("Promos", L.vus.filter(x => x.bloc === "promo")) +
+    (L.cache ? '<p class="wahint">' + L.cache + ' autres messages attendent : ils passent les jours suivants, ' + q + ' par jour.</p>' : '');
+}
+
+/* ---------- l'onglet « Promos » ---------- */
+let WA_CAMP_NEUF = null;   /* {nom, cible:[], fichier} pendant la création */
+function renderWaPromos(){
+  const box = $("waPromos");
+  if (!box) return;
+  const nbE = k => prosVivants().filter(p => prosEtape(p) === k).length;
+  const actives = WA.camp.filter(c => !c.sup);
+  const C = WA_CAMP_NEUF;
+  const fichiers = WA_DRIVE;
+  box.innerHTML =
+    '<div class="wacard"><div class="walab">Campagnes</div>' +
+      (actives.length ? actives.map(c => {
+        const cib = prosVivants().filter(p => (c.cible || []).indexOf(prosEtape(p)) >= 0).length;
+        const f = (c.faits || []).length;
+        return '<div class="wacamp"><div><b>' + esc(c.nom || "Promo") + '</b><small>' +
+          (c.parr ? 'image du parrainage · ' : '') + f + ' envoyés sur ' + cib + ' · ' + (c.actif ? 'en cours' : 'arrêtée') + '</small>' +
+          '<i><em style="width:' + (cib ? Math.round(f / cib * 100) : 0) + '%"></em></i></div>' +
+          '<button type="button" data-wacampon="' + c.id + '">' + (c.actif ? 'Arrêter' : 'Relancer') + '</button></div>';
+      }).join("") : '<p class="wahint">Aucune campagne pour l\'instant.</p>') +
+    '</div>' +
+    '<div class="wacard"><div class="walab">Nouvelle campagne</div>' +
+      (C ? (
+        '<input class="wainp" id="waCampNom" placeholder="Nom (ex. Promo octobre jour et nuit)" value="' + esc(C.nom || "") + '">' +
+        '<div class="wasub">1. À qui ?</div>' +
+        '<div class="wachips">' + WA_ETAPES.map(e => '<button type="button" data-wacib="' + e.k + '" aria-pressed="' +
+          (C.cible.indexOf(e.k) >= 0) + '">' + e.lab + ' · ' + nbE(e.k) + '</button>').join("") + '</div>' +
+        '<label class="watog"><input type="checkbox" id="waCampParr"' + (C.parr ? ' checked' : '') + '> C\'est l\'image du parrainage mensuel</label>' +
+        '<div class="wasub">2. L\'image ou le PDF <button type="button" class="walink" data-wadrive>↻ relire le dossier Drive</button></div>' +
+        (fichiers === null ? '<p class="wahint">Lecture du dossier Drive…</p>' :
+          (fichiers.length ? '<div class="wafiles">' + fichiers.map(f =>
+            '<button type="button" data-wafile="' + f.id + '" aria-pressed="' + (C.fichier === f.id) + '"><b>' + esc(f.nom) + '</b><small>' +
+              (String(f.type).indexOf("pdf") >= 0 ? "PDF" : "image") + '</small></button>').join("") + '</div>'
+            : '<p class="wahint">Le dossier Drive « PROMOS » est vide. Déposez-y vos images Nano Banana ou vos PDF, puis relisez-le.</p>')) +
+        '<div class="wasub">3. Envoi</div>' +
+        '<p class="wahint">Les messages se rangent dans « Aujourd\'hui », ' + waReg("quota") + ' par jour avec les relances. Personne ne reçoit plus d\'une promo tous les ' + waReg("ecart") + ' jours.</p>' +
+        '<div class="waduo"><button type="button" class="wa" data-wacampgo>Lancer la campagne</button><button type="button" data-wacampnon>Annuler</button></div>'
+      ) : '<button type="button" class="wa full" data-wacampnew>+ Nouvelle campagne</button>') +
+    '</div>';
+  if (C && fichiers === null) waDriveListe(true).then(renderWaPromos);
+}
+
+/* ---------- l'onglet « Messages » ---------- */
+let WA_ED = null;   /* {cle, lang, v} */
+function renderWaMsgs(){
+  const box = $("waMsgs");
+  if (!box) return;
+  if (WA_ED){ waEditeurRend(); return; }
+  box.innerHTML =
+    '<div class="wacard"><div class="walab">Les messages</div>' +
+      Object.keys(WA_MSG_DEF).map(k => '<button type="button" class="watpl" data-waed="' + k + '"><b>' + esc(WA_MSG_DEF[k].lab) +
+        '</b><small>' + esc(WA_MSG_DEF[k].quand) + ' · ' + waVersions(k, "fr").length + ' version' + (waVersions(k, "fr").length > 1 ? 's' : '') +
+        (WA.msg[k] ? ' · modifié' : '') + '</small><span>›</span></button>').join("") +
+    '</div>' +
+    (adminAllowed() ? (
+      '<div class="wacard"><div class="walab">Réglages (Noureddine)</div>' +
+        '<div class="wareg"><label>Prix enrouleur par défaut<input data-wareg="pxE" inputmode="decimal" value="' + esc(waReg("pxE")) + '"><em>MAD/m² HT</em></label>' +
+        '<label>Prix jour et nuit par défaut<input data-wareg="pxJ" inputmode="decimal" value="' + esc(waReg("pxJ")) + '"><em>MAD/m² HT</em></label>' +
+        '<label>Messages par jour<input data-wareg="quota" inputmode="numeric" value="' + esc(waReg("quota")) + '"></label>' +
+        '<label>Lien des avis Google<input data-wareg="lienAvis" placeholder="https://g.page/r/…" value="' + esc(waReg("lienAvis")) + '"></label></div>' +
+        '<div class="wasub">Fiches techniques (dossier Drive) <button type="button" class="walink" data-wadrive>↻ relire</button></div>' +
+        (WA_DRIVE === null ? '<p class="wahint">Lecture du dossier Drive…</p>' :
+          ["ficheENR", "ficheJN"].map(k => '<label class="wasel">' + (k === "ficheENR" ? "Fiche enrouleur" : "Fiche jour et nuit") +
+            '<select data-wareg="' + k + '"><option value="">— aucune —</option>' + (WA_DRIVE || []).map(f =>
+              '<option value="' + f.id + '"' + (waReg(k) === f.id ? ' selected' : '') + '>' + esc(f.nom) + '</option>').join("") +
+            '</select></label>').join("")) +
+        '<p class="wahint">Les délais des relances se régleront dans l\'écran des règles (prochaine version).</p>' +
+      '</div>') : '');
+  if (adminAllowed() && WA_DRIVE === null) waDriveListe(true).then(renderWaMsgs);
+}
+function waEditeurRend(){
+  const E = WA_ED, box = $("waMsgs");
+  const def = WA_MSG_DEF[E.cle];
+  const vers = waVersions(E.cle, E.lang);
+  const txt = vers[E.v] !== undefined ? vers[E.v] : "";
+  const ex = {id:"ex", nom:"Samira", tel:"0600000000", type:"JN", pxJ:"260", nbFen:"4", dims:[], adresse:"Maarif", fact:"oui"};
+  const exMes = Object.assign({}, ex, {dims:[{l:"180", h:"220", q:"1"}, {l:"120", h:"150", q:"2"}]});
+  const exSans = Object.assign({}, ex, {nom:""});
+  const apercu = (lab, pp) => '<div class="waap"><em>' + lab + '</em><div class="wabul' + (E.lang === "ar" ? " rtl" : "") + '">' +
+    esc(waRemplit(txt, waValeurs(pp, E.lang))).replace(/\n/g, "<br>") + '</div></div>';
+  box.innerHTML =
+    '<div class="wacard">' +
+      '<div class="wabh"><b>' + esc(def.lab) + '</b><button type="button" class="waclose" data-waedfin aria-label="Retour">‹</button></div>' +
+      '<p class="wahint" style="margin:0 0 8px">' + esc(def.quand) + '</p>' +
+      '<div class="waseg"><button type="button" data-waedlang="fr" aria-pressed="' + (E.lang === "fr") + '">Français</button>' +
+        '<button type="button" data-waedlang="ar" aria-pressed="' + (E.lang === "ar") + '">الدارجة</button></div>' +
+      '<div class="wachips">' + vers.map((v, i) => '<button type="button" data-waedv="' + i + '" aria-pressed="' + (i === E.v) + '">Version ' + (i + 1) + '</button>').join("") +
+        (vers.length < 3 ? '<button type="button" data-waedv="' + vers.length + '" aria-pressed="' + (E.v === vers.length) + '">+ version</button>' : '') + '</div>' +
+      '<textarea class="watxt' + (E.lang === "ar" ? " rtl" : "") + '" id="waEdTxt" rows="7">' + esc(txt) + '</textarea>' +
+      '<div class="wains">' + WA_TOKENS.map(t => '<button type="button" data-watok="' + esc(t) + '">+ ' + esc(t) + '</button>').join("") + '</div>' +
+      '<p class="wahint">[A|B] : écrit A si toutes ses valeurs sont remplies, sinon B. Exemple : [Bonjour {prénom}|Bonjour].</p>' +
+      '<div class="waduo"><button type="button" class="wa" data-waedsave>Enregistrer</button>' +
+        (WA.msg[E.cle] ? '<button type="button" data-waedreset>Texte d\'origine</button>' : '') +
+        (vers.length > 1 && E.v < vers.length ? '<button type="button" data-waeddel>Supprimer</button>' : '') + '</div>' +
+    '</div>' +
+    '<div class="wacard"><div class="walab">Aperçu</div>' +
+      apercu("avec prénom et mesures", exMes) + apercu("avec prénom, sans mesures", ex) + apercu("sans prénom ni mesures", Object.assign({}, exSans, {nbFen:""})) +
+    '</div>';
+}
+function waEdEcrit(fn){
+  const E = WA_ED;
+  const cur = {fr:waVersions(E.cle, "fr").slice(), ar:waVersions(E.cle, "ar").slice()};
+  fn(cur);
+  WA.msg[E.cle] = cur;
+  waSave();
+}
+
+/* ---------- tout redessiner ---------- */
+let WA_TAB = "today";
+function waRendTout(){
+  try { waNorm(); } catch(e){}
+  ["today", "contacts", "promos", "msgs"].forEach(k => {
+    const b = document.querySelector('[data-watab="' + k + '"]');
+    if (b) b.setAttribute("aria-pressed", String(k === WA_TAB));
+  });
+  const f = $("prosSheet").classList.contains("fiche");
+  $("waToday").hidden = f || WA_TAB !== "today";
+  $("waPromos").hidden = f || WA_TAB !== "promos";
+  $("waMsgs").hidden = f || WA_TAB !== "msgs";
+  $("prosLst").hidden = f || WA_TAB !== "contacts";
+  $("prosOpen").hidden = f || WA_TAB !== "contacts";
+  const nb = waNbDuJour();
+  const bt = document.querySelector('[data-watab="today"] em');
+  if (bt){ bt.textContent = nb || ""; bt.hidden = !nb; }
+  $("prosSum").textContent = nb;
+  $("prosSumLab").textContent = "À envoyer aujourd'hui";
+  if (WA_TAB === "today") renderWaToday();
+  if (WA_TAB === "promos") renderWaPromos();
+  if (WA_TAB === "msgs") renderWaMsgs();
+  if (WA_TAB === "contacts") try { renderPros(); } catch(e){}
+  try { renderWaFiche(); renderProsFicheAct(); } catch(e){}
+  try { renderHome(); } catch(e){}
+}
+/* Le haut de la fiche : l'étape, le prochain rappel, les messages envoyés. */
+function renderWaFiche(){
+  const box = $("waFicheEtat");
+  if (!box) return;
+  const p = prosEdit && PROS.find(x => x.id === prosEdit);
+  if (!p){ box.hidden = true; box.innerHTML = ""; return; }
+  waSeq(p);
+  const e = prosEtape(p);
+  const ordre = ["dem", "prix", "int", "devis", "client"];
+  const i = ordre.indexOf(e);
+  const t = waTache(p) || waPromoPour(p, null);
+  const env = (p.env || []).slice().reverse();
+  box.hidden = false;
+  box.innerHTML =
+    '<div class="waetp" style="--c:' + waEtapeCoul(e) + '">' + ordre.map((k, j) => '<span class="' + (i >= j ? "on" : "") + '"></span>').join("") + '</div>' +
+    '<div class="waetl">' + ordre.map((k, j) => '<span class="' + (j === i ? "on" : "") + '" style="--c:' + waEtapeCoul(k) + '">' + waEtapeLab(k) + '</span>').join("") + '</div>' +
+    (e === "pause"
+      ? '<div class="wanext pause"><b>En pause · ' + esc((p.pause && p.pause.r) || "pas intéressé") + '</b><button type="button" data-wareprend="' + p.id + '">Reprendre</button></div>'
+      : '<div class="wanext"><b>' + (t ? esc(t.why) + " · " + (t.due <= Date.now() ? "aujourd'hui" : prosDate(t.due)) : "Aucun rappel prévu") +
+          '</b><small>fixé par l\'app</small></div>') +
+    (env.length ? '<div class="waenv"><em>Messages envoyés</em>' + env.slice(0, 6).map(x =>
+      '<span>' + esc((WA_MSG_DEF[x.k] || {}).lab || x.k) + ' · ' + prosDate(x.at) + (x.by ? ' · ' + esc(nomDe(x.by)) : '') + '</span>').join("") + '</div>' : '');
+}
+
+/* ---------- les clics ---------- */
+$("prosSheet").addEventListener("click", e => {
+  const tb = e.target.closest("[data-watab]");
+  if (tb){ WA_TAB = tb.dataset.watab; WA_ED = null; if (WA_TAB === "contacts") renderPros(); waRendTout();
+           try { $("prosSheet").querySelector(".sheet-body").scrollTo({top:0}); } catch(err){} return; }
+  const pe = e.target.closest("#waToday [data-predit]");
+  if (pe){ const p = PROS.find(x => x.id === pe.dataset.predit); if (p){ prosCharge(p); prosFormOuvre(true); renderPros(); } return; }
+  const pb = e.target.closest("[data-wapausebtn]");
+  if (pb){ const p = PROS.find(x => x.id === pb.dataset.wapausebtn); if (p) waPauseDemande(p); return; }
+  const br = e.target.closest("[data-wabr]");
+  if (br){
+    const p = PROS.find(x => x.id === br.dataset.wabr);
+    if (!p) return;
+    const t = br.dataset.wacamp ? waPromoPour(p, null) : null;
+    waOuvreBrouillon(p.id, t);
+    return;
+  }
+  const rp = e.target.closest("[data-wareprend]");
+  if (rp){ waReprend(rp.dataset.wareprend); try { renderPros(); } catch(err){} return; }
+  /* promos */
+  if (e.target.closest("[data-wacampnew]")){ WA_CAMP_NEUF = {nom:"", cible:["prix", "dem"], fichier:"", parr:false}; renderWaPromos(); return; }
+  if (e.target.closest("[data-wacampnon]")){ WA_CAMP_NEUF = null; renderWaPromos(); return; }
+  if (e.target.closest("[data-wadrive]")){ WA_DRIVE = null; if (WA_TAB === "msgs") renderWaMsgs(); else renderWaPromos(); return; }
+  const cib = e.target.closest("[data-wacib]");
+  if (cib && WA_CAMP_NEUF){
+    WA_CAMP_NEUF.nom = $("waCampNom").value;
+    const k = cib.dataset.wacib, L = WA_CAMP_NEUF.cible, i = L.indexOf(k);
+    if (i >= 0) L.splice(i, 1); else L.push(k);
+    renderWaPromos(); return;
+  }
+  const fi = e.target.closest("[data-wafile]");
+  if (fi && WA_CAMP_NEUF){ WA_CAMP_NEUF.nom = $("waCampNom").value; WA_CAMP_NEUF.fichier = fi.dataset.wafile; renderWaPromos(); return; }
+  if (e.target.closest("[data-wacampgo]") && WA_CAMP_NEUF){
+    const C = WA_CAMP_NEUF;
+    C.nom = $("waCampNom").value.trim();
+    C.parr = !!($("waCampParr") && $("waCampParr").checked);
+    if (!C.nom){ toast("Donnez un nom à la campagne"); return; }
+    if (!C.fichier){ toast("Choisissez l'image ou le PDF de la promo"); return; }
+    if (!C.parr && !C.cible.length){ toast("Choisissez à qui l'envoyer"); return; }
+    if (C.parr) WA.camp.forEach(x => { if (x.parr) x.parr = false; });
+    WA.camp.push({id:"c" + Date.now(), nom:C.nom, cible:C.parr ? [] : C.cible.slice(), fichier:C.fichier, parr:C.parr,
+                  actif:!C.parr, at:Date.now(), by:(USER && USER.login) || "", faits:[]});
+    WA_CAMP_NEUF = null; waSave(); waRendTout();
+    toast(C.parr ? "Image du parrainage enregistrée" : "Campagne lancée : elle passe dans « Aujourd'hui »");
+    return;
+  }
+  const con = e.target.closest("[data-wacampon]");
+  if (con){ const c = WA.camp.find(x => x.id === con.dataset.wacampon); if (c){ c.actif = !c.actif; waSave(); waRendTout(); } return; }
+  /* messages */
+  const ed = e.target.closest("[data-waed]");
+  if (ed){ WA_ED = {cle:ed.dataset.waed, lang:"fr", v:0}; renderWaMsgs(); return; }
+  if (e.target.closest("[data-waedfin]")){ WA_ED = null; renderWaMsgs(); return; }
+  const el = e.target.closest("[data-waedlang]");
+  if (el){ WA_ED.lang = el.dataset.waedlang; WA_ED.v = 0; renderWaMsgs(); return; }
+  const ev = e.target.closest("[data-waedv]");
+  if (ev){ WA_ED.v = parseInt(ev.dataset.waedv, 10) || 0; renderWaMsgs(); return; }
+  const tk = e.target.closest("[data-watok]");
+  if (tk){
+    const ta = $("waEdTxt"); if (!ta) return;
+    const ins = "{" + tk.dataset.watok + "}";
+    const a = ta.selectionStart || ta.value.length, b = ta.selectionEnd || a;
+    ta.value = ta.value.slice(0, a) + ins + ta.value.slice(b);
+    ta.focus(); ta.selectionStart = ta.selectionEnd = a + ins.length;
+    return;
+  }
+  if (e.target.closest("[data-waedsave]")){
+    const txt = $("waEdTxt").value;
+    waEdEcrit(cur => { cur[WA_ED.lang][WA_ED.v] = txt; });
+    toast("Message enregistré"); renderWaMsgs(); return;
+  }
+  if (e.target.closest("[data-waeddel]")){
+    waEdEcrit(cur => { cur[WA_ED.lang].splice(WA_ED.v, 1); });
+    WA_ED.v = 0; renderWaMsgs(); return;
+  }
+  if (e.target.closest("[data-waedreset]")){
+    delete WA.msg[WA_ED.cle]; waSave(); WA_ED.v = 0; toast("Texte d'origine remis"); renderWaMsgs(); return;
+  }
+  /* fiche : langue, source, gros client */
+  const lg = e.target.closest("[data-wafl]");
+  if (lg){ prosD.lang = lg.dataset.wafl; renderWaChamps(); return; }
+  const sr = e.target.closest("[data-wafs]");
+  if (sr){ prosD.src = prosD.src === sr.dataset.wafs ? "" : sr.dataset.wafs; renderWaChamps(); return; }
+  if (e.target.closest("#waStar")){ prosD.star = !prosD.star; renderWaChamps(); return; }
+});
+$("prosSheet").addEventListener("change", e => {
+  const r = e.target.closest("[data-wareg]");
+  if (!r) return;
+  WA.reg[r.dataset.wareg] = r.value.trim();
+  waSave();
+  toast("Réglage enregistré");
+  if (r.tagName === "SELECT") renderWaMsgs();
+});
+$("waModal").addEventListener("click", e => {
+  if (e.target === $("waModal") || e.target.closest("[data-waclose]")){ waModalFerme(); waRendTout(); return; }
+  const lg = e.target.closest("[data-walang]");
+  if (lg && WA_BR){
+    const p = PROS.find(x => x.id === WA_BR.pid);
+    WA_BR.lang = lg.dataset.walang;
+    if (p && p.lang !== WA_BR.lang){ p.lang = WA_BR.lang; p.maj = Date.now(); prosSave(); }
+    waBrouillonRend(true); return;
+  }
+  if (e.target.closest("[data-wavar]") && WA_BR){ WA_BR.v++; waBrouillonRend(true); return; }
+  if (e.target.closest("[data-wasend]")){ waEnvoie(); return; }
+  const rs = e.target.closest("[data-wares]");
+  if (rs && WA_BR){ waResultatChoix(WA_BR.pid, rs.dataset.wares); return; }
+  const pz = e.target.closest("[data-wapause]");
+  if (pz && WA_BR){ waPause(WA_BR.pid, pz.dataset.wapause); return; }
+  const fn = e.target.closest("[data-wafin]");
+  if (fn && WA_BR){
+    const p = PROS.find(x => x.id === WA_BR.pid);
+    if (!p) return;
+    if (fn.dataset.wafin === "pause"){ waPauseDemande(p); return; }
+    p.seq.next = Date.now() + waReg("tard") * WA_J; p.maj = Date.now(); prosSave();
+    waModalFerme(); waRendTout(); toast("Dernier essai le " + prosDate(p.seq.next));
+  }
+});
+
+/* Les champs ajoutés à la fiche : langue des messages, d'où il vient, gros client. */
+const WA_SOURCES = ["Instagram", "Facebook", "TikTok", "Google", "Site", "Bouche à oreille", "Autre"];
+function renderWaChamps(){
+  const l = $("waLangSeg"), s = $("waSrc"), st = $("waStar");
+  if (!l) return;
+  [...l.children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.wafl === (prosD.lang === "ar" ? "ar" : "fr"))));
+  s.innerHTML = WA_SOURCES.map(x => '<button type="button" data-wafs="' + x + '" aria-pressed="' + (prosD.src === x) + '">' + x + '</button>').join("");
+  st.setAttribute("aria-pressed", String(!!prosD.star));
+}
+
 
 /* ============ Rémunération : salaires et primes du mois ============ */
 /* Imane prend les commandes et touche un pourcentage du produit vendu.
