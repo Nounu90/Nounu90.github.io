@@ -1976,6 +1976,47 @@ button.wa.full{width:100%}
 .waduo button.warouge{color:#B42318; border-color:#F1C4C0}
 .wahbody .watxt{display:block; width:calc(100% - 20px); box-sizing:border-box; margin:0 10px}
 .wahbody .waduo{margin:8px 10px 10px}
+.wahbody .waedpj{margin:0 10px}
+/* v14.15 : Stats */
+.wastper{display:flex; flex-wrap:wrap; gap:6px}
+.wastper button{padding:7px 12px; border-radius:99px; border:1px solid var(--line); background:var(--card); font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--ink)}
+.wastper button[aria-pressed="true"]{background:var(--ink); color:var(--ground); border-color:var(--ink)}
+.wastdates{display:flex; gap:8px; margin-top:9px}
+.wastdates label{flex:1; font-size:11px; color:var(--muted)}
+.wastdates input{display:block; width:100%; margin-top:3px; padding:8px; border-radius:9px; border:1px solid var(--line); background:var(--card); color:var(--ink); font:inherit; font-size:13px}
+.wastk{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:11px}
+.wastk div{background:var(--card); border:1px solid var(--line); border-radius:13px; padding:10px 12px}
+.wastk span{display:block; font-size:11.5px; color:var(--muted)}
+.wastk b{display:block; font-family:"IBM Plex Mono",monospace; font-size:24px; color:var(--ink); margin:2px 0}
+.wastk em{font-style:normal; font-size:11px; font-weight:700; color:var(--muted)}
+.wastk em.up{color:#127A3D} .wastk em.dn{color:#B42318}
+.wastk .big{grid-column:1 / -1; background:#E3F5EA; border-color:#BFE6CC}
+.wastk .big b{color:#127A3D}
+.wastch{display:flex; align-items:flex-end; gap:4px; height:140px; border-bottom:1px solid var(--line); padding-top:14px}
+.wastch div{flex:1; min-width:0; height:100%; position:relative; display:flex; align-items:flex-end; justify-content:center; gap:2px}
+.wastch span{position:absolute; top:-14px; font-size:10px; color:var(--muted); font-family:"IBM Plex Mono",monospace}
+.wastch i{display:block; width:45%; max-width:18px; border-radius:4px 4px 0 0; min-height:0}
+.wastch i.n, .wastleg i.n{background:#9FDDB6} .wastch i.c, .wastleg i.c{background:#127A3D}
+.wastx{display:flex; gap:4px; margin-top:4px}
+.wastx span{flex:1; min-width:0; text-align:center; font-size:9.5px; color:var(--muted); overflow:hidden; white-space:nowrap}
+.wastleg{display:flex; gap:14px; margin-top:8px; font-size:11.5px; color:var(--muted)}
+.wastleg i{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px}
+.wastfun div{display:flex; align-items:center; gap:8px; margin-bottom:5px}
+.wastfun .bar{height:27px; border-radius:7px; display:flex; align-items:center; padding:0 9px; color:#fff; font-size:12px; font-weight:700; white-space:nowrap}
+.wastfun small{font-size:11.5px; color:var(--muted); white-space:nowrap}
+.wastsplit{display:flex; border-radius:9px; overflow:hidden; min-height:28px}
+.wastsplit span{display:flex; align-items:center; justify-content:center; padding:4px 6px; color:#fff; font-size:11.5px; font-weight:700; text-align:center}
+.wasttip{font-size:12.5px; color:var(--ink); background:var(--card2); border-radius:10px; padding:9px 11px; margin:9px 0 0}
+.wasttip b{color:#127A3D}
+.wasttbl{width:100%; border-collapse:collapse; font-size:12.5px; color:var(--ink)}
+.wasttbl td{padding:7px 4px; border-bottom:1px solid var(--line)}
+.wasttbl td:not(:first-child){text-align:right; font-family:"IBM Plex Mono",monospace}
+.wasttbl tr:first-child td{font-size:11px; color:var(--muted); font-family:inherit}
+.wasthb{display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:12.5px; color:var(--ink)}
+.wasthb span{width:40%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.wasthb em{flex:1}
+.wasthb i{display:block; height:12px; border-radius:3px; background:#D97706}
+.wasthb b{font-family:"IBM Plex Mono",monospace; font-size:12px}
 .waraisons{display:grid; gap:7px}
 .waraisons button{text-align:left; padding:12px; border-radius:11px; border:1px solid var(--line); background:var(--card); font-size:14px; color:var(--ink)}
 .wafiche{margin:0 0 12px}
@@ -3303,10 +3344,12 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
       <button type="button" data-watab="contacts" aria-pressed="false">Contacts</button>
       <button type="button" data-watab="promos" aria-pressed="false">Promos</button>
       <button type="button" data-watab="msgs" aria-pressed="false">Messages</button>
+      <button type="button" data-watab="stats" aria-pressed="false">Stats</button>
     </div>
     <div id="waToday"></div>
     <div id="waPromos" hidden></div>
     <div id="waMsgs" hidden></div>
+    <div id="waStats" hidden></div>
     <button class="prbtn wa promobtn" id="prosPromoBtn" type="button" hidden>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>
       Promotions WhatsApp</button>
@@ -7951,7 +7994,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.14";
+const APP_VERSION = "14.15";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -15329,13 +15372,37 @@ function waEnvAnnulable(p, x){
   const L = p.env || [];
   return !!x.av && L[L.length - 1] === x;
 }
-function waEnvTexteSauve(pid, at, txt){
+function waEnvTexteSauve(pid, at, txt, pj){
   const r = waEnvTrouve(pid, at);
   if (!r) return;
-  r.x.txt = String(txt || "").trim().slice(0, 1500);
+  if (txt !== null) r.x.txt = String(txt || "").trim().slice(0, 1500);
+  if (Array.isArray(pj)){
+    r.x.pj = pj.slice();
+    /* v14.15 : l'image de la promo retirée, la promo ne compte plus pour ce client */
+    const c = r.x.camp && (WA.camp || []).find(y => y.id === r.x.camp);
+    if (c && c.fichier && r.x.pj.indexOf(waNomFichier(c.fichier)) < 0){ delete r.x.camp; waPromoRecalc(r.p); waSave(); }
+  }
   r.x.modif = Date.now();
   r.p.maj = Date.now(); prosSave();
-  toast("Texte corrigé");
+  toast("Message corrigé");
+}
+/* v14.15 : les pièces jointes d'un message déjà parti, en cours de correction */
+let WA_EDPJ = null;   /* {pid, at, pj:[noms], ouvert} */
+function waEdPjRend(){
+  const box = document.querySelector(".wahbody .waedpj");
+  if (!box || !WA_EDPJ) return;
+  const E = WA_EDPJ;
+  box.innerHTML = '<div class="walab" style="margin:10px 0 6px">Pièces jointes</div>' +
+    (E.pj.length ? E.pj.map((n, i) => '<div class="wapj"><b>📎 ' + esc(n) + '</b>' +
+        '<button type="button" data-waedpjdel="' + i + '" aria-label="Retirer">✕</button></div>').join("")
+      : '<p class="wahint" style="margin:0 0 6px">Aucune pièce jointe.</p>') +
+    '<button type="button" class="wajoin" data-waedpjadd>+ Joindre un fichier</button>' +
+    (E.ouvert ? (WA_DRIVE === null ? '<p class="wahint">Lecture du dossier Drive…</p>'
+      : WA_DRIVE.length ? '<div class="wafiles">' + WA_DRIVE.map(f => '<button type="button" data-waedpjf="' + esc(f.nom) + '" aria-pressed="' +
+          (E.pj.indexOf(f.nom) >= 0) + '"><b>' + esc(f.nom) + '</b><small>' + (String(f.type).indexOf("pdf") >= 0 ? "PDF" : "image") +
+          '</small></button>').join("") + '</div>'
+      : '<p class="wahint">Le dossier Drive « PROMOS » est vide.</p>') : '');
+  if (E.ouvert && WA_DRIVE === null) waDriveListe(true).then(waEdPjRend);
 }
 function waEnvAnnule(pid, at){
   const r = waEnvTrouve(pid, at);
@@ -15445,7 +15512,7 @@ function waEnvDetail(x, pid){
       ? '<div class="waduo"><button type="button" data-wamainchg="' + x.at + '" data-wapid="' + pid + '">Changer de promo</button>' +
         '<button type="button" data-wamaindel="' + x.at + '" data-wapid="' + pid + '">Annuler cette promo</button></div>'
       : pid
-      ? '<div class="waduo"><button type="button" data-waedtxt="' + x.at + '" data-wapid="' + pid + '">✎ Modifier le texte</button>' +
+      ? '<div class="waduo"><button type="button" data-waedtxt="' + x.at + '" data-wapid="' + pid + '">✎ Modifier</button>' +
         (p && waEnvAnnulable(p, x)
           ? '<button type="button" class="warouge" data-waenvdel="' + x.at + '" data-wapid="' + pid + '">Pas parti : annuler</button>' : '') +
         '</div>' : '') +
@@ -15748,7 +15815,7 @@ function waEdEcrit(fn){
 let WA_TAB = "today";
 function waRendTout(){
   try { waNorm(); } catch(e){}
-  ["today", "contacts", "promos", "msgs"].forEach(k => {
+  ["today", "contacts", "promos", "msgs", "stats"].forEach(k => {
     const b = document.querySelector('[data-watab="' + k + '"]');
     if (b) b.setAttribute("aria-pressed", String(k === WA_TAB));
   });
@@ -15756,6 +15823,7 @@ function waRendTout(){
   $("waToday").hidden = f || WA_TAB !== "today";
   $("waPromos").hidden = f || WA_TAB !== "promos";
   $("waMsgs").hidden = f || WA_TAB !== "msgs";
+  $("waStats").hidden = f || WA_TAB !== "stats";
   $("prosLst").hidden = f || WA_TAB !== "contacts";
   $("prosOpen").hidden = f || WA_TAB !== "contacts";
   const nb = waNbDuJour();
@@ -15766,6 +15834,7 @@ function waRendTout(){
   if (WA_TAB === "today") renderWaToday();
   if (WA_TAB === "promos") renderWaPromos();
   if (WA_TAB === "msgs") renderWaMsgs();
+  if (WA_TAB === "stats") try { renderWaStats(); } catch(e){ console.error(e); }
   if (WA_TAB === "contacts") try { renderPros(); } catch(e){}
   try { renderWaFiche(); renderProsFicheAct(); } catch(e){}
   try { renderHome(); } catch(e){}
@@ -15811,6 +15880,8 @@ function renderWaFiche(){
 $("prosSheet").addEventListener("click", e => {
   if (e.target.closest("[data-waplan]")){ WA_PLAN = !WA_PLAN; renderWaToday(); return; }
   if (e.target.closest("[data-wajour]")){ waMessagesDuJour(); return; }
+  const stp = e.target.closest("[data-wastper]");
+  if (stp){ WA_ST.per = stp.dataset.wastper; renderWaStats(); return; }
   const tb = e.target.closest("[data-watab]");
   if (tb){ WA_TAB = tb.dataset.watab; WA_ED = null; if (WA_TAB === "contacts") renderPros(); waRendTout();
            try { $("prosSheet").querySelector(".sheet-body").scrollTo({top:0}); } catch(err){} return; }
@@ -16062,27 +16133,216 @@ document.addEventListener("click", e => {
     const r = waEnvTrouve(ed.dataset.wapid, +ed.dataset.waedtxt);
     const body = ed.closest(".wahbody");
     if (!r || !body) return;
-    body.innerHTML = '<textarea class="watxt" dir="auto" rows="6">' + esc(r.x.txt || "") + '</textarea>' +
+    WA_EDPJ = {pid:r.p.id, at:r.x.at, pj:(r.x.pj || []).slice(), ouvert:false};
+    body.innerHTML = (r.x.txt || r.x.bloc !== "main"
+        ? '<textarea class="watxt" dir="auto" rows="6">' + esc(r.x.txt || "") + '</textarea>' : '') +
+      '<div class="waedpj"></div>' +
       '<div class="waduo"><button type="button" data-waedno>Annuler</button>' +
       '<button type="button" class="wa" data-waedok="' + r.x.at + '" data-wapid="' + r.p.id + '">Enregistrer</button></div>';
+    waEdPjRend();
     const ta = body.querySelector("textarea");
-    ta.focus();
+    if (ta) ta.focus();
     return;
+  }
+  const pd = e.target.closest("[data-waedpjdel]");
+  if (pd && WA_EDPJ){ WA_EDPJ.pj.splice(+pd.dataset.waedpjdel, 1); waEdPjRend(); return; }
+  if (e.target.closest("[data-waedpjadd]") && WA_EDPJ){ WA_EDPJ.ouvert = !WA_EDPJ.ouvert; waEdPjRend(); return; }
+  const pf = e.target.closest("[data-waedpjf]");
+  if (pf && WA_EDPJ){
+    const n = pf.dataset.waedpjf, i = WA_EDPJ.pj.indexOf(n);
+    if (i >= 0) WA_EDPJ.pj.splice(i, 1); else WA_EDPJ.pj.push(n);
+    waEdPjRend(); return;
   }
   const ok = e.target.closest("[data-waedok]");
   if (ok){
     const ta = ok.closest(".wahbody").querySelector("textarea");
-    waEnvTexteSauve(ok.dataset.wapid, +ok.dataset.waedok, ta ? ta.value : "");
+    waEnvTexteSauve(ok.dataset.wapid, +ok.dataset.waedok, ta ? ta.value : null, WA_EDPJ ? WA_EDPJ.pj : null);
+    WA_EDPJ = null;
     waHistRefait(ok); return;
   }
   const no = e.target.closest("[data-waedno]");
-  if (no){ waHistRefait(no); return; }
+  if (no){ WA_EDPJ = null; waHistRefait(no); return; }
   const dl = e.target.closest("[data-waenvdel]");
   if (dl){
     if (!confirm("Ce message n'est pas parti ? Il sera retiré et le rappel reviendra comme avant.")) return;
     waEnvAnnule(dl.dataset.wapid, +dl.dataset.waenvdel);
     waHistRefait(dl); return;
   }
+});
+
+/* ============ v14.15 : l'onglet Stats ============ */
+/* Combien de contacts, de devis et de clients sur une période, et ce qui fait signer.
+   Tout se calcule depuis les fiches (PROS) et les bons (ORDERS) : rien de plus à saisir. */
+let WA_ST = {per:"mois", du:"", au:""};
+function waStPeriode(){
+  const now = new Date();
+  const j0 = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+  let a, b = Date.now() + 1, pa, pb;
+  if (WA_ST.per === "semaine"){
+    const d = j0(now); const k = (d.getDay() + 6) % 7; d.setDate(d.getDate() - k);
+    a = d.getTime(); pa = a - 7 * WA_J; pb = b - 7 * WA_J;
+  } else if (WA_ST.per === "annee"){
+    a = new Date(now.getFullYear(), 0, 1).getTime();
+    pa = new Date(now.getFullYear() - 1, 0, 1).getTime();
+    const x = new Date(now); x.setFullYear(now.getFullYear() - 1); pb = x.getTime() + 1;
+  } else if (WA_ST.per === "dates"){
+    const du = WA_ST.du ? new Date(WA_ST.du + "T00:00:00") : new Date(now.getFullYear(), now.getMonth(), 1);
+    const au = WA_ST.au ? new Date(WA_ST.au + "T00:00:00") : j0(now);
+    a = du.getTime(); b = au.getTime() + WA_J;
+    if (b <= a) b = a + WA_J;
+    pa = a - (b - a); pb = a;
+  } else {
+    a = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    pa = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
+    const x = new Date(now); x.setDate(1); x.setMonth(now.getMonth() - 1);
+    x.setDate(Math.min(now.getDate(), new Date(now.getFullYear(), now.getMonth(), 0).getDate()));
+    x.setHours(now.getHours(), now.getMinutes()); pb = x.getTime() + 1;
+  }
+  return {a:a, b:b, pa:pa, pb:pb};
+}
+function waMsDe(d){ const t = new Date(String(d || "").length === 10 ? d + "T12:00:00" : d).getTime(); return isNaN(t) ? 0 : t; }
+/* Le jour où un bon est devenu une vraie commande, et s'il est passé par un devis. */
+function waBonInfo(o){
+  const L = (o.log || []).filter(x => x && x.kind === "etat");
+  const dv = L.find(x => x.etat === "devis");
+  const cm = L.find(x => x.etat && x.etat !== "devis");
+  const pay = paiements(o).map(x => waMsDe(x.date)).filter(Boolean).sort((x, y) => x - y)[0] || 0;
+  const cree = waMsDe(o.date);
+  return {devisAt: dv ? dv.at : (etatDe(o) === "devis" ? cree : 0),
+          cmdAt: etatDe(o) === "devis" ? 0 : ((cm && cm.at) || pay || cree),
+          viaDevis: !!dv};
+}
+/* Tout ce qu'on sait d'un contact pour les stats. */
+function waStContact(p){
+  const bons = bonsDuTel(p.tel, p.bon).map(o => Object.assign({o:o}, waBonInfo(o)));
+  const cmds = bons.filter(x => x.cmdAt).sort((x, y) => x.cmdAt - y.cmdAt);
+  const devs = bons.filter(x => x.devisAt);
+  const c = cmds[0] || null;
+  const niveau = cmds.length ? 4 : devs.length ? 3 : p.interet === "int" ? 2 :
+    (p.prixEnv || parseFloat(p.pxE) > 0 || parseFloat(p.pxJ) > 0) ? 1 : 0;
+  const env = (p.env || []).slice().sort((x, y) => x.at - y.at);
+  const avant = c ? env.filter(x => x.at <= c.cmdAt) : [];
+  return {p:p, at:p.at || 0, bons:bons, devs:devs, client:c,
+          clientAt: c ? c.cmdAt : 0,
+          via: c ? (c.viaDevis || devs.some(d => d.devisAt && d.devisAt < c.cmdAt - 3600000) || avant.some(x => /^devis/.test(x.k || "")) ? "devis" : "direct") : "",
+          niveau:niveau, avant:avant, dernier: avant.length ? avant[avant.length - 1] : null};
+}
+function waStCalc(a, b, C){
+  const dans = t => t >= a && t < b;
+  const r = {contacts:0, msgs:0, devis:0, clients:0, viaDevis:0, direct:0, encaisse:0};
+  C.forEach(c => {
+    if (dans(c.at)) r.contacts++;
+    (c.p.env || []).forEach(x => { if (dans(x.at)) r.msgs++; });
+    c.devs.forEach(d => { if (dans(d.devisAt)) r.devis++; });
+    if (c.client && dans(c.clientAt)){ r.clients++; if (c.via === "devis") r.viaDevis++; else r.direct++; }
+    c.bons.forEach(x => paiements(x.o).forEach(y => { if (dans(waMsDe(y.date))) r.encaisse += parseFloat(y.montant) || 0; }));
+  });
+  return r;
+}
+function waStDelta(v, w){
+  if (!w && !v) return '';
+  const d = v - w;
+  return d ? '<em class="' + (d > 0 ? 'up' : 'dn') + '">' + (d > 0 ? '▲ ' : '▼ ') + frm(Math.abs(Math.round(d)), 0) + '</em>' : '<em>= période d\'avant</em>';
+}
+/* Les colonnes du graphique : jours, semaines ou mois selon la longueur. */
+function waStCases(a, b){
+  const L = [], jours = (b - a) / WA_J;
+  const moisN = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+  if (jours <= 16){
+    for (let t = a; t < b; t += WA_J){ const d = new Date(t); L.push({a:t, b:t + WA_J, l:["di", "lu", "ma", "me", "je", "ve", "sa"][d.getDay()] + " " + d.getDate()}); }
+  } else if (jours <= 120){
+    for (let t = a; t < b; t += 7 * WA_J){ const d = new Date(t); L.push({a:t, b:Math.min(b, t + 7 * WA_J), l:d.getDate() + "/" + (d.getMonth() + 1)}); }
+  } else {
+    let d = new Date(a); d = new Date(d.getFullYear(), d.getMonth(), 1);
+    while (d.getTime() < b){ const n = new Date(d.getFullYear(), d.getMonth() + 1, 1); L.push({a:Math.max(a, d.getTime()), b:Math.min(b, n.getTime()), l:moisN[d.getMonth()]}); d = n; }
+  }
+  return L;
+}
+function waStPct(n, d){ return d ? Math.round(n / d * 100) + " %" : "–"; }
+function renderWaStats(){
+  const box = $("waStats");
+  if (!box) return;
+  const P = waStPeriode();
+  const C = prosVivants().map(waStContact);
+  const R = waStCalc(P.a, P.b, C), Rp = waStCalc(P.pa, P.pb, C);
+  const dans = t => t >= P.a && t < P.b;
+  const nes = C.filter(c => dans(c.at));
+  const cli = C.filter(c => c.client && dans(c.clientAt));
+  const auj = new Date(); const iso = d => { const x = new Date(d); return x.getFullYear() + "-" + pad(x.getMonth() + 1) + "-" + pad(x.getDate()); };
+  let h = '<div class="wacard"><div class="wastper">' +
+      [["semaine", "Semaine"], ["mois", "Mois"], ["annee", "Année"], ["dates", "Entre 2 dates"]].map(([k, l]) =>
+        '<button type="button" data-wastper="' + k + '" aria-pressed="' + (WA_ST.per === k) + '">' + l + '</button>').join("") + '</div>' +
+      (WA_ST.per === "dates" ? '<div class="wastdates"><label>Du<input type="date" data-wastd="du" value="' + (WA_ST.du || iso(new Date(auj.getFullYear(), auj.getMonth(), 1))) + '"></label>' +
+        '<label>Au<input type="date" data-wastd="au" value="' + (WA_ST.au || iso(auj)) + '"></label></div>' : '') +
+      '<p class="wahint" style="margin:8px 0 0">' + prosDate(P.a) + ' → ' + prosDate(P.b - 1) + ' · comparé à la même durée juste avant</p></div>';
+  /* les chiffres clés */
+  h += '<div class="wastk">' +
+    '<div><span>Nouveaux contacts</span><b>' + R.contacts + '</b>' + waStDelta(R.contacts, Rp.contacts) + '</div>' +
+    '<div><span>Messages envoyés</span><b>' + R.msgs + '</b>' + waStDelta(R.msgs, Rp.msgs) + '</div>' +
+    '<div><span>Devis faits</span><b>' + R.devis + '</b>' + waStDelta(R.devis, Rp.devis) + '</div>' +
+    '<div><span>Nouveaux clients</span><b>' + R.clients + '</b>' + waStDelta(R.clients, Rp.clients) + '</div>' +
+    '<div class="big"><span>Encaissé sur la période (acomptes et soldes des contacts)</span><b>' + frm(Math.round(R.encaisse), 0) + ' DH</b>' + waStDelta(R.encaisse, Rp.encaisse) + '</div></div>';
+  /* le graphique */
+  const K = waStCases(P.a, P.b).map(k => ({l:k.l, n:C.filter(c => c.at >= k.a && c.at < k.b).length,
+                                            c:C.filter(c => c.client && c.clientAt >= k.a && c.clientAt < k.b).length}));
+  const mx = Math.max(1, ...K.map(k => Math.max(k.n, k.c)));
+  h += '<div class="wacard"><div class="walab">Contacts et clients</div><div class="wastch">' +
+    K.map(k => '<div title="' + esc(k.l) + ' : ' + k.n + ' contacts, ' + k.c + ' clients"><span>' + (k.n || "") + '</span>' +
+      '<i class="n" style="height:' + (k.n / mx * 100) + '%"></i><i class="c" style="height:' + (k.c / mx * 100) + '%"></i></div>').join("") +
+    '</div><div class="wastx">' + K.map(k => '<span>' + esc(k.l) + '</span>').join("") + '</div>' +
+    '<div class="wastleg"><span><i class="n"></i>nouveaux contacts</span><span><i class="c"></i>devenus clients</span></div></div>';
+  /* le parcours des contacts arrivés sur la période */
+  const niv = [0, 1, 2, 3, 4].map(n => nes.filter(c => c.niveau >= n).length);
+  const lab = ["demandes", "prix envoyé", "intéressés", "devis", "clients"];
+  const col = ["#94A3B8", "#D97706", "#EA580C", "#2563EB", "#127A3D"];
+  h += '<div class="wacard"><div class="walab">Le parcours · contacts arrivés sur la période</div>' +
+    (nes.length ? '<div class="wastfun">' + niv.map((v, i) => '<div><span class="bar" style="width:' + Math.max(14, v / niv[0] * 100) + '%;background:' + col[i] + '">' +
+        v + ' ' + lab[i] + '</span>' + (i ? '<small>' + waStPct(v, niv[i - 1]) + '</small>' : '') + '</div>').join("") + '</div>' +
+        '<p class="wahint" style="margin:6px 0 0">Le % montre combien passent à l\'étape suivante. La plus petite barre est là où ils se perdent.</p>'
+      : '<p class="wahint">Aucun nouveau contact sur la période.</p>') + '</div>';
+  /* comment ils deviennent clients */
+  if (cli.length){
+    const jours = cli.map(c => (c.clientAt - c.at) / WA_J).filter(x => x >= 0);
+    const msgs = cli.map(c => c.avant.filter(x => x.bloc !== "libre").length);
+    const moy = L => L.length ? L.reduce((s, x) => s + x, 0) / L.length : 0;
+    h += '<div class="wacard"><div class="walab">Comment ils deviennent clients</div>' +
+      '<div class="wastsplit">' + (R.viaDevis ? '<span style="flex:' + R.viaDevis + ';background:#2563EB">' + R.viaDevis + ' après un devis</span>' : '') +
+        (R.direct ? '<span style="flex:' + R.direct + ';background:#7C3AED">' + R.direct + ' avance directe</span>' : '') + '</div>' +
+      '<p class="wasttip">En moyenne <b>' + fr(moy(jours), 0) + ' jours</b> entre la demande et la commande · <b>' + fr(moy(msgs), 1) + ' messages</b> envoyés avant.</p>';
+    /* le dernier message parti avant la commande */
+    const der = {};
+    cli.forEach(c => { const k = c.dernier ? waEnvLab(c.dernier) : "Aucun message de l'app"; der[k] = (der[k] || 0) + 1; });
+    h += '<div class="walab" style="margin-top:12px">Quel message fait signer</div><table class="wasttbl"><tr><td>Dernier message avant la commande</td><td>Clients</td></tr>' +
+      Object.keys(der).sort((x, y) => der[y] - der[x]).map(k => '<tr><td>' + esc(k) + '</td><td>' + der[k] + '</td></tr>').join("") + '</table></div>';
+  }
+  /* d'où ils viennent */
+  if (nes.length){
+    const src = {};
+    nes.forEach(c => { const k = c.p.src || "Non renseigné"; src[k] = src[k] || {n:0, c:0}; src[k].n++; if (c.niveau >= 4) src[k].c++; });
+    h += '<div class="wacard"><div class="walab">D\'où ils viennent · contacts arrivés sur la période</div><table class="wasttbl"><tr><td>Source</td><td>Contacts</td><td>Clients</td><td>Taux</td></tr>' +
+      Object.keys(src).sort((x, y) => src[y].n - src[x].n).map(k => '<tr><td>' + esc(k) + '</td><td>' + src[k].n + '</td><td>' + src[k].c + '</td><td>' +
+        (k === "Non renseigné" ? "–" : waStPct(src[k].c, src[k].n)) + '</td></tr>').join("") + '</table></div>';
+    const ty = {ENR:{n:0, c:0}, JN:{n:0, c:0}, MIX:{n:0, c:0}};
+    nes.forEach(c => { const k = ty[c.p.type] ? c.p.type : "ENR"; ty[k].n++; if (c.niveau >= 4) ty[k].c++; });
+    const tl = {ENR:["Enrouleur", "#0F766E"], JN:["Jour et nuit", "#9333EA"], MIX:["Les deux", "#64748B"]};
+    h += '<div class="wacard"><div class="walab">Enrouleur ou jour et nuit</div><div class="wastsplit">' +
+      Object.keys(ty).filter(k => ty[k].n).map(k => '<span style="flex:' + ty[k].n + ';background:' + tl[k][1] + '">' + tl[k][0] + ' ' + ty[k].n + ' · ' + ty[k].c + ' cl.</span>').join("") + '</div></div>';
+  }
+  /* pourquoi ils ne commandent pas */
+  const rs = {};
+  C.forEach(c => { const z = c.p.pause; if (z && dans(z.at || 0)){ const k = z.r || "Sans raison"; rs[k] = (rs[k] || 0) + 1; } });
+  const rk = Object.keys(rs).sort((x, y) => rs[y] - rs[x]);
+  if (rk.length){
+    const m = rs[rk[0]];
+    h += '<div class="wacard"><div class="walab">Pourquoi ils ne commandent pas · mis en pause sur la période</div>' +
+      rk.map(k => '<div class="wasthb"><span>' + esc(k) + '</span><i style="width:' + (rs[k] / m * 100) + '%"></i><b>' + rs[k] + '</b></div>').join("") + '</div>';
+  }
+  box.innerHTML = h;
+}
+$("prosSheet").addEventListener("change", e => {
+  const d = e.target.closest("[data-wastd]");
+  if (!d) return;
+  WA_ST[d.dataset.wastd] = d.value; renderWaStats();
 });
 
 /* Les champs ajoutés à la fiche : langue des messages, d'où il vient, gros client. */
