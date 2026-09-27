@@ -1999,6 +1999,24 @@ button.wa.full{width:100%}
 .waalerte b{font-family:"Archivo",sans-serif; font-size:13.5px}
 .waalerte button{justify-self:start; margin-top:4px; padding:7px 11px; border-radius:9px; border:1px solid currentColor; background:none; color:inherit; font-weight:600}
 .wasend[disabled]{opacity:.4}
+button.wagoal{width:100%; text-align:left; cursor:pointer}
+.wagoal .wavoir{flex:none; font-style:normal; font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:700; color:#1FA855; background:none; height:auto; width:auto; margin:0}
+.waenv{display:block}
+.waenv > em{display:block; margin-bottom:6px}
+.waenv > span{display:block}
+.wahist{border:1px solid var(--line); border-radius:10px; margin-bottom:6px; background:var(--card)}
+.wahist summary{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; padding:8px 10px; cursor:pointer; list-style:none}
+.wahist summary::-webkit-details-marker{display:none}
+.wahist summary b{font-family:"Archivo",sans-serif; font-size:13px; color:var(--ink)}
+.wahist summary span{font-size:11.5px; color:var(--muted)}
+.wahtxt{white-space:pre-wrap; font-size:13px; line-height:1.5; color:var(--ink); background:var(--card2); border-radius:9px; margin:0 10px 8px; padding:8px 10px}
+.wahpj{display:flex; flex-wrap:wrap; gap:6px; margin:0 10px 8px}
+.wahpj span{font-size:12px; background:var(--card2); border-radius:7px; padding:3px 8px; color:var(--ink)}
+.wahist .waduo{margin:0 10px 10px}
+.wajourc{margin-bottom:10px}
+.wajourh{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin:0 2px 4px}
+.wajourh button{background:none; padding:0; font-family:"Archivo",sans-serif; font-size:14px; font-weight:700; color:#1FA855}
+.wajourh span{font-size:11.5px; color:var(--muted)}
 .waplan{display:flex; align-items:center; gap:10px; width:100%; text-align:left; margin-top:12px; padding:11px 12px; border-radius:12px;
   border:1px solid var(--line); background:var(--card); font-size:12.5px; color:var(--muted)}
 .waplan span{flex:1}
@@ -7920,7 +7938,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.12";
+const APP_VERSION = "14.13";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -15207,6 +15225,9 @@ async function waEnvoie(){
   if (!B) return;
   const p = PROS.find(x => x.id === B.pid);
   const txt = ($("waTexte") && $("waTexte").value || B.texte).trim();
+  /* v14.13 : ce qui part vraiment est gardé, pour l'historique du client */
+  B.txtEnvoye = txt;
+  B.pjNoms = (B.pieces || []).map(id => (WA_FICH[id] || {}).nom || ((WA_DRIVE || []).find(x => x.id === id) || {}).nom || "pièce jointe");
   const lien = waLien(p.tel);
   const files = B.pieces.map(id => WA_FICH[id]).filter(Boolean).map(waFichierVersFile);
   let parti = false;
@@ -15236,8 +15257,9 @@ function waConfirme(p){
 function waNoteEnvoi(p, B){
   const now = Date.now();
   if (!Array.isArray(p.env)) p.env = [];
-  p.env.push({at:now, k:B.cle || B.t.k, bloc:B.t.bloc, camp:B.t.camp || undefined, by:(USER && USER.login) || ""});
-  if (p.env.length > 60) p.env = p.env.slice(-60);
+  p.env.push({at:now, k:B.cle || B.t.k, bloc:B.t.bloc, camp:B.t.camp || undefined, by:(USER && USER.login) || "",
+              txt:String(B.txtEnvoye || "").slice(0, 1500), pj:B.pjNoms || [], lang:B.lang || "fr"});
+  if (p.env.length > 200) p.env = p.env.slice(-200);
   p.vu = now; p.vuBy = (USER && USER.login) || "";
   const s = p.seq || (waSeq(p), p.seq);
   if (B.t.bloc === "libre"){
@@ -15278,10 +15300,78 @@ function waPromoMain(pid, cid){
   c.faits = c.faits || [];
   if (c.faits.indexOf(p.id) < 0) c.faits.push(p.id);
   if (!Array.isArray(p.env)) p.env = [];
-  p.env.push({at:now, k:"promo", camp:c.id, bloc:"main", by:(USER && USER.login) || ""});
+  p.env.push({at:now, k:"promo", camp:c.id, bloc:"main", by:(USER && USER.login) || "",
+              txt:"Promo envoyée à la main dans WhatsApp.", pj:[waNomFichier(c.fichier)]});
   p.promoDer = now; p.vu = now; p.maj = now;
   waSave(); prosSave(); waModalFerme(); waRendTout();
   toast("Compté : " + (c.nom || "promo") + " envoyée");
+}
+/* v14.13 : tout ce qui est parti aujourd'hui, client par client, avec le texte et les pièces jointes. */
+function waMessagesDuJour(){
+  const t0 = waDebutJour();
+  const L = [];
+  prosVivants().forEach(p => (p.env || []).forEach(x => { if (x.at >= t0) L.push({p:p, x:x}); }));
+  L.sort((a, b) => b.x.at - a.x.at);
+  const compte = L.filter(y => y.x.bloc !== "new" && y.x.bloc !== "libre" && y.x.bloc !== "main").length;
+  WA_BR = null;
+  waModal('<div class="wabh"><b>Envoyés aujourd\'hui</b><span>' + L.length + ' message' + (L.length > 1 ? 's' : '') +
+      ' · ' + compte + ' dans les ' + waReg("quota") + '</span>' +
+      '<button type="button" class="waclose" data-waclose aria-label="Fermer">✕</button></div>' +
+    (L.length ? L.map(y => '<div class="wajourc"><div class="wajourh"><button type="button" data-wafiche="' + y.p.id + '">' +
+        esc(y.p.nom || telAffiche(y.p.tel || "") || "Sans nom") + ' ›</button><span>' + waHeure(y.x.at) +
+        (y.x.bloc === "new" || y.x.bloc === "libre" || y.x.bloc === "main" ? ' · hors des ' + waReg("quota") : '') + '</span></div>' +
+        waEnvDetail(y.x, null) + '</div>').join("")
+      : '<p class="wahint">Aucun message envoyé depuis l\'app aujourd\'hui.</p>'));
+  document.querySelectorAll("#waBox .wahist").forEach(d => d.open = true);
+}
+function waNomFichier(id){
+  return (WA_FICH[id] || {}).nom || ((WA_DRIVE || []).find(x => x.id === id) || {}).nom || "image de la promo";
+}
+/* v14.13 : une promo notée « à la main » par erreur se change ou s'annule. La
+   campagne et la date de la dernière promo suivent. */
+function waPromoRecalc(p){
+  (WA.camp || []).forEach(c => {
+    const a = (p.env || []).some(x => x.camp === c.id);
+    const i = (c.faits || []).indexOf(p.id);
+    if (!a && i >= 0 && !(p.env || []).some(x => x.k === "r2" && x.camp === c.id)) c.faits.splice(i, 1);
+    if (a && i < 0){ c.faits = c.faits || []; c.faits.push(p.id); }
+  });
+  p.promoDer = (p.env || []).filter(x => x.camp || (x.k === "r2" && (x.pj || []).length))
+    .reduce((m, x) => Math.max(m, x.at || 0), 0);
+}
+function waPromoMainChange(pid, at, cid){
+  const p = PROS.find(x => x.id === pid), c = WA.camp.find(x => x.id === cid);
+  const x = p && (p.env || []).find(y => y.at === at && y.bloc === "main");
+  if (!x || !c) return;
+  x.camp = c.id; x.pj = [waNomFichier(c.fichier)]; x.modif = Date.now();
+  waPromoRecalc(p);
+  p.maj = Date.now(); waSave(); prosSave(); waModalFerme(); waRendTout();
+  toast("Promo changée : " + (c.nom || "promo"));
+}
+function waPromoMainAnnule(pid, at){
+  const p = PROS.find(x => x.id === pid);
+  if (!p) return;
+  p.env = (p.env || []).filter(y => !(y.at === at && y.bloc === "main"));
+  waPromoRecalc(p);
+  p.maj = Date.now(); waSave(); prosSave(); waModalFerme(); waRendTout();
+  toast("Promo annulée");
+}
+/* L'intitulé d'un message de l'historique. */
+function waEnvLab(x){
+  return (x.camp ? "Promo · " + (((WA.camp.find(c => c.id === x.camp) || {}).nom) || "") : waLabel(x.k)) +
+         (x.bloc === "main" ? " (à la main)" : "");
+}
+function waHeure(ms){ const d = new Date(ms); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+function waEnvDetail(x, pid){
+  return '<details class="wahist"><summary><b>' + esc(waEnvLab(x)) + '</b><span>' + prosDate(x.at) + ' ' + waHeure(x.at) +
+      (x.by ? ' · ' + esc(nomDe(x.by)) : '') + '</span></summary>' +
+    (x.txt ? '<div class="wahtxt" dir="auto">' + esc(x.txt) + '</div>'
+           : '<p class="wahint">Texte non enregistré : message envoyé avant cette version.</p>') +
+    ((x.pj || []).length ? '<div class="wahpj">' + x.pj.map(n => '<span>📎 ' + esc(n) + '</span>').join("") + '</div>' : '') +
+    (x.bloc === "main" && pid
+      ? '<div class="waduo"><button type="button" data-wamainchg="' + x.at + '" data-wapid="' + pid + '">Changer de promo</button>' +
+        '<button type="button" data-wamaindel="' + x.at + '" data-wapid="' + pid + '">Annuler cette promo</button></div>' : '') +
+  '</details>';
 }
 /* Après l'envoi : Imane dit ce qui s'est passé, l'app fixe la suite. */
 function waResultat(p){
@@ -15392,8 +15482,8 @@ function renderWaToday(){
   const q = waReg("quota");
   const grp = (titre, arr) => arr.length ? '<div class="wagh">' + titre + ' · ' + arr.length + '</div>' + arr.map(waCarte).join("") : '';
   box.innerHTML =
-    '<div class="wagoal"><b>' + L.fait + '/' + q + '</b><span>relances et promos envoyées aujourd\'hui' +
-      '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span></div>' +
+    '<button type="button" class="wagoal" data-wajour><b>' + L.fait + '/' + q + '</b><span>relances et promos envoyées aujourd\'hui' +
+      '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span><em class="wavoir">Voir ›</em></button>' +
     (tot ? '' : '<div class="empty">Rien à envoyer aujourd\'hui.' + (L.cache ? '' : '<br>Les prochains rappels arrivent tout seuls.') + '</div>') +
     grp("Nouvelles demandes", L.nouv) +
     grp("Rappels promis", L.vus.filter(x => x.bloc === "rappel")) +
@@ -15644,14 +15734,31 @@ function renderWaFiche(){
           '</b><small>fixé par l\'app</small></div>') +
     '<div class="waduo" style="margin-top:8px"><button type="button" class="walibre" style="margin:0" data-walibre="' + p.id + '">Écrire un message</button>' +
       '<button type="button" class="walibre gris" style="margin:0" data-wamain="' + p.id + '">Promo envoyée à la main</button></div>' +
-    (env.length ? '<div class="waenv"><em>Messages envoyés</em>' + env.slice(0, 6).map(x =>
-      '<span>' + esc(x.camp ? "Promo · " + (((WA.camp.find(c => c.id === x.camp) || {}).nom) || "") : waLabel(x.k)) +
-        (x.bloc === "main" ? " (à la main)" : "") + ' · ' + prosDate(x.at) + (x.by ? ' · ' + esc(nomDe(x.by)) : '') + '</span>').join("") + '</div>' : '');
+    (env.length
+      ? '<div class="waenv"><em>Historique · ' + env.length + ' message' + (env.length > 1 ? 's' : '') + ' · ' +
+          env.filter(x => x.camp).length + ' promo' + (env.filter(x => x.camp).length > 1 ? 's' : '') + '</em>' +
+          env.map(x => waEnvDetail(x, p.id)).join("") + '</div>'
+      : '<div class="waenv"><em>Historique</em><span>Aucun message envoyé depuis l\'app pour l\'instant.</span></div>');
 }
 
 /* ---------- les clics ---------- */
 $("prosSheet").addEventListener("click", e => {
   if (e.target.closest("[data-waplan]")){ WA_PLAN = !WA_PLAN; renderWaToday(); return; }
+  if (e.target.closest("[data-wajour]")){ waMessagesDuJour(); return; }
+  const mch = e.target.closest("[data-wamainchg]");
+  if (mch){
+    const p = PROS.find(x => x.id === mch.dataset.wapid);
+    if (!p) return;
+    WA_BR = {pid:p.id, envAt:+mch.dataset.wamainchg};
+    const L = WA.camp.filter(c => c && !c.sup);
+    waModal('<div class="wabh"><b>Changer de promo</b><span>' + esc(p.nom || telAffiche(p.tel || "")) + '</span>' +
+        '<button type="button" class="waclose" data-waclose aria-label="Fermer">✕</button></div>' +
+      '<p class="wahint" style="margin:0 0 10px">Choisissez la promo vraiment envoyée.</p>' +
+      '<div class="waraisons">' + L.map(c => '<button type="button" data-wamainset="' + c.id + '">' + esc(c.nom || "Promo") + '</button>').join("") + '</div>');
+    return;
+  }
+  const mdl = e.target.closest("[data-wamaindel]");
+  if (mdl){ waPromoMainAnnule(mdl.dataset.wapid, +mdl.dataset.wamaindel); return; }
   const tb = e.target.closest("[data-watab]");
   if (tb){ WA_TAB = tb.dataset.watab; WA_ED = null; if (WA_TAB === "contacts") renderPros(); waRendTout();
            try { $("prosSheet").querySelector(".sheet-body").scrollTo({top:0}); } catch(err){} return; }
@@ -15843,6 +15950,15 @@ $("waModal").addEventListener("click", e => {
     return;
   }
   if (e.target.closest("[data-wanon]")){ waModalFerme(); waRendTout(); toast("Rien n'est noté"); return; }
+  const ms = e.target.closest("[data-wamainset]");
+  if (ms && WA_BR && WA_BR.envAt){ waPromoMainChange(WA_BR.pid, WA_BR.envAt, ms.dataset.wamainset); return; }
+  const fo = e.target.closest("[data-wafiche]");
+  if (fo){
+    const p = PROS.find(x => x.id === fo.dataset.wafiche);
+    waModalFerme();
+    if (p){ prosCharge(p); prosFormOuvre(true); renderPros(); }
+    return;
+  }
   const mc = e.target.closest("[data-wamaincamp]");
   if (mc && WA_BR){ waPromoMain(WA_BR.pid, mc.dataset.wamaincamp); return; }
   const fp = e.target.closest("[data-waficheprix]");
