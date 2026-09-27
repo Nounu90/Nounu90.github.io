@@ -1999,6 +1999,12 @@ button.wa.full{width:100%}
 .waalerte b{font-family:"Archivo",sans-serif; font-size:13.5px}
 .waalerte button{justify-self:start; margin-top:4px; padding:7px 11px; border-radius:9px; border:1px solid currentColor; background:none; color:inherit; font-weight:600}
 .wasend[disabled]{opacity:.4}
+.wajoin{width:100%; margin:4px 0 8px; padding:9px; border-radius:10px; border:1px dashed var(--line-strong); background:none;
+  font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--muted)}
+#waJoinBox{margin-bottom:8px}
+.wapj{align-items:center}
+.wapj b{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.wapj button{flex:none; width:26px; height:26px; border-radius:7px; border:1px solid var(--line); background:var(--card); color:var(--muted); font-size:12px}
 .wacampb{display:flex; gap:6px; flex:none}
 .walibre.gris{border-color:var(--line); color:var(--ink)}
 .wachoix{display:flex; align-items:center; gap:8px; margin:0 0 9px; font-size:12.5px; color:var(--muted)}
@@ -3335,6 +3341,13 @@ button.wa.full{width:100%}
         <button type="button" data-pnbf="-1" aria-label="Une fenêtre de moins">−</button>
         <input id="prosNbFen" inputmode="numeric" placeholder="?" autocomplete="off" aria-label="Nombre de fenêtres">
         <button type="button" data-pnbf="1" aria-label="Une fenêtre de plus">+</button>
+      </div>
+
+      <div class="prsub"><span>Total m²</span><b id="prosM2TotLab">si le client donne sa surface</b></div>
+      <div class="field">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg>
+        <input id="prosM2Tot" inputmode="decimal" placeholder="Total m² donné par le client" autocomplete="off">
+        <span class="unit">m²</span>
       </div>
 
       <div class="prsub"><span>Dimensions</span><b id="prosDimTot">—</b></div>
@@ -7889,7 +7902,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.10";
+const APP_VERSION = "14.11";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -13458,7 +13471,7 @@ function prosLignes(){
     const st = prosStatut(p);
     return [jjmmaaaa(p.at), p.nom || "", p.tel || "", waLien(p.tel), p.adresse || "",
       p.pose || "", p.type ? typeCourt(p.type) : "", (p.refs || []).join(", "), dims,
-      r && r.nb ? r.nb : "", r && r.m2 ? Math.round(r.m2 * 100) / 100 : "",
+      r && r.nb ? r.nb : "", r && r.m2 ? Math.round(r.m2 * 100) / 100 : (prosM2TotSaisi(p) || ""),
       [p.note || "", p.suivi ? "Suivi : " + p.suivi : "",
        prosEstim(p) ? "Prix WhatsApp : " + prosEstimTexte(p) : ""].filter(Boolean).join(" · "),
       (st === "client" ? "Devenu client" : (st === "fin" ? "Sans suite" : (p.rappel ? "À rappeler" : "En cours"))) +
@@ -13795,7 +13808,7 @@ function prosIncomplete(p){
   const e = prosEtape(p);
   if (e === "client" || e === "pause") return false;
   const r = prosResume(p);
-  return !(r && r.nb) || !(parseFloat(p.pxE) > 0 || parseFloat(p.pxJ) > 0);
+  return !((r && r.nb) || prosM2TotSaisi(p)) || !(parseFloat(p.pxE) > 0 || parseFloat(p.pxJ) > 0);
 }
 let prosPlus = false;
 function jourCourt(iso){
@@ -14015,11 +14028,11 @@ function renderPros(){
    C'est une prise de notes qui évitera de tout retaper le jour du devis. */
 function prosDVide(){ return {adresse:"", pose:"Pose", type:"ENR", refs:[], dims:[],
                               rappel:false, rappelLe:"", interet:"nc", promoMan:0, promoDer:0, fact:"oui", poseMode:"forfait",
-                              promos:[], nbFen:"", lang:"fr", src:"", star:false}; }
+                              promos:[], nbFen:"", m2Tot:"", lang:"fr", src:"", star:false}; }
 function prosFormPrix(){
   return {type:prosD.type, dims:prosD.dims, pxE:$("prosPxE").value, pxJ:$("prosPxJ").value,
           remise:$("prosRemise").value, fact:prosD.fact || "oui",
-          poseP:$("prosPoseP").value, poseMode:prosD.poseMode || "forfait"};
+          poseP:$("prosPoseP").value, poseMode:prosD.poseMode || "forfait", m2Tot:prosD.m2Tot || "", nbFen:prosD.nbFen || ""};
 }
 function renderProsPrix(){
   if (!$("prosPxE")) return;
@@ -14033,7 +14046,8 @@ function renderProsPrix(){
   (prosD.dims || []).forEach(d => { const n = prosDimNette(d);
     if (n) m2 += Math.max(n.l, MINCM) * Math.max(n.h, MINCM) / 10000 * n.q; });
   const L = (a, b, c) => '<div class="r' + (c ? " " + c : "") + '"><span>' + a + '</span><b>' + b + '</b></div>';
-  let h = L("Surface facturée", fr(m2, 2) + " m²" + (r && r.nb ? "  ·  " + r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre") : ""));
+  const m2Tot = !m2 ? prosM2TotSaisi(prosD) : 0;
+  let h = L(m2Tot ? "Surface donnée par le client" : "Surface facturée", fr(m2 || m2Tot, 2) + " m²" + (r && r.nb ? "  ·  " + r.nb + (r.nb > 1 ? " fenêtres" : " fenêtre") : ""));
   if (!e){
     h += '<small>Tapez le prix au m² pour voir le total. C\'est une estimation WhatsApp, pas un devis.</small>';
   } else {
@@ -14111,6 +14125,14 @@ function prosEstim(p){
   });
   let nb = 0;
   (p.dims || []).forEach(d => { const n = prosDimNette(d); if (n) nb += n.q; });
+  /* pas de mesures mais un total m² donné par le client : c'est lui qui fait le prix */
+  if (!m2 && prosM2TotSaisi(p)){
+    m2 = prosM2TotSaisi(p);
+    const px = p.type === "JN" ? pj : (p.type === "MIX" ? (pe || pj) : pe);
+    if (!px) manque = true;
+    tot = m2 * px;
+  }
+  if (!nb) nb = prosNbFenSaisi(p);
   const up = parseFloat(String(p.poseP || "").replace(",", ".")) || 0;
   const pose = p.poseMode === "fenetre" ? up * nb : up;
   const brut = tot + pose;
@@ -14138,6 +14160,11 @@ function prosEstimTexte(p){
 
 /* v14.7 : le nombre de fenêtres tapé par Imane quand le client ne connaît pas
    ses mesures. Dès qu'une mesure existe, c'est le compte des mesures qui gagne. */
+/* v14.11 : la surface totale donnée par le client, sans mesures fenêtre par fenêtre. */
+function prosM2TotSaisi(p){
+  const n = parseFloat(String((p && p.m2Tot) || "").replace(",", "."));
+  return (n > 0 && n < 10000) ? n : 0;
+}
 function prosNbFenSaisi(p){
   const n = Math.round(parseFloat(String((p && p.nbFen) || "").replace(",", ".")));
   return (n >= 1 && n <= 999) ? n : 0;
@@ -14160,9 +14187,18 @@ function prosNbTexte(r){
 function renderProsNbFen(){
   const box = $("prosNbFenBox"), inp = $("prosNbFen");
   if (!box || !inp) return;
-  let nbMes = 0;
-  (prosD.dims || []).forEach(d => { const n = prosDimNette(d); if (n) nbMes += n.q; });
+  let nbMes = 0, m2Mes = 0;
+  (prosD.dims || []).forEach(d => { const n = prosDimNette(d); if (n){ nbMes += n.q; m2Mes += Math.max(n.l, MINCM) * Math.max(n.h, MINCM) / 10000 * n.q; } });
   const auto = nbMes > 0;
+  const m = $("prosM2Tot");
+  if (m){
+    m.readOnly = auto;
+    if (auto){ m.value = fr(m2Mes, 2); $("prosM2TotLab").textContent = "calculé depuis les mesures"; }
+    else {
+      if (document.activeElement !== m) m.value = prosD.m2Tot || "";
+      $("prosM2TotLab").textContent = "si le client donne sa surface";
+    }
+  }
   box.classList.toggle("auto", auto);
   inp.readOnly = auto;
   if (auto){ inp.value = nbMes; $("prosNbFenLab").textContent = "compté depuis les mesures"; }
@@ -14176,6 +14212,12 @@ function prosDimTotTexte(){
   $("prosDimTot").textContent = (r && r.nb && !r.sansMesure) ? prosNbTexte(r) : "—";
   renderProsNbFen();
 }
+$("prosM2Tot").addEventListener("input", e => {
+  const clean = e.target.value.replace(/[^0-9.,]/g, "").slice(0, 7);
+  if (clean !== e.target.value) e.target.value = clean;
+  prosD.m2Tot = clean;
+  try { renderProsPrix(); } catch(err){}
+});
 $("prosNbFen").addEventListener("input", e => {
   const clean = e.target.value.replace(/[^0-9]/g, "").slice(0, 3);
   if (clean !== e.target.value) e.target.value = clean;
@@ -14320,7 +14362,7 @@ function prosCharge(p){
            poseMode: p.poseMode === "fenetre" ? "fenetre" : "forfait",
            refs: (p.refs || []).slice(),
            dims: (p.dims || []).map(d => Object.assign({}, d)),
-           nbFen: p.nbFen || "", lang: p.lang === "ar" ? "ar" : "fr", src: p.src || "", star: !!p.star};
+           nbFen: p.nbFen || "", m2Tot: p.m2Tot || "", lang: p.lang === "ar" ? "ar" : "fr", src: p.src || "", star: !!p.star};
   renderProsD();
 }
 /* Recopie le formulaire du haut dans une fiche. */
@@ -14333,6 +14375,7 @@ function prosApplique(p){
      contact. Elle est posée à la création, puis par le bouton WhatsApp (p.vu). */
   if (!p.msg && !p.vu) p.msg = p.at || Date.now();
   p.nbFen = prosNbFenSaisi(prosD) ? String(prosNbFenSaisi(prosD)) : "";
+  p.m2Tot = prosM2TotSaisi(prosD) ? String(prosD.m2Tot).replace(".", ",") : "";
   p.lang = prosD.lang === "ar" ? "ar" : "fr";
   p.src = prosD.src || "";
   p.star = !!prosD.star;
@@ -14958,7 +15001,8 @@ function waValeurs(p, lang){
   const px = waPrix(p);
   const r = prosResume(p);
   const nb = r ? r.nb : 0;
-  const mes = !!(r && r.m2 && !r.sansMesure);
+  const m2Tot = (r && r.m2 && !r.sansMesure) ? 0 : prosM2TotSaisi(p);
+  const mes = !!(r && r.m2 && !r.sansMesure) || !!m2Tot;
   const e = (mes && !waPrixManque(p)) ? prosEstim(p) : null;
   const o = waDevisBon(p);
   const typeTxt = ar ? {ENR:"ستور رولو", JN:"ستور زيبرا (جور إي نوي)", MIX:"ستور رولو وستور زيبرا"}[t]
@@ -14970,13 +15014,14 @@ function waValeurs(p, lang){
   let total = "";
   if (o){ total = frm(Math.round(duDe(o)), 0) + (ar ? " درهم" : " DH") + (facture(o) ? " TTC" : " HT"); }
   else if (e && e.m2){ total = frm(Math.round(e.fact ? e.ttc : e.ht), 0) + (ar ? " درهم" : " DH") + (e.fact ? " TTC" : " HT"); }
-  const nom = String(p.nom || "").trim();
+  /* « Ayoub/houssani/ad » : on salue « Ayoub », pas tout le nom noté par Imane */
+  const nom = String(p.nom || "").split("/")[0].trim();
   return {
     "prénom": nom.length <= 30 && !/\d/.test(nom) ? nom : "",
     "type": typeTxt,
     "fenêtres": nb ? (ar ? (nb === 1 ? "شرجم واحد" : nb + " ديال الشراجم") : nb + (nb > 1 ? " fenêtres" : " fenêtre")) : "",
     "prix m²": prixM2,
-    "m²": mes ? fr(r.m2, 2) + (ar ? " م²" : " m²") : "",
+    "m²": mes ? fr(m2Tot || r.m2, 2) + (ar ? " م²" : " m²") : "",
     "total": total,
     "pose": (e && e.pose > 0) ? (ar ? "مع التركيب" : "pose comprise") : "",
     "n° devis": o ? (o.num || "") : "",
@@ -14999,7 +15044,7 @@ function waRemplit(modele, V){
           .replace(/\n{3,}/g, "\n\n").trim();
 }
 function waCleModele(p, t){
-  if (t.k === "prix"){ const r = prosResume(p); return (r && r.m2 && !r.sansMesure) ? "prix_mes" : "prix_sans"; }
+  if (t.k === "prix"){ const r = prosResume(p); return ((r && r.m2 && !r.sansMesure) || prosM2TotSaisi(p)) ? "prix_mes" : "prix_sans"; }
   if (t.k === "fin") return "";
   return t.k;
 }
@@ -15099,14 +15144,15 @@ function waBrouillonRend(recalc){
     '<div class="wavar"><span>Modifiable avant l\'envoi</span>' + (vers.length > 1 && !B.t.camp
       ? '<button type="button" data-wavar>Autre version ↻ ' + ((B.v % vers.length) + 1) + '/' + vers.length + '</button>' : '') + '</div>' +
     '<div id="waPiecesBox"></div>' +
+    '<button type="button" class="wajoin" data-wajoin>+ Joindre un fichier</button>' +
+    '<div id="waJoinBox" hidden></div>' +
     ((B.cle === "prix_mes" || B.cle === "prix_sans") && waPrixManque(p)
       ? '<div class="waalerte"><b>Ajoutez le prix au m² dans la fiche</b><span>Le prix au m² se décide dans la fiche du client. Sans lui, la réponse au prix ne part pas.</span>' +
           '<button type="button" data-waficheprix="' + p.id + '">Ouvrir la fiche</button></div>' : '') +
     '<button type="button" class="wasend" data-wasend' +
       ((B.cle === "prix_mes" || B.cle === "prix_sans") && waPrixManque(p) ? ' disabled' : '') + '>' +
       '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg>' +
-      'Envoyer sur WhatsApp</button>' +
-    '<p class="wahint">Jamais de visite gratuite. Sans mesures : seulement le prix au m².</p>');
+      'Envoyer sur WhatsApp</button>');
   waBrouillonPieces();
 }
 function waBrouillonPieces(){
@@ -15116,8 +15162,26 @@ function waBrouillonPieces(){
     const f = WA_FICH[id];
     const d = (WA_DRIVE || []).find(x => x.id === id);
     const nom = (f && f.nom) || (d && d.nom) || "pièce jointe";
-    return '<div class="wapj"><b>' + esc(nom) + '</b><em>' + (f ? "prête" : "chargement…") + '</em></div>';
+    return '<div class="wapj"><b>' + esc(nom) + '</b><em>' + (f ? "prête" : "chargement…") + '</em>' +
+      '<button type="button" data-waretire="' + esc(id) + '" aria-label="Retirer">✕</button></div>';
   }).join("");
+  waJoinRend();
+}
+/* v14.11 : n'importe quel fichier du dossier Drive (fiche technique, qualité du tissu…)
+   peut partir avec n'importe quel message. */
+function waJoinRend(){
+  const box = $("waJoinBox");
+  if (!box || !WA_BR || box.hidden) return;
+  if (WA_DRIVE === null){
+    box.innerHTML = '<p class="wahint">Lecture du dossier Drive…</p>';
+    waDriveListe(true).then(waJoinRend);
+    return;
+  }
+  box.innerHTML = WA_DRIVE.length
+    ? '<div class="wafiles">' + WA_DRIVE.map(f => '<button type="button" data-wajoinf="' + esc(f.id) + '" aria-pressed="' +
+        (WA_BR.pieces.indexOf(f.id) >= 0) + '"><b>' + esc(f.nom) + '</b><small>' +
+        (String(f.type).indexOf("pdf") >= 0 ? "PDF" : "image") + '</small></button>').join("") + '</div>'
+    : '<p class="wahint">Le dossier Drive « PROMOS » est vide.</p>';
 }
 async function waEnvoie(){
   const B = WA_BR;
@@ -15679,6 +15743,15 @@ $("waModal").addEventListener("click", e => {
     waBrouillonRend(true); return;
   }
   if (e.target.closest("[data-wavar]") && WA_BR){ WA_BR.v++; waBrouillonRend(true); return; }
+  if (e.target.closest("[data-wajoin]") && WA_BR){ const b = $("waJoinBox"); b.hidden = !b.hidden; waJoinRend(); return; }
+  const jf = e.target.closest("[data-wajoinf]");
+  if (jf && WA_BR){
+    const id = jf.dataset.wajoinf, i = WA_BR.pieces.indexOf(id);
+    if (i >= 0) WA_BR.pieces.splice(i, 1); else { WA_BR.pieces.push(id); const pid = WA_BR.pid; waFichier(id).then(() => { if (WA_BR && WA_BR.pid === pid) waBrouillonPieces(); }); }
+    waBrouillonPieces(); return;
+  }
+  const rt = e.target.closest("[data-waretire]");
+  if (rt && WA_BR){ WA_BR.pieces = WA_BR.pieces.filter(x => x !== rt.dataset.waretire); waBrouillonPieces(); return; }
   if (e.target.closest("[data-wasend]")){ waEnvoie(); return; }
   if (e.target.closest("[data-waoui]") && WA_BR){
     const p = PROS.find(x => x.id === WA_BR.pid);
@@ -15710,7 +15783,7 @@ $("waModal").addEventListener("click", e => {
 });
 
 /* Les champs ajoutés à la fiche : langue des messages, d'où il vient, gros client. */
-const WA_SOURCES = ["Instagram", "Facebook", "TikTok", "Google", "Site", "Bouche à oreille", "Autre"];
+const WA_SOURCES = ["Instagram", "Facebook", "Google", "Pub", "Autre"];
 function renderWaChamps(){
   const l = $("waLangSeg"), s = $("waSrc"), st = $("waStar");
   if (!l) return;
@@ -15728,7 +15801,7 @@ const REMU = {
   imaneBase: 500,          /* fixe mensuel */
   imanePct:  4,            /* % du CA produit HT de chaque commande */
   imaneMin:  1200,         /* minimum garanti sur le mois */
-  soufBase:  3200,         /* salaire de base */
+  soufBase:  3200,         /* salaire net */
   parFenetre: 40,          /* à partir de 4 fenêtres, la société paie à la fenêtre */
   seuilFen:  3             /* au dessus de ce nombre, on bascule au tarif par fenêtre */
 };
@@ -15855,7 +15928,7 @@ function remuSoufiane(iso){
   const societe = lignes.filter(l => l.p.mode === "societe").reduce((t,l) => t + l.p.montant, 0);
   const fenetres = lignes.reduce((t,l) => t + l.p.n, 0);
   return {lignes:lignes, client:client, societe:societe, prime: client + societe,
-          fenetres:fenetres, total: REMU.soufBase + client + societe};
+          fenetres:fenetres, total: REMU.soufBase + client};   /* v14.11 : salaire net + forfaits encaissés du client */
 }
 
 function moisLisible(iso){
@@ -15902,19 +15975,18 @@ function renderRemu(){
     : '<div class="rmvide">Aucune commande prise à son nom ce mois ci.</div>';
 
   /* --- Soufiane --- */
-  let cs = r("Salaire de base", fr(REMU.soufBase, 2)) +
+  let cs = r("Salaire net", fr(REMU.soufBase, 2)) +
     r("Forfaits de pose encaissés du client", fr(S2.client, 2), "ok") +
-    r("Primes à la charge de la société", fr(S2.societe, 2), "ok") +
     r("Fenêtres posées", S2.fenetres) +
     gros("À verser", fr(S2.total, 2) + " MAD");
   cs += '<div class="rmsub">' + S2.lignes.length + " pose" + (S2.lignes.length > 1 ? "s" : "") + '</div>';
   cs += S2.lignes.length ? S2.lignes.map(l =>
       '<div class="rmline">' +
         '<span class="n">' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") + '</span>' +
-        '<span class="v' + (l.p.montant > 0.01 ? "" : " nul") + '">' + fr(l.p.montant, 2) + '</span>' +
+        '<span class="v' + (l.p.montant > 0.01 && l.p.mode !== "societe" ? "" : " nul") + '">' + fr(l.p.mode === "societe" ? 0 : l.p.montant, 2) + '</span>' +
         '<span class="s">' + l.p.n + ' fenêtre' + (l.p.n > 1 ? "s" : "") + '  ·  ' +
           (l.p.mode === "societe"
-            ? l.p.n + " × " + REMU.parFenetre + " MAD, payé par la société"
+            ? "pas de forfait client, rien à verser en plus"
             : (l.p.montant > 0.01
                 ? "prix de pose du bon, encaissé du client"
                 : '<b class="rmwarn">aucun prix de pose sur le bon</b>')) +
@@ -15928,10 +16000,9 @@ function renderRemu(){
     '<div class="rmregles"><h3>La règle appliquée</h3>' +
       'Imane : <b>' + REMU.imaneBase + ' MAD</b> de base, <b>' + REMU.imanePct +
       ' %</b> du produit HT de chaque commande encaissée, minimum <b>' + REMU.imaneMin + ' MAD</b>.<br>' +
-      'Soufiane : <b>' + REMU.soufBase + ' MAD</b> de base. Jusqu\'à ' + REMU.seuilFen +
+      'Soufiane : <b>' + REMU.soufBase + ' MAD</b> de salaire net. Jusqu\'à ' + REMU.seuilFen +
       ' fenêtres, il encaisse le <b>prix de pose porté par le bon de commande</b>. ' +
-      'À partir de ' + (REMU.seuilFen + 1) + ' fenêtres, la société paie <b>' + REMU.parFenetre +
-      ' MAD</b> par fenêtre posée. Les commandes en livraison ne comptent pas.' +
+      'À verser : <b>salaire net + forfaits de pose encaissés du client</b>. Les commandes en livraison ne comptent pas.' +
     '</div>';
 
   const nb = bonsDuMois(remuMois).length;
