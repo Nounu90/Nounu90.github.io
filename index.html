@@ -5722,8 +5722,17 @@ function nomDe(login){ return login ? login.charAt(0).toUpperCase() + login.slic
    et des plus récents, et on les retire des plus anciens pour tenir dans
    la mémoire du téléphone. */
 function persistOrders(){
+  if (persistOrdersEssai()) return true;
+  /* v14.16 : mémoire pleine. On libère ce qui se relit tout seul (catalogue et
+     articles du stock), puis on réessaie. Sans ça l'échec passait inaperçu. */
+  try { localStorage.removeItem("mst_art"); localStorage.removeItem("mst_cat"); } catch(e){}
+  if (persistOrdersEssai()) return true;
+  if (!persistOrders.avisé){ persistOrders.avisé = true; toast("Mémoire du téléphone pleine : les bons restent lus depuis la base"); }
+  return false;
+}
+function persistOrdersEssai(){
   for (let keep = 8; keep >= 0; keep -= 2){
-    const arr = ORDERS.slice(0, 150).map((o, i) => {
+    const arr = ORDERS.map((o, i) => {
       if (o.pending || i < keep) return o;
       if (!o.photos || !o.photos.length) return o;
       const c = Object.assign({}, o);
@@ -6149,18 +6158,53 @@ async function flushPending(){
 }
 
 /* --- lecture de la base --- */
-async function pullBons(){
+/* v14.16 : avant, seuls les 200 derniers bons modifiés arrivaient. Un téléphone qui
+   avait perdu sa copie locale (mise à jour, mémoire pleine) ne voyait plus les anciens
+   bons jusqu'à une reconnexion. Maintenant : la liste complète des identifiants, puis
+   seulement les bons nouveaux, changés ou manquants sur ce téléphone. */
+let CFGUA = {};     /* rangées réservées déjà lues depuis l'ouverture de l'app */
+let PULL_EN_COURS = null;
+function pullBons(){
+  if (PULL_EN_COURS) return PULL_EN_COURS;
+  PULL_EN_COURS = pullBonsVrai().finally(() => { PULL_EN_COURS = null; });
+  return PULL_EN_COURS;
+}
+async function pullBonsVrai(){
   if (!SB || !USER) return false;
   try {
-    const {data, error} = await SB.from("bons")
-      .select("id,num,author,data,updated_at")
-      .not("id", "like", "pimg-%")
-      .order("updated_at", {ascending:false}).limit(200);
-    if (error) throw error;
+    /* 1. tous les identifiants, par pages de 1000 */
+    const ids = [];
+    for (let de = 0; de < 20000; de += 1000){
+      const {data:pg, error:e1} = await SB.from("bons").select("id,updated_at")
+        .not("id", "like", "pimg-%").order("id", {ascending:true}).range(de, de + 999);
+      if (e1) throw e1;
+      ids.push(...pg);
+      if (pg.length < 1000) break;
+    }
     const map = {};
     ORDERS.forEach(o => { map[o.id] = o; });
+    /* une base vide alors que ce téléphone a des bons : la session a expiré, on ne touche à rien */
+    if (!ids.length && ORDERS.some(o => !o.pending)){
+      const {data:ss} = await SB.auth.getSession();
+      if (!ss || !ss.session){ sessionExpiree(); return false; }
+    }
+    /* 2. seulement ce qui est nouveau, changé, ou absent d'ici */
+    const aLire = ids.filter(r => {
+      const cur = map[r.id];
+      if (cur) return cur._ua !== r.updated_at;
+      if (TOMBS.indexOf(r.id) >= 0) return false;
+      return CFGUA[r.id] !== r.updated_at;
+    }).map(r => r.id);
+    const data = [];
+    for (let i = 0; i < aLire.length; i += 100){
+      const {data:pg, error:e2} = await SB.from("bons").select("id,num,author,data,updated_at").in("id", aLire.slice(i, i + 100));
+      if (e2) throw e2;
+      data.push(...pg);
+    }
     const distants = {};
+    ids.forEach(r => { distants[r.id] = true; });
     data.forEach(r => {
+      if ([ATL_ID, PROS_ID, WA_ID, PROMO_ID, INV_ID, PERSO_ID, NOTE_ID, NOM_ID].indexOf(r.id) >= 0) CFGUA[r.id] = r.updated_at;
       /* la nomenclature partagée occupe une rangée réservée, ce n'est pas un bon */
       if (r.id === ATL_ID){
         const a = r.data;
@@ -6219,15 +6263,16 @@ async function pullBons(){
       }
       /* On ne garde le local que s'il est vraiment plus récent. Sinon la version
          distante passe, même si le local attendait encore d'être envoyé. */
-      if (cur && (cur.maj || 0) > (o.maj || 0)) return;
-      if (cur && cur.pending && (cur.maj || 0) >= (o.maj || 0)) return;
+      o._ua = r.updated_at;
+      if (cur && (cur.maj || 0) > (o.maj || 0)){ cur._ua = r.updated_at; return; }
+      if (cur && cur.pending && (cur.maj || 0) >= (o.maj || 0)){ cur._ua = r.updated_at; return; }
       map[r.id] = o;
     });
 
     /* Un bon absent de la base a été supprimé par un autre téléphone : il doit
-       disparaître ici aussi. On épargne les bons pas encore envoyés, et on ne
-       fait le ménage que si la base a répondu la liste complète. */
-    const complete = data.length < 200;
+       disparaître ici aussi. On épargne les bons pas encore envoyés. La liste des
+       identifiants est complète, le ménage se fait donc toujours. */
+    const complete = ids.length > 0;
     if (complete){
       Object.keys(map).forEach(id => {
         if (distants[id]) return;
@@ -6289,6 +6334,7 @@ async function doLogin(){
     $("logPass").value = "";
     showLogin(false);
     ONLINE = true;
+    sessionExpiree.fait = false;
     renderArt();
     renderHome();
     syncAll();
@@ -6303,6 +6349,17 @@ async function doLogin(){
 $("logGo").addEventListener("click", doLogin);
 $("logPass").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
 
+/* v14.16 : la session Supabase a expiré alors que le téléphone croyait être connecté.
+   Avant, la base répondait vide et les bons semblaient disparaître. */
+function sessionExpiree(){
+  if (sessionExpiree.fait) return;
+  sessionExpiree.fait = true;
+  ONLINE = false; renderNet();
+  showLogin(true);
+  const m = $("logMsg");
+  if (m){ m.className = "login-msg"; m.textContent = "Session expirée : reconnectez-vous. Vos bons ne sont pas perdus."; }
+  if (USER && $("logUser")) $("logUser").value = USER.login;
+}
 function logout(){
   ask("Se déconnecter ?", "Les bons déjà envoyés restent dans la base. Un bon en attente d'envoi serait perdu.", async () => {
     try { if (SB) await SB.auth.signOut(); } catch(e){}
@@ -6393,6 +6450,8 @@ async function bootAuth(){
       }
     } catch(e){}
   }
+  /* en ligne sans session : elle a expiré, on redemande la connexion (v14.16) */
+  if (SB && USER && navigator.onLine !== false){ setTimeout(sessionExpiree, 0); return false; }
   return !!USER;   /* session connue : on laisse travailler hors ligne */
 }
 
@@ -7994,7 +8053,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.15";
+const APP_VERSION = "14.16";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
