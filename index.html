@@ -1999,6 +1999,24 @@ button.wa.full{width:100%}
 .waalerte b{font-family:"Archivo",sans-serif; font-size:13.5px}
 .waalerte button{justify-self:start; margin-top:4px; padding:7px 11px; border-radius:9px; border:1px solid currentColor; background:none; color:inherit; font-weight:600}
 .wasend[disabled]{opacity:.4}
+.waplan{display:flex; align-items:center; gap:10px; width:100%; text-align:left; margin-top:12px; padding:11px 12px; border-radius:12px;
+  border:1px solid var(--line); background:var(--card); font-size:12.5px; color:var(--muted)}
+.waplan span{flex:1}
+.waplan b{color:var(--ink)}
+.waplan em{flex:none; font-style:normal; font-family:"Archivo",sans-serif; font-weight:700; color:#1FA855; font-size:12.5px}
+.waplanbox{margin-top:10px}
+.waplansum{display:flex; gap:8px; margin-bottom:10px}
+.waplansum span{flex:1; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 11px; font-size:11.5px; color:var(--muted)}
+.waplansum b{display:block; font-family:"IBM Plex Mono",monospace; font-size:19px; color:var(--ink)}
+.wajour{background:var(--card); border:1px solid var(--line); border-radius:12px; margin-bottom:7px; overflow:hidden}
+.wajour summary{display:flex; align-items:baseline; gap:10px; padding:10px 12px; cursor:pointer; list-style:none}
+.wajour summary::-webkit-details-marker{display:none}
+.wajour summary b{font-family:"Archivo",sans-serif; font-size:13.5px; text-transform:capitalize; flex:none}
+.wajour summary span{font-size:12px; color:var(--muted)}
+.waprow{display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:8px 12px; border-top:1px solid var(--line);
+  border-left:4px solid var(--c); background:none; font-size:13px; color:var(--ink)}
+.waprow b{flex:1; min-width:0; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.waprow span{flex:none; font-size:11.5px; color:var(--muted)}
 .wajoin{width:100%; margin:4px 0 8px; padding:9px; border-radius:10px; border:1px dashed var(--line-strong); background:none;
   font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--muted)}
 #waJoinBox{margin-bottom:8px}
@@ -7902,7 +7920,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.11";
+const APP_VERSION = "14.12";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -14914,7 +14932,8 @@ function waListeDuJour(){
   autres.sort((a, b) => ordre[a.bloc] - ordre[b.bloc] || b.poids - a.poids || a.due - b.due);
   nouv.sort((a, b) => a.due - b.due);
   const reste = Math.max(0, waReg("quota") - waEnvoisDuJour());
-  return {nouv:nouv, vus:autres.slice(0, reste), cache:autres.length - Math.min(reste, autres.length), fait:waEnvoisDuJour()};
+  return {nouv:nouv, vus:autres.slice(0, reste), attente:autres.slice(reste),
+          cache:autres.length - Math.min(reste, autres.length), fait:waEnvoisDuJour()};
 }
 function waNbDuJour(){ const L = waListeDuJour(); return L.nouv.length + L.vus.length; }
 
@@ -15381,7 +15400,71 @@ function renderWaToday(){
     grp("Relances", L.vus.filter(x => x.bloc === "relance")) +
     grp("Clients : avis et parrainage", L.vus.filter(x => x.bloc === "client")) +
     grp("Promos", L.vus.filter(x => x.bloc === "promo")) +
-    (L.cache ? '<p class="wahint">' + L.cache + ' autres messages attendent : ils passent les jours suivants, ' + q + ' par jour.</p>' : '');
+    '<button type="button" class="waplan" data-waplan aria-expanded="' + WA_PLAN + '">' +
+      '<span>' + (L.cache ? '<b>' + L.cache + ' autres messages attendent</b> : ils passent les jours suivants, ' + q + ' par jour.'
+                           : '<b>Les 30 prochains jours</b> : les rappels déjà prévus.') + '</span>' +
+      '<em>' + (WA_PLAN ? 'Masquer le planning' : 'Voir le planning') + ' ›</em></button>' +
+    (WA_PLAN ? waPlanningHtml(L) : '');
+}
+/* v14.12 : le planning des jours à venir. Les messages en attente et les rappels
+   déjà prévus sont rangés jour par jour, 20 par jour, dans le même ordre que la
+   liste du jour. C'est une prévision : chaque envoi fixe ensuite le rappel suivant. */
+let WA_PLAN = false;
+function waPlanning(L, nbJours){
+  const q = waReg("quota"), t0 = waDebutJour();
+  const items = (L.attente || []).map(x => Object.assign({}, x, {jour:0}));
+  const deja = {};
+  items.forEach(x => deja[x.p.id] = true);
+  (L.vus || []).forEach(x => deja[x.p.id] = true);
+  (L.nouv || []).forEach(x => deja[x.p.id] = true);
+  prosVivants().forEach(p => {
+    if (deja[p.id]) return;
+    const t = waTache(p);
+    if (!t || t.bloc === "new") return;
+    const j = Math.floor((t.due - t0) / WA_J);
+    if (j < 1 || j > nbJours) return;
+    t.p = p;
+    const r = prosResume(p);
+    t.poids = (p.star ? 1e6 : 0) + (r ? (r.m2 || 0) * 100 + (r.nb || 0) : 0);
+    t.jour = j;
+    items.push(t);
+  });
+  const ordre = {rappel:0, relance:1, client:2, promo:3};
+  items.sort((a, b) => a.jour - b.jour || ordre[a.bloc] - ordre[b.bloc] || b.poids - a.poids || a.due - b.due);
+  const jours = [];
+  let reste = items.slice();
+  for (let j = 1; j <= nbJours && reste.length; j++){
+    const dispo = reste.filter(x => x.jour <= j);
+    dispo.sort((a, b) => ordre[a.bloc] - ordre[b.bloc] || b.poids - a.poids || a.due - b.due);
+    const pris = dispo.slice(0, q);
+    if (pris.length) jours.push({j:j, date:t0 + j * WA_J, L:pris});
+    const ids = new Set(pris);
+    reste = reste.filter(x => !ids.has(x));
+  }
+  return {jours:jours, plusTard:reste.length};
+}
+function waPlanningHtml(L){
+  const P = waPlanning(L, 30);
+  const JOURS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+  if (!P.jours.length) return '<p class="wahint">Rien de prévu dans les 30 prochains jours.</p>';
+  const semaine = P.jours.filter(d => d.j <= 7).reduce((n, d) => n + d.L.length, 0);
+  const mois = P.jours.reduce((n, d) => n + d.L.length, 0);
+  return '<div class="waplanbox">' +
+    '<div class="waplansum"><span><b>' + semaine + '</b>cette semaine</span><span><b>' + mois + '</b>sur 30 jours</span>' +
+      (P.plusTard ? '<span><b>' + P.plusTard + '</b>après 30 jours</span>' : '') + '</div>' +
+    P.jours.map(d => {
+      const dt = new Date(d.date);
+      const lab = (d.j === 1 ? "Demain · " : "") + JOURS[dt.getDay()] + " " + pad(dt.getDate()) + "/" + pad(dt.getMonth() + 1);
+      const par = {};
+      d.L.forEach(x => { const k = x.bloc === "promo" ? "Promos" : x.why.replace(/ · .*$/, ""); par[k] = (par[k] || 0) + 1; });
+      return '<details class="wajour"' + (d.j === 1 ? ' open' : '') + '><summary><b>' + lab + '</b><span>' + d.L.length + ' message' + (d.L.length > 1 ? 's' : '') +
+          ' · ' + Object.keys(par).map(k => par[k] + ' ' + k.toLowerCase()).join(', ') + '</span></summary>' +
+        d.L.map(x => '<button type="button" class="waprow" data-predit="' + x.p.id + '" style="--c:' + (x.p.star ? "#B7791F" : waEtapeCoul(prosEtape(x.p))) + '">' +
+          '<b>' + (x.p.star ? "⭐ " : "") + esc(x.p.nom || telAffiche(x.p.tel || "") || "Sans nom") + '</b><span>' + esc(x.why) + '</span></button>').join("") +
+      '</details>';
+    }).join("") +
+    '<p class="wahint">Prévision : chaque message envoyé fixe ensuite le rappel suivant, le planning se met à jour tout seul. Un appui sur un nom ouvre sa fiche.</p>' +
+  '</div>';
 }
 
 /* ---------- l'onglet « Promos » ---------- */
@@ -15568,6 +15651,7 @@ function renderWaFiche(){
 
 /* ---------- les clics ---------- */
 $("prosSheet").addEventListener("click", e => {
+  if (e.target.closest("[data-waplan]")){ WA_PLAN = !WA_PLAN; renderWaToday(); return; }
   const tb = e.target.closest("[data-watab]");
   if (tb){ WA_TAB = tb.dataset.watab; WA_ED = null; if (WA_TAB === "contacts") renderPros(); waRendTout();
            try { $("prosSheet").querySelector(".sheet-body").scrollTo({top:0}); } catch(err){} return; }
