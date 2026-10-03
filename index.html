@@ -1977,6 +1977,18 @@ button.wa.full{width:100%}
 .wahbody .watxt{display:block; width:calc(100% - 20px); box-sizing:border-box; margin:0 10px}
 .wahbody .waduo{margin:8px 10px 10px}
 .wahbody .waedpj{margin:0 10px}
+.wahistop{display:flex; gap:6px; flex-wrap:wrap; margin:0 0 10px}
+.wahistop button{padding:7px 12px; border-radius:99px; border:1px solid var(--line); background:var(--card); font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--ink)}
+.wahistop button[aria-pressed="true"]{background:#1FA855; border-color:#1FA855; color:#fff}
+.wahistsum{display:flex; gap:8px; margin:0 0 10px}
+.wahistsum span{flex:1; background:var(--card2); border-radius:10px; padding:8px 10px; font-size:11px; color:var(--muted)}
+.wahistsum b{display:block; font-family:"IBM Plex Mono",monospace; font-size:19px; color:var(--ink)}
+.wahistj{display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; margin-bottom:4px; border-radius:10px; border:1px solid var(--line); background:var(--card); text-align:left}
+.wahistj b{width:92px; flex:none; font-family:"Archivo",sans-serif; font-size:12.5px; color:var(--ink)}
+.wahistj i{flex:1; height:8px; border-radius:8px; background:var(--card2); overflow:hidden}
+.wahistj em{display:block; height:100%; background:#1FA855}
+.wahistj span{width:74px; flex:none; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink)}
+.wahistj.we{opacity:.55}
 .waweek{background:#FFF7E6; border:1px solid #F1DFA0; border-radius:12px; padding:10px 12px; margin-bottom:10px; font-size:12.5px; color:#7A5B00}
 .waweek b{display:block; font-family:"Archivo",sans-serif; font-size:13px}
 .wadrivemaj{display:block; width:100%; margin:0 0 8px; padding:8px; border-radius:10px; border:1px solid var(--line); background:var(--card2); font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--ink)}
@@ -8082,7 +8094,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.17";
+const APP_VERSION = "14.18";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -15374,7 +15386,10 @@ function waBrouillonRend(recalc){
     '<button type="button" class="wasend" data-wasend' +
       ((B.cle === "prix_mes" || B.cle === "prix_sans") && waPrixManque(p) ? ' disabled' : '') + '>' +
       '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2.1-5.6A8.4 8.4 0 1121 11.5z"/></svg>' +
-      'Envoyer sur WhatsApp</button>');
+      'Envoyer sur WhatsApp' + ((B.pieces || []).length ? ' avec ' + B.pieces.length + ' fichier' + (B.pieces.length > 1 ? 's' : '') : '') + '</button>' +
+    ((B.pieces || []).length ? '<p class="wahint" style="margin:8px 0 0">Avec des fichiers, le téléphone ouvre le partage : choisissez <b>WhatsApp Business</b>, puis <b>' +
+      esc(p.nom || telAffiche(p.tel || "")) + '</b>. Le texte part avec les images (il est aussi copié, à coller si besoin).</p>'
+      : '<p class="wahint" style="margin:8px 0 0">Aucun fichier joint : seul le texte part. « + Joindre un fichier » pour ajouter une image.</p>'));
   waBrouillonPieces();
 }
 function waBrouillonPieces(){
@@ -15414,18 +15429,40 @@ async function waEnvoie(){
   B.txtEnvoye = txt;
   B.pjNoms = (B.pieces || []).map(id => (WA_FICH[id] || {}).nom || ((WA_DRIVE || []).find(x => x.id === id) || {}).nom || "pièce jointe");
   const lien = waLien(p.tel);
-  const files = B.pieces.map(id => WA_FICH[id]).filter(Boolean).map(waFichierVersFile);
+  /* v14.18 : un fichier pas encore téléchargé du Drive faisait partir le texte seul,
+     sans le dire. On le télécharge d'abord ; l'envoi demande alors un 2e appui,
+     sinon le téléphone refuse d'ouvrir le partage. */
+  const manque = (B.pieces || []).filter(id => !WA_FICH[id]);
+  if (manque.length){
+    const bt = document.querySelector("[data-wasend]");
+    if (bt){ bt.disabled = true; bt.lastChild.textContent = "Préparation des fichiers…"; }
+    await Promise.all(manque.map(waFichier));
+    if (WA_BR !== B) return;
+    const ko = (B.pieces || []).filter(id => !WA_FICH[id]);
+    B.texte = txt;                       /* garder ce qu'Imane a modifié */
+    waBrouillonRend(false);
+    if (ko.length){ toast("Fichier introuvable dans le Drive : retirez-le ou réessayez"); return; }
+    toast2("Fichiers prêts", "Appuyez encore sur « Envoyer »");
+    return;
+  }
+  const files = (B.pieces || []).map(id => WA_FICH[id]).filter(Boolean).map(waFichierVersFile);
   let parti = false;
-  if (files.length && navigator.canShare && navigator.canShare({files:files})){
-    try { if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(() => {}); } catch(e){}
-    try { await navigator.share({files:files, text:txt}); parti = true; }
-    catch(e){ if (e && e.name === "AbortError"){ toast("Envoi annulé"); return; } }
+  if (files.length){
+    if (!(navigator.canShare && navigator.canShare({files:files}))){
+      toast2("Ce téléphone ne peut pas envoyer de fichiers depuis l'app", "Le texte part seul : ajoutez l'image dans WhatsApp");
+    } else {
+      try { if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(() => {}); } catch(e){}
+      try { await navigator.share({files:files, text:txt}); parti = true; }
+      catch(e){
+        if (e && e.name === "AbortError"){ toast("Envoi annulé"); return; }
+        toast2("Le partage des fichiers a échoué", "Le texte part seul : ajoutez l'image dans WhatsApp");
+      }
+    }
   }
   waEnvoiGarde(B);
   if (!parti){
     if (!lien){ toast("Numéro manquant"); return; }
     window.open(lien + "?text=" + encodeURIComponent(txt), "_blank");
-    if (files.length) toast("Le texte est parti ; ajoutez la pièce jointe dans WhatsApp");
   }
   waConfirme(p);
 }
@@ -15595,22 +15632,60 @@ function waPromoMain(pid, cid){
   toast("Compté : " + (c.nom || "promo") + " envoyée");
 }
 /* v14.13 : tout ce qui est parti aujourd'hui, client par client, avec le texte et les pièces jointes. */
-function waMessagesDuJour(){
-  const t0 = waDebutJour();
+/* v14.18 : l'historique des envois. Aujourd'hui, hier, ou un tableau jour par jour
+   sur 7 ou 30 jours ; un appui sur un jour ouvre ses messages. */
+let WA_HISTO = 0;   /* 0 = aujourd'hui, 1 = hier, "7", "30", ou le début d'un jour (ms) */
+function waCompteQuota(x){ return x.bloc !== "new" && x.bloc !== "libre"; }
+function waEnvoisEntre(a, b){
   const L = [];
-  prosVivants().forEach(p => (p.env || []).forEach(x => { if (x.at >= t0) L.push({p:p, x:x}); }));
-  L.sort((a, b) => b.x.at - a.x.at);
-  const compte = L.filter(y => y.x.bloc !== "new" && y.x.bloc !== "libre" && y.x.bloc !== "main").length;
-  WA_BR = null;
-  waModal('<div class="wabh"><b>Envoyés aujourd\'hui</b><span>' + L.length + ' message' + (L.length > 1 ? 's' : '') +
-      ' · ' + compte + ' dans les ' + waReg("quota") + '</span>' +
+  prosVivants().forEach(p => (p.env || []).forEach(x => { if (x.at >= a && x.at < b) L.push({p:p, x:x}); }));
+  return L.sort((u, v) => v.x.at - u.x.at);
+}
+function waJourDe(ms){ const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); }
+function waJourLab(t){
+  const J = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+  const d = new Date(t), t0 = waDebutJour();
+  const n = Math.round((t0 - t) / WA_J);
+  return n === 0 ? "Aujourd'hui" : n === 1 ? "Hier" : J[d.getDay()] + " " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1);
+}
+function waMessagesDuJour(sel){
+  if (sel !== undefined) WA_HISTO = sel;
+  const q = waReg("quota"), t0 = waDebutJour();
+  const puce = (v, l) => '<button type="button" data-wahisto="' + v + '" aria-pressed="' + (String(WA_HISTO) === String(v)) + '">' + l + '</button>';
+  let h = '<div class="wabh"><b>Messages envoyés</b><span>historique</span>' +
       '<button type="button" class="waclose" data-waclose aria-label="Fermer">✕</button></div>' +
-    (L.length ? L.map(y => '<div class="wajourc"><div class="wajourh"><button type="button" data-wafiche="' + y.p.id + '">' +
-        esc(y.p.nom || telAffiche(y.p.tel || "") || "Sans nom") + ' ›</button><span>' + waHeure(y.x.at) +
-        (y.x.bloc === "new" || y.x.bloc === "libre" || y.x.bloc === "main" ? ' · hors des ' + waReg("quota") : '') + '</span></div>' +
-        waEnvDetail(y.x, y.p.id) + '</div>').join("")
-      : '<p class="wahint">Aucun message envoyé depuis l\'app aujourd\'hui.</p>'));
-  document.querySelectorAll("#waBox .wahist").forEach(d => d.open = true);
+    '<div class="wahistop">' + puce(0, "Aujourd'hui") + puce(1, "Hier") + puce("7", "7 jours") + puce("30", "30 jours") + '</div>';
+  if (WA_HISTO === "7" || WA_HISTO === "30"){
+    const n = +WA_HISTO, jours = [];
+    for (let i = 0; i < n; i++){
+      const a = waJourDe(t0 - i * WA_J + 12 * 3600000), L = waEnvoisEntre(a, a + WA_J);
+      const dj = new Date(a).getDay();
+      jours.push({a:a, tot:L.length, q:L.filter(y => waCompteQuota(y.x)).length, we:dj === 0 || dj === 6});
+    }
+    const tq = jours.reduce((s, j) => s + j.q, 0), tt = jours.reduce((s, j) => s + j.tot, 0);
+    const ouvres = jours.filter(j => !j.we).length || 1;
+    h += '<div class="wahistsum"><span><b>' + tq + '</b>relances et promos</span><span><b>' + tt + '</b>messages en tout</span>' +
+         '<span><b>' + fr(tq / ouvres, 1) + '</b>par jour ouvré</span></div>' +
+      jours.map(j => '<button type="button" class="wahistj' + (j.we ? ' we' : '') + '" data-wahisto="' + j.a + '"><b>' + waJourLab(j.a) + '</b>' +
+        '<i><em style="width:' + Math.min(100, Math.round(j.q / q * 100)) + '%"></em></i>' +
+        '<span>' + (j.we && !j.tot ? 'week-end' : j.q + '/' + q + (j.tot > j.q ? ' · +' + (j.tot - j.q) : '')) + '</span></button>').join("") +
+      '<p class="wahint">« +2 » = nouvelles demandes et messages libres, hors des ' + q + '. Un appui sur un jour montre ses messages.</p>';
+  } else {
+    const a = WA_HISTO === 1 ? t0 - WA_J + 3600000 : WA_HISTO > 1000 ? WA_HISTO : t0;
+    const jd = waJourDe(a);
+    const L = waEnvoisEntre(jd, jd + WA_J);
+    const compte = L.filter(y => waCompteQuota(y.x)).length;
+    h += '<p class="wahint" style="margin:0 0 10px"><b>' + waJourLab(jd) + '</b> · ' + L.length + ' message' + (L.length > 1 ? 's' : '') +
+         ' · ' + compte + ' dans les ' + q + '</p>' +
+      (L.length ? L.map(y => '<div class="wajourc"><div class="wajourh"><button type="button" data-wafiche="' + y.p.id + '">' +
+          esc(y.p.nom || telAffiche(y.p.tel || "") || "Sans nom") + ' ›</button><span>' + waHeure(y.x.at) +
+          (waCompteQuota(y.x) ? '' : ' · hors des ' + q) + '</span></div>' +
+          waEnvDetail(y.x, y.p.id) + '</div>').join("")
+        : '<p class="wahint">Aucun message envoyé depuis l\'app ce jour-là.</p>');
+  }
+  WA_BR = null;
+  waModal(h);
+  if (WA_HISTO === 0 || WA_HISTO === 1) document.querySelectorAll("#waBox .wahist").forEach(d => d.open = true);
 }
 function waNomFichier(id){
   return (WA_FICH[id] || {}).nom || ((WA_DRIVE || []).find(x => x.id === id) || {}).nom || "image de la promo";
@@ -15758,7 +15833,7 @@ function renderWaToday(){
   const grp = (titre, arr) => arr.length ? '<div class="wagh">' + titre + ' · ' + arr.length + '</div>' + arr.map(waCarte).join("") : '';
   box.innerHTML =
     '<button type="button" class="wagoal" data-wajour><b>' + L.fait + '/' + q + '</b><span>relances et promos envoyées aujourd\'hui' +
-      '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span><em class="wavoir">Voir ›</em></button>' +
+      '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span><em class="wavoir">Historique ›</em></button>' +
     (L.weekend ? '<div class="waweek"><b>Week-end : pas de relances ni de promos.</b><span>Elles reprennent lundi. Les nouvelles demandes restent à traiter.</span></div>' : '') +
     (tot ? '' : '<div class="empty">Rien à envoyer aujourd\'hui.' + (L.cache ? '' : '<br>Les prochains rappels arrivent tout seuls.') + '</div>') +
     grp("Nouvelles demandes", L.nouv) +
@@ -16032,7 +16107,7 @@ function renderWaFiche(){
 /* ---------- les clics ---------- */
 $("prosSheet").addEventListener("click", e => {
   if (e.target.closest("[data-waplan]")){ WA_PLAN = !WA_PLAN; renderWaToday(); return; }
-  if (e.target.closest("[data-wajour]")){ waMessagesDuJour(); return; }
+  if (e.target.closest("[data-wajour]")){ waMessagesDuJour(0); return; }
   const stp = e.target.closest("[data-wastper]");
   if (stp){ WA_ST.per = stp.dataset.wastper; renderWaStats(); return; }
   const tb = e.target.closest("[data-watab]");
@@ -16236,6 +16311,8 @@ $("waModal").addEventListener("click", e => {
   if (e.target.closest("[data-wanon]")){ waEnvoiOublie(); waModalFerme(); waRendTout(); toast("Rien n'est noté"); return; }
   const ms = e.target.closest("[data-wamainset]");
   if (ms && WA_BR && WA_BR.envAt){ waPromoMainChange(WA_BR.pid, WA_BR.envAt, ms.dataset.wamainset); return; }
+  const hs = e.target.closest("[data-wahisto]");
+  if (hs){ const v = hs.dataset.wahisto; waMessagesDuJour(v === "7" || v === "30" ? v : +v); return; }
   const fo = e.target.closest("[data-wafiche]");
   if (fo){
     const p = PROS.find(x => x.id === fo.dataset.wafiche);
