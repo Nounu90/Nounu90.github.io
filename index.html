@@ -1977,6 +1977,9 @@ button.wa.full{width:100%}
 .wahbody .watxt{display:block; width:calc(100% - 20px); box-sizing:border-box; margin:0 10px}
 .wahbody .waduo{margin:8px 10px 10px}
 .wahbody .waedpj{margin:0 10px}
+.waweek{background:#FFF7E6; border:1px solid #F1DFA0; border-radius:12px; padding:10px 12px; margin-bottom:10px; font-size:12.5px; color:#7A5B00}
+.waweek b{display:block; font-family:"Archivo",sans-serif; font-size:13px}
+.wadrivemaj{display:block; width:100%; margin:0 0 8px; padding:8px; border-radius:10px; border:1px solid var(--line); background:var(--card2); font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--ink)}
 /* v14.15 : Stats */
 .wastper{display:flex; flex-wrap:wrap; gap:6px}
 .wastper button{padding:7px 12px; border-radius:99px; border:1px solid var(--line); background:var(--card); font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--ink)}
@@ -2465,6 +2468,9 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
   font-family:"Archivo",sans-serif; font-size:12px; font-weight:600; text-align:center;
 }
 .netbar.ko{background:var(--accent)}
+.horlogebar{position:fixed; top:0; left:0; right:0; z-index:70; background:#B42318; color:#fff; padding:10px 14px; font-family:"Archivo",sans-serif; font-size:12.5px; text-align:center}
+.horlogebar b{display:block; font-size:13.5px}
+.horlogebar span{display:block; opacity:.9; margin-top:2px}
 .netbar svg{flex:none}
 @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
 </style>
@@ -4880,6 +4886,7 @@ $("pcList").addEventListener("input", e => {
   inp.className = v === "" ? "" : "edited";
   if (k === "tissuCoupe" || k === "tissuVente") majChutes(fam);
   if (k === "tissuCoupe") majMl(fam);
+  if (k === "bouchon") majFrein(fam);
   pcCheck();
   /* On enregistre et on partage sans attendre que l'agent quitte la case :
      sinon une saisie non terminée ne partait jamais vers les autres. */
@@ -6433,6 +6440,28 @@ function renderUserLine(){
     '<button type="button" id="btnLogout">Déconnexion</button>';
   const b = $("btnLogout");
   if (b) b.addEventListener("click", logout);
+}
+
+/* v14.17 : un téléphone à la mauvaise heure date tout de travers (le journal
+   range le travail d'aujourd'hui dans hier). On compare à l'heure du serveur. */
+let HORLOGE_VU = 0;
+async function horlogeVerif(){
+  if (Date.now() - HORLOGE_VU < 30 * 60000 || navigator.onLine === false) return;
+  HORLOGE_VU = Date.now();
+  try {
+    const t0 = Date.now();
+    const r = await fetch("./sw.js?h=" + t0, {method:"HEAD", cache:"no-store"});
+    const h = r.headers.get("Date");
+    if (!h) return;
+    const ecart = new Date(h).getTime() + (Date.now() - t0) / 2 - Date.now();
+    let bar = $("horlogeBar");
+    if (Math.abs(ecart) < 10 * 60000){ if (bar) bar.remove(); return; }
+    if (!bar){ bar = document.createElement("div"); bar.id = "horlogeBar"; bar.className = "horlogebar"; document.body.appendChild(bar); }
+    const min = Math.round(Math.abs(ecart) / 60000);
+    const dur = min >= 1440 ? Math.round(min / 1440) + " jour" + (min >= 2880 ? "s" : "") : min >= 60 ? Math.round(min / 60) + " h" : min + " min";
+    bar.innerHTML = '<b>L\'heure de ce téléphone est fausse : ' + dur + (ecart > 0 ? ' de retard' : ' d\'avance') + '.</b>' +
+      '<span>Réglages du téléphone → Date et heure → activez « Heure automatique ». Sinon le journal range votre travail au mauvais jour.</span>';
+  } catch(e){}
 }
 
 /* --- démarrage de la session --- */
@@ -8053,7 +8082,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.16";
+const APP_VERSION = "14.17";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8077,7 +8106,9 @@ const PIECES_DEF = {
     {k:"barre",     label:"Barre de charge",    u:"ml", auto:d => d.coupeMl},
     {k:"chainette", label:"Chaînette",          u:"ml", auto:d => d.chaineMl},
     {k:"bouchon",   label:"Bouchon",            u:"u",  auto:d => d.nb * 2},
-    {k:"frein",     label:"Frein",              u:"u",  auto:d => d.nb * 4}
+    /* v14.17 : toujours le double des bouchons, même corrigés à la main */
+    {k:"frein",     label:"Frein",              u:"u",  fixe:true, titre:"Calculé : 2 freins par bouchon",
+     auto:(d, fam) => 2 * bouchonsDe(d, fam)}
   ],
   JN: [
     {k:"cache",      label:"Cache",              u:"ml", auto:d => d.cacheMl},
@@ -8119,6 +8150,11 @@ function tissuVal(fam, k, d){
   }
   const def = TISSU_DEF[fam].find(x => x.k === k);
   return def && def.auto ? def.auto(d, fam) : 0;
+}
+function bouchonsDe(d, fam){
+  const man = pcVal(fam, "bouchon");
+  if (man !== null){ const n = parseFloat(String(man).replace(",", ".")); if (!isNaN(n)) return n; }
+  return (d && d.nb ? d.nb : 0) * 2;
 }
 /* Le mètre linéaire déroulé n'est pas une saisie : c'est le m² coupé divisé
    par la laize du rouleau. Si l'atelier corrige la surface, la longueur suit
@@ -8285,6 +8321,15 @@ function majMl(fam){
   inp.className = "fixe";
 }
 
+/* v14.17 : le frein suit le bouchon sans redessiner la fiche. */
+function majFrein(fam){
+  const inp = $("pcList").querySelector('input[data-fam="' + fam + '"][data-k="frein"]');
+  if (!inp) return;
+  const d = pcData[fam] || famData(fam);
+  inp.value = fr(2 * bouchonsDe(d, fam));
+  inp.className = "fixe";
+}
+
 /* Ce qui manque encore pour pouvoir envoyer la fiche */
 function pcManquants(){
   const out = [];
@@ -8374,7 +8419,7 @@ function renderPieces(){
           ? def.label + ' <em>laize ' + fr(d.laize, 0) + ' cm</em>' : def.label;
         const row = '<div class="pcrow"><label>' + lab + '</label>' +
           '<input type="text" inputmode="decimal" class="' + cls + '" value="' + val + '"' +
-          (def.fixe ? ' readonly tabindex="-1" title="Calculé : m² coupé divisé par la laize"' : '') +
+          (def.fixe ? ' readonly tabindex="-1" title="' + (def.titre || "Calculé : m² coupé divisé par la laize") + '"' : '') +
           ' data-fam="' + fam + '" data-k="' + def.k + '"' +
           ' placeholder="' + (a !== null ? "" : "—") + '"><u>' + def.u + '</u></div>';
         if (!def.opts) return row;
@@ -8788,6 +8833,19 @@ function renderCutInfo(o){
 
 /* Les fenêtres déjà fabriquées, cochées par l'atelier. */
 function faites(o){ return (o && Array.isArray(o.faites)) ? o.faites : []; }
+/* v14.17 : le jour où une case a été cochée, lu dans le journal du bon
+   (« le 01 octobre 2026 »). Le dernier geste sur la case fait foi. */
+function dateCoche(o, kinds, k){
+  let der = null;
+  (o.log || []).forEach(e => {
+    if (!e || e.k !== k || kinds.indexOf(e.kind || "fab") < 0) return;
+    if (!der || (e.at || 0) >= (der.at || 0)) der = e;
+  });
+  if (!der || !der.on || !der.at) return "";
+  const d = new Date(der.at);
+  const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  return " le " + pad(d.getDate()) + " " + MOIS[d.getMonth()] + " " + d.getFullYear();
+}
 
 /* La liste des coupes de profilé, et la livraison au magasin 2. */
 function renderTube(o){
@@ -8816,7 +8874,7 @@ function renderTube(o){
           '<span class="fbox">' + (on ? coche : "") + '</span>' +
           '<span class="fdim">' + cm(c.coupe) + ' cm</span>' +
           '<span class="fsub">fenêtre ' + c.n + '  ·  ' + fr(c.l,0) + ' × ' + fr(c.h,0) + ' cm' +
-            (on ? '  ·  livrée au magasin 2' : '') + '</span>' +
+            (on ? '  ·  livrée au magasin 2' + dateCoche(o, ["tube", "livr"], c.key) : '') + '</span>' +
         '</button>';
       }).join("") +
     '</div>';
@@ -8846,7 +8904,8 @@ function renderFait(o, dims){
         : '') + '</span>' +
       '<span class="fdim">' + fr(d.l,0) + ' × ' + fr(d.h,0) + ' cm</span>' +
       '<span class="fsub">' + (d.t === "JN" ? "jour et nuit" : "enrouleur") +
-        (d.ref ? "  ·  " + d.ref : "") + (d.note ? "  ·  " + esc(d.note) : "") + '</span>' +
+        (d.ref ? "  ·  " + d.ref : "") + (d.note ? "  ·  " + esc(d.note) : "") +
+        (on ? "  ·  fabriquée" + dateCoche(o, ["fab"], d.key) : "") + '</span>' +
     '</button>';
   }).join("");
 }
@@ -14881,7 +14940,7 @@ $("tilePros").addEventListener("click", () => {
 const WA_ID = "cfg-wamsg";          /* rangée réservée : modèles, réglages, campagnes */
 const WA_J = 86400000;
 const WA_DEBUT_SYSTEME = new Date(2026, 8, 27).getTime();   /* mise en service du système */
-const WA_DEF_REG = {pxE:230, pxJ:260, r1:2, r2:7, r3:30, disc:3, tard:7, tardMax:2,
+const WA_DEF_REG = {pxE:230, pxJ:260, r1:5, r2:10, r3:30, disc:5, tard:7, tardMax:2,
   d1:2, d2:5, avis:7, parrMax:6, quota:20, ecart:14, lienAvis:"", ficheENR:"", ficheJN:""};
 let WA = LS.get("mst_wa", null);
 if (!WA || typeof WA !== "object") WA = {v:1, maj:0, reg:{}, msg:{}, camp:[]};
@@ -14980,16 +15039,27 @@ function waDernierBon(p){
 function waDebutJour(){ const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
 /* v14.10 : le dernier message parti vers ce contact, quel qu'il soit. */
 function waDernierEnvoi(p){ return (p.env || []).reduce((m, x) => Math.max(m, x.at || 0), 0); }
-const WA_ECART_MIN = 3;   /* jours au moins entre deux messages au même contact */
-/* La tâche du contact, avec l'écart minimum : si un message vient de partir
-   (une promo par exemple), le suivant attend 3 jours. */
+const WA_ECART_MIN = 5;   /* v14.17 : 5 jours au moins après le dernier échange (était 3) */
+/* Le dernier échange avec ce contact : un message parti, ou le client qui nous a écrit. */
+function waDernierEchange(p){ return Math.max(waDernierEnvoi(p), p.msg || 0, p.vu || 0); }
+/* La tâche du contact, avec l'écart minimum : un client qui nous a contactés
+   aujourd'hui, ou à qui on vient d'écrire, n'est relancé que 5 jours après. */
 function waTache(p){
   const t = waTacheBrut(p);
   if (!t || t.bloc === "new" || t.k === "fin") return t;
-  const d = waDernierEnvoi(p);
+  const d = waDernierEchange(p);
   if (d && t.due < d + WA_ECART_MIN * WA_J) t.due = d + WA_ECART_MIN * WA_J;
-  return t;
+  return waHorsWeekend(t);
 }
+/* v14.17 : pas de relance ni de promo le samedi et le dimanche : la date glisse au lundi. */
+function waLundiSi(ms){
+  const d = new Date(ms), j = d.getDay();
+  if (j !== 0 && j !== 6) return ms;
+  d.setDate(d.getDate() + (j === 6 ? 2 : 1)); d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+function waHorsWeekend(t){ if (t && t.bloc !== "new") t.due = waLundiSi(t.due); return t; }
+function waWeekend(){ const j = new Date().getDay(); return j === 0 || j === 6; }
 function waTacheBrut(p){
   const s = p.seq || {};
   const der = s.last || s.base || p.at || 0;
@@ -15036,7 +15106,7 @@ function waPromoPour(p, tache){
   const e = prosEtape(p);
   /* en pause : seulement les grandes promos, une tous les 2 mois au plus */
   if (Date.now() - (p.promoDer || 0) < (e === "pause" ? 60 : waReg("ecart")) * WA_J) return null;
-  if (Date.now() - waDernierEnvoi(p) < WA_ECART_MIN * WA_J) return null;
+  if (Date.now() - waDernierEchange(p) < WA_ECART_MIN * WA_J) return null;
   const c = waCampActive().find(c => (c.cible || []).indexOf(e) >= 0 && (c.faits || []).indexOf(p.id) < 0);
   return c ? {k:"promo", due:c.at || 0, bloc:"promo", why:"Promo · " + (c.nom || ""), camp:c.id} : null;
 }
@@ -15064,8 +15134,8 @@ function waListeDuJour(){
   const ordre = {rappel:0, relance:1, client:2, promo:3};
   autres.sort((a, b) => ordre[a.bloc] - ordre[b.bloc] || b.poids - a.poids || a.due - b.due);
   nouv.sort((a, b) => a.due - b.due);
-  const reste = Math.max(0, waReg("quota") - waEnvoisDuJour());
-  return {nouv:nouv, vus:autres.slice(0, reste), attente:autres.slice(reste),
+  const reste = waWeekend() ? 0 : Math.max(0, waReg("quota") - waEnvoisDuJour());
+  return {nouv:nouv, vus:autres.slice(0, reste), attente:autres.slice(reste), weekend:waWeekend(),
           cache:autres.length - Math.min(reste, autres.length), fait:waEnvoisDuJour()};
 }
 function waNbDuJour(){ const L = waListeDuJour(); return L.nouv.length + L.vus.length; }
@@ -15329,11 +15399,11 @@ function waJoinRend(){
     waDriveListe(true).then(waJoinRend);
     return;
   }
-  box.innerHTML = WA_DRIVE.length
+  box.innerHTML = '<button type="button" class="wadrivemaj" data-wadrivemaj>↻ Actualiser les fichiers du Drive</button>' + (WA_DRIVE.length
     ? '<div class="wafiles">' + WA_DRIVE.map(f => '<button type="button" data-wajoinf="' + esc(f.id) + '" aria-pressed="' +
         (WA_BR.pieces.indexOf(f.id) >= 0) + '"><b>' + esc(f.nom) + '</b><small>' +
         (String(f.type).indexOf("pdf") >= 0 ? "PDF" : "image") + '</small></button>').join("") + '</div>'
-    : '<p class="wahint">Le dossier Drive « PROMOS » est vide.</p>';
+    : '<p class="wahint">Le dossier Drive « PROMOS » est vide.</p>');
 }
 async function waEnvoie(){
   const B = WA_BR;
@@ -15351,12 +15421,33 @@ async function waEnvoie(){
     try { await navigator.share({files:files, text:txt}); parti = true; }
     catch(e){ if (e && e.name === "AbortError"){ toast("Envoi annulé"); return; } }
   }
+  waEnvoiGarde(B);
   if (!parti){
     if (!lien){ toast("Numéro manquant"); return; }
     window.open(lien + "?text=" + encodeURIComponent(txt), "_blank");
     if (files.length) toast("Le texte est parti ; ajoutez la pièce jointe dans WhatsApp");
   }
   waConfirme(p);
+}
+/* v14.17 : le téléphone recharge souvent l'app au retour de WhatsApp. Le message
+   en cours était perdu, rien n'était noté et le compteur restait à 0/20. Il est
+   gardé sur le téléphone jusqu'au « Oui » ou au « Non ». */
+function waEnvoiGarde(B){
+  const t = Object.assign({}, B.t); delete t.p;
+  LS.set("mst_wa_envoi", {pid:B.pid, t:t, cle:B.cle, lang:B.lang, txtEnvoye:B.txtEnvoye, pjNoms:B.pjNoms,
+                          pieces:B.pieces || [], at:Date.now()});
+}
+function waEnvoiOublie(){ try { localStorage.removeItem("mst_wa_envoi"); } catch(e){} }
+function waEnvoiReprise(){
+  const g = LS.get("mst_wa_envoi", null);
+  if (!g || !g.pid) return;
+  if (Date.now() - (g.at || 0) > 12 * 3600000){ waEnvoiOublie(); return; }
+  if (!$("waModal").hidden) return;
+  const p = PROS.find(x => x.id === g.pid);
+  if (!p){ waEnvoiOublie(); return; }
+  WA_BR = {pid:g.pid, t:g.t || {}, cle:g.cle, lang:g.lang, txtEnvoye:g.txtEnvoye, pjNoms:g.pjNoms || [], pieces:g.pieces || [], v:0, texte:""};
+  if (!$("prosSheet").classList.contains("open")) try { $("tilePros").click(); } catch(e){}
+  setTimeout(() => waConfirme(p), 250);
 }
 /* v14.10 : l'app ne voit pas WhatsApp. Au retour, Imane confirme que le message
    est vraiment parti ; rien n'est noté tant qu'elle n'a pas dit oui. */
@@ -15456,7 +15547,7 @@ function waEdPjRend(){
         '<button type="button" data-waedpjdel="' + i + '" aria-label="Retirer">✕</button></div>').join("")
       : '<p class="wahint" style="margin:0 0 6px">Aucune pièce jointe.</p>') +
     '<button type="button" class="wajoin" data-waedpjadd>+ Joindre un fichier</button>' +
-    (E.ouvert ? (WA_DRIVE === null ? '<p class="wahint">Lecture du dossier Drive…</p>'
+    (E.ouvert ? '<button type="button" class="wadrivemaj" data-wadrivemaj>↻ Actualiser les fichiers du Drive</button>' + (WA_DRIVE === null ? '<p class="wahint">Lecture du dossier Drive…</p>'
       : WA_DRIVE.length ? '<div class="wafiles">' + WA_DRIVE.map(f => '<button type="button" data-waedpjf="' + esc(f.nom) + '" aria-pressed="' +
           (E.pj.indexOf(f.nom) >= 0) + '"><b>' + esc(f.nom) + '</b><small>' + (String(f.type).indexOf("pdf") >= 0 ? "PDF" : "image") +
           '</small></button>').join("") + '</div>'
@@ -15668,6 +15759,7 @@ function renderWaToday(){
   box.innerHTML =
     '<button type="button" class="wagoal" data-wajour><b>' + L.fait + '/' + q + '</b><span>relances et promos envoyées aujourd\'hui' +
       '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span><em class="wavoir">Voir ›</em></button>' +
+    (L.weekend ? '<div class="waweek"><b>Week-end : pas de relances ni de promos.</b><span>Elles reprennent lundi. Les nouvelles demandes restent à traiter.</span></div>' : '') +
     (tot ? '' : '<div class="empty">Rien à envoyer aujourd\'hui.' + (L.cache ? '' : '<br>Les prochains rappels arrivent tout seuls.') + '</div>') +
     grp("Nouvelles demandes", L.nouv) +
     grp("Rappels promis", L.vus.filter(x => x.bloc === "rappel")) +
@@ -15708,6 +15800,8 @@ function waPlanning(L, nbJours){
   const jours = [];
   let reste = items.slice();
   for (let j = 1; j <= nbJours && reste.length; j++){
+    const jd = new Date(t0 + j * WA_J + 12 * 3600000).getDay();
+    if (jd === 0 || jd === 6) continue;        /* v14.17 : rien le week-end */
     const dispo = reste.filter(x => x.jour <= j);
     dispo.sort((a, b) => ordre[a.bloc] - ordre[b.bloc] || b.poids - a.poids || a.due - b.due);
     const pris = dispo.slice(0, q);
@@ -16123,15 +16217,23 @@ $("waModal").addEventListener("click", e => {
     if (i >= 0) WA_BR.pieces.splice(i, 1); else { WA_BR.pieces.push(id); const pid = WA_BR.pid; waFichier(id).then(() => { if (WA_BR && WA_BR.pid === pid) waBrouillonPieces(); }); }
     waBrouillonPieces(); return;
   }
+  if (e.target.closest("[data-wadrivemaj]")){
+    /* v14.17 : relire le dossier Drive, pour un fichier ajouté après l'ouverture */
+    WA_DRIVE = null;
+    if (WA_EDPJ) waEdPjRend(); else waJoinRend();
+    toast("Lecture du dossier Drive…");
+    return;
+  }
   const rt = e.target.closest("[data-waretire]");
   if (rt && WA_BR){ WA_BR.pieces = WA_BR.pieces.filter(x => x !== rt.dataset.waretire); waBrouillonPieces(); return; }
   if (e.target.closest("[data-wasend]")){ waEnvoie(); return; }
   if (e.target.closest("[data-waoui]") && WA_BR){
     const p = PROS.find(x => x.id === WA_BR.pid);
+    waEnvoiOublie();
     if (p) waNoteEnvoi(p, WA_BR);
     return;
   }
-  if (e.target.closest("[data-wanon]")){ waModalFerme(); waRendTout(); toast("Rien n'est noté"); return; }
+  if (e.target.closest("[data-wanon]")){ waEnvoiOublie(); waModalFerme(); waRendTout(); toast("Rien n'est noté"); return; }
   const ms = e.target.closest("[data-wamainset]");
   if (ms && WA_BR && WA_BR.envAt){ waPromoMainChange(WA_BR.pid, WA_BR.envAt, ms.dataset.wamainset); return; }
   const fo = e.target.closest("[data-wafiche]");
@@ -18030,6 +18132,8 @@ window.addEventListener("popstate", () => {
     if (!okAuth){ showLogin(true); return; }
     renderHome();
     syncAll();
+    setTimeout(() => { try { waEnvoiReprise(); } catch(e){} }, 600);
+    horlogeVerif();
     if (SB){
       SB.channel("bons-live")
         .on("postgres_changes", {event:"*", schema:"public", table:"bons"}, () => pullBons())
@@ -18045,6 +18149,8 @@ window.addEventListener("popstate", () => {
     renderNet();
     syncStock(true);
     syncAll().then(() => { renderNet(); renderUserLine(); });
+    try { if (USER) waEnvoiReprise(); } catch(e){}
+    horlogeVerif();
   });
   window.addEventListener("pageshow", () => { renderNet(); });
 })();
