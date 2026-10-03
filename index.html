@@ -8095,7 +8095,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.19";
+const APP_VERSION = "14.20";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -15123,10 +15123,19 @@ function waPromoPour(p, tache){
   const c = waCampActive().find(c => (c.cible || []).indexOf(e) >= 0 && (c.faits || []).indexOf(p.id) < 0);
   return c ? {k:"promo", due:c.at || 0, bloc:"promo", why:"Promo · " + (c.nom || ""), camp:c.id} : null;
 }
+/* v14.20 : tout message envoyé compte dans les 20 (relance, promo, message libre,
+   réponse à une demande de plus d'un jour). Seule la réponse à une demande arrivée
+   le jour même reste hors quota : elle ne doit jamais attendre. */
+function waCompteQuota(x, p){
+  if (x.bloc !== "new") return true;
+  const d = new Date((p && p.at) || 0); d.setHours(0, 0, 0, 0);
+  const j = new Date(x.at || 0); j.setHours(0, 0, 0, 0);
+  return d.getTime() !== j.getTime();
+}
 function waEnvoisDuJour(){
   const t0 = waDebutJour();
   let n = 0;
-  prosVivants().forEach(p => (p.env || []).forEach(x => { if (x.at >= t0 && x.bloc !== "new" && x.bloc !== "libre") n++; }));
+  prosVivants().forEach(p => (p.env || []).forEach(x => { if (x.at >= t0 && waCompteQuota(x, p)) n++; }));
   return n;
 }
 /* La liste du jour, déjà triée ; « cache » = ce qui dépasse le quota de 20. */
@@ -15613,7 +15622,7 @@ function waToastEnvoi(p){
   const t0 = waDebutJour();
   let n = 0;
   prosVivants().forEach(q => (q.env || []).forEach(x => {
-    if (x.at >= t0 && x.bloc !== "new" && x.bloc !== "libre" && x.bloc !== "main") n++;
+    if (x.at >= t0 && waCompteQuota(x, q)) n++;
   }));
   const t = waTache(p);
   const suite = p.pause ? "En pause" : t ? (t.k === "fin" ? "Fin des relances le " : "Prochaine relance le ") + prosDate(t.due) : "Plus de relance prévue";
@@ -15636,7 +15645,6 @@ function waPromoMain(pid, cid){
 /* v14.18 : l'historique des envois. Aujourd'hui, hier, ou un tableau jour par jour
    sur 7 ou 30 jours ; un appui sur un jour ouvre ses messages. */
 let WA_HISTO = 0;   /* 0 = aujourd'hui, 1 = hier, "7", "30", ou le début d'un jour (ms) */
-function waCompteQuota(x){ return x.bloc !== "new" && x.bloc !== "libre"; }
 function waEnvoisEntre(a, b){
   const L = [];
   prosVivants().forEach(p => (p.env || []).forEach(x => { if (x.at >= a && x.at < b) L.push({p:p, x:x}); }));
@@ -15661,7 +15669,7 @@ function waMessagesDuJour(sel){
     for (let i = 0; i < n; i++){
       const a = waJourDe(t0 - i * WA_J + 12 * 3600000), L = waEnvoisEntre(a, a + WA_J);
       const dj = new Date(a).getDay();
-      jours.push({a:a, tot:L.length, q:L.filter(y => waCompteQuota(y.x)).length, we:dj === 0 || dj === 6});
+      jours.push({a:a, tot:L.length, q:L.filter(y => waCompteQuota(y.x, y.p)).length, we:dj === 0 || dj === 6});
     }
     const tq = jours.reduce((s, j) => s + j.q, 0), tt = jours.reduce((s, j) => s + j.tot, 0);
     const ouvres = jours.filter(j => !j.we).length || 1;
@@ -15675,12 +15683,12 @@ function waMessagesDuJour(sel){
     const a = WA_HISTO === 1 ? t0 - WA_J + 3600000 : WA_HISTO > 1000 ? WA_HISTO : t0;
     const jd = waJourDe(a);
     const L = waEnvoisEntre(jd, jd + WA_J);
-    const compte = L.filter(y => waCompteQuota(y.x)).length;
+    const compte = L.filter(y => waCompteQuota(y.x, y.p)).length;
     h += '<p class="wahint" style="margin:0 0 10px"><b>' + waJourLab(jd) + '</b> · ' + L.length + ' message' + (L.length > 1 ? 's' : '') +
          ' · ' + compte + ' dans les ' + q + '</p>' +
       (L.length ? L.map(y => '<div class="wajourc"><div class="wajourh"><button type="button" data-wafiche="' + y.p.id + '">' +
           esc(y.p.nom || telAffiche(y.p.tel || "") || "Sans nom") + ' ›</button><span>' + waHeure(y.x.at) +
-          (waCompteQuota(y.x) ? '' : ' · hors des ' + q) + '</span></div>' +
+          (waCompteQuota(y.x, y.p) ? '' : ' · demande du jour, hors des ' + q) + '</span></div>' +
           waEnvDetail(y.x, y.p.id) + '</div>').join("")
         : '<p class="wahint">Aucun message envoyé depuis l\'app ce jour-là.</p>');
   }
@@ -15836,9 +15844,8 @@ function renderWaToday(){
     /* v14.19 : le gros chiffre compte TOUS les messages partis aujourd'hui ; le détail
        dit combien comptent dans les 20 (relances et promos) et combien sont hors quota. */
     (() => { const tous = waEnvoisEntre(waDebutJour(), waDebutJour() + WA_J).length, hors = Math.max(0, tous - L.fait);
-      return '<button type="button" class="wagoal" data-wajour><b>' + tous + '</b><span>message' + (tous > 1 ? 's' : '') + ' envoyé' + (tous > 1 ? 's' : '') +
-        ' aujourd\'hui · <strong>' + L.fait + '/' + q + '</strong> relances et promos' +
-        (hors ? ' · ' + hors + ' réponse' + (hors > 1 ? 's' : '') + ' aux demandes' : '') +
+      return '<button type="button" class="wagoal" data-wajour><b>' + L.fait + '/' + q + '</b><span>messages envoyés aujourd\'hui' +
+        (hors ? ' · + ' + hors + ' réponse' + (hors > 1 ? 's' : '') + ' à des demandes du jour (hors quota)' : '') +
         '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span><em class="wavoir">Historique ›</em></button>'; })() +
     (L.weekend ? '<div class="waweek"><b>Week-end : pas de relances ni de promos.</b><span>Elles reprennent lundi. Les nouvelles demandes restent à traiter.</span></div>' : '') +
     (tot ? '' : '<div class="empty">Rien à envoyer aujourd\'hui.' + (L.cache ? '' : '<br>Les prochains rappels arrivent tout seuls.') + '</div>') +
