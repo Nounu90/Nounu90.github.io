@@ -2057,7 +2057,8 @@ button.wa.full{width:100%}
 .achsp{display:flex; justify-content:space-between; gap:10px; width:100%; text-align:left; padding:10px 0; border:0; border-bottom:1px solid var(--line); background:none; color:var(--ink)}
 .achsp small{display:block; color:var(--muted); font-size:11.5px} .achsp span:last-child{text-align:right}
 .achsp em{font-style:normal; font-family:"IBM Plex Mono",monospace; font-weight:700; font-size:15px}
-.achsp.tot{border-bottom:0} .achsp.tot em{color:var(--accent)}
+.achsp.tot{border-bottom:0}
+.achmod{font-style:normal; font-size:11px; font-weight:600; color:var(--accent); margin-left:6px} .achsp.tot em{color:var(--accent)}
 .achsug{display:flex; gap:10px; align-items:flex-start; width:100%; text-align:left; padding:9px 0; border:0; border-bottom:1px solid var(--line); background:none; color:var(--ink)}
 .achsug i{flex:none; width:20px; height:20px; border:2px solid var(--line-strong); border-radius:6px; margin-top:2px}
 .achsug.on i{background:var(--accent); border-color:var(--accent); box-shadow:inset 0 0 0 3px var(--card)}
@@ -8202,7 +8203,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.22";
+const APP_VERSION = "14.23";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -18590,7 +18591,8 @@ function achRendBa(box){
     '<select class="achsel" data-achfour><option value="">Choisir un fournisseur…</option>' +
       achFoursVivants().map(x => '<option value="' + x.id + '"' + (x.id === b.four ? ' selected' : '') + '>' + esc(x.nom) + '</option>').join("") +
       '<option value="__neuf">+ Nouveau fournisseur</option></select>' +
-    (ACH_FOUR_ED && ACH_FOUR_ED.depuisBa ? achFormFour() : '') +
+    (ACH_FOUR_ED && ACH_FOUR_ED.depuisBa ? achFormFour()
+      : (f ? '<button type="button" class="achnouv" style="margin:0 0 4px" data-achfouredit>✎ Modifier ce fournisseur</button>' : '')) +
     (f && f.tel ? '<p class="hint" style="margin:6px 0 0">📞 ' + esc(telAffiche(f.tel)) + '</p>' : '') +
     '<label class="achlab">Livraison souhaitée<input type="date" data-achchamp="livr" value="' + esc(b.livr || "") + '"></label>' +
   '</section>';
@@ -18716,14 +18718,15 @@ function achRendFours(box){
     return {f:f, n:L.length, s:s};
   }).sort((a, b) => b.s.ht - a.s.ht);
   const tot = lig.reduce((a, x) => { a.ht += x.s.ht; a.tva += x.s.tva; a.reste += x.s.reste; return a; }, {ht:0, tva:0, reste:0});
-  box.innerHTML =
+  const edite = ACH_FOUR_ED && ACH_FOUR_ED.id && !ACH_FOUR_ED.depuisBa;
+  box.innerHTML = (edite ? '<section class="card achcard">' + achFormFour() + '</section>' : '') +
     '<div class="pypuces">' + [["mois", "Ce mois"], ["annee", "Cette année"], ["tout", "Tout"]].map(([k, l]) => '<button type="button" class="prchip" data-achper="' + k + '" aria-pressed="' + (ACH_PER === k) + '">' + l + '</button>').join("") + '</div>' +
-    '<section class="card achcard">' + (lig.length ? lig.map(x => '<button type="button" class="achsp" data-achfed="' + x.f.id + '"><span><b>' + esc(x.f.nom) + '</b><small>' + x.n + ' bon' + (x.n > 1 ? 's' : '') +
+    '<section class="card achcard">' + (lig.length ? lig.map(x => '<button type="button" class="achsp" data-achfed="' + x.f.id + '"><span><b>' + esc(x.f.nom) + ' <i class="achmod">✎ Modifier</i></b><small>' + x.n + ' bon' + (x.n > 1 ? 's' : '') +
         (x.f.tel ? ' · ' + esc(telAffiche(x.f.tel)) : '') + '</small></span><span><em>' + frm(x.s.ht, 0) + '</em><small>HT · TVA ' + frm(x.s.tva, 0) +
         (x.s.reste > 0.01 ? ' · reste ' + frm(x.s.reste, 0) : '') + '</small></span></button>').join("") +
         '<div class="achsp tot"><span><b>Total</b></span><span><em>' + frm(tot.ht, 0) + '</em><small>HT · TVA ' + frm(tot.tva, 0) + ' · reste ' + frm(tot.reste, 0) + '</small></span></div>'
       : '<p class="hint" style="margin:0">Aucun fournisseur. Ajoutez le premier ci-dessous.</p>') + '</section>' +
-    (ACH_FOUR_ED && !ACH_FOUR_ED.depuisBa ? '<section class="card achcard">' + achFormFour() + '</section>'
+    (ACH_FOUR_ED && !ACH_FOUR_ED.depuisBa && !edite ? '<section class="card achcard">' + achFormFour() + '</section>'
       : '<button type="button" class="achbig ol" data-achfourneuf>+ Nouveau fournisseur</button>') +
     '<p class="hint">Les montants comptent les bons envoyés (pas les brouillons), à la date du bon. Un appui sur un fournisseur pour le modifier.</p>';
 }
@@ -18921,7 +18924,17 @@ $("achSheet").addEventListener("click", e => {
   if ((x = g("[data-achba]"))){ ACH_PAY = {mode:"cheque"}; achOuvre("ba", x.dataset.achba); return; }
   if ((x = g("[data-achper]"))){ ACH_PER = x.dataset.achper; renderAch(); return; }
   if (g("[data-achfourneuf]")){ ACH_FOUR_ED = {}; renderAch(); return; }
-  if ((x = g("[data-achfed]"))){ const f = achFour(x.dataset.achfed); ACH_FOUR_ED = f ? Object.assign({}, f) : {}; renderAch(); return; }
+  if (g("[data-achfouredit]")){
+    const bb = achBa(), ff = bb && achFour(bb.four);
+    if (ff){ ACH_FOUR_ED = Object.assign({}, ff, {depuisBa:true}); renderAch(); setTimeout(() => { const i = $("achFNom"); if (i) i.focus(); }, 50); }
+    return;
+  }
+  if ((x = g("[data-achfed]"))){
+    const f = achFour(x.dataset.achfed); ACH_FOUR_ED = f ? Object.assign({}, f) : {}; renderAch();
+    try { $("achSheet").querySelector(".sheet-body").scrollTo({top:0}); } catch(err){}
+    setTimeout(() => { const i = $("achFNom"); if (i) i.focus(); }, 50);
+    return;
+  }
   if ((x = g("[data-achftype]"))){ ACH_FOUR_ED = Object.assign(ACH_FOUR_ED || {}, achLitFour(), {type:x.dataset.achftype}); renderAch(); return; }
   if (g("[data-achfourno]")){ ACH_FOUR_ED = null; renderAch(); return; }
   if (g("[data-achfourok]")){
