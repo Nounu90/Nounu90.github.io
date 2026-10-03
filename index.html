@@ -1989,6 +1989,7 @@ button.wa.full{width:100%}
 .wahistj em{display:block; height:100%; background:#1FA855}
 .wahistj span{width:74px; flex:none; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink)}
 .wahistj.we{opacity:.55}
+.wagoal strong{color:var(--ink); font-weight:700}
 .waweek{background:#FFF7E6; border:1px solid #F1DFA0; border-radius:12px; padding:10px 12px; margin-bottom:10px; font-size:12.5px; color:#7A5B00}
 .waweek b{display:block; font-family:"Archivo",sans-serif; font-size:13px}
 .wadrivemaj{display:block; width:100%; margin:0 0 8px; padding:8px; border-radius:10px; border:1px solid var(--line); background:var(--card2); font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--ink)}
@@ -8094,7 +8095,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.18";
+const APP_VERSION = "14.19";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -15832,8 +15833,13 @@ function renderWaToday(){
   const q = waReg("quota");
   const grp = (titre, arr) => arr.length ? '<div class="wagh">' + titre + ' · ' + arr.length + '</div>' + arr.map(waCarte).join("") : '';
   box.innerHTML =
-    '<button type="button" class="wagoal" data-wajour><b>' + L.fait + '/' + q + '</b><span>relances et promos envoyées aujourd\'hui' +
-      '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span><em class="wavoir">Historique ›</em></button>' +
+    /* v14.19 : le gros chiffre compte TOUS les messages partis aujourd'hui ; le détail
+       dit combien comptent dans les 20 (relances et promos) et combien sont hors quota. */
+    (() => { const tous = waEnvoisEntre(waDebutJour(), waDebutJour() + WA_J).length, hors = Math.max(0, tous - L.fait);
+      return '<button type="button" class="wagoal" data-wajour><b>' + tous + '</b><span>message' + (tous > 1 ? 's' : '') + ' envoyé' + (tous > 1 ? 's' : '') +
+        ' aujourd\'hui · <strong>' + L.fait + '/' + q + '</strong> relances et promos' +
+        (hors ? ' · ' + hors + ' réponse' + (hors > 1 ? 's' : '') + ' aux demandes' : '') +
+        '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span><em class="wavoir">Historique ›</em></button>'; })() +
     (L.weekend ? '<div class="waweek"><b>Week-end : pas de relances ni de promos.</b><span>Elles reprennent lundi. Les nouvelles demandes restent à traiter.</span></div>' : '') +
     (tot ? '' : '<div class="empty">Rien à envoyer aujourd\'hui.' + (L.cache ? '' : '<br>Les prochains rappels arrivent tout seuls.') + '</div>') +
     grp("Nouvelles demandes", L.nouv) +
