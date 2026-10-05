@@ -1904,6 +1904,7 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .watask .acts{display:flex; gap:7px}
 .watask .acts button{padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; color:var(--ink)}
 .watask .acts button.wa{flex:1; background:#1FA855; border-color:#1FA855; color:#fff}
+.watask .acts button.wadisc{color:#127A3D; border-color:#BFE6CC; background:#E3F5EA}
 .wahint{font-size:12px; color:var(--muted); line-height:1.5; margin:8px 2px 0}
 .wacard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 13px; margin-bottom:11px}
 .walab{font-family:"Archivo",sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:9px}
@@ -2058,6 +2059,13 @@ button.wa.full{width:100%}
 .achsp small{display:block; color:var(--muted); font-size:11.5px} .achsp span:last-child{text-align:right}
 .achsp em{font-style:normal; font-family:"IBM Plex Mono",monospace; font-weight:700; font-size:15px}
 .achsp.tot{border-bottom:0}
+.waform{border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-bottom:8px; background:var(--card)}
+.waform.neuf{border-color:#D6207E; box-shadow:0 0 0 3px rgba(214,32,126,.12)}
+.waform .h{display:flex; align-items:baseline; gap:8px} .waform .h b{flex:1; font-family:"Archivo",sans-serif; font-size:14px}
+.waform .h span{font-size:11px; color:var(--muted)} .waform .nv{font-style:normal; font-size:10.5px; font-weight:700; color:#fff; background:#D6207E; border-radius:99px; padding:1px 7px}
+.waform small{display:block; font-size:12px; color:var(--muted); margin-top:3px}
+.waform .wabtn{flex:1; display:flex; align-items:center; justify-content:center; padding:11px 12px; border-radius:11px; background:#1FA855; color:#fff; font-family:"Archivo",sans-serif; font-size:13px; font-weight:600; text-decoration:none}
+.wadel label{display:flex; flex-direction:column} .wadel small{font-size:10.5px; color:var(--muted); font-weight:400}
 .achmod{font-style:normal; font-size:11px; font-weight:600; color:var(--accent); margin-left:6px} .achsp.tot em{color:var(--accent)}
 .achsug{display:flex; gap:10px; align-items:flex-start; width:100%; text-align:left; padding:9px 0; border:0; border-bottom:1px solid var(--line); background:none; color:var(--ink)}
 .achsug i{flex:none; width:20px; height:20px; border:2px solid var(--line-strong); border-radius:6px; margin-top:2px}
@@ -3457,11 +3465,13 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
       <button type="button" data-watab="promos" aria-pressed="false">Promos</button>
       <button type="button" data-watab="msgs" aria-pressed="false">Messages</button>
       <button type="button" data-watab="stats" aria-pressed="false">Stats</button>
+      <button type="button" data-watab="forms" aria-pressed="false">Formulaires<em id="waFormBadge" hidden></em></button>
     </div>
     <div id="waToday"></div>
     <div id="waPromos" hidden></div>
     <div id="waMsgs" hidden></div>
     <div id="waStats" hidden></div>
+    <div id="waForms" hidden></div>
     <button class="prbtn wa promobtn" id="prosPromoBtn" type="button" hidden>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>
       Promotions WhatsApp</button>
@@ -4114,6 +4124,7 @@ function blank(){
     date: new Date().toISOString(),
     nom:"", tel:"", adresse:"", gps:"", ech:"", remise:"", ice:"",
     etat:"devis",                 /* un bon commence toujours par un devis */
+    arr:1,                        /* v14.25 : calcul arrondi comme SAGE */
     type:"ENR",
     multi:false,
     dims:[{l:"",h:"",ref:"",note:"",type:"ENR",q:""}],
@@ -4247,12 +4258,12 @@ function remisePct(o){
   const v = parseFloat(String(src.remise === undefined ? "" : src.remise).replace(",", ".")) || 0;
   return Math.max(0, Math.min(100, v));
 }
-function remiseDe(o, brut){ return brut * remisePct(o) / 100; }
+function remiseDe(o, brut){ return R2(o, brut * remisePct(o) / 100); }
 /* Le total HT d'un bon, remise déduite. C'est la base de la TVA et du bénéfice. */
 function htDe(o){
   const t = orderTotals(o);
-  const brut = t.prix + t.pose;
-  return brut - remiseDe(o, brut);
+  const brut = R2(o, t.prix + t.pose);
+  return R2(o, brut - remiseDe(o, brut));
 }
 
 function puFam(fam, o){
@@ -4270,15 +4281,25 @@ function renderPrixFields(){
 const MINCM = 100;   /* minimum facturé par côté */
 const MAXH  = 500;   /* hauteur maximale fabricable, en cm */
 function billed(d){ return (Math.max(d.l, MINCM) * Math.max(d.h, MINCM)) / 10000; }
+/* v14.25 : comme SAGE et la calculatrice. Le m² affiché (2 décimales) est celui qui
+   est multiplié par le prix, et chaque montant est arrondi au centime. Avant, l'app
+   gardait 7,336 m² en affichant 7,34 : 234,10 × 7,336 = 1 717,36 au lieu de 1 718,29.
+   Seuls les bons créés depuis cette version (arr:1) changent : les anciens bons,
+   peut-être déjà payés au centime, gardent leur total. */
+function r2(x){ return Math.round(((+x || 0) + Number.EPSILON) * 100) / 100; }
+function arrondi(o){ return !!(o && o.arr); }
+function R2(o, x){ return arrondi(o) ? r2(x) : x; }
 
 function totals(){
   const v = validDims();
+  const fE = R2(S, v.filter(d => d.t !== "JN").reduce((s,d) => s + billed(d), 0));
+  const fJ = R2(S, v.filter(d => d.t === "JN").reduce((s,d) => s + billed(d), 0));
   return {
     nb: v.length,
     m2: v.reduce((s,d) => s + (d.l * d.h) / 10000, 0),          /* surface réelle */
-    m2f: v.reduce((s,d) => s + billed(d), 0),                    /* surface facturée */
-    m2fENR: v.filter(d => d.t !== "JN").reduce((s,d) => s + billed(d), 0),
-    m2fJN:  v.filter(d => d.t === "JN").reduce((s,d) => s + billed(d), 0),
+    m2f: arrondi(S) ? r2(fE + fJ) : v.reduce((s,d) => s + billed(d), 0),   /* surface facturée */
+    m2fENR: fE,
+    m2fJN:  fJ,
     ml:     v.reduce((s,d) => s + d.l / 100, 0),   /* tube : la largeur */
     mlTissu:v.reduce((s,d) => s + d.h / 100, 0),   /* tissu : la hauteur, la largeur tient dans la laize */
     mini: v.filter(d => d.l < MINCM || d.h < MINCM).length       /* lignes ramenées au minimum */
@@ -4586,11 +4607,14 @@ function ttc(ht){ return ht * (1 + TVA); }
 function tvaDe(ht){ return ht * TVA; }
 /* Un bon facturé porte la TVA ; un bon sans facture reste au prix HT. */
 function facture(o){ return !o || o.fact !== "non"; }
-function prixClient(o, ht){ return facture(o) ? ttc(ht) : ht; }
+function prixClient(o, ht){
+  if (!facture(o)) return ht;
+  return arrondi(o) ? r2(r2(ht) + r2(r2(ht) * TVA)) : ttc(ht);
+}
 
 function storesTotal(t){
   const tt = t || totals();
-  return tt.m2fENR * puFam("ENR") + tt.m2fJN * puFam("JN");
+  return R2(S, R2(S, tt.m2fENR * puFam("ENR")) + R2(S, tt.m2fJN * puFam("JN")));
 }
 
 function renderRecap(){
@@ -4628,7 +4652,7 @@ function renderRecap(){
   $("totBar").hidden = !montre;
   if (montre){
     $("sHT").textContent  = fr(ht) + " MAD";
-    $("sTVA").textContent = fr(tvaDe(ht)) + " MAD";
+    $("sTVA").textContent = fr(R2(S, tvaDe(ht))) + " MAD";
     $("totLab").textContent = avecTva ? "Total TTC" : "Total HT";
     $("sTot").textContent = fr(prixClient(S, ht)) + " MAD";
   }
@@ -5046,7 +5070,7 @@ function renderPoseMode(){
 function poseTotal(){
   const u = parseFloat(String(S.posePrix).replace(",", ".")) || 0;
   if (u <= 0) return 0;
-  return S.poseMode === "fenetre" ? u * totals().nb : u;
+  return R2(S, S.poseMode === "fenetre" ? u * totals().nb : u);
 }
 
 $("segFact").addEventListener("click", e => {
@@ -6711,6 +6735,10 @@ function homeTodoLignes(){
     if (av) L.push({c:"#F0B429", t: av + (av > 1 ? " paiements à confirmer" : " paiement à confirmer"), lien:"Paiements", go:"pay"});
   }
   try { achAFaire().forEach(x => L.push(x)); } catch(e){}
+  try {
+    if (prosAllowed()){ const n = formsNonVus().length;
+      if (n) L.unshift({c:"#D6207E", t: n + (n > 1 ? " nouveaux formulaires du site" : " nouveau formulaire du site"), lien:"Formulaires", go:"forms"}); }
+  } catch(e){}
   return L;
 }
 function renderHomeTodo(){
@@ -6776,6 +6804,7 @@ $("homeTodo").addEventListener("click", e => {
   if (g === "pay"){ if (!payAllowed()) return; payVue = "attendre"; payChip = "tous"; payBon = ""; renderPay(); nav("paySheet"); return; }
   if (g === "note"){ if (!noteAllowed()) return; renderNote(); nav("noteSheet"); return; }
   if (g === "pros"){ if (!prosAllowed()) return; WA_TAB = "today"; prosFormOuvre(false); waRendTout(); nav("prosSheet"); return; }
+  if (g === "forms"){ if (!prosAllowed()) return; WA_TAB = "forms"; prosFormOuvre(false); waRendTout(); nav("prosSheet"); formsCharge(); return; }
   if (g.indexOf("ach") === 0){
     if (!achAllowed()) return;
     ACH_FOUR_ED = null; ACH_PAY = {mode:"cheque"};
@@ -7524,9 +7553,19 @@ function orderTotals(o){
     for (let k = 0; k < qtyRow(d); k++) v.push({l:l, h:h, t:t});
   });
   const pp = parseFloat(String(o.posePrix || "").replace(",", ".")) || 0;
-  const pose = pp > 0 ? (o.poseMode === "fenetre" ? pp * v.length : pp) : 0;
-  const prix = v.reduce((t,d) => t + (Math.max(d.l,MINCM) * Math.max(d.h,MINCM))/10000 * puFam(d.t, o), 0);
-  const m2 = v.reduce((t,d) => t + (Math.max(d.l,MINCM) * Math.max(d.h,MINCM))/10000, 0);
+  const pose = R2(o, pp > 0 ? (o.poseMode === "fenetre" ? pp * v.length : pp) : 0);
+  let prix, m2;
+  if (arrondi(o)){
+    /* m² par famille arrondi à 2 décimales, puis montant au centime */
+    const fam = {ENR:0, JN:0};
+    v.forEach(d => { fam[d.t === "JN" ? "JN" : "ENR"] += (Math.max(d.l,MINCM) * Math.max(d.h,MINCM)) / 10000; });
+    const mE = r2(fam.ENR), mJ = r2(fam.JN);
+    m2 = r2(mE + mJ);
+    prix = r2(r2(mE * puFam("ENR", o)) + r2(mJ * puFam("JN", o)));
+  } else {
+    prix = v.reduce((t,d) => t + (Math.max(d.l,MINCM) * Math.max(d.h,MINCM))/10000 * puFam(d.t, o), 0);
+    m2 = v.reduce((t,d) => t + (Math.max(d.l,MINCM) * Math.max(d.h,MINCM))/10000, 0);
+  }
   return {nb:v.length, prix: prix, pose:pose, m2: m2,
           poseLab: o.pose === "Livraison" ? "Livraison" : "Pose"};
 }
@@ -8203,7 +8242,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.23";
+const APP_VERSION = "14.27";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -14468,12 +14507,13 @@ function prosEstim(p){
   if (!nb) nb = prosNbFenSaisi(p);
   const up = parseFloat(String(p.poseP || "").replace(",", ".")) || 0;
   const pose = p.poseMode === "fenetre" ? up * nb : up;
-  const brut = tot + pose;
+  m2 = r2(m2); tot = r2(tot);
+  const brut = r2(tot + pose);
   const rp = Math.min(100, Math.max(0, parseFloat(String(p.remise || "").replace(",", ".")) || 0));
-  const rem = brut * rp / 100;
-  const ht = brut - rem;
+  const rem = r2(brut * rp / 100);
+  const ht = r2(brut - rem);
   const fact = p.fact !== "non";
-  const tva = fact ? ht * TVA : 0;
+  const tva = fact ? r2(ht * TVA) : 0;
   return {pe:pe, pj:pj, m2:m2, tot:tot, manque:manque, nb:nb, pose:pose, rp:rp, rem:rem,
           ht:ht, tva:tva, ttc:ht + tva, fact:fact};
 }
@@ -15063,7 +15103,7 @@ $("tilePros").addEventListener("click", () => {
 const WA_ID = "cfg-wamsg";          /* rangée réservée : modèles, réglages, campagnes */
 const WA_J = 86400000;
 const WA_DEBUT_SYSTEME = new Date(2026, 8, 27).getTime();   /* mise en service du système */
-const WA_DEF_REG = {pxE:230, pxJ:260, r1:5, r2:10, r3:30, disc:5, tard:7, tardMax:2,
+const WA_DEF_REG = {pxE:230, pxJ:260, r1:5, r2:14, r3:40, r4:90, ran:365, disc:5, tard:7, tardMax:2,
   d1:2, d2:5, avis:7, parrMax:6, quota:20, ecart:14, lienAvis:"", ficheENR:"", ficheJN:""};
 let WA = LS.get("mst_wa", null);
 if (!WA || typeof WA !== "object") WA = {v:1, maj:0, reg:{}, msg:{}, camp:[]};
@@ -15136,17 +15176,33 @@ function prosEtape(p){
   return "dem";
 }
 /* Le rappel suivant part du moment où le contact entre dans son étape. */
+/* v14.24 : demande, prix envoyé et intéressé suivent une seule chaîne de relances
+   (« suivi ») : relance 1 à 5 jours de l'enregistrement du contact, puis 14, 40 et
+   90 jours après la relance précédente. Ensuite pause automatique et une relance par an. */
+function waEtapeSeq(p){ const e = prosEtape(p); return (e === "dem" || e === "prix" || e === "int") ? "suivi" : e; }
 function waSeq(p){
-  const e = prosEtape(p);
+  const e = waEtapeSeq(p);
   if (p.seq && p.seq.e === e) return false;
+  if (p.seq && e === "suivi" && ["dem", "prix", "int"].indexOf(p.seq.e) >= 0){
+    /* reprise d'un contact de l'ancien système : on garde où il en était */
+    p.seq.n = p.seq.e === "prix" ? Math.min(p.seq.n || 0, 3) : 0;
+    p.seq.e = "suivi";
+    return true;
+  }
   const neuf = !p.seq;
   p.seq = {e:e, base: neuf ? (prosDernier(p) || Date.now()) : Date.now(), n:0, pt:0, last:0,
            mig: neuf && (p.at || 0) < WA_DEPART};
   return true;
 }
+function waPauseAuto(p){
+  if (p.pause || !p.seq || p.seq.e !== "suivi" || (p.seq.n || 0) < 4) return false;
+  p.pause = {r:"Sans commande après 4 relances", at:Date.now(), by:"auto", auto:true};
+  waSeq(p);
+  return true;
+}
 function waNorm(){
   let ch = false;
-  prosVivants().forEach(p => { if (waSeq(p)){ p.maj = Date.now(); ch = true; } });
+  prosVivants().forEach(p => { if (waSeq(p) | waPauseAuto(p)){ p.maj = Date.now(); ch = true; } });
   if (ch){ LS.set("mst_pros", PROS); pushPros(); }
 }
 function waDevisBon(p){
@@ -15169,7 +15225,7 @@ function waDernierEchange(p){ return Math.max(waDernierEnvoi(p), p.msg || 0, p.v
    aujourd'hui, ou à qui on vient d'écrire, n'est relancé que 5 jours après. */
 function waTache(p){
   const t = waTacheBrut(p);
-  if (!t || t.bloc === "new" || t.k === "fin") return t;
+  if (!t || t.bloc === "new") return t;            /* v14.26 : la décision « fin » attend aussi 5 jours */
   const d = waDernierEchange(p);
   if (d && t.due < d + WA_ECART_MIN * WA_J) t.due = d + WA_ECART_MIN * WA_J;
   return waHorsWeekend(t);
@@ -15188,6 +15244,19 @@ function waTacheBrut(p){
   const der = s.last || s.base || p.at || 0;
   if (s.next) return {k:"rappel", due:s.next, bloc:"rappel", why:"Rappel promis"};
   switch (s.e){
+    case "suivi": {
+      const D = ["r1", "r2", "r3", "r4"], n = s.n || 0;
+      if (n >= 4) return null;                       /* la pause automatique prend le relais */
+      const ref = n === 0 ? (p.at || s.base || 0) : (s.last || s.base || 0);
+      return {k:D[n], idx:n, due:ref + waReg(D[n]) * WA_J, bloc:"relance",
+              why:"Relance " + (n + 1) + (n === 1 ? " · promo" : "")};
+    }
+    case "pause": {
+      const pz = p.pause || {};
+      if (pz.r === "A dit STOP") return null;
+      const ref = Math.max(pz.at || 0, waDernierEnvoi(p), p.at || 0);
+      return {k:"ran", idx:s.n || 0, due:ref + waReg("ran") * WA_J, bloc:"relance", why:"Relance annuelle"};
+    }
     case "dem":
       return {k:"prix", due: s.mig ? Math.max(s.base || 0, WA_DEPART) : (s.base || p.at || 0), bloc: s.mig ? "relance" : "new",
               why: s.mig ? "Reprise · réponse au prix" : "Nouvelle demande"};
@@ -15252,7 +15321,9 @@ function waEnvoisDuJour(){
 function waListeDuJour(){
   const fin = waDebutJour() + WA_J;
   const nouv = [], autres = [];
+  const t0j = waDebutJour();
   prosVivants().forEach(p => {
+    if (waDernierEnvoi(p) >= t0j) return;          /* v14.24 : déjà contacté aujourd'hui */
     let t = waTache(p);
     if (t && t.due >= fin) t = null;
     const pr = t ? null : waPromoPour(p, null);
@@ -15284,17 +15355,17 @@ const WA_MSG_DEF = {
         "[Bonjour {prénom}|Bonjour] 🙂 [Notre {type} est à {prix m²}. ][Envoyez-moi les mesures de vos {fenêtres} et je vous calcule le prix exact.|Envoyez-moi les mesures de vos fenêtres et je vous calcule le prix exact.]\nLa fiche technique est jointe."],
     ar:["[السلام عليكم {prénom}|السلام عليكم] 🙂 شكراً على الميساج ديالك.\n[الثمن ديال {type} هو {prix m²}. ][باش نحسبو ليك الثمن ديال {fenêtres}، صيفط ليا القياسات (العرض × الطول) ديال كل واحد.|باش نحسبو ليك الثمن، صيفط ليا شحال من شرجم عندك والقياسات ديالهم (العرض × الطول).]\nها الفيش التقنية.",
         "[السلام عليكم {prénom}|السلام عليكم] 🙂 [{type} عندنا بـ {prix m²}. ][صيفط ليا القياسات ديال {fenêtres} ونحسب ليك الثمن بالضبط.|صيفط ليا القياسات ديال الشراجم ونحسب ليك الثمن بالضبط.]\nصيفطت ليك الفيش التقنية."]},
-  r1: {lab:"Relance 1", quand:"2 jours après le prix, sans commande",
+  r1: {lab:"Relance 1", quand:"5 jours après l'enregistrement du contact (réglable)",
     fr:["[Bonjour {prénom}|Bonjour], avez-vous une question sur le tissu ou les couleurs du {type} ? Je peux vous envoyer des photos de nos réalisations.",
         "[Bonjour {prénom}|Bonjour] 🙂 Je reviens vers vous pour le {type}. Vous voulez voir des photos de stores déjà posés chez nos clients ?"],
     ar:["[السلام عليكم {prénom}|السلام عليكم]، واش عندك شي سؤال على الثوب ولا الألوان ديال {type}؟ نقدر نصيفط ليك تصاور ديال الخدمة ديالنا.",
         "[السلام عليكم {prénom}|السلام عليكم] 🙂 رجعت ليك على {type}. بغيتي نصيفط ليك تصاور ديال ستورات ركبناهم عند الكليان ديالنا؟"]},
-  r2: {lab:"Relance 2 · promo", quand:"7 jours après le prix, avec l'image de la promo en cours",
+  r2: {lab:"Relance 2 · promo", quand:"14 jours après la relance 1, avec l'image de la promo en cours (réglable)",
     fr:["[Bonjour {prénom}|Bonjour], nous avons une offre en ce moment sur le {type}. Je vous l'envoie en image, elle est valable quelques jours seulement.",
         "[Bonjour {prénom}|Bonjour] 🙂 Bonne nouvelle : une offre spéciale sur le {type} cette semaine. Tous les détails sont dans l'image."],
     ar:["[السلام عليكم {prénom}|السلام عليكم]، عندنا عرض دابا على {type}. صيفطت ليك التصويرة، العرض صالح غير لشي أيام.",
         "[السلام عليكم {prénom}|السلام عليكم] 🙂 خبر زوين: عرض خاص على {type} هاد السيمانة. كلشي مكتوب فالتصويرة."]},
-  r3: {lab:"Relance 3 · nouveauté", quand:"30 jours après le prix, dernier essai avant la pause",
+  r3: {lab:"Relance 3 · nouveauté", quand:"40 jours après la relance 2 (réglable)",
     fr:["[Bonjour {prénom}|Bonjour], nous venons de recevoir de nouveaux tissus et de nouvelles couleurs pour le {type}. Voulez-vous que je vous envoie le catalogue ?\n(Répondez STOP pour ne plus recevoir nos messages.)"],
     ar:["[السلام عليكم {prénom}|السلام عليكم]، وصلونا ثواب وألوان جداد ديال {type}. بغيتي نصيفط ليك الكتالوج؟\n(كتب STOP إلا ما بغيتيش توصلك الميساجات ديالنا.)"]},
   int: {lab:"Suivi d'un intéressé", quand:"tous les 3 jours quand on discute",
@@ -15306,6 +15377,12 @@ const WA_MSG_DEF = {
   d2: {lab:"Relance devis 2", quand:"5 jours après le devis",
     fr:["[Bonjour {prénom}|Bonjour], je me permets de revenir vers vous pour le devis[ {n° devis}]. Voulez-vous qu'on réserve une date de pose ?"],
     ar:["[السلام عليكم {prénom}|السلام عليكم]، رجعت ليك على الدوفي[ {n° devis}]. بغيتي نحجزو ليك نهار التركيب؟"]},
+  r4: {lab:"Relance 4 · dernière", quand:"90 jours après la relance 3, puis pause automatique (réglable)",
+    fr:["[Bonjour {prénom}|Bonjour], je me permets de revenir vers vous pour votre projet de {type}. Si c'est toujours d'actualité, je vous prépare un prix à jour avec nos nouveautés.\n(Répondez STOP pour ne plus recevoir nos messages.)"],
+    ar:["[السلام عليكم {prénom}|السلام عليكم]، رجعت ليك على المشروع ديال {type}. إلا باقي بغيتيه، نوجد ليك ثمن جديد مع الجديد ديالنا.\n(كتب STOP إلا ما بغيتيش توصلك الميساجات ديالنا.)"]},
+  ran: {lab:"Relance annuelle", quand:"une fois par an, pour les contacts en pause (réglable)",
+    fr:["[Bonjour {prénom}|Bonjour], c'est MSTORECASA 🙂 Cela fait un moment ! Nous avons de nouveaux tissus et de nouvelles couleurs de {type}. Voulez-vous que je vous envoie nos nouveautés ?"],
+    ar:["[السلام عليكم {prénom}|السلام عليكم]، معاك MSTORECASA 🙂 شحال هادي ما تواصلنا! عندنا ثواب وألوان جداد ديال {type}. بغيتي نصيفط ليك الجديد ديالنا؟"]},
   rappel: {lab:"Rappel promis", quand:"quand le client a dit « plus tard »",
     fr:["[Bonjour {prénom}|Bonjour], comme convenu je reviens vers vous pour le {type}. Êtes-vous toujours intéressé ?"],
     ar:["[السلام عليكم {prénom}|السلام عليكم]، كيف تفاهمنا، رجعت ليك على {type}. واش باقي مهتم؟"]},
@@ -15660,6 +15737,7 @@ function waNoteEnvoi(p, B){
        « pas encore de réponse » et fixe le prochain rappel. Une nouvelle se donne dans la fiche. */
     const idx = (B.t && B.t.idx !== undefined) ? B.t.idx : (s.n || 0);
     s.n = s.next ? (s.n || 0) : idx + 1; s.next = 0; s.last = now;
+    waPauseAuto(p);
   }
   p.maj = now; prosSave();
   waModalFerme(); waRendTout(); waToastEnvoi(p);
@@ -15871,8 +15949,9 @@ function waResultatChoix(pid, r){
   if (r === "pas"){ waPauseDemande(p); return; }
   if (r === "devis"){ waModalFerme(); prosVersBon(p, "devis"); return; }
   if (r === "disc"){
-    if (s.e === "devis"){ s.next = now + waReg("disc") * WA_J; s.last = now; }
-    else { p.interet = "int"; waSeq(p); p.seq.last = now; }
+    if (s.e !== "devis") p.interet = "int";
+    waSeq(p);
+    p.seq.next = now + waReg("disc") * WA_J; p.seq.last = now;
   } else if (r === "tard" && (s.pt || 0) < waReg("tardMax")){
     s.pt = (s.pt || 0) + 1; s.next = now + waReg("tard") * WA_J; s.last = now;
   } else {
@@ -15882,6 +15961,28 @@ function waResultatChoix(pid, r){
   p.maj = now; prosSave();
   waModalFerme(); waRendTout();
   if (r === "disc" || r === "tard"){ const t = waTache(p); toast2("Noté", t ? "Prochain rappel le " + prosDate(t.due) : "Plus de rappel prévu"); }
+}
+/* v14.26 : « On discute ». Imane parle déjà avec le client (négociation en cours) :
+   le rappel du jour est sauté sans message, et la relance suivante part du jour même.
+   Le dernier échange est noté, donc rien ne repart avant 5 jours. */
+function waOnDiscute(pid){
+  const p = PROS.find(x => x.id === pid);
+  if (!p) return;
+  const now = Date.now();
+  waSeq(p);
+  const s = p.seq, t = waTache(p);
+  if (s.next || (t && t.k === "rappel")) s.next = 0;                 /* rappel promis : sauté */
+  else if (t && t.idx !== undefined) s.n = t.idx + 1;               /* relance du jour : passée */
+  else s.n = (s.n || 0) + 1;
+  s.last = now;
+  p.msg = now; p.vu = now; p.vuBy = (USER && USER.login) || "";
+  if (!Array.isArray(p.disc)) p.disc = [];
+  p.disc.push({at:now, by:p.vuBy, quoi:t ? t.why : ""});
+  if (p.disc.length > 50) p.disc = p.disc.slice(-50);
+  waPauseAuto(p);
+  p.maj = now; prosSave(); waRendTout();
+  const n = waTache(p);
+  toast2("💬 Noté : en discussion", n ? "Prochaine relance le " + prosDate(n.due) : "Plus de relance prévue");
 }
 function waPauseDemande(p){
   WA_BR = {pid:p.id};
@@ -15940,6 +16041,7 @@ function waCarte(x){
     '<div class="sub">' + esc(quoi.join(" · ")) + '</div>' +
     '<div class="acts"><button type="button" class="wa" data-wabr="' + p.id + '"' + (x.camp ? ' data-wacamp="' + x.camp + '"' : '') + '>' +
       (x.k === "fin" ? 'Décider' : 'Brouillon') + '</button>' +
+      (e === "devis" && x.k !== "fin" ? '<button type="button" class="wadisc" data-wadisc="' + p.id + '" title="On parle déjà avec ce client : ce rappel est sauté">💬 On discute</button>' : '') +
       '<button type="button" data-predit="' + p.id + '">Fiche</button></div>' +
   '</div>';
 }
@@ -16114,7 +16216,11 @@ function renderWaMsgs(){
             '<select data-wareg="' + k + '"><option value="">— aucune —</option>' + (WA_DRIVE || []).map(f =>
               '<option value="' + f.id + '"' + (waReg(k) === f.id ? ' selected' : '') + '>' + esc(f.nom) + '</option>').join("") +
             '</select></label>').join("")) +
-        '<p class="wahint">Les délais des relances se régleront dans l\'écran des règles (prochaine version).</p>' +
+        '<div class="wasub">Délais des relances (en jours)</div>' +
+        '<div class="wareg wadel">' + [["r1", "Relance 1", "après l'enregistrement du contact"], ["r2", "Relance 2", "après la relance 1"],
+            ["r3", "Relance 3", "après la relance 2"], ["r4", "Relance 4", "après la relance 3, puis pause"], ["ran", "Relance annuelle", "contacts en pause"]]
+          .map(([k, l, q]) => '<label>' + l + '<small>' + q + '</small><input data-wareg="' + k + '" inputmode="numeric" value="' + esc(waReg(k)) + '"></label>').join("") + '</div>' +
+        '<p class="wahint">Jamais moins de 5 jours après le dernier échange, jamais le week-end. Visible seulement par Noureddine.</p>' +
       '</div>') : '');
   if (adminAllowed() && WA_DRIVE === null) waDriveListe(true).then(renderWaMsgs);
 }
@@ -16166,7 +16272,7 @@ function waEdEcrit(fn){
 let WA_TAB = "today";
 function waRendTout(){
   try { waNorm(); } catch(e){}
-  ["today", "contacts", "promos", "msgs", "stats"].forEach(k => {
+  ["today", "contacts", "promos", "msgs", "stats", "forms"].forEach(k => {
     const b = document.querySelector('[data-watab="' + k + '"]');
     if (b) b.setAttribute("aria-pressed", String(k === WA_TAB));
   });
@@ -16175,6 +16281,7 @@ function waRendTout(){
   $("waPromos").hidden = f || WA_TAB !== "promos";
   $("waMsgs").hidden = f || WA_TAB !== "msgs";
   $("waStats").hidden = f || WA_TAB !== "stats";
+  $("waForms").hidden = f || WA_TAB !== "forms";
   $("prosLst").hidden = f || WA_TAB !== "contacts";
   $("prosOpen").hidden = f || WA_TAB !== "contacts";
   const nb = waNbDuJour();
@@ -16186,6 +16293,8 @@ function waRendTout(){
   if (WA_TAB === "promos") renderWaPromos();
   if (WA_TAB === "msgs") renderWaMsgs();
   if (WA_TAB === "stats") try { renderWaStats(); } catch(e){ console.error(e); }
+  if (WA_TAB === "forms"){ try { renderWaForms(); } catch(e){ console.error(e); } formsVus(); }
+  formBadge();
   if (WA_TAB === "contacts") try { renderPros(); } catch(e){}
   try { renderWaFiche(); renderProsFicheAct(); } catch(e){}
   try { renderHome(); } catch(e){}
@@ -16231,6 +16340,13 @@ function renderWaFiche(){
 $("prosSheet").addEventListener("click", e => {
   if (e.target.closest("[data-waplan]")){ WA_PLAN = !WA_PLAN; renderWaToday(); return; }
   if (e.target.closest("[data-wajour]")){ waMessagesDuJour(0); return; }
+  if (e.target.closest("[data-waformmaj]")){ FORM_LU = 0; formsCharge().then(() => renderWaForms()); toast("Lecture des formulaires…"); return; }
+  const fa = e.target.closest("[data-waformadd]");
+  if (fa){ const o = FORMS[+fa.dataset.waformadd]; if (o) formVersContact(o); return; }
+  if (e.target.closest("[data-wanotif]")){
+    try { Notification.requestPermission().then(() => renderWaForms()); } catch(err){ toast("Notifications non disponibles sur ce téléphone"); }
+    return;
+  }
   const stp = e.target.closest("[data-wastper]");
   if (stp){ WA_ST.per = stp.dataset.wastper; renderWaStats(); return; }
   const tb = e.target.closest("[data-watab]");
@@ -16238,6 +16354,8 @@ $("prosSheet").addEventListener("click", e => {
            try { $("prosSheet").querySelector(".sheet-body").scrollTo({top:0}); } catch(err){} return; }
   const pe = e.target.closest("#waToday [data-predit]");
   if (pe){ const p = PROS.find(x => x.id === pe.dataset.predit); if (p){ prosCharge(p); prosFormOuvre(true); renderPros(); } return; }
+  const dc = e.target.closest("[data-wadisc]");
+  if (dc){ waOnDiscute(dc.dataset.wadisc); return; }
   const pb = e.target.closest("[data-wapausebtn]");
   if (pb){ const p = PROS.find(x => x.id === pb.dataset.wapausebtn); if (p) waPauseDemande(p); return; }
   const br = e.target.closest("[data-wabr]");
@@ -16707,7 +16825,124 @@ $("prosSheet").addEventListener("change", e => {
 });
 
 /* Les champs ajoutés à la fiche : langue des messages, d'où il vient, gros client. */
-const WA_SOURCES = ["Instagram", "Facebook", "Google", "Pub", "Autre"];
+const WA_SOURCES = ["Instagram", "Facebook", "Google", "Site web", "Pub", "Autre"];
+
+/* ============ v14.24 : les formulaires du site (onglet « Form » de la feuille) ============
+   Chaque demande remplie sur le site arrive ici. Une nouvelle ligne déclenche une
+   notification ; « Ajouter aux contacts » crée la fiche, et la relance 1 part 5 jours après. */
+let FORMS = LS.get("mst_forms", []);
+let FORM_VU = LS.get("mst_formvu", null);       /* clés déjà vues ; null = première lecture */
+let FORM_LU = 0;
+function formCle(r){ return String(r.date || "") + "|" + waNum(r.tel || "") ; }
+function formCsv(t){
+  const out = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < t.length; i++){
+    const c = t[i];
+    if (q){ if (c === '"'){ if (t[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ","){ row.push(cur); cur = ""; }
+    else if (c === "\n"){ row.push(cur); out.push(row); row = []; cur = ""; }
+    else if (c !== "\r") cur += c;
+  }
+  if (cur || row.length){ row.push(cur); out.push(row); }
+  return out;
+}
+function formDate(s){
+  const m = String(s || "").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+  return m ? new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0)).getTime() : 0;
+}
+async function formsCharge(){
+  if (!prosAllowed() || navigator.onLine === false) return false;
+  if (Date.now() - FORM_LU < 60000) return false;
+  FORM_LU = Date.now();
+  try {
+    const r = await fetch("https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:csv&sheet=Form&mst=" + Date.now());
+    if (!r.ok) return false;
+    const L = formCsv(await r.text());
+    if (!L.length) return false;
+    const h = L[0].map(x => String(x || "").trim().toLowerCase());
+    const col = (...noms) => h.findIndex(x => noms.some(n => x.indexOf(n) >= 0));
+    const C = {date:col("date"), nom:col("nom"), tel:col("téléphone", "telephone"), type:col("type"), nb:col("fenêtre", "fenetre"),
+               ville:col("ville"), couleur:col("couleur"), inst:col("installation"), tarif:col("tarif"), source:col("source"),
+               page:col("page"), statut:col("statut"), notes:col("notes")};
+    const v = (row, k) => C[k] >= 0 ? String(row[C[k]] || "").trim() : "";
+    const rows = L.slice(1).filter(x => x.some(c => String(c).trim())).map(x => {
+      const o = {}; Object.keys(C).forEach(k => o[k] = v(x, k)); o.at = formDate(o.date); return o;
+    }).filter(o => o.nom || o.tel).sort((a, b) => b.at - a.at);
+    FORMS = rows; LS.set("mst_forms", FORMS);
+    if (FORM_VU === null){ FORM_VU = FORMS.map(formCle); LS.set("mst_formvu", FORM_VU); }   /* les anciennes ne sonnent pas */
+    const neuves = FORMS.filter(o => FORM_VU.indexOf(formCle(o)) < 0 && !formNotifie(o));
+    neuves.forEach(o => formNotif(o));
+    formBadge();
+    if (WA_TAB === "forms" && $("prosSheet").classList.contains("open")) renderWaForms();
+    try { renderHome(); } catch(e){}
+    return true;
+  } catch(e){ return false; }
+}
+const FORM_SONNE = {};
+function formNotifie(o){ return !!FORM_SONNE[formCle(o)]; }
+function formNotif(o){
+  FORM_SONNE[formCle(o)] = true;
+  const txt = (o.nom || "Sans nom") + (o.type ? " · " + o.type : "") + (o.nb ? " · " + o.nb + " fenêtre" + (+o.nb > 1 ? "s" : "") : "") + (o.ville ? " · " + o.ville : "");
+  toast2("📝 Nouveau formulaire", txt);
+  try {
+    if ("Notification" in window && Notification.permission === "granted")
+      new Notification("Nouveau formulaire · MSTORECASA", {body:txt, icon:"icon-192.png", tag:"form-" + formCle(o)});
+  } catch(e){}
+}
+function formsNonVus(){ return (FORMS || []).filter(o => (FORM_VU || []).indexOf(formCle(o)) < 0); }
+function formBadge(){
+  const b = $("waFormBadge"); if (!b) return;
+  const n = formsNonVus().length;
+  b.hidden = !n; b.textContent = n || "";
+}
+function formsVus(){
+  if (!FORMS.length) return;
+  const avant = (FORM_VU || []).length;
+  FORM_VU = [...new Set((FORM_VU || []).concat(FORMS.map(formCle)))].slice(-500);
+  if (FORM_VU.length !== avant){ LS.set("mst_formvu", FORM_VU); setTimeout(() => { formBadge(); try { renderHome(); } catch(e){} }, 4000); }
+}
+function formContact(o){ const n = waNum(o.tel); return n ? prosVivants().find(p => waNum(p.tel) === n) : null; }
+function renderWaForms(){
+  const box = $("waForms"); if (!box) return;
+  const nonVus = formsNonVus().map(formCle);
+  const notifOk = !("Notification" in window) || Notification.permission === "granted";
+  box.innerHTML =
+    (!notifOk && Notification.permission !== "denied"
+      ? '<button type="button" class="walibre" style="margin:0 0 10px" data-wanotif>🔔 Activer les notifications sur ce téléphone</button>' : '') +
+    '<div class="wacard"><div class="walab wahead">Formulaires du site · ' + FORMS.length +
+      '<button type="button" class="waplus" data-waformmaj>↻ Actualiser</button></div>' +
+    (FORMS.length ? FORMS.map((o, i) => {
+      const c = formContact(o), neuf = nonVus.indexOf(formCle(o)) >= 0;
+      return '<div class="waform' + (neuf ? ' neuf' : '') + '"><div class="h"><b>' + esc(o.nom || "Sans nom") + '</b>' +
+          (neuf ? '<em class="nv">Nouveau</em>' : '') + '<span>' + esc(o.date) + '</span></div>' +
+        '<small>' + [o.tel ? telAffiche(o.tel) : "", o.type, o.nb ? o.nb + " fenêtre" + (+o.nb > 1 ? "s" : "") : "", o.ville, o.couleur].filter(Boolean).map(esc).join(" · ") + '</small>' +
+        ((o.inst || o.tarif || o.notes || o.source) ? '<small>' + [o.source ? "Source : " + o.source : "", o.inst ? "Installation : " + o.inst : "", o.tarif ? "Tarif affiché : " + o.tarif : "", o.notes].filter(Boolean).map(esc).join(" · ") + '</small>' : '') +
+        '<div class="waduo" style="margin-top:8px">' +
+          (o.tel && waLien(o.tel) ? '<a class="wabtn" href="' + waLien(o.tel) + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
+          (c ? '<button type="button" data-predit="' + c.id + '">Déjà dans les contacts ›</button>'
+             : '<button type="button" class="wa" data-waformadd="' + i + '">Ajouter aux contacts</button>') +
+        '</div></div>';
+    }).join("") : '<p class="wahint">Aucun formulaire pour l\'instant.</p>') + '</div>' +
+    '<p class="wahint">Lu dans l\'onglet « Form » de la feuille Google, toutes les 2 minutes quand l\'app est ouverte. Une notification s\'affiche à chaque nouveau formulaire.</p>';
+}
+function formVersContact(o){
+  const deja = formContact(o);
+  if (deja){ prosCharge(deja); prosFormOuvre(true); renderPros(); return; }
+  const t = /jour|nuit|zebra|zèbre/i.test(o.type || "") ? "JN" : "ENR";
+  const p = {id:"p" + Date.now() + Math.floor(Math.random() * 900), at:Date.now(), by:(USER && USER.login) || "",
+             nom:o.nom || "", tel:o.tel || "", adresse:o.ville || "", type:t, nbFen:o.nb || "",
+             /* « ig / 1202… » = publicité Instagram, « fb » = Facebook */
+             src:/^\s*(ig|insta)/i.test(o.source || "") ? "Instagram" : /^\s*(fb|face)/i.test(o.source || "") ? "Facebook"
+               : /google|gclid/i.test(o.source || "") ? "Google" : "Site web",
+             note:["Formulaire du site " + (o.date || ""), o.type ? "type : " + o.type : "", o.couleur ? "couleur : " + o.couleur : "",
+                   o.inst ? "installation : " + o.inst : "", o.tarif ? "tarif affiché : " + o.tarif : "", o.notes].filter(Boolean).join(" · "),
+             maj:Date.now()};
+  PROS.unshift(p); prosSave();
+  toast2("Contact ajouté", "Relance 1 dans " + waReg("r1") + " jours");
+  prosCharge(p); prosFormOuvre(true); renderPros(); waRendTout();
+}
+setInterval(() => { if (USER && document.visibilityState === "visible") formsCharge(); }, 120000);
 function renderWaChamps(){
   const l = $("waLangSeg"), s = $("waSrc"), st = $("waStar");
   if (!l) return;
@@ -19141,6 +19376,7 @@ $("tileAch").addEventListener("click", () => {
     renderHome();
     syncAll();
     setTimeout(() => { try { waEnvoiReprise(); } catch(e){} }, 600);
+    setTimeout(() => { try { formsCharge(); } catch(e){} }, 1500);
     horlogeVerif();
     if (SB){
       SB.channel("bons-live")
@@ -19158,6 +19394,7 @@ $("tileAch").addEventListener("click", () => {
     syncStock(true);
     syncAll().then(() => { renderNet(); renderUserLine(); });
     try { if (USER) waEnvoiReprise(); } catch(e){}
+    try { if (USER) formsCharge(); } catch(e){}
     horlogeVerif();
   });
   window.addEventListener("pageshow", () => { renderNet(); });
