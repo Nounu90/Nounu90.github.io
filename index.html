@@ -8242,7 +8242,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.27";
+const APP_VERSION = "14.32";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8254,7 +8254,7 @@ function hookUrl(){ return LS.get("mst_hook", "") || HOOK_DEFAULT; }
    sans auto = case vide, remplie par l'atelier.
    L'ordre suit exactement les colonnes du tableau de production. */
 /* Les quantités se déduisent du nombre de stores : un mécanisme par store,
-   deux bouchons par mécanisme, deux freins par bouchon. Côté jour et nuit,
+   deux bouchons par mécanisme, un frein par bouchon. Côté jour et nuit,
    un embout par fenêtre et deux bouchons inférieurs par embout.
    L'atelier peut toujours corriger une case. */
 const PIECES_DEF = {
@@ -8266,9 +8266,9 @@ const PIECES_DEF = {
     {k:"barre",     label:"Barre de charge",    u:"ml", auto:d => d.coupeMl},
     {k:"chainette", label:"Chaînette",          u:"ml", auto:d => d.chaineMl},
     {k:"bouchon",   label:"Bouchon",            u:"u",  auto:d => d.nb * 2},
-    /* v14.17 : toujours le double des bouchons, même corrigés à la main */
-    {k:"frein",     label:"Frein",              u:"u",  fixe:true, titre:"Calculé : 2 freins par bouchon",
-     auto:(d, fam) => 2 * bouchonsDe(d, fam)}
+    /* v14.28 : toujours le même nombre que les bouchons, même corrigés à la main (était le double) */
+    {k:"frein",     label:"Frein",              u:"u",  fixe:true, titre:"Calculé : 1 frein par bouchon",
+     auto:(d, fam) => bouchonsDe(d, fam)}
   ],
   JN: [
     {k:"cache",      label:"Cache",              u:"ml", auto:d => d.cacheMl},
@@ -8486,7 +8486,7 @@ function majFrein(fam){
   const inp = $("pcList").querySelector('input[data-fam="' + fam + '"][data-k="frein"]');
   if (!inp) return;
   const d = pcData[fam] || famData(fam);
-  inp.value = fr(2 * bouchonsDe(d, fam));
+  inp.value = fr(bouchonsDe(d, fam));
   inp.className = "fixe";
 }
 
@@ -11704,6 +11704,18 @@ function docCarte(o){
                                        (pe.manque.length > 1 ? "s" : "")) : "") + '</h4>' +
          (pe.tot && !pe.ok ? '<ul class="dkmanque">' +
             pe.manque.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>' : '');
+    /* v14.30 : quand la fiche est partie au tableau de production */
+    if (et !== "devis"){
+      const ds = o.sheetAt ? new Date(o.sheetAt) : null;
+      if (SHEETROWS[String(o.num || "")])
+        h += r("Tableau de production", "en attente de réseau, partira tout seul", "att");
+      else if (ds && !isNaN(ds.getTime()))
+        h += r("Tableau de production", "Envoyé au tableau le " + pad(ds.getDate()) + "/" + pad(ds.getMonth() + 1) +
+               (ds.getFullYear() !== new Date().getFullYear() ? "/" + ds.getFullYear() : "") +
+               " à " + pad(ds.getHours()) + ":" + pad(ds.getMinutes()), "ok");
+      else
+        h += r("Tableau de production", "Pas encore envoyé au tableau", "acc");
+    }
     if (!fc.length) h += '<div class="dkr"><span>Aucune dimension exploitable</span></div>';
     fc.forEach(f => {
       h += '<div class="dkfam"><span>' + (f.fam === "JN" ? "Jour et nuit" : "Enrouleur") +
@@ -14968,8 +14980,10 @@ function prosClic(e){
     /* le lien s'ouvre tout seul, on note juste la date du dernier contact */
     const p = PROS.find(x => x.id === wa.dataset.prwa);
     if (p){
+      /* v14.32 : si une relance était due, ouvrir la conversation la fait */
+      try { waSeq(p); const t = waTache(p); if (t && t.due <= Date.now()) waCompteRelance(p, Date.now()); } catch(err){}
       p.vu = Date.now(); p.vuBy = (USER && USER.login) || ""; p.maj = Date.now();
-      prosSave(); setTimeout(renderPros, 60);
+      prosSave(); setTimeout(renderPros, 60); try { setTimeout(waRendTout, 80); } catch(err){}
     }
     return;
   }
@@ -15194,6 +15208,37 @@ function waSeq(p){
            mig: neuf && (p.at || 0) < WA_DEPART};
   return true;
 }
+/* v14.32 : TOUT contact avec le client compte comme une relance : un message de la
+   chaîne, un message libre (les modèles d'Imane), ou la conversation WhatsApp ouverte
+   depuis la fiche. Avant, seuls les messages « Relance » comptaient : un client contacté
+   il y a 5 jours par un message libre revenait en « Relance 1 ». */
+function waMemeJour(a, b){ const x = new Date(a), y = new Date(b); return x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth() && x.getDate() === y.getDate(); }
+function waCompteRelance(p, now){
+  const s = p.seq;
+  if (!s || s.e !== "suivi") return false;
+  if (!(s.last && waMemeJour(s.last, now))) s.n = Math.min(4, (s.n || 0) + 1);   /* une seule fois par jour */
+  s.next = 0; s.last = now;
+  waPauseAuto(p);
+  return true;
+}
+/* Reprise de l'historique, une seule fois par contact (seq.h = 2). Chaque jour où le
+   client a été contacté APRÈS le jour de son enregistrement compte pour une relance :
+   messages envoyés depuis l'app (p.env) et conversation ouverte (p.vu). Jamais plus de
+   3 comptées, pour ne mettre personne en pause d'office. */
+function waSeqHist(p){
+  const s = p.seq;
+  if (!s || s.e !== "suivi" || s.h === 2) return false;
+  s.h = 2;
+  const at = p.at || 0;
+  const T = (p.env || []).map(x => x && x.at).filter(t => t && !waMemeJour(t, at) && t > at);
+  if (p.vu && p.vu > at && !waMemeJour(p.vu, at)) T.push(p.vu);
+  if (!T.length) return true;
+  const jours = {};
+  T.forEach(t => { const d = new Date(t); jours[d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate()] = 1; });
+  s.n = Math.max(s.n || 0, Math.min(3, Object.keys(jours).length));
+  s.last = Math.max(s.last || 0, Math.max.apply(null, T));
+  return true;
+}
 function waPauseAuto(p){
   if (p.pause || !p.seq || p.seq.e !== "suivi" || (p.seq.n || 0) < 4) return false;
   p.pause = {r:"Sans commande après 4 relances", at:Date.now(), by:"auto", auto:true};
@@ -15202,7 +15247,7 @@ function waPauseAuto(p){
 }
 function waNorm(){
   let ch = false;
-  prosVivants().forEach(p => { if (waSeq(p) | waPauseAuto(p)){ p.maj = Date.now(); ch = true; } });
+  prosVivants().forEach(p => { if (waSeq(p) | waSeqHist(p) | waPauseAuto(p)){ p.maj = Date.now(); ch = true; } });
   if (ch){ LS.set("mst_pros", PROS); pushPros(); }
 }
 function waDevisBon(p){
@@ -15298,7 +15343,9 @@ function waPromoPour(p, tache){
   const e = prosEtape(p);
   /* en pause : seulement les grandes promos, une tous les 2 mois au plus */
   if (Date.now() - (p.promoDer || 0) < (e === "pause" ? 60 : waReg("ecart")) * WA_J) return null;
-  if (Date.now() - waDernierEchange(p) < WA_ECART_MIN * WA_J) return null;
+  /* v14.32 : une promo de campagne attend autant qu'une relance 2 : jamais moins de
+     14 jours (réglage « ecart ») après le dernier contact avec ce client. */
+  if (Date.now() - waDernierEchange(p) < Math.max(WA_ECART_MIN, waReg("ecart")) * WA_J) return null;
   const c = waCampActive().find(c => (c.cible || []).indexOf(e) >= 0 && (c.faits || []).indexOf(p.id) < 0);
   return c ? {k:"promo", due:c.at || 0, bloc:"promo", why:"Promo · " + (c.nom || ""), camp:c.id} : null;
 }
@@ -15707,7 +15754,8 @@ function waNoteEnvoi(p, B){
   p.vu = now; p.vuBy = (USER && USER.login) || "";
   const s = p.seq || (waSeq(p), p.seq);
   if (B.t.bloc === "libre"){
-    /* un message libre : noté dans le journal, sans rien changer aux rappels */
+    /* v14.32 : un message libre est un contact avec le client : il compte comme la relance */
+    waCompteRelance(p, now);
     p.maj = now; prosSave(); waModalFerme(); waRendTout(); waToastEnvoi(p);
     return;
   }
@@ -18625,19 +18673,20 @@ function achTot(b){
   const paye = (b.paies || []).reduce((s, p) => s + (parseFloat(p.montant) || 0), 0);
   return {ht:ht, tva:tva, ttc:ht + tva, paye:paye, reste:Math.max(0, ht + tva - paye)};
 }
-/* la réception : rien, en partie, tout */
+/* v14.29 : la réception est une simple case « Reçu » sur le bon (b.recuOk). Plus de
+   « reçu en partie » ni de quantité par ligne. Un ancien bon dont toutes les lignes
+   avaient été saisies reçues reste reçu. */
 function achRecu(b){
+  if (b.recuOk === true) return "tout";
+  if (b.recuOk === false) return "rien";
   const L = (b.lignes || []).filter(l => (parseFloat(l.q) || 0) > 0);
   if (!L.length) return "rien";
-  const ok = L.filter(l => (parseFloat(l.recu) || 0) >= (parseFloat(l.q) || 0) - 0.0001).length;
-  const un = L.some(l => (parseFloat(l.recu) || 0) > 0);
-  return ok === L.length ? "tout" : (un ? "partiel" : "rien");
+  return L.every(l => (parseFloat(l.recu) || 0) >= (parseFloat(l.q) || 0) - 0.0001) ? "tout" : "rien";
 }
 function achEtat(b){
   if (b.etat === "brouillon" || !b.etat) return {k:"brouillon", lab:"Brouillon", c:"#8A8384"};
   const r = achRecu(b);
   if (r === "tout") return {k:"recu", lab:"Reçu" + (b.recuAt ? " le " + prosDate(b.recuAt) : ""), c:"#12833F"};
-  if (r === "partiel") return {k:"partiel", lab:"Reçu en partie", c:"#B45309"};
   return {k:"envoye", lab:"Envoyé" + (b.livr ? " · livraison prévue " + String(b.livr).split("-").reverse().join("/") : ""), c:"#1F5FD1"};
 }
 function achPayeLab(b){
@@ -18688,10 +18737,9 @@ function achManques(){
 }
 /* Un bon d'achat envoyé qui couvre ce tissu : pas encore reçu, ou reçu mais pas
    encore saisi dans SAGE (le stock de la feuille ne le montre donc pas encore). */
-function achLigneRecue(l){ return (parseFloat(l.recu) || 0) >= (parseFloat(l.q) || 0) - 0.0001; }
 function achEnCommande(ref){
-  return achVivants().find(b => b.etat && b.etat !== "brouillon" &&
-    (b.lignes || []).some(l => l.ref === ref && (!achLigneRecue(l) || !b.sage))) || null;
+  return achVivants().find(b => b.etat && b.etat !== "brouillon" && (achRecu(b) !== "tout" || !b.sage) &&
+    (b.lignes || []).some(l => l.ref === ref)) || null;
 }
 /* v14.21 : pour l'échéance d'un bon client. Si chaque tissu qui manque est déjà
    commandé avec une date de livraison, c'est cette date qui compte, pas le délai
@@ -18704,7 +18752,7 @@ function achJourMatiere(manque){
     const b = achEnCommande(m.ref);
     if (!b) return 0;
     /* déjà reçu, en attente de SAGE : le tissu est à l'atelier */
-    const recu = (b.lignes || []).filter(l => l.ref === m.ref).every(achLigneRecue);
+    const recu = achRecu(b) === "tout";
     const d = recu ? auj : b.livr;
     if (!d) return 0;
     if (d > fin) fin = d;
@@ -18813,13 +18861,12 @@ function achRendBa(box){
   const b = achBa();
   if (!b){ achOuvre("liste"); return; }
   const f = achFour(b.four), t = achTot(b), e = achEtat(b);
-  const pas = ["brouillon", "envoye", "partiel", "recu"];
-  const ix = {brouillon:0, envoye:1, partiel:2, recu:3}[e.k];
+  const ix = {brouillon:0, envoye:1, recu:2}[e.k];
   const paye = t.reste <= 0.01 && t.ttc > 0;
   const seg = (attr, val, opts) => '<div class="achseg">' + opts.map(([v, l]) => '<button type="button" ' + attr + '="' + v + '" aria-pressed="' + (String(val) === String(v)) + '">' + l + '</button>').join("") + '</div>';
   const MODES = [["cheque", "Chèque"], ["virement", "Virement"], ["especes", "Espèces"]];
   let h = '<div class="achnum"><b>' + esc(b.num) + '</b><span>' + prosDate(b.date) + (b.by ? ' · ' + esc(nomDe(b.by)) : '') + '</span></div>' +
-    '<div class="achsteps">' + ["Brouillon", "Envoyé", "Reçu en partie", "Reçu"].map((l, i) => '<div class="' + (i <= ix ? 'on' : '') + '"><i></i>' + l + '</div>').join("") +
+    '<div class="achsteps">' + ["Brouillon", "Envoyé", "Reçu"].map((l, i) => '<div class="' + (i <= ix ? 'on' : '') + '"><i></i>' + l + '</div>').join("") +
       '<div class="' + (paye ? 'on' : '') + '"><i></i>Payé</div></div>';
   /* le fournisseur */
   h += '<section class="card achcard"><div class="label">Fournisseur</div>' +
@@ -18852,17 +18899,12 @@ function achRendBa(box){
     '. ' + (b.livr ? 'Leur échéance tient compte de la livraison prévue le ' + String(b.livr).split("-").reverse().join("/") + ' dès que ce bon est envoyé.' : 'Indiquez la livraison souhaitée : leur échéance la suivra.') + '</div>';
   /* réception et paiements, une fois envoyé */
   if (b.etat && b.etat !== "brouillon"){
-    h += '<section class="card achcard"><div class="label">Réception · ce qui est arrivé</div>' +
-      (b.lignes || []).map((l, i) => {
-        const q = parseFloat(l.q) || 0, r = parseFloat(l.recu) || 0;
-        return '<div class="achrc"><b>' + esc(l.nom) + '<small>commandé ' + fr(q, q % 1 ? 2 : 0) + '</small></b>' +
-          '<input inputmode="decimal" data-achrecu="' + i + '" value="' + (l.recu === undefined || l.recu === "" ? "" : esc(String(l.recu).replace(".", ","))) + '" placeholder="0">' +
-          '<button type="button" class="achtout" data-achtout="' + i + '">tout</button>' +
-          (r >= q - 0.0001 && q > 0 ? '<span class="ok">✓</span>' : (r > 0 ? '<span class="mq">−' + fr(q - r, (q - r) % 1 ? 2 : 0) + '</span>' : '<span class="mq0">—</span>')) + '</div>';
-      }).join("") +
+    h += '<section class="card achcard"><div class="label">Réception</div>' +
       '<div class="achphoto">' + (b.photo ? '<img data-pimg="' + esc(b.photo) + '" data-achvoir alt="Bon de livraison">' : '') +
         '<label class="achfile">📷 ' + (b.photo ? 'Changer la photo du bon de livraison' : 'Photo du bon de livraison') + '<input type="file" accept="image/*" data-achphoto hidden></label></div>' +
       '<button type="button" class="achsage' + (b.sage ? ' on' : '') + '" data-achsage>' + (b.sage ? '☑ Saisi dans SAGE' + (b.sageAt ? ' le ' + prosDate(b.sageAt) : '') : '☐ Saisi dans SAGE · à cocher une fois fait') + '</button>' +
+      '<button type="button" class="achsage' + (achRecu(b) === "tout" ? ' on' : '') + '" data-achrecuok>' +
+        (achRecu(b) === "tout" ? '☑ Reçu' + (b.recuAt ? ' le ' + prosDate(b.recuAt) : '') : '☐ Reçu · à cocher quand la marchandise est arrivée') + '</button>' +
     '</section>';
     const P = b.paies || [];
     h += '<section class="card achcard"><div class="label">Paiements fournisseur</div>' +
@@ -18977,7 +19019,7 @@ function achRendCmd(box){
       (M.length ? M.map(m => '<button type="button" class="achsug' + coche("t:" + m.ref) + '" data-achcoche="t:' + esc(m.ref) + '"><i></i><span><b>' + esc(m.ref) + '</b>' +
           '<small>Manque ' + fr(m.manque) + ' m² · stock ' + fr(m.stock) + ' m² · réservé ' + fr(m.besoin) + ' m²' + (m.laize ? ' · laize ' + m.laize : '') + '</small>' +
           '<small>' + (m.bons.length ? 'Pour ' + esc(m.bons.join(", ")) : '') + '</small>' +
-          (m.deja ? '<small class="deja">' + ((m.deja.lignes || []).filter(l => l.ref === m.ref).every(achLigneRecue)
+          (m.deja ? '<small class="deja">' + (achRecu(m.deja) === "tout"
               ? 'Reçu (' + esc(m.deja.num) + '), à saisir dans SAGE'
               : 'Déjà commandé : ' + esc(m.deja.num) + (m.deja.livr ? ', livraison ' + String(m.deja.livr).split("-").reverse().join("/") : '')) + '</small>' : '') +
         '</span><em>' + fr(m.manque, 1) + ' m²</em></button>').join("")
@@ -19212,7 +19254,7 @@ $("achSheet").addEventListener("click", e => {
     toast("Article ajouté à la liste des achats");
     return;
   }
-  if ((x = g("[data-achtout]")) && b){ const l = b.lignes[+x.dataset.achtout]; l.recu = l.q; achRecuMaj(b); renderAch(); return; }
+  if (g("[data-achrecuok]") && b){ b.recuOk = achRecu(b) !== "tout"; b.recuAt = b.recuOk ? Date.now() : 0; achTouche(b); renderAch(); try { renderHome(); } catch(err){} return; }
   if (g("[data-achsage]") && b){ b.sage = !b.sage; b.sageAt = b.sage ? Date.now() : 0; achTouche(b); renderAch(); try { renderHome(); } catch(err){} return; }
   if (g("[data-achvoir]") && b && b.photo){ voirPimg(b.photo, b.num + " · bon de livraison"); return; }
   if ((x = g("[data-achpm]"))){ ACH_PAY.mode = x.dataset.achpm; renderAch(); return; }
