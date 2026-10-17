@@ -1809,6 +1809,19 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:600; color:var(--muted)}
 .hk3 b{display:block; font-family:"IBM Plex Mono",monospace; font-size:16px; font-weight:600; color:var(--ink); margin-top:2px}
 .hk3 b.ok{color:var(--ok)} .hk3 b.att{color:var(--warn)}
+.hk3 .hk3b{flex:1; min-width:0; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:9px 10px;
+  font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:600; color:var(--muted); cursor:pointer}
+.hk3 .hk3b em{display:block; font-style:normal; font-size:10px; color:var(--accent); margin-top:1px}
+.hktot{display:flex; justify-content:space-between; align-items:baseline; background:var(--card2); border-radius:11px; padding:10px 12px; margin:0 0 10px}
+.hktot span{font-size:12.5px; color:var(--muted)} .hktot b{font-family:"IBM Plex Mono",monospace; font-size:17px; color:var(--ink)}
+.hktot b.ok{color:var(--ok)} .hktot b.att{color:var(--warn)}
+.hkmodes{display:flex; gap:6px; flex-wrap:wrap; margin:0 0 10px}
+.hkmodes span{flex:1; min-width:90px; border:1px solid var(--line); border-radius:10px; padding:6px 9px; font-size:11px; color:var(--muted)}
+.hkmodes b{display:block; font-family:"IBM Plex Mono",monospace; font-size:13.5px; color:var(--ink)}
+.hkl{display:flex; justify-content:space-between; gap:10px; width:100%; text-align:left; padding:9px 2px; border:0; border-bottom:1px solid var(--line); background:none; color:var(--ink)}
+.hkl span{min-width:0} .hkl b{display:block; font-size:13.5px} .hkl small{display:block; font-size:11.5px; color:var(--muted)}
+.hkl em{font-style:normal; text-align:right; font-family:"IBM Plex Mono",monospace; font-weight:700; font-size:13.5px; white-space:nowrap}
+.hkl em small{font-family:inherit; font-weight:400}
 /* --- v13.8 : inventaire atelier --- */
 .invnote{background:var(--ok-soft); border-left:4px solid var(--ok); border-radius:12px; padding:10px 12px;
   font-size:12.5px; line-height:1.5; color:var(--ok); margin-bottom:11px}
@@ -1991,6 +2004,20 @@ button.wa.full{width:100%}
 .wahistj span{width:74px; flex:none; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink)}
 .wahistj.we{opacity:.55}
 .wagoal strong{color:var(--ink); font-weight:700}
+.wahmode{margin:0 0 10px}
+.wastar[disabled]{opacity:1; cursor:default}
+.wajr{display:flex; gap:9px; align-items:flex-start; padding:8px 2px; border-bottom:1px solid var(--line); font-size:13px; color:var(--ink)}
+.wajr i{flex:none; width:8px; height:8px; border-radius:50%; margin-top:6px}
+.wajr span{flex:1; min-width:0; line-height:1.4}
+.wajr button{border:0; background:none; padding:0; font:inherit; font-weight:700; color:#1FA855}
+.wajr small{display:block; font-size:11px; color:var(--muted); margin-top:2px}
+.wajrjour{font-family:"Archivo",sans-serif; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:12px 0 2px}
+.wajrbox{margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:8px 10px; background:var(--card)}
+.wajrbox summary{cursor:pointer; font-family:"Archivo",sans-serif; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.wahistd{display:inline-flex; align-items:center; gap:4px; padding:3px 4px 3px 10px; border-radius:99px; border:1px solid var(--line); background:var(--card); font-size:12.5px}
+.wahistd.on{border-color:#1FA855; background:rgba(31,168,85,.16)}
+.wahistd input{color-scheme:light dark}
+.wahistd input{border:0; background:none; font:inherit; font-size:12.5px; color:var(--ink); padding:3px 4px; max-width:132px}
 /* v14.21 : Achats */
 .achbig{display:block; width:100%; border:0; border-radius:12px; background:var(--accent); color:#fff; font-family:"Archivo",sans-serif; font-size:14px; font-weight:700; padding:13px; margin:0 0 10px}
 .achbig.gr{background:#1FA855} .achbig.ol{background:var(--card); color:var(--ink); border:1px solid var(--line)}
@@ -2838,6 +2865,12 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
     <div class="hgrp g-cmd">
       <h4>Commandes</h4>
       <div class="hgrid">
+        <!-- v14.33 : l'atelier en pixel art, en direct, pour Noureddine seulement -->
+        <button class="tile" id="tileJeu" type="button" hidden>
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r="1"/><circle cx="18" cy="13.5" r="1"/></svg></span>
+          <span class="tt"><b>Atelier en direct</b><small>Le jeu de l'atelier, en temps réel</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
         <button class="tile" id="tileHist" type="button">
           <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/><circle cx="19" cy="19" r="3"/></svg></span>
           <span class="tt"><b>Historique</b><small id="tileHistSub">Aucun bon enregistré</small></span>
@@ -6756,7 +6789,8 @@ function renderHomeTodo(){
 function renderHomeK3(){
   const box = $("homeK3");
   if (!box) return;
-  const cell = (lab, val, cls) => '<div>' + lab + '<b' + (cls ? ' class="' + cls + '"' : '') + '>' + val + '</b></div>';
+  const cell = (lab, val, cls, go) => (go ? '<button type="button" class="hk3b" data-hkgo="' + go + '">' : '<div>') + lab +
+    '<b' + (cls ? ' class="' + cls + '"' : '') + '>' + val + '</b>' + (go ? '<em>détail ›</em></button>' : '</div>');
   let h = "";
   if (tubeSeul() || fabSeul()){
     const quoi = tubeSeul() ? "tube" : "fab";
@@ -6777,8 +6811,8 @@ function renderHomeK3(){
     }));
     const reste = (ORDERS || []).filter(o => o && o.status === "sent" && etatDe(o) !== "devis")
       .reduce((t, o) => t + soldeDe(o), 0);
-    h = cell("Facturé ce mois", frm(fact, 0), "") + cell("Encaissé ce mois", frm(enc, 0), "ok") +
-        cell("Reste à encaisser", frm(reste, 0), "att");
+    h = cell("Facturé ce mois", frm(fact, 0), "", "fact") + cell("Encaissé ce mois", frm(enc, 0), "ok", "enc") +
+        cell("Reste à encaisser", frm(reste, 0), "att", "reste");
   } else {
     const mes = (ORDERS || []).filter(o => o && o.status === "sent" && ceMois(o) && (!USER || o.author === USER.login)).length;
     const enc = (ORDERS || []).filter(o => o && o.status === "sent" && etatDe(o) !== "devis" && etatDe(o) !== "livre").length;
@@ -6788,6 +6822,83 @@ function renderHomeK3(){
   box.hidden = !h;
   box.innerHTML = h;
 }
+/* v14.38 : le détail des 3 chiffres de l'accueil, dans une fenêtre par dessus l'accueil. */
+function hkModal(html){
+  let m = $("hkModal");
+  if (!m){
+    m = document.createElement("div"); m.id = "hkModal"; m.className = "wamodal";
+    m.innerHTML = '<div class="wabox" id="hkBox"></div>';
+    document.body.appendChild(m);
+    m.addEventListener("click", e => {
+      if (e.target === m || e.target.closest("[data-hkclose]")){ m.hidden = true; return; }
+      const ob = e.target.closest("[data-hkbon]");
+      if (ob){ const o = (ORDERS || []).find(x => x.id === ob.dataset.hkbon); if (o){ m.hidden = true; formVenu = ""; loadOrder(o); toast("Bon " + o.num + " ouvert"); } return; }
+      const pg = e.target.closest("[data-hkpay]");
+      if (pg){ m.hidden = true; if (!payAllowed()) return; payVue = pg.dataset.hkpay; payChip = "tous"; payBon = ""; renderPay(); nav("paySheet"); }
+    });
+  }
+  $("hkBox").innerHTML = html;
+  m.hidden = false;
+}
+function hkDetail(go){
+  const n = new Date();
+  const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  const mois = MOIS[n.getMonth()] + " " + n.getFullYear();
+  const tete = (t, sous) => '<div class="wabh"><b>' + t + '</b><span>' + esc(sous) + '</span>' +
+    '<button type="button" class="waclose" data-hkclose aria-label="Fermer">✕</button></div>';
+  const jj = iso => String(iso || "").slice(0, 10).split("-").reverse().join("/");
+  const ligne = (o, droite, sous) => '<button type="button" class="hkl" data-hkbon="' + o.id + '"><span><b>' + esc(o.nom || "Client sans nom") + '</b>' +
+    '<small>' + esc(o.num || "") + (sous ? '  ·  ' + sous : '') + '</small></span><em>' + droite + '</em></button>';
+  if (go === "fact"){
+    const L = (ORDERS || []).filter(o => o && o.status === "sent" && etatDe(o) !== "devis" && ceMois(o))
+      .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    const tot = L.reduce((t, o) => t + duDe(o), 0);
+    hkModal(tete("Facturé ce mois", mois + " · " + L.length + " bon" + (L.length > 1 ? "s" : "")) +
+      '<div class="hktot"><span>Total</span><b>' + frm(tot, 2) + ' MAD</b></div>' +
+      (L.length ? L.map(o => ligne(o, frm(duDe(o), 2) + '<small>' + (facture(o) ? "TTC" : "HT") + '</small>',
+          jj(o.date) + '  ·  ' + etatLabel(etatDe(o)))).join("") : '<p class="wahint">Aucune commande ce mois.</p>') +
+      '<p class="wahint">Les commandes confirmées du mois (pas les devis), au montant dû par le client. Un appui ouvre le bon.</p>');
+    return;
+  }
+  if (go === "enc"){
+    const P = [];
+    (ORDERS || []).forEach(o => paiements(o).forEach(p => {
+      const d = new Date(String(p.date || "") + "T12:00:00");
+      if (!isNaN(d.getTime()) && d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth()) P.push({o:o, p:p});
+    }));
+    P.sort((a, b) => String(b.p.date || "").localeCompare(String(a.p.date || "")));
+    const tot = P.reduce((t, x) => t + (parseFloat(x.p.montant) || 0), 0);
+    const parMode = {};
+    P.forEach(x => { const k = x.p.mode || "Autre"; parMode[k] = (parMode[k] || 0) + (parseFloat(x.p.montant) || 0); });
+    hkModal(tete("Encaissé ce mois", mois + " · " + P.length + " paiement" + (P.length > 1 ? "s" : "")) +
+      '<div class="hktot"><span>Total</span><b class="ok">' + frm(tot, 2) + ' MAD</b></div>' +
+      (Object.keys(parMode).length ? '<div class="hkmodes">' + Object.keys(parMode).sort((a, b) => parMode[b] - parMode[a])
+        .map(k => '<span>' + esc(k) + '<b>' + frm(parMode[k], 0) + '</b></span>').join("") + '</div>' : '') +
+      (P.length ? P.map(x => ligne(x.o, frm(parseFloat(x.p.montant) || 0, 2) + '<small>' + (x.p.recu ? "confirmé" : "à confirmer") + '</small>',
+          'payé le ' + jj(x.p.date) + '  ·  ' + esc(x.p.mode || "") + (x.p.type ? '  ·  ' + esc(x.p.type) : '') +
+          '  ·  commande du ' + jj(x.o.date))).join("")
+        : '<p class="wahint">Aucun paiement ce mois.</p>') +
+      '<button type="button" class="achbig ol" style="margin-top:10px" data-hkpay="encaisse">Ouvrir Paiements · Encaissé</button>');
+    return;
+  }
+  if (go === "reste"){
+    const L = (ORDERS || []).filter(o => o && o.status === "sent" && etatDe(o) !== "devis" && soldeDe(o) > 0.01)
+      .sort((a, b) => ((etatDe(b) === "livre") - (etatDe(a) === "livre")) || (soldeDe(b) - soldeDe(a)));
+    const tot = L.reduce((t, o) => t + soldeDe(o), 0);
+    const liv = L.filter(o => etatDe(o) === "livre");
+    hkModal(tete("Reste à encaisser", L.length + " bon" + (L.length > 1 ? "s" : "") + " pas soldé" + (L.length > 1 ? "s" : "")) +
+      '<div class="hktot"><span>Total</span><b class="att">' + frm(tot, 2) + ' MAD</b></div>' +
+      (liv.length ? '<div class="wajrjour">Livrés mais pas soldés · ' + frm(liv.reduce((t, o) => t + soldeDe(o), 0), 0) + ' MAD</div>' : '') +
+      L.map((o, i) => (i === liv.length && liv.length && liv.length < L.length ? '<div class="wajrjour">Pas encore livrés</div>' : '') +
+        ligne(o, frm(soldeDe(o), 2) + '<small>sur ' + frm(duDe(o), 0) + '</small>', 'commande du ' + jj(o.date) + '  ·  ' + etatLabel(etatDe(o)) + '  ·  payé ' + frm(payeDe(o), 0))).join("") +
+      (L.length ? '' : '<p class="wahint">Tout est soldé.</p>') +
+      '<button type="button" class="achbig ol" style="margin-top:10px" data-hkpay="attendre">Ouvrir Paiements · À encaisser</button>');
+  }
+}
+$("homeK3").addEventListener("click", e => {
+  const b = e.target.closest("[data-hkgo]");
+  if (b) hkDetail(b.dataset.hkgo);
+});
 $("homeTodo").addEventListener("click", e => {
   const b = e.target.closest("button[data-hgo]");
   if (!b) return;
@@ -6929,6 +7040,7 @@ function renderHome(){
   }
   $("tileArt").hidden = !artAllowed();
   try { renderAchTile(); } catch(e){}
+  try { renderJeuTile(); } catch(e){}
   const ti = $("tileInv");
   if (ti){
     ti.hidden = !invAllowed();
@@ -8242,7 +8354,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.32";
+const APP_VERSION = "14.39";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -13939,6 +14051,12 @@ function prosStatut(p){
 }
 function prosARappeler(p){ return !!p.rappel && prosStatut(p) !== "client"; }
 let prosFiltre = "tous", prosQ = "", prosEdit = "", prosCoul = "";
+/* v14.37 : plus de 6 fenêtres = gros client, automatiquement (mesures saisies ou
+   « Nombre de fenêtres »). Le bouton « ⭐ Gros client » de la fiche reste pour les autres. */
+const GROS_FEN = 6;
+function waNbFen(p){ try { const r = prosResume(p); return (r && r.nb) || prosNbFenSaisi(p) || 0; } catch(e){ return prosNbFenSaisi(p) || 0; } }
+function waGrosAuto(p){ return waNbFen(p) > GROS_FEN; }
+function waGros(p){ return !!(p && (p.star || waGrosAuto(p))); }
 
 function prosListe(f, compte){
   const F = f || prosFiltre;
@@ -13946,7 +14064,7 @@ function prosListe(f, compte){
   return prosVivants().filter(p => {
     const st = prosStatut(p);
     if (F.indexOf("e-") === 0 && prosEtape(p) !== F.slice(2)) return false;
-    if (F === "star" && !p.star) return false;
+    if (F === "star" && !waGros(p)) return false;
     if (F === "incomp" && !prosIncomplete(p)) return false;
     if (F === "client" && st !== "client") return false;
     if (F === "fin"    && st !== "fin")    return false;
@@ -14176,13 +14294,13 @@ function renderNosClients(body){
 /* v14.8 : les puces suivent les 5 étapes du système WhatsApp */
 const PCHIPS = [
   {k:"tous",     lab:"Tous"},
+  {k:"star",     lab:"⭐ Gros clients", c:"#B7791F"},     /* v14.36 : toujours visible, juste après Tous */
   {k:"e-dem",    lab:"Demande",      c:"var(--c-nc)"},
   {k:"e-prix",   lab:"Prix envoyé",  c:"var(--c-devis)"},
   {k:"e-int",    lab:"Intéressé",    c:"var(--c-int)"},
   {k:"e-devis",  lab:"Devis",        c:"#0E8A8A"},
   {k:"e-client", lab:"Client",       c:"var(--c-encours)"},
   {k:"e-pause",  lab:"En pause",     c:"var(--c-nrp)"},
-  {k:"star",     lab:"⭐ Gros clients", plus:1},
   {k:"incomp",   lab:"Fiche incomplète", c:"var(--warn)", plus:1},
   {k:"reste",    lab:"Reste à payer",  c:"var(--warn)", plus:1},
   {k:"nos",      lab:"Nos clients", plus:1}
@@ -14353,7 +14471,7 @@ function renderPros(){
       '<div class="prtags">' +
         (function(){
           const e = prosEtape(p), t = waTache(p);
-          return '<span class="prtag etp" style="--c:' + waEtapeCoul(e) + '">' + (p.star ? "⭐ " : "") + waEtapeLab(e) + '</span>' +
+          return '<span class="prtag etp" style="--c:' + waEtapeCoul(e) + '">' + (waGros(p) ? "⭐ " : "") + waEtapeLab(e) + '</span>' +
             (e === "pause" && p.pause ? tag(esc(p.pause.r)) : "") +
             (t && e !== "pause" ? tag("rappel " + (t.due <= Date.now() ? "aujourd'hui" : "le " + prosDate(t.due)), "inf") : "") +
             (prosIncomplete(p) ? tag("fiche incomplète", "att") : "");
@@ -14877,7 +14995,12 @@ $("prosSave").addEventListener("click", () => {
   if (!nom && !tel){ toast("Il faut au moins un nom ou un numéro"); return; }
   if (prosEdit){
     const p = PROS.find(x => x.id === prosEdit);
-    if (p) prosApplique(p);
+    if (p){
+      const av = JSON.parse(JSON.stringify(p));
+      prosApplique(p);
+      const d = waDiffFiche(av, p);
+      if (d.length) waLog(p, "modif", "Fiche modifiée : " + d.join(" · "));
+    }
     toast("Contact modifié");
   } else {
     /* Le même numéro deux fois, c'est la même personne qui réécrit :
@@ -14896,6 +15019,7 @@ $("prosSave").addEventListener("click", () => {
     const p = {id:"p" + Date.now() + Math.floor(Math.random()*900),
                at:Date.now(), by:(USER && USER.login) || ""};
     prosApplique(p);
+    waLog(p, "cree", "Contact créé" + (p.src ? " · venu par " + p.src : ""));
     PROS.unshift(p);
     toast("Contact ajouté");
   }
@@ -14981,7 +15105,9 @@ function prosClic(e){
     const p = PROS.find(x => x.id === wa.dataset.prwa);
     if (p){
       /* v14.32 : si une relance était due, ouvrir la conversation la fait */
-      try { waSeq(p); const t = waTache(p); if (t && t.due <= Date.now()) waCompteRelance(p, Date.now()); } catch(err){}
+      let compte = false;
+      try { waSeq(p); const t = waTache(p); if (t && t.due <= Date.now()){ waCompteRelance(p, Date.now()); compte = true; } } catch(err){}
+      waLog(p, "conv", "Conversation WhatsApp ouverte" + (compte ? " : compte comme la relance du jour" : ""));
       p.vu = Date.now(); p.vuBy = (USER && USER.login) || ""; p.maj = Date.now();
       prosSave(); setTimeout(renderPros, 60); try { setTimeout(waRendTout, 80); } catch(err){}
     }
@@ -15014,6 +15140,7 @@ function prosClic(e){
     ask("Supprimer ce contact ?", (p.nom || p.tel || "Ce contact") +
         " sera effacé pour toute l'équipe.", () => {
       /* on garde une tombe : sinon la fiche revient au prochain échange */
+      waLog(p, "sup", "Contact supprimé : " + (p.nom || "") + (p.tel ? " · " + p.tel : ""));
       p.sup = true; p.maj = Date.now();
       p.nom = ""; p.tel = ""; p.note = "";
       prosSave(); if (dansFiche) prosFicheFerme(); else renderPros(); renderHome();
@@ -15242,6 +15369,8 @@ function waSeqHist(p){
 function waPauseAuto(p){
   if (p.pause || !p.seq || p.seq.e !== "suivi" || (p.seq.n || 0) < 4) return false;
   p.pause = {r:"Sans commande après 4 relances", at:Date.now(), by:"auto", auto:true};
+  if (!Array.isArray(p.jr)) p.jr = [];
+  p.jr.push({at:Date.now(), by:"", k:"pause", t:"Pause automatique : 4 relances sans commande"});
   waSeq(p);
   return true;
 }
@@ -15378,7 +15507,7 @@ function waListeDuJour(){
     if (!x) return;
     x.p = p;
     const r = prosResume(p);
-    x.poids = (p.star ? 1e6 : 0) + (r ? (r.m2 || 0) * 100 + (r.nb || 0) : 0);
+    x.poids = (waGros(p) ? 1e6 : 0) + (r ? (r.m2 || 0) * 100 + (r.nb || 0) : 0);
     (x.bloc === "new" ? nouv : autres).push(x);
   });
   const ordre = {rappel:0, relance:1, client:2, promo:3};
@@ -15816,6 +15945,8 @@ function waEnvTexteSauve(pid, at, txt, pj){
     if (c && c.fichier && r.x.pj.indexOf(waNomFichier(c.fichier)) < 0){ delete r.x.camp; waPromoRecalc(r.p); waSave(); }
   }
   r.x.modif = Date.now();
+  waLog(r.p, "modif", "Message corrigé : " + waEnvLab(r.x) + " du " + prosDate(r.x.at) + " " + waHeure(r.x.at) +
+        (Array.isArray(pj) ? " · pièces jointes : " + (pj.length ? pj.join(", ") : "aucune") : ""));
   r.p.maj = Date.now(); prosSave();
   toast("Message corrigé");
 }
@@ -15850,6 +15981,7 @@ function waEnvAnnule(pid, at){
     if (i >= 0 && (a.camps || []).indexOf(c.id) < 0) c.faits.splice(i, 1);
   });
   p.env = (p.env || []).filter(y => y !== r.x);
+  waLog(p, "annule", "Envoi annulé (pas parti) : " + waEnvLab(r.x) + " du " + prosDate(r.x.at) + " " + waHeure(r.x.at));
   p.maj = Date.now(); waSave(); prosSave();
   toast2("Envoi annulé", "Le rappel revient comme avant");
 }
@@ -15880,7 +16012,9 @@ function waPromoMain(pid, cid){
 /* v14.13 : tout ce qui est parti aujourd'hui, client par client, avec le texte et les pièces jointes. */
 /* v14.18 : l'historique des envois. Aujourd'hui, hier, ou un tableau jour par jour
    sur 7 ou 30 jours ; un appui sur un jour ouvre ses messages. */
-let WA_HISTO = 0;   /* 0 = aujourd'hui, 1 = hier, "7", "30", ou le début d'un jour (ms) */
+let WA_HISTO = 0;
+let WA_HMODE = "msg";      /* v14.35 : msg = les messages, jr = le journal de tout ce qui a été fait */
+let WA_HQUI = "";          /* filtre par agent dans le journal */   /* 0 = aujourd'hui, 1 = hier, "7", "30", ou le début d'un jour (ms) */
 function waEnvoisEntre(a, b){
   const L = [];
   prosVivants().forEach(p => (p.env || []).forEach(x => { if (x.at >= a && x.at < b) L.push({p:p, x:x}); }));
@@ -15894,12 +16028,46 @@ function waJourLab(t){
   return n === 0 ? "Aujourd'hui" : n === 1 ? "Hier" : J[d.getDay()] + " " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1);
 }
 function waMessagesDuJour(sel){
+  if (!adminAllowed()) return;                      /* v14.33 : l'historique est pour Noureddine seul */
   if (sel !== undefined) WA_HISTO = sel;
   const q = waReg("quota"), t0 = waDebutJour();
   const puce = (v, l) => '<button type="button" data-wahisto="' + v + '" aria-pressed="' + (String(WA_HISTO) === String(v)) + '">' + l + '</button>';
-  let h = '<div class="wabh"><b>Messages envoyés</b><span>historique</span>' +
+  let h = '<div class="wabh"><b>' + (WA_HMODE === "jr" ? 'Journal WhatsApp' : 'Messages envoyés') + '</b><span>historique</span>' +
       '<button type="button" class="waclose" data-waclose aria-label="Fermer">✕</button></div>' +
-    '<div class="wahistop">' + puce(0, "Aujourd'hui") + puce(1, "Hier") + puce("7", "7 jours") + puce("30", "30 jours") + '</div>';
+    '<div class="waseg wahmode"><button type="button" data-wahmode="msg" aria-pressed="' + (WA_HMODE === "msg") + '">Messages</button>' +
+      '<button type="button" data-wahmode="jr" aria-pressed="' + (WA_HMODE === "jr") + '">Journal complet</button></div>' +
+    '<div class="wahistop">' + puce(0, "Aujourd'hui") + puce(1, "Hier") + puce("7", "7 jours") + puce("30", "30 jours") +
+      /* v14.33 : une date précise */
+      '<label class="wahistd' + (WA_HISTO > 1000 ? ' on' : '') + '">📅<input type="date" data-wahistd max="' + jourISO(new Date()) + '" value="' +
+        (WA_HISTO > 1000 ? jourISO(new Date(WA_HISTO)) : '') + '"></label></div>';
+  if (WA_HMODE === "jr"){
+    /* la période choisie : un jour, ou les 7 / 30 derniers jours */
+    let a, b;
+    if (WA_HISTO === "7" || WA_HISTO === "30"){ b = t0 + WA_J; a = t0 - (+WA_HISTO - 1) * WA_J; }
+    else { const x = WA_HISTO === 1 ? t0 - WA_J + 3600000 : WA_HISTO > 1000 ? WA_HISTO : t0; a = waJourDe(x); b = a + WA_J; }
+    const E = [];
+    (PROS || []).forEach(p => { if (p) waEvenements(p).forEach(x => { if (x.at >= a && x.at < b) E.push({x:x, p:p}); }); });
+    E.sort((u, v) => v.x.at - u.x.at);
+    const qui = [...new Set(E.map(y => y.x.by).filter(Boolean))];
+    const vus = WA_HQUI ? E.filter(y => y.x.by === WA_HQUI) : E;
+    const nb = k => vus.filter(y => y.x.k === k).length;
+    h += '<p class="wahint" style="margin:0 0 8px">' + (b - a > WA_J ? 'Du ' + prosDate(a) + ' au ' + prosDate(b - 1) : '<b>' + waJourLab(a) + '</b>') +
+         ' · ' + vus.length + ' action' + (vus.length > 1 ? 's' : '') +
+         (vus.length ? ' (' + [[nb("env"), "messages"], [nb("nouv"), "nouvelles du client"], [nb("modif"), "modifications"], [nb("pause"), "pauses"],
+           [nb("disc"), "« on discute »"], [nb("conv"), "conversations ouvertes"], [nb("annule"), "annulations"]].filter(z => z[0]).map(z => z[0] + " " + z[1]).join(", ") + ')' : '') + '</p>' +
+      (qui.length > 1 ? '<div class="wahistop">' + '<button type="button" data-wahqui="" aria-pressed="' + (!WA_HQUI) + '">Tout le monde</button>' +
+         qui.map(q => '<button type="button" data-wahqui="' + esc(q) + '" aria-pressed="' + (WA_HQUI === q) + '">' + esc(nomDe(q)) + '</button>').join("") + '</div>' : '');
+    let jour = "";
+    h += vus.length ? vus.slice(0, 400).map(y => {
+        const j = waJourDe(y.x.at), tete = (b - a > WA_J && j !== jour) ? '<div class="wajrjour">' + waJourLab(j) + '</div>' : '';
+        jour = j;
+        return tete + waJrLigne(y.x, y.p);
+      }).join("") : '<p class="wahint">Rien de noté sur cette période.</p>';
+    h += '<p class="wahint">Le journal note chaque geste depuis la version 14.35. Avant, seuls les messages envoyés sont connus.</p>';
+    WA_BR = null;
+    waModal(h);
+    return;
+  }
   if (WA_HISTO === "7" || WA_HISTO === "30"){
     const n = +WA_HISTO, jours = [];
     for (let i = 0; i < n; i++){
@@ -15930,7 +16098,8 @@ function waMessagesDuJour(sel){
   }
   WA_BR = null;
   waModal(h);
-  if (WA_HISTO === 0 || WA_HISTO === 1) document.querySelectorAll("#waBox .wahist").forEach(d => d.open = true);
+  /* v14.34 : un jour choisi au calendrier s'ouvre aussi en entier, chaque message lisible */
+  if (WA_HISTO === 0 || WA_HISTO === 1 || WA_HISTO > 1000) document.querySelectorAll("#waBox .wahist").forEach(d => d.open = true);
 }
 function waNomFichier(id){
   return (WA_FICH[id] || {}).nom || ((WA_DRIVE || []).find(x => x.id === id) || {}).nom || "image de la promo";
@@ -15952,6 +16121,7 @@ function waPromoMainChange(pid, at, cid){
   const x = p && (p.env || []).find(y => y.at === at && y.bloc === "main");
   if (!x || !c) return;
   x.camp = c.id; x.pj = [waNomFichier(c.fichier)]; x.modif = Date.now();
+  waLog(p, "promo", "Promo à la main changée en : " + (c.nom || "promo"));
   waPromoRecalc(p);
   p.maj = Date.now(); waSave(); prosSave(); waModalFerme(); waRendTout();
   toast("Promo changée : " + (c.nom || "promo"));
@@ -15959,6 +16129,8 @@ function waPromoMainChange(pid, at, cid){
 function waPromoMainAnnule(pid, at){
   const p = PROS.find(x => x.id === pid);
   if (!p) return;
+  const vx = (p.env || []).find(y => y.at === at && y.bloc === "main");
+  if (vx) waLog(p, "annule", "Promo à la main annulée : " + waEnvLab(vx));
   p.env = (p.env || []).filter(y => !(y.at === at && y.bloc === "main"));
   waPromoRecalc(p);
   p.maj = Date.now(); waSave(); prosSave(); waModalFerme(); waRendTout();
@@ -15989,10 +16161,64 @@ function waEnvDetail(x, pid){
   '</div></details>';
 }
 /* v14.14 : la nouvelle donnée depuis la fiche (le client a répondu, plus tard). */
+/* ============ v14.35 : le journal WhatsApp ============
+   Chaque geste sur un contact laisse une ligne dans p.jr (qui, quand, quoi) : nouvelle
+   du client, pause, reprise, « On discute », fiche modifiée champ par champ, envoi
+   annulé, conversation ouverte… Les messages envoyés viennent de p.env. Le tout voyage
+   avec la fiche (rangée cfg-prospects). Visible par Noureddine seul. */
+function waLog(p, k, t){
+  if (!p) return;
+  if (!Array.isArray(p.jr)) p.jr = [];
+  p.jr.push({at:Date.now(), by:(USER && USER.login) || "", k:k, t:String(t || "").slice(0, 400)});
+  if (p.jr.length > 150) p.jr = p.jr.slice(-150);
+}
+const WA_CHAMPS = [["nom", "nom"], ["tel", "téléphone"], ["adresse", "adresse"], ["type", "type de store"], ["nbFen", "nombre de fenêtres"],
+  ["m2Tot", "total m²"], ["pxE", "prix enrouleur"], ["pxJ", "prix jour et nuit"], ["remise", "remise %"], ["poseP", "prix de pose"],
+  ["poseMode", "calcul de la pose"], ["pose", "pose ou livraison"], ["fact", "facture"], ["lang", "langue"], ["src", "venu par"],
+  ["star", "gros client"], ["interet", "situation"], ["rappelLe", "date de rappel"], ["note", "note"], ["suivi", "suivi"]];
+function waValChamp(k, v){
+  if (v === undefined || v === null || v === "") return "vide";
+  if (k === "star") return v ? "oui" : "non";
+  if (k === "type") return {ENR:"enrouleur", JN:"jour et nuit", MIX:"les deux"}[v] || v;
+  if (k === "lang") return v === "ar" ? "darija" : "français";
+  if (k === "interet") return {int:"Intéressé", pas:"Pas intéressé", nrp:"Ne répond pas", nc:"Nouveau client"}[v] || v;
+  if (k === "fact") return v === "non" ? "sans facture" : "facturée";
+  const t = String(v); return t.length > 60 ? t.slice(0, 60) + "…" : t;
+}
+function waDiffFiche(av, p){
+  const out = [];
+  WA_CHAMPS.forEach(([k, l]) => {
+    const a = av[k], b = p[k];
+    if (String(a === undefined || a === null ? "" : a) === String(b === undefined || b === null ? "" : b)) return;
+    if (k === "star" && !!a === !!b) return;
+    out.push(l + " : " + waValChamp(k, a) + " → " + waValChamp(k, b));
+  });
+  const dm = x => (x.dims || []).map(d => [d.l, d.h, d.q, d.type].join("|")).join(";");
+  if (dm(av) !== dm(p)) out.push("mesures : " + (av.dims || []).length + " → " + (p.dims || []).length + " ligne" + ((p.dims || []).length > 1 ? "s" : ""));
+  if ((av.refs || []).join(",") !== (p.refs || []).join(",")) out.push("tissus : " + ((av.refs || []).join(", ") || "aucun") + " → " + ((p.refs || []).join(", ") || "aucun"));
+  return out;
+}
+/* tous les événements d'un contact : son journal et ses messages */
+function waEvenements(p){
+  const L = (p.jr || []).map(x => ({at:x.at, by:x.by, k:x.k, t:x.t}));
+  (p.env || []).forEach(x => L.push({at:x.at, by:x.by, k:"env", t:"Message envoyé : " + waEnvLab(x) + (x.modif ? " (corrigé ensuite)" : "")}));
+  return L.sort((a, b) => b.at - a.at);
+}
+const WA_JR_COUL = {env:"#1FA855", nouv:"#1F5FD1", pause:"#B42318", reprise:"#127A3D", disc:"#0E8A8A", modif:"#B45309",
+                    cree:"#7A3BC4", annule:"#B42318", conv:"#64748B", sup:"#B42318", promo:"#D6207E"};
+function waJrLigne(x, p){
+  return '<div class="wajr"><i style="background:' + (WA_JR_COUL[x.k] || "#8A8384") + '"></i><span>' +
+    (p ? '<button type="button" data-wafiche="' + p.id + '">' + esc(p.nom || telAffiche(p.tel || "") || "Contact supprimé") + ' ›</button> ' : '') +
+    esc(x.t) + '<small>' + prosDate(x.at) + ' ' + waHeure(x.at) + (x.by ? ' · ' + esc(nomDe(x.by)) : '') + '</small></span></div>';
+}
 function waResultatChoix(pid, r){
   const p = PROS.find(x => x.id === pid);
   if (!p) return;
   const now = Date.now();
+  if (r === "disc") waLog(p, "nouv", "Il discute : rappel dans " + waReg("disc") + " jours");
+  if (r === "tard") waLog(p, "nouv", "Il a dit « plus tard » : rappel dans " + waReg("tard") + " jours");
+  if (r === "devis") waLog(p, "nouv", "Il veut un devis : devis ouvert");
+  if (r === "pas") waLog(p, "nouv", "Pas intéressé");
   const s = p.seq || (waSeq(p), p.seq);
   if (r === "pas"){ waPauseDemande(p); return; }
   if (r === "devis"){ waModalFerme(); prosVersBon(p, "devis"); return; }
@@ -16024,6 +16250,7 @@ function waOnDiscute(pid){
   else s.n = (s.n || 0) + 1;
   s.last = now;
   p.msg = now; p.vu = now; p.vuBy = (USER && USER.login) || "";
+  waLog(p, "disc", "On discute avec le client" + (t && t.why ? " : « " + t.why + " » sauté" : ""));
   if (!Array.isArray(p.disc)) p.disc = [];
   p.disc.push({at:now, by:p.vuBy, quoi:t ? t.why : ""});
   if (p.disc.length > 50) p.disc = p.disc.slice(-50);
@@ -16044,6 +16271,7 @@ function waPause(pid, raison){
   const p = PROS.find(x => x.id === pid);
   if (!p) return;
   p.pause = {r:raison, at:Date.now(), by:(USER && USER.login) || ""};
+  waLog(p, "pause", "Mis en pause : " + raison);
   p.maj = Date.now(); waSeq(p); prosSave();
   waModalFerme(); waRendTout();
   if (prosEdit === pid) try { prosCharge(p); renderPros(); } catch(e){}
@@ -16053,6 +16281,7 @@ function waReprend(pid){
   const p = PROS.find(x => x.id === pid);
   if (!p) return;
   delete p.pause; delete p.fin;
+  waLog(p, "reprise", "Contact repris (sorti de la pause)");
   if (p.interet === "pas") p.interet = "";
   p.maj = Date.now(); waSeq(p); prosSave(); waRendTout();
   toast("Contact repris");
@@ -16083,8 +16312,8 @@ function waCarte(x){
   if (parseFloat(p.pxJ) > 0) px.push(fr(parseFloat(p.pxJ), 0));
   if (px.length) quoi.push(px.join(" / ") + " MAD/m²");
   const e = prosEtape(p);
-  return '<div class="watask" style="--c:' + (p.star ? "#B7791F" : waEtapeCoul(e)) + '">' +
-    '<div class="h"><b>' + (p.star ? "⭐ " : "") + esc(p.nom || telAffiche(p.tel || "") || "Sans nom") + '</b>' +
+  return '<div class="watask" style="--c:' + (waGros(p) ? "#B7791F" : waEtapeCoul(e)) + '">' +
+    '<div class="h"><b>' + (waGros(p) ? "⭐ " : "") + esc(p.nom || telAffiche(p.tel || "") || "Sans nom") + '</b>' +
       '<span class="why' + (late ? " late" : "") + '">' + esc(x.why) + (late ? " · en retard de " + j + " j" : "") + '</span></div>' +
     '<div class="sub">' + esc(quoi.join(" · ")) + '</div>' +
     '<div class="acts"><button type="button" class="wa" data-wabr="' + p.id + '"' + (x.camp ? ' data-wacamp="' + x.camp + '"' : '') + '>' +
@@ -16104,9 +16333,11 @@ function renderWaToday(){
     /* v14.19 : le gros chiffre compte TOUS les messages partis aujourd'hui ; le détail
        dit combien comptent dans les 20 (relances et promos) et combien sont hors quota. */
     (() => { const tous = waEnvoisEntre(waDebutJour(), waDebutJour() + WA_J).length, hors = Math.max(0, tous - L.fait);
-      return '<button type="button" class="wagoal" data-wajour><b>' + L.fait + '/' + q + '</b><span>messages envoyés aujourd\'hui' +
+      const adm = adminAllowed();
+      return '<' + (adm ? 'button type="button" class="wagoal" data-wajour' : 'div class="wagoal"') + '><b>' + L.fait + '/' + q + '</b><span>messages envoyés aujourd\'hui' +
         (hors ? ' · + ' + hors + ' réponse' + (hors > 1 ? 's' : '') + ' à des demandes du jour (hors quota)' : '') +
-        '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span><em class="wavoir">Historique ›</em></button>'; })() +
+        '<i><em style="width:' + Math.min(100, Math.round(L.fait / q * 100)) + '%"></em></i></span>' +
+        (adm ? '<em class="wavoir">Historique ›</em></button>' : '</div>'); })() +
     (L.weekend ? '<div class="waweek"><b>Week-end : pas de relances ni de promos.</b><span>Elles reprennent lundi. Les nouvelles demandes restent à traiter.</span></div>' : '') +
     (tot ? '' : '<div class="empty">Rien à envoyer aujourd\'hui.' + (L.cache ? '' : '<br>Les prochains rappels arrivent tout seuls.') + '</div>') +
     grp("Nouvelles demandes", L.nouv) +
@@ -16139,7 +16370,7 @@ function waPlanning(L, nbJours){
     if (j < 1 || j > nbJours) return;
     t.p = p;
     const r = prosResume(p);
-    t.poids = (p.star ? 1e6 : 0) + (r ? (r.m2 || 0) * 100 + (r.nb || 0) : 0);
+    t.poids = (waGros(p) ? 1e6 : 0) + (r ? (r.m2 || 0) * 100 + (r.nb || 0) : 0);
     t.jour = j;
     items.push(t);
   });
@@ -16175,8 +16406,8 @@ function waPlanningHtml(L){
       d.L.forEach(x => { const k = x.bloc === "promo" ? "Promos" : x.why.replace(/ · .*$/, ""); par[k] = (par[k] || 0) + 1; });
       return '<details class="wajour"' + (d.j === 1 ? ' open' : '') + '><summary><b>' + lab + '</b><span>' + d.L.length + ' message' + (d.L.length > 1 ? 's' : '') +
           ' · ' + Object.keys(par).map(k => par[k] + ' ' + k.toLowerCase()).join(', ') + '</span></summary>' +
-        d.L.map(x => '<button type="button" class="waprow" data-predit="' + x.p.id + '" style="--c:' + (x.p.star ? "#B7791F" : waEtapeCoul(prosEtape(x.p))) + '">' +
-          '<b>' + (x.p.star ? "⭐ " : "") + esc(x.p.nom || telAffiche(x.p.tel || "") || "Sans nom") + '</b><span>' + esc(x.why) + '</span></button>').join("") +
+        d.L.map(x => '<button type="button" class="waprow" data-predit="' + x.p.id + '" style="--c:' + (waGros(x.p) ? "#B7791F" : waEtapeCoul(prosEtape(x.p))) + '">' +
+          '<b>' + (waGros(x.p) ? "⭐ " : "") + esc(x.p.nom || telAffiche(x.p.tel || "") || "Sans nom") + '</b><span>' + esc(x.why) + '</span></button>').join("") +
       '</details>';
     }).join("") +
     '<p class="wahint">Prévision : chaque message envoyé fixe ensuite le rappel suivant, le planning se met à jour tout seul. Un appui sur un nom ouvre sa fiche.</p>' +
@@ -16381,7 +16612,11 @@ function renderWaFiche(){
       ? '<div class="waenv"><em>Historique · ' + env.length + ' message' + (env.length > 1 ? 's' : '') + ' · ' +
           env.filter(x => x.camp).length + ' promo' + (env.filter(x => x.camp).length > 1 ? 's' : '') + '</em>' +
           env.map(x => waEnvDetail(x, p.id)).join("") + '</div>'
-      : '<div class="waenv"><em>Historique</em><span>Aucun message envoyé depuis l\'app pour l\'instant.</span></div>');
+      : '<div class="waenv"><em>Historique</em><span>Aucun message envoyé depuis l\'app pour l\'instant.</span></div>') +
+    /* v14.35 : le journal complet du contact, pour Noureddine */
+    (adminAllowed() ? (() => { const J = waEvenements(p);
+      return '<details class="wajrbox"><summary>Journal · ' + J.length + ' action' + (J.length > 1 ? 's' : '') + '</summary>' +
+        (J.length ? J.map(x => waJrLigne(x, null)).join("") : '<p class="wahint">Rien de noté pour l\'instant.</p>') + '</details>'; })() : '');
 }
 
 /* ---------- les clics ---------- */
@@ -16555,6 +16790,11 @@ $("prosSheet").addEventListener("change", e => {
   if (r.tagName === "SELECT") renderWaMsgs();
 });
 $("waModal").addEventListener("change", e => {
+  if (e.target.dataset && e.target.dataset.wahistd !== undefined){
+    const v = e.target.value;
+    if (v){ const d = new Date(v + "T00:00:00"); if (!isNaN(d.getTime())) waMessagesDuJour(d.getTime()); }
+    return;
+  }
   if (e.target.id !== "waChoix" || !WA_BR) return;
   const p = PROS.find(x => x.id === WA_BR.pid);
   if (!p) return;
@@ -16597,9 +16837,16 @@ $("waModal").addEventListener("click", e => {
     if (p) waNoteEnvoi(p, WA_BR);
     return;
   }
-  if (e.target.closest("[data-wanon]")){ waEnvoiOublie(); waModalFerme(); waRendTout(); toast("Rien n'est noté"); return; }
+  if (e.target.closest("[data-wanon]")){
+    try { const p = WA_BR && PROS.find(x => x.id === WA_BR.pid); if (p){ waLog(p, "annule", "Message préparé mais pas envoyé (« Non »)" + (WA_BR.t && WA_BR.t.why ? " : " + WA_BR.t.why : "")); p.maj = Date.now(); prosSave(); } } catch(err){}
+    waEnvoiOublie(); waModalFerme(); waRendTout(); toast("Rien n'est noté"); return;
+  }
   const ms = e.target.closest("[data-wamainset]");
   if (ms && WA_BR && WA_BR.envAt){ waPromoMainChange(WA_BR.pid, WA_BR.envAt, ms.dataset.wamainset); return; }
+  const hm = e.target.closest("[data-wahmode]");
+  if (hm){ WA_HMODE = hm.dataset.wahmode; waMessagesDuJour(); return; }
+  const hq = e.target.closest("[data-wahqui]");
+  if (hq){ WA_HQUI = hq.dataset.wahqui; waMessagesDuJour(); return; }
   const hs = e.target.closest("[data-wahisto]");
   if (hs){ const v = hs.dataset.wahisto; waMessagesDuJour(v === "7" || v === "30" ? v : +v); return; }
   const fo = e.target.closest("[data-wafiche]");
@@ -16986,6 +17233,7 @@ function formVersContact(o){
              note:["Formulaire du site " + (o.date || ""), o.type ? "type : " + o.type : "", o.couleur ? "couleur : " + o.couleur : "",
                    o.inst ? "installation : " + o.inst : "", o.tarif ? "tarif affiché : " + o.tarif : "", o.notes].filter(Boolean).join(" · "),
              maj:Date.now()};
+  waLog(p, "cree", "Contact créé depuis un formulaire du site (" + (o.date || "") + ")");
   PROS.unshift(p); prosSave();
   toast2("Contact ajouté", "Relance 1 dans " + waReg("r1") + " jours");
   prosCharge(p); prosFormOuvre(true); renderPros(); waRendTout();
@@ -16996,7 +17244,11 @@ function renderWaChamps(){
   if (!l) return;
   [...l.children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.wafl === (prosD.lang === "ar" ? "ar" : "fr"))));
   s.innerHTML = WA_SOURCES.map(x => '<button type="button" data-wafs="' + x + '" aria-pressed="' + (prosD.src === x) + '">' + x + '</button>').join("");
-  st.setAttribute("aria-pressed", String(!!prosD.star));
+  const auto = waGrosAuto(prosD), n = waNbFen(prosD);
+  st.setAttribute("aria-pressed", String(!!prosD.star || auto));
+  const lab = st.querySelector("span");
+  if (lab) lab.textContent = auto ? "⭐ Gros client · automatique (" + n + " fenêtres)" : "⭐ Gros client";
+  st.disabled = auto;
 }
 
 
@@ -19390,6 +19642,11 @@ function renderAchTile(){
     : "Bons de commande fournisseur";
   homeBadge("tileAch", rec);
 }
+/* v14.33 : l'atelier en pixel art (atelier.html), visible pour Noureddine seulement */
+function jeuAllowed(){ return !!USER && String(USER.login || "").toLowerCase() === "noureddine"; }
+function renderJeuTile(){ const t = $("tileJeu"); if (t) t.hidden = !jeuAllowed(); }
+$("tileJeu").addEventListener("click", () => { if (jeuAllowed()) location.href = "atelier.html"; });
+
 $("tileAch").addEventListener("click", () => {
   if (!achAllowed()) return;
   ACH_VUE = "liste"; ACH_FOUR_ED = null;

@@ -1,5 +1,5 @@
 /* MSTORECASA - service worker */
-const V = "mstorecasa-v130";
+const V = "mstorecasa-v139";
 const CORE = [
   "./", "./index.html", "./manifest.json", "./supabase.js",
   "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png"
@@ -33,7 +33,9 @@ self.addEventListener("fetch", e => {
     e.respondWith(
       fetch(req).then(res => {
         const copy = res.clone();
-        caches.open(V).then(c => c.put("./index.html", copy));
+        /* v14.33 : chaque page garde sa propre copie (atelier.html ne remplace plus l'app) */
+        const cle = (url.pathname.endsWith("/") || url.pathname.endsWith("/index.html")) ? "./index.html" : req;
+        caches.open(V).then(c => c.put(cle, copy));
         return res;
       }).catch(() => caches.match(req).then(hit => hit || caches.match("./index.html")))
     );
