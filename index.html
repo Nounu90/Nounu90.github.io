@@ -1809,9 +1809,20 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
   font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:600; color:var(--muted)}
 .hk3 b{display:block; font-family:"IBM Plex Mono",monospace; font-size:16px; font-weight:600; color:var(--ink); margin-top:2px}
 .hk3 b.ok{color:var(--ok)} .hk3 b.att{color:var(--warn)}
+.rmbar{height:9px; border-radius:9px; background:var(--card2); overflow:hidden; margin:4px 0 3px}
+.rmbar i{display:block; height:100%; background:linear-gradient(90deg, var(--ok), #D97706)}
+.rmbarlab{font-size:11.5px; color:var(--muted); margin:0 0 8px}
 .hk3 .hk3b{flex:1; min-width:0; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:9px 10px;
   font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:600; color:var(--muted); cursor:pointer}
 .hk3 .hk3b em{display:block; font-style:normal; font-size:10px; color:var(--accent); margin-top:1px}
+.grc{border:1px solid var(--line); border-left:4px solid #B7791F; border-radius:12px; padding:10px 12px; margin-bottom:8px; background:var(--card)}
+.grh{display:flex; justify-content:space-between; align-items:baseline; gap:8px} .grh b{font-family:"Archivo",sans-serif; font-size:14px} .grh em{font-style:normal; font-family:"IBM Plex Mono",monospace; font-weight:700; color:#B7791F}
+.grtags{display:flex; flex-wrap:wrap; gap:5px; margin:5px 0 3px}
+.grtag{font-size:11px; font-weight:700; border-radius:99px; padding:2px 8px} .grtag.wa{background:#E3F5EA; color:#127A3D} .grtag.dv{background:#E0F2F1; color:#0E8A8A}
+.grc small{display:block; font-size:12px; color:var(--muted); margin-top:2px} .grc .grnote{color:var(--ink); font-style:italic}
+.grb{display:flex; gap:6px; margin-top:8px}
+.grb a, .grb button{flex:1; text-align:center; padding:8px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-family:"Archivo",sans-serif; font-size:12.5px; font-weight:600; text-decoration:none}
+.grb a.wa{background:#1FA855; border-color:#1FA855; color:#fff}
 .hktot{display:flex; justify-content:space-between; align-items:baseline; background:var(--card2); border-radius:11px; padding:10px 12px; margin:0 0 10px}
 .hktot span{font-size:12.5px; color:var(--muted)} .hktot b{font-family:"IBM Plex Mono",monospace; font-size:17px; color:var(--ink)}
 .hktot b.ok{color:var(--ok)} .hktot b.att{color:var(--warn)}
@@ -2889,6 +2900,10 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
           <span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.4 2.9-5.2 6.5-5.2s6.5 1.8 6.5 5.2"/><path d="M17 8.5a3 3 0 010 5M19.5 6a6 6 0 010 10"/></svg></span>
           <span class="tt"><b>Clients</b><small id="tileCliSub">Historique et paiements par client</small></span>
         </button>
+        <button class="tile" id="tileGros" type="button" hidden>
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></span>
+          <span class="tt"><b>Gros clients</b><small id="tileGrosSub">À suivre, pas encore commandé</small></span>
+        </button>
         <button class="tile" id="tileAtl" type="button">
           <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 15h3"/></svg></span>
           <span class="tt"><b>Atelier</b><small id="tileAtlSub">Capacité, jours fériés, échéances</small></span>
@@ -3777,6 +3792,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
       <button type="button" data-nf="tous" aria-pressed="false">Toutes</button>
       <button type="button" data-nf="fait" aria-pressed="false">Faites</button>
     </div>
+    <div class="pypuces" id="noteQui"></div>
     <div id="noteBody" style="margin-top:11px"></div>
   </div>
 </div>
@@ -5397,10 +5413,11 @@ function saveOrder(status){
   }
   if (status === "sent"){ try { prosLie(rec); } catch(e){} }
   if (i >= 0) all[i] = rec; else all.unshift(rec);
-  ORDERS = all.slice(0, 150);
+  ORDERS = all;                     /* v14.41 : plus de coupe à 150 bons (les plus anciens disparaissaient de l'écran) */
   const ok = persistOrders();
   if (!ok) toast("Mémoire pleine, brouillon non conservé");
   pushBon(rec);
+  if (status === "sent") setTimeout(() => { try { notesAuto(); } catch(e){} }, 1500);   /* v14.41 : téléphone manquant, etc. */
   return ok;
 }
 
@@ -6486,6 +6503,7 @@ async function syncAll(){
   await flushPending();
   await pullBons();
   try { if (nettoyageTableau()) renderTout(); } catch(e){}
+  try { notesAuto(); } catch(e){}               /* v14.41 : les notes de ce qui manque */
   pullAtl();                  /* réglages d'atelier partagés */
   syncNums();                 /* renommages faits directement dans la feuille */
   verifSheet();               /* et personne ne manque dans le tableau */
@@ -6823,6 +6841,66 @@ function renderHomeK3(){
   box.innerHTML = h;
 }
 /* v14.38 : le détail des 3 chiffres de l'accueil, dans une fenêtre par dessus l'accueil. */
+/* ============ v14.44 : les gros clients à suivre (Noureddine seul) ============
+   Plus de 6 fenêtres (ou marqué ⭐) et AUCUNE commande confirmée : contacts WhatsApp
+   et devis, rassemblés par numéro de téléphone. Pour les appeler soi-même. */
+function grosClients(){
+  const out = [], vu = {};
+  const nbBon = o => { try { return orderTotals(o).nb || 0; } catch(e){ return 0; } };
+  const confirme = tel => { const n = waNum(tel); return !!n && (ORDERS || []).some(o => o && o.status === "sent" && etatDe(o) !== "devis" && waNum(o.tel) === n); };
+  (typeof prosVivants === "function" ? prosVivants() : []).forEach(p => {
+    if (!waGros(p) || prosEtape(p) === "client" || confirme(p.tel)) return;
+    if (p.pause && p.pause.r === "A dit STOP") return;
+    const devis = bonsDuTel(p.tel, p.bon).filter(o => etatDe(o) === "devis");
+    const n = waNum(p.tel); if (n) vu[n] = true; devis.forEach(o => { vu["bon:" + o.id] = true; });
+    out.push({p:p, devis:devis, nom:p.nom || "", tel:p.tel || "", nb:waNbFen(p), der:Math.max(prosDernier(p), waDernierEnvoi(p))});
+  });
+  (ORDERS || []).forEach(o => {
+    if (!o || o.status !== "sent" || etatDe(o) !== "devis" || vu["bon:" + o.id]) return;
+    const nb = nbBon(o); if (nb <= GROS_FEN) return;
+    const n = waNum(o.tel);
+    if (n && (vu[n] || confirme(o.tel))) return;
+    if (n) vu[n] = true;
+    out.push({p:null, devis:[o], nom:o.nom || "", tel:o.tel || "", nb:nb, der:new Date(o.date || 0).getTime() || 0});
+  });
+  return out.sort((a, b) => b.nb - a.nb || b.der - a.der);
+}
+function renderGrosTile(){
+  const t = $("tileGros"); if (!t) return;
+  t.hidden = !adminAllowed();
+  if (t.hidden) return;
+  const L = grosClients();
+  $("tileGrosSub").textContent = L.length ? L.length + " à suivre · pas encore commandé" : "Aucun gros client en attente";
+  homeBadge("tileGros", L.length);
+}
+function grosDetail(){
+  const L = grosClients();
+  const jj = t => t ? prosDate(t) : "—";
+  hkModal('<div class="wabh"><b>Gros clients à suivre</b><span>' + L.length + ' · plus de ' + GROS_FEN + ' fenêtres, pas encore de commande</span>' +
+      '<button type="button" class="waclose" data-hkclose aria-label="Fermer">✕</button></div>' +
+    (L.length ? L.map(x => {
+      const p = x.p, o = x.devis[x.devis.length - 1], tA = p ? waTache(p) : null;
+      const r = p ? prosResume(p) : null;
+      const m2 = o ? orderTotals(o).m2 : (r && r.m2) || 0;
+      const lien = waLien(x.tel);
+      const src = [p ? '<span class="grtag wa">WhatsApp · ' + esc(waEtapeLab(prosEtape(p)) || "") + '</span>' : '',
+                   ...x.devis.map(d => '<span class="grtag dv">Devis ' + esc(d.num || "") + ' · ' + frm(duDe(d), 0) + ' MAD</span>')].join("");
+      return '<div class="grc"><div class="grh"><b>⭐ ' + esc(x.nom || telAffiche(x.tel) || "Sans nom") + '</b><em>' + x.nb + ' fenêtres</em></div>' +
+        '<div class="grtags">' + src + '</div>' +
+        '<small>' + [x.tel ? telAffiche(x.tel) : "pas de téléphone", m2 ? fr(m2, 2) + " m²" : "", (p && p.adresse) || (o && o.adresse) || "",
+                     p && p.src ? "venu par " + p.src : ""].filter(Boolean).map(esc).join("  ·  ") + '</small>' +
+        '<small>Dernier contact ' + jj(x.der) + (p && p.vuBy ? ' par ' + esc(nomDe(p.vuBy)) : '') +
+          (tA ? '  ·  prochaine relance ' + (tA.due <= Date.now() ? "aujourd'hui" : prosDate(tA.due)) : '') +
+          (o ? '  ·  devis du ' + jj(new Date(o.date || 0).getTime()) : '') + '</small>' +
+        ((p && (p.suivi || p.note)) ? '<small class="grnote">' + esc(String(p.suivi || p.note).slice(0, 160)) + '</small>' : '') +
+        '<div class="grb">' + (lien ? '<a class="wa" href="' + lien + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
+          (x.tel ? '<a href="tel:' + esc(String(x.tel).replace(/\s/g, "")) + '">Appeler</a>' : '') +
+          (p ? '<button type="button" data-hkpros="' + p.id + '">Fiche</button>' : '') +
+          (o ? '<button type="button" data-hkbon="' + o.id + '">Devis</button>' : '') + '</div></div>';
+    }).join("") : '<p class="wahint">Aucun gros client en attente : tous ont commandé, ou aucun ne dépasse ' + GROS_FEN + ' fenêtres.</p>') +
+    '<p class="wahint">Contacts WhatsApp et devis de plus de ' + GROS_FEN + ' fenêtres (ou marqués ⭐), sans aucune commande confirmée pour ce numéro. Visible par Noureddine seul.</p>');
+}
+$("tileGros").addEventListener("click", () => { if (adminAllowed()) grosDetail(); });
 function hkModal(html){
   let m = $("hkModal");
   if (!m){
@@ -6833,6 +6911,9 @@ function hkModal(html){
       if (e.target === m || e.target.closest("[data-hkclose]")){ m.hidden = true; return; }
       const ob = e.target.closest("[data-hkbon]");
       if (ob){ const o = (ORDERS || []).find(x => x.id === ob.dataset.hkbon); if (o){ m.hidden = true; formVenu = ""; loadOrder(o); toast("Bon " + o.num + " ouvert"); } return; }
+      const pr = e.target.closest("[data-hkpros]");
+      if (pr){ const p = PROS.find(x => x.id === pr.dataset.hkpros); m.hidden = true;
+        if (p && prosAllowed()){ $("tilePros").click(); setTimeout(() => { prosCharge(p); prosFormOuvre(true); renderPros(); }, 150); } return; }
       const pg = e.target.closest("[data-hkpay]");
       if (pg){ m.hidden = true; if (!payAllowed()) return; payVue = pg.dataset.hkpay; payChip = "tous"; payBon = ""; renderPay(); nav("paySheet"); }
     });
@@ -7040,6 +7121,7 @@ function renderHome(){
   }
   $("tileArt").hidden = !artAllowed();
   try { renderAchTile(); } catch(e){}
+  try { renderGrosTile(); } catch(e){}
   try { renderJeuTile(); } catch(e){}
   const ti = $("tileInv");
   if (ti){
@@ -8354,7 +8436,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.39";
+const APP_VERSION = "14.46";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -11483,7 +11565,9 @@ function docPasseDossier(o, dos, q){
     if (dos === "fini"    && !estFini(o)) return false;
     if (dos === "encours" && estFini(o)) return false;
     if (dos === "sage"    && !estSage(o)) return false;
-    if (dos === "pasage"  && estSage(o)) return false;
+    /* v14.45 : « pas encore SAGE » coupé en deux : les commandes (sans les devis), puis les devis */
+    if (dos === "pasage"  && (estSage(o) || etatDe(o) === "devis")) return false;
+    if (dos === "devsage" && (etatDe(o) !== "devis" || estSageDev(o))) return false;
     if (dos === "banque"  && !bonAVerifier(o)) return false;
     if (dos === "note"    && !String(o.dnote || "").trim()) return false;
     if (dos === "hors"    && !sheetManquant(o)) return false;
@@ -11759,7 +11843,8 @@ function docCarte(o){
 
     h += '<div class="dkbloc"><h4>Bon de commande</h4>' +
       r("Type", esc(typeLabel(o))) +
-      r(o.pose === "Livraison" ? "Livraison" : "Pose", t.pose ? frm(t.pose, 2) + " MAD" : "sans") +
+      /* v14.40 : la pose choisie sans prix restait affichée « sans » : on dit qu'elle est prévue */
+      r(o.pose === "Livraison" ? "Livraison" : "Pose", t.pose ? frm(t.pose, 2) + " MAD" : "oui · sans prix ajouté") +
       r("Stores", t.nb + "  ·  " + fr(t.m2 || 0, 2) + " m²") +
       puLignes(o).map(p => r("Prix unitaire" + (puLignes(o).length > 1 ? " " + p.lab.toLowerCase() : ""),
                              frm(p.pu, 2) + " MAD/m² HT")).join("") +
@@ -11939,7 +12024,7 @@ function docCarte(o){
       '<div class="dktag">' +
         '<span>Envoyer cette note à</span>' +
         '<div class="dktagb">' +
-          ["ahmed", "imane", "soufiane"].map(u =>
+          ["noureddine", "ahmed", "imane", "soufiane"].map(u =>
             '<button type="button" data-dktag="' + u + '" data-dko="' + o.id + '" aria-pressed="' +
             ((DKSEL[o.id] || {})[u] ? "true" : "false") + '">' + nomDe(u) + '</button>').join("") +
         '</div>' +
@@ -11979,7 +12064,7 @@ const DOC_ETATS = [["tous","Tous",""],["impaye","Non soldés","#8F5400"],["paye"
   ["devis","Devis","#7A3BC4"],["production","En production","#EA7A00"],
   ["pret","Prêts","#1F5FD1"],["livre","Livrés","#12833F"]];
 const DOC_DOS = [["tous","Tous les dossiers"],["encours","En cours"],["fini","Terminés"],
-  ["sage","Saisis SAGE"],["pasage","Pas encore SAGE"],["banque","Virements à vérifier"],
+  ["sage","Saisis SAGE"],["pasage","Commandes pas encore SAGE"],["devsage","Devis pas encore SAGE"],["banque","Virements à vérifier"],
   ["note","Avec note"],["apresage","Pièces faites, pas SAGE"],["hors","Pas dans le tableau"]];
 
 /* Ce qui presse d'abord : fiche incomplète, pièces à remplir, retard, virement
@@ -13165,6 +13250,94 @@ async function pullNotes(){
 }
 
 function notesVivantes(){ return NOTES.filter(n => n && !n.sup); }
+
+/* ============ v14.41 : Noureddine écrit les notes de ce qui manque ============
+   Quand un point de « Ce qui manque » (Dossiers) n'est toujours pas fait au moment
+   prévu, une note « pour tout le monde » signée Noureddine est écrite, liée au bon.
+   Elle se coche toute seule quand le point est réglé. Une note par bon et par point
+   (identifiant fixe : jamais en double, même écrite depuis deux téléphones). Une note
+   supprimée ou cochée à la main n'est jamais recréée. Bons créés depuis le 1er octobre 2026. */
+const NA_DEPUIS = new Date(2026, 9, 1).getTime();
+const NA_J = 86400000;
+const NA_POINTS = {
+  "Téléphone du client":            {k:"tel",    t:"téléphone du client manquant"},
+  "Prix au m²":                     {k:"prix",   t:"prix au m² manquant"},
+  "Tissu choisi sur chaque mesure": {k:"tissu",  t:"tissu pas choisi sur toutes les mesures"},
+  "Pièces utilisées remplies":      {k:"pieces", t:"pièces utilisées pas remplies alors que le bon est prêt"},
+  "Fiche de production envoyée":    {k:"fiche",  t:"fiche de production pas envoyée au tableau"},
+  "Découpes livrées au magasin 2":  {k:"tubes",  t:"découpes de tubes pas toutes livrées au magasin 2"},
+  "Fenêtres fabriquées":            {k:"fen",    t:"fenêtres pas toutes fabriquées, en production depuis 3 jours"},
+  "Commande livrée":                {k:"livre",  t:"pas encore livré, l'échéance est passée"},
+  "Paiement soldé":                 {k:"solde",  t:"livré mais pas soldé"},
+  "Virements vus en banque":        {k:"banque", t:"paiement pas encore vu en banque depuis 3 jours"},
+  "Saisi dans SAGE":                {k:"sage",   t:"livré depuis 2 jours, pas encore saisi dans SAGE"}
+};
+function naDepuisEtat(o, etat){
+  const L = (o.log || []).filter(x => x && x.kind === "etat" && x.etat === etat && x.at);
+  return L.length ? L[L.length - 1].at : 0;
+}
+/* à partir de quand l'absence d'un point mérite une note (0 = pas encore) */
+function naQuand(o, k){
+  const et = etatDe(o), cree = new Date(o.date || 0).getTime() || 0;
+  const enProd = et === "production" || et === "pret" || et === "livre";
+  const prod = naDepuisEtat(o, "production") || (enProd ? cree : 0);
+  switch (k){
+    case "tel": case "prix": return cree;                                   /* dès la création du bon */
+    case "tissu": return et !== "devis" ? (prod || cree) : 0;
+    case "pieces": return (et === "pret" || et === "livre") ? (naDepuisEtat(o, "pret") || naDepuisEtat(o, "livre") || cree) : 0;
+    case "fiche": return enProd && prod ? prod + NA_J : 0;
+    case "tubes": return enProd && prod ? prod + 2 * NA_J : 0;
+    case "fen": return enProd && prod ? prod + 3 * NA_J : 0;
+    case "livre": return (o.ech && et !== "devis" && et !== "livre" && String(o.ech) < jourISO(new Date())) ? Date.now() : 0;
+    case "solde": return et === "livre" ? (naDepuisEtat(o, "livre") || cree) : 0;
+    case "banque": { const v = paiements(o).filter(p => !p.recu && p.date).map(p => new Date(p.date + "T12:00:00").getTime() + 3 * NA_J);
+                     return v.length ? Math.min.apply(null, v) : 0; }
+    case "sage": return et === "livre" ? (naDepuisEtat(o, "livre") || cree) + 2 * NA_J : 0;
+  }
+  return 0;
+}
+function notesAuto(){
+  if (!USER) return 0;
+  const now = Date.now(), par = {};
+  NOTES.forEach(n => { if (n && n.id) par[n.id] = n; });
+  let ch = 0;
+  (ORDERS || []).forEach(o => {
+    if (!o || o.status !== "sent" || !o.id) return;
+    if ((new Date(o.date || 0).getTime() || 0) < NA_DEPUIS) return;
+    let cp; try { cp = completude(o); } catch(e){ return; }
+    const manque = {};
+    cp.manque.forEach(lab => { const P = NA_POINTS[lab]; if (P) manque[P.k] = P; });
+    Object.keys(NA_POINTS).forEach(lab => {
+      const P = NA_POINTS[lab], id = "auto-" + o.id + "-" + P.k, n = par[id];
+      if (manque[P.k]){
+        const q = naQuand(o, P.k);
+        if (n || !q || now < q) return;                           /* déjà écrite (même supprimée) ou pas encore l'heure */
+        const note = {id:id, txt:(o.num || "Bon") + " · " + (o.nom || "client") + " : " + P.t,
+                      pour:"", bon:o.id, at:now, maj:now, by:"noureddine", auto:true};
+        NOTES.unshift(note); par[id] = note; ch++;
+      } else if (n && !n.sup && !n.fait && n.auto){
+        n.fait = now; n.faitBy = "noureddine"; n.maj = now; ch++;  /* le point est réglé : la note se coche */
+      }
+    });
+  });
+  /* v14.42 : achat reçu depuis 2 jours sans facture du fournisseur */
+  try {
+    (ACH && ACH.bas || []).forEach(b => {
+      if (!b || b.sup || !b.etat || b.etat === "brouillon") return;
+      const id = "auto-ba-" + b.id + "-facture", n = par[id], recu = achRecu(b) === "tout";
+      if (recu && !b.factureOk){
+        const q = (b.recuAt || 0) + 2 * NA_J;
+        if (n || !b.recuAt || now < q) return;
+        const f = achFour(b.four), note = {id:id, txt:(b.num || "Achat") + " · " + (f ? f.nom : "fournisseur") +
+          " : marchandise reçue le " + prosDate(b.recuAt) + ", facture du fournisseur pas encore reçue",
+          pour:"", at:now, maj:now, by:"noureddine", auto:true};
+        NOTES.unshift(note); par[id] = note; ch++;
+      } else if (n && !n.sup && !n.fait && n.auto){ n.fait = now; n.faitBy = "noureddine"; n.maj = now; ch++; }
+    });
+  } catch(e){}
+  if (ch){ notesSave(); try { renderNote(); renderHome(); } catch(e){} }
+  return ch;
+}
 /* Une note me concerne si elle m'est adressée, ou si elle est pour tout le
    monde et que ce n'est pas moi qui l'ai écrite. */
 function notePourMoi(n){
@@ -13185,9 +13358,17 @@ function notesAlerte(){
 }
 
 let noteFiltre = "afaire", noteBonId = "", noteEditId = "";
-
+let noteQui = "";      /* v14.46 : "" = tout, "*" = notes pour tout le monde, sinon le login du destinataire */
+function notePasseQui(n, q){ return !q || (q === "*" ? !n.pour : n.pour === q); }
+function renderNoteQui(){
+  const box = $("noteQui"); if (!box) return;
+  const reste = q => notesVivantes().filter(n => !n.fait && notePasseQui(n, q)).length;
+  const L = [["", "Tous les agents"]].concat(NOTE_USERS.map(u => [u, nomDe(u)])).concat([["*", "Pour tout le monde"]]);
+  box.innerHTML = L.map(([k, l]) => '<button type="button" class="prchip" data-nqf="' + k + '" aria-pressed="' + (noteQui === k) + '">' +
+    esc(l) + ' <b>' + reste(k) + '</b></button>').join("");
+}
 function noteListe(){
-  return notesVivantes().filter(n => {
+  return notesVivantes().filter(n => notePasseQui(n, noteQui)).filter(n => {
     if (noteFiltre === "afaire") return !n.fait;
     if (noteFiltre === "fait")   return !!n.fait;
     return true;
@@ -13213,8 +13394,8 @@ function renderNotePour(){
   const box = $("notePour");
   if (!box) return;
   const moi = moiLogin();
-  const autres = NOTE_USERS.filter(u => u !== moi);
-  const choix = autres.map(u => ({k:u, lab:nomDe(u)})).concat([{k:"", lab:"Tout le monde"}]);
+  /* v14.43 : Noureddine fait partie des destinataires (une note pour soi même sert de pense-bête) */
+  const choix = NOTE_USERS.map(u => ({k:u, lab:nomDe(u) + (u === moi ? " (moi)" : "")})).concat([{k:"", lab:"Tout le monde"}]);
   box.innerHTML = choix.map(c =>
     '<button type="button" data-npour="' + esc(c.k) + '" aria-pressed="' +
     (c.k === notePour ? "true" : "false") + '">' + esc(c.lab) + '</button>').join("");
@@ -13232,6 +13413,7 @@ function renderNote(){
     b.setAttribute("aria-pressed", String(b.dataset.nf === noteFiltre)));
 
   renderNotePour();
+  renderNoteQui();
   const bo = noteBonId ? (ORDERS || []).find(o => o.id === noteBonId) : null;
   $("noteBon").classList.toggle("on", !!bo);
   $("noteBonLab").textContent = bo
@@ -13286,6 +13468,12 @@ $("notePour").addEventListener("click", e => {
 $("noteBon").addEventListener("click", () => {
   if (noteBonId){ noteBonId = ""; renderNote(); return; }
   ouvrirPickBon("note");
+});
+$("noteQui").addEventListener("click", e => {
+  const b = e.target.closest("[data-nqf]");
+  if (!b) return;
+  noteQui = noteQui === b.dataset.nqf ? "" : b.dataset.nqf;
+  renderNote();
 });
 $("noteFiltres").addEventListener("click", e => {
   const b = e.target.closest("[data-nf]");
@@ -14054,7 +14242,13 @@ let prosFiltre = "tous", prosQ = "", prosEdit = "", prosCoul = "";
 /* v14.37 : plus de 6 fenêtres = gros client, automatiquement (mesures saisies ou
    « Nombre de fenêtres »). Le bouton « ⭐ Gros client » de la fiche reste pour les autres. */
 const GROS_FEN = 6;
-function waNbFen(p){ try { const r = prosResume(p); return (r && r.nb) || prosNbFenSaisi(p) || 0; } catch(e){ return prosNbFenSaisi(p) || 0; } }
+function waNbFen(p){
+  let n = 0;
+  try { const r = prosResume(p); n = (r && r.nb) || prosNbFenSaisi(p) || 0; } catch(e){ n = prosNbFenSaisi(p) || 0; }
+  /* v14.44 : son devis compte aussi (le plus grand des deux) */
+  try { if (p && (p.tel || p.bon)) bonsDuTel(p.tel, p.bon).forEach(o => { n = Math.max(n, orderTotals(o).nb || 0); }); } catch(e){}
+  return n;
+}
 function waGrosAuto(p){ return waNbFen(p) > GROS_FEN; }
 function waGros(p){ return !!(p && (p.star || waGrosAuto(p))); }
 
@@ -17258,8 +17452,9 @@ function renderWaChamps(){
    de fenêtres. Tout se lit ici, mois par mois, bon par bon. */
 const REMU = {
   imaneBase: 500,          /* fixe mensuel */
-  imanePct:  4,            /* % du CA produit HT de chaque commande */
-  imaneMin:  1200,         /* minimum garanti sur le mois */
+  imanePct1: 5,            /* v14.40 : % sur les ventes HT encaissées du mois jusqu'au seuil */
+  imanePct2: 7,            /* % sur la seule partie au-delà du seuil */
+  imaneSeuil: 25000,       /* seuil mensuel, remis à zéro le 1er du mois */
   soufBase:  3200,         /* salaire net */
   parFenetre: 40,          /* à partir de 4 fenêtres, la société paie à la fenêtre */
   seuilFen:  3             /* au dessus de ce nombre, on bascule au tarif par fenêtre */
@@ -17358,21 +17553,53 @@ function posePrime(o){
   return {n:n, montant: poseFacturee(o), mode:"client", hors:false};
 }
 
+/* v14.40 : Imane est payée sur l'argent ENCAISSÉ dans le mois, pas sur l'état « soldé ».
+   Un paiement (p.montant, saisi dans l'unité du bon : TTC si le bon est facturé, HT
+   sinon) couvre les produits ET la pose : on n'en garde que la part produits HT,
+   montant × produitHT ÷ total dû du bon. Le total dû étant lui même TTC ou HT comme le
+   paiement, le résultat est déjà en HT (pas de seconde division par 1,2).
+   Commission par tranches sur le cumul du mois : 5 % jusqu'à 25 000, 7 % au-delà. */
+function imaneCom(ventes){
+  const S = REMU.imaneSeuil, v = Math.max(0, ventes);
+  const p1 = Math.min(v, S) * REMU.imanePct1 / 100, p2 = Math.max(0, v - S) * REMU.imanePct2 / 100;
+  return {p1:r2(p1), p2:r2(p2), com:r2(p1 + p2), total:r2(REMU.imaneBase + p1 + p2)};
+}
+function partProduitsHT(o, montant){
+  const du = duDe(o), prod = produitHT(o);
+  if (!(du > 0) || !(prod > 0)) return 0;
+  return Math.min(prod, montant * prod / du);
+}
 function remuImane(iso){
   /* Un devis n'est pas une commande prise : il n'ouvre pas de commission. */
-  const bons = bonsDuMois(iso).filter(o =>
+  const siens = (ORDERS || []).filter(o => o && o.status === "sent" &&
     String(o.author || "").toLowerCase() === IMANE && etatDe(o) !== "devis");
-  const lignes = bons.map(o => {
-    const ht = produitHT(o);
-    const paye = paySolde(o);
-    return {o:o, ht:ht, com: ht * REMU.imanePct / 100, paye:paye};
-  });
-  const acquise = lignes.filter(l => l.paye).reduce((t,l) => t + l.com, 0);
-  const attente = lignes.filter(l => !l.paye).reduce((t,l) => t + l.com, 0);
-  const brut = REMU.imaneBase + acquise;
-  const total = Math.max(brut, REMU.imaneMin);
-  return {lignes:lignes, acquise:acquise, attente:attente, brut:brut, total:total,
-          minApplique: total > brut + 0.001};
+  const lignes = [];
+  siens.forEach(o => paiements(o).forEach(p => {
+    if (String(p.date || "").slice(0, 7) !== iso) return;          /* le mois du paiement, pas du bon */
+    const m = parseFloat(p.montant) || 0;
+    if (!(m > 0)) return;
+    lignes.push({o:o, p:p, date:String(p.date), montant:m, ht:partProduitsHT(o, m), recu:!!p.recu});
+  }));
+  lignes.sort((x, y) => x.date.localeCompare(y.date) || ((x.p.at || 0) - (y.p.at || 0)));
+  /* la commission de chaque paiement suit le cumul : la tranche 7 % ne s'ouvre qu'au-delà de 25 000 */
+  let cumul = 0;
+  lignes.forEach(l => { const av = imaneCom(cumul).com; cumul += l.ht; l.com = r2(imaneCom(cumul).com - av); l.cumul = cumul; });
+  const ventes = r2(cumul), c = imaneCom(ventes);
+  const restes = siens.filter(o => soldeDe(o) > 0.01).map(o => ({o:o, reste:soldeDe(o), ht:partProduitsHT(o, soldeDe(o))}))
+    .sort((x, y) => y.reste - x.reste);
+  return {lignes:lignes, ventes:ventes, p1:c.p1, p2:c.p2, com:c.com, total:c.total, restes:restes};
+}
+/* les cas de contrôle demandés par Noureddine (console : remuTests()) */
+function remuTests(){
+  const cas = [[7766, 888.30], [6472, 823.60], [25000, 1750], [30000, 2100]];
+  const L = cas.map(([v, att]) => ({ventes:v, attendu:att, obtenu:imaneCom(v).total, ok:Math.abs(imaneCom(v).total - att) < 0.005}));
+  /* un bon de 4 000 HT sans facture, 2 000 d'avance en octobre, le solde en novembre */
+  const bon = {id:"t", status:"sent", etat:"production", type:"ENR", prix:"100", fact:"non", author:IMANE,
+               dims:[{l:"200", h:"2000"}], paies:[{date:"2026-10-05", montant:2000}, {date:"2026-11-10", montant:2000}]};
+  const garde = ORDERS; ORDERS = [bon];
+  try { L.push({bon:"4 000 HT", octobre:remuImane("2026-10").ventes, novembre:remuImane("2026-11").ventes}); }
+  finally { ORDERS = garde; }
+  return L;
 }
 
 function remuSoufiane(iso){
@@ -17386,8 +17613,9 @@ function remuSoufiane(iso){
   const client  = lignes.filter(l => l.p.mode === "client").reduce((t,l) => t + l.p.montant, 0);
   const societe = lignes.filter(l => l.p.mode === "societe").reduce((t,l) => t + l.p.montant, 0);
   const fenetres = lignes.reduce((t,l) => t + l.p.n, 0);
+  /* v14.40 : à partir de 4 fenêtres, 40 MAD par fenêtre posée, comptés automatiquement */
   return {lignes:lignes, client:client, societe:societe, prime: client + societe,
-          fenetres:fenetres, total: REMU.soufBase + client};   /* v14.11 : salaire net + forfaits encaissés du client */
+          fenetres:fenetres, total: REMU.soufBase + client + societe};
 }
 
 function moisLisible(iso){
@@ -17414,38 +17642,51 @@ function renderRemu(){
       '<span class="rmtot">' + fr(tot, 2) + '<em>MAD</em></span>' +
     '</div>' + corps + '</div>';
 
-  /* --- Imane --- */
-  let ci = r("Base du mois", fr(REMU.imaneBase, 2)) +
-    r("Commission acquise  ·  " + REMU.imanePct + " % du produit HT", fr(I.acquise, 2), "ok") +
-    (I.attente > 0.01
-      ? r("En attente d'encaissement", fr(I.attente, 2), "att") : "") +
-    (I.minApplique ? r("Minimum garanti appliqué", fr(REMU.imaneMin, 2), "att") : "") +
+  /* --- Imane (v14.40) --- */
+  const pc = Math.min(100, I.ventes / REMU.imaneSeuil * 100);
+  const jj = d => String(d || "").split("-").reverse().join("/");
+  let ci = r("Ventes HT encaissées du mois", fr(I.ventes, 2)) +
+    '<div class="rmbar"><i style="width:' + pc.toFixed(1) + '%"></i></div>' +
+    '<div class="rmbarlab">' + (I.ventes >= REMU.imaneSeuil
+        ? '<b>Zone ' + REMU.imanePct2 + ' % atteinte</b> · ' + fr(I.ventes - REMU.imaneSeuil, 2) + ' MAD au-delà de ' + frm(REMU.imaneSeuil, 0)
+        : 'Encore <b>' + fr(REMU.imaneSeuil - I.ventes, 2) + ' MAD</b> avant la zone ' + REMU.imanePct2 + ' % (' + frm(REMU.imaneSeuil, 0) + ')') + '</div>' +
+    r("Part à " + REMU.imanePct1 + " %  ·  jusqu'à " + frm(REMU.imaneSeuil, 0), fr(I.p1, 2), "ok") +
+    r("Part à " + REMU.imanePct2 + " %  ·  au-delà de " + frm(REMU.imaneSeuil, 0), fr(I.p2, 2), I.p2 > 0 ? "ok" : "") +
+    r("Fixe", fr(REMU.imaneBase, 2)) +
     gros("À verser", fr(I.total, 2) + " MAD");
-  ci += '<div class="rmsub">' + I.lignes.length + " commande" + (I.lignes.length > 1 ? "s" : "") +
-        " prise" + (I.lignes.length > 1 ? "s" : "") + '</div>';
+  ci += '<div class="rmsub">' + I.lignes.length + " paiement" + (I.lignes.length > 1 ? "s" : "") + " encaissé" + (I.lignes.length > 1 ? "s" : "") + " ce mois</div>";
   ci += I.lignes.length ? I.lignes.map(l =>
       '<div class="rmline">' +
-        '<span class="n">' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") + '</span>' +
-        '<span class="v' + (l.paye ? "" : " nul") + '">' + fr(l.com, 2) + '</span>' +
-        '<span class="s">Produit HT ' + fr(l.ht, 2) + ' MAD  ·  ' +
-          (l.paye ? "encaissé" : '<b class="rmwarn">pas encore encaissé, commission en attente</b>') +
-        '</span>' +
+        '<span class="n">' + jj(l.date) + '  ·  ' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") + '</span>' +
+        '<span class="v">' + fr(l.com, 2) + '</span>' +
+        '<span class="s">Encaissé ' + fr(l.montant, 2) + (facture(l.o) ? " TTC" : " HT") + '  ·  part produits HT ' + fr(l.ht, 2) +
+          (l.recu ? "" : '  ·  <b class="rmwarn">à confirmer</b>') + '</span>' +
       '</div>').join("")
-    : '<div class="rmvide">Aucune commande prise à son nom ce mois ci.</div>';
+    : '<div class="rmvide">Aucun paiement encaissé ce mois-ci sur ses commandes.</div>';
+  ci += '<div class="rmsub">Reste à payer sur ses commandes · ' + I.restes.length + ' bon' + (I.restes.length > 1 ? "s" : "") + ' à relancer</div>';
+  ci += I.restes.length ? I.restes.map(x =>
+      '<div class="rmline">' +
+        '<span class="n">' + esc(x.o.num || "") + '  ·  ' + esc(x.o.nom || "Client sans nom") + '</span>' +
+        '<span class="v nul">' + fr(x.reste, 2) + '</span>' +
+        '<span class="s">commande du ' + jj(String(x.o.date || "").slice(0, 10)) + '  ·  ' + etatLabel(etatDe(x.o)) +
+          '  ·  part produits HT encore à venir ' + fr(x.ht, 2) + '</span>' +
+      '</div>').join("")
+    : '<div class="rmvide">Tout est encaissé.</div>';
 
   /* --- Soufiane --- */
   let cs = r("Salaire net", fr(REMU.soufBase, 2)) +
     r("Forfaits de pose encaissés du client", fr(S2.client, 2), "ok") +
+    r("Poses de 4 fenêtres et plus  ·  " + REMU.parFenetre + " MAD par fenêtre", fr(S2.societe, 2), S2.societe > 0 ? "ok" : "") +
     r("Fenêtres posées", S2.fenetres) +
     gros("À verser", fr(S2.total, 2) + " MAD");
   cs += '<div class="rmsub">' + S2.lignes.length + " pose" + (S2.lignes.length > 1 ? "s" : "") + '</div>';
   cs += S2.lignes.length ? S2.lignes.map(l =>
       '<div class="rmline">' +
         '<span class="n">' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") + '</span>' +
-        '<span class="v' + (l.p.montant > 0.01 && l.p.mode !== "societe" ? "" : " nul") + '">' + fr(l.p.mode === "societe" ? 0 : l.p.montant, 2) + '</span>' +
+        '<span class="v' + (l.p.montant > 0.01 ? "" : " nul") + '">' + fr(l.p.montant, 2) + '</span>' +
         '<span class="s">' + l.p.n + ' fenêtre' + (l.p.n > 1 ? "s" : "") + '  ·  ' +
           (l.p.mode === "societe"
-            ? "pas de forfait client, rien à verser en plus"
+            ? l.p.n + " × " + REMU.parFenetre + " MAD, compté automatiquement"
             : (l.p.montant > 0.01
                 ? "prix de pose du bon, encaissé du client"
                 : '<b class="rmwarn">aucun prix de pose sur le bon</b>')) +
@@ -17457,17 +17698,19 @@ function renderRemu(){
     carte("I", "Imane", "Prise de commandes  ·  payée hors société", I.total, ci) +
     carte("S", "Soufiane", "Pose  ·  salarié", S2.total, cs) +
     '<div class="rmregles"><h3>La règle appliquée</h3>' +
-      'Imane : <b>' + REMU.imaneBase + ' MAD</b> de base, <b>' + REMU.imanePct +
-      ' %</b> du produit HT de chaque commande encaissée, minimum <b>' + REMU.imaneMin + ' MAD</b>.<br>' +
+      'Imane : <b>' + REMU.imaneBase + ' MAD</b> de fixe, <b>' + REMU.imanePct1 + ' %</b> sur les ventes HT encaissées du mois jusqu\'à <b>' +
+      frm(REMU.imaneSeuil, 0) + ' MAD</b>, <b>' + REMU.imanePct2 + ' %</b> sur la partie au-delà. Seule la part produits (hors pose) de chaque paiement compte, ' +
+      'au mois où l\'argent est encaissé ; le compteur repart à zéro le 1er. Pas de minimum.<br>' +
       'Soufiane : <b>' + REMU.soufBase + ' MAD</b> de salaire net. Jusqu\'à ' + REMU.seuilFen +
       ' fenêtres, il encaisse le <b>prix de pose porté par le bon de commande</b>. ' +
-      'À verser : <b>salaire net + forfaits de pose encaissés du client</b>. Les commandes en livraison ne comptent pas.' +
+      'À partir de ' + (REMU.seuilFen + 1) + ' fenêtres : <b>' + REMU.parFenetre + ' MAD par fenêtre</b>, compté automatiquement. ' +
+      'À verser : <b>salaire net + forfaits de pose + ' + REMU.parFenetre + ' MAD par fenêtre des grandes poses</b>. Les commandes en livraison ne comptent pas.' +
     '</div>';
 
   const nb = bonsDuMois(remuMois).length;
   $("remuHint").textContent = moisLisible(remuMois) + "  ·  " + nb + " bon" + (nb > 1 ? "s" : "") +
     " envoyé" + (nb > 1 ? "s" : "") + "  ·  total à verser " +
-    fr(I.total + S2.total, 2) + " MAD.  Le mois d'un bon est celui de sa création.";
+    fr(I.total + S2.total, 2) + " MAD.  Imane : mois du paiement. Soufiane : mois de création du bon.";
 }
 
 $("remuMois").addEventListener("change", e => {
@@ -19068,10 +19311,12 @@ function achRendListe(box){
   const nb = {tous:L.length, brouillon:L.filter(b => !b.etat || b.etat === "brouillon").length,
               recevoir:aRecevoir.length, recu:envoyes.filter(b => achRecu(b) === "tout").length,
               payer:envoyes.filter(b => achTot(b).reste > 0.01).length,
-              sage:envoyes.filter(b => achRecu(b) !== "rien" && !b.sage).length};
+              sage:envoyes.filter(b => achRecu(b) !== "rien" && !b.sage).length,
+              facture:envoyes.filter(b => achRecu(b) === "tout" && !b.factureOk).length};
   const F = {tous:() => true, brouillon:b => !b.etat || b.etat === "brouillon", recevoir:b => aRecevoir.indexOf(b) >= 0,
              recu:b => b.etat && b.etat !== "brouillon" && achRecu(b) === "tout", payer:b => b.etat && b.etat !== "brouillon" && achTot(b).reste > 0.01,
-             sage:b => b.etat && b.etat !== "brouillon" && achRecu(b) !== "rien" && !b.sage};
+             sage:b => b.etat && b.etat !== "brouillon" && achRecu(b) !== "rien" && !b.sage,
+             facture:b => b.etat && b.etat !== "brouillon" && achRecu(b) === "tout" && !b.factureOk};
   const vus = L.filter(F[ACH_F] || F.tous);
   box.innerHTML =
     '<div class="hk3"><div><small>À recevoir</small><b>' + aRecevoir.length + '</b></div>' +
@@ -19081,7 +19326,7 @@ function achRendListe(box){
     (mq.length ? '<button type="button" class="achwarn" data-achvue="cmd"><b>' + mq.length + ' tissu' + (mq.length > 1 ? 's' : '') +
        ' à commander pour des bons clients</b>' + mq.slice(0, 4).map(m => esc(m.ref)).join(" · ") + (mq.length > 4 ? '…' : '') + ' → voir « À commander »</button>' : '') +
     '<div class="achduo"><button type="button" data-achvue="cmd">À commander</button><button type="button" data-achvue="four">Fournisseurs</button></div>' +
-    '<div class="pypuces">' + [["tous", "Tous"], ["brouillon", "Brouillons"], ["recevoir", "À recevoir"], ["recu", "Reçus"], ["payer", "À payer"], ["sage", "À saisir dans SAGE"]]
+    '<div class="pypuces">' + [["tous", "Tous"], ["brouillon", "Brouillons"], ["recevoir", "À recevoir"], ["recu", "Reçus"], ["payer", "À payer"], ["sage", "À saisir dans SAGE"], ["facture", "Facture à récupérer"]]
       .filter(([k]) => k === "tous" || nb[k]).map(([k, l]) => '<button type="button" class="prchip" data-achf="' + k + '" aria-pressed="' + (ACH_F === k) + '">' + l + ' <b>' + nb[k] + '</b></button>').join("") + '</div>' +
     (vus.length ? vus.map(achCarte).join("") : '<div class="empty">' + (L.length ? 'Rien dans ce filtre.' : 'Aucun bon d\'achat pour l\'instant.<br>« + Nouveau bon d\'achat » pour commencer.') + '</div>') +
     ACH_NOSTOCK;
@@ -19097,6 +19342,8 @@ function achCarte(b){
     (p && b.etat !== "brouillon" ? '<span class="st" style="background:' + p.bg + ';color:' + p.c + '">' + esc(p.lab) + '</span>' : '') +
     (b.etat !== "brouillon" && achRecu(b) !== "rien" ? (b.sage ? '<span class="st" style="background:#E3F5EA;color:#12833F">Saisi dans SAGE ✓</span>'
                                                                : '<span class="st" style="background:#FFF4E0;color:#B45309">À saisir dans SAGE</span>') : '') +
+    (b.etat !== "brouillon" && achRecu(b) === "tout" ? (b.factureOk ? '<span class="st" style="background:#E3F5EA;color:#12833F">Facture reçue ✓</span>'
+                                                                     : '<span class="st" style="background:#FDECEE;color:#B42318">Facture à récupérer</span>') : '') +
   '</button>';
 }
 function achNouveau(lignes){
@@ -19157,6 +19404,9 @@ function achRendBa(box){
       '<button type="button" class="achsage' + (b.sage ? ' on' : '') + '" data-achsage>' + (b.sage ? '☑ Saisi dans SAGE' + (b.sageAt ? ' le ' + prosDate(b.sageAt) : '') : '☐ Saisi dans SAGE · à cocher une fois fait') + '</button>' +
       '<button type="button" class="achsage' + (achRecu(b) === "tout" ? ' on' : '') + '" data-achrecuok>' +
         (achRecu(b) === "tout" ? '☑ Reçu' + (b.recuAt ? ' le ' + prosDate(b.recuAt) : '') : '☐ Reçu · à cocher quand la marchandise est arrivée') + '</button>' +
+      /* v14.42 : la facture du fournisseur */
+      '<button type="button" class="achsage' + (b.factureOk ? ' on' : '') + '" data-achfacture>' +
+        (b.factureOk ? '☑ Facture reçue' + (b.factureAt ? ' le ' + prosDate(b.factureAt) : '') : '☐ Facture reçue · à cocher quand le fournisseur a donné sa facture') + '</button>' +
     '</section>';
     const P = b.paies || [];
     h += '<section class="card achcard"><div class="label">Paiements fournisseur</div>' +
@@ -19506,6 +19756,8 @@ $("achSheet").addEventListener("click", e => {
     toast("Article ajouté à la liste des achats");
     return;
   }
+  if (g("[data-achfacture]") && b){ b.factureOk = !b.factureOk; b.factureAt = b.factureOk ? Date.now() : 0; achTouche(b); renderAch();
+    try { notesAuto(); renderHome(); } catch(err){} return; }
   if (g("[data-achrecuok]") && b){ b.recuOk = achRecu(b) !== "tout"; b.recuAt = b.recuOk ? Date.now() : 0; achTouche(b); renderAch(); try { renderHome(); } catch(err){} return; }
   if (g("[data-achsage]") && b){ b.sage = !b.sage; b.sageAt = b.sage ? Date.now() : 0; achTouche(b); renderAch(); try { renderHome(); } catch(err){} return; }
   if (g("[data-achvoir]") && b && b.photo){ voirPimg(b.photo, b.num + " · bon de livraison"); return; }

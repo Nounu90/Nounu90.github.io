@@ -23,7 +23,16 @@
   .agent canvas { image-rendering:pixelated; flex:none; }
   .agent .name { font-size:9px; margin-bottom:5px; }
   .agent .act { font-size:7px; line-height:1.6; color:#505868; }
+  .notact { display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+  .notqui { display:flex; gap:4px; flex-wrap:wrap; margin:0 0 8px; }
+  .notqui button { font-size:7px; padding:4px 6px; }
+  .notqui button[aria-pressed="true"] { background:#c03030; color:#fff; }
+  .notact select { font:inherit; font-size:7px; padding:3px; }
+  .notact button { font-size:7px; padding:4px 6px; }
   .manq { display:flex; gap:8px; align-items:flex-start; padding:6px 0; border-bottom:1px solid #d8d8e8; font-size:8px; line-height:1.6; }
+  .manq { padding-left:6px; padding-right:4px; }
+  .lotleg { display:flex; flex-wrap:wrap; gap:5px; margin:0 0 8px; }
+  .lotleg span { border:2px solid; padding:3px 6px; font-size:7px; line-height:1.5; }
   .manq b { flex:none; width:40px; color:#c03030; } .manq span { flex:none; width:78px; color:#384868; }
   .manq div { flex:1; min-width:0; } .manq i { font-style:normal; color:#289048; } .manq small { display:block; color:#6878a0; font-size:7px; }
   .dot { display:inline-block; width:8px; height:8px; margin-right:6px; border:1px solid #000; }
@@ -125,7 +134,7 @@
   <div class="fr" id="agents"></div>
   <div class="fr">
     <div class="row" style="margin-top:0"><button id="zoomOut" type="button">Zoom -</button><button id="zoomIn" type="button">Zoom +</button><button id="fitBtn" type="button">Vue d'ensemble</button></div>
-    <div class="row"><button id="cotesBtn" type="button">Cotes : NON</button><button id="sndBtn" type="button">Sons : OUI</button></div>
+    <div class="row"><button id="cotesBtn" type="button">Cotes : NON</button><button id="sndBtn" type="button">Sons : OUI</button><button id="notifBtn" type="button">Notifications : NON</button></div>
     <div class="row" style="align-items:center"><span class="muted">Volume</span><input id="volRange" type="range" min="0" max="100" step="5" style="flex:1;margin:0;padding:0;border:none" aria-label="Volume des sons"><span id="volLab" class="muted" style="width:32px;text-align:right"></span></div>
     <div class="muted" style="margin-top:6px">1 case = 1 m. Tubes, tissu, rouleaux et stores sont à leur vraie taille.<br>Glissez la carte ou utilisez les flèches pour vous déplacer, molette pour zoomer. Cliquez sur un meuble pour ouvrir son écran, sur un agent pour savoir ce qu'il fait, sur son nom à droite pour le suivre.</div>
   </div>
@@ -248,6 +257,8 @@ function hit(x,y,w,h,lines){ HITS.push({x,y,w,h,lines}); } function tag(x,y,text
    DONNÉES (lecture seule)
    =================================================================== */
 let CATALOGUE=[], ARTICLES=[], ATL={}, ORDERS=[], NOTES=[], PROS=[], ACH={bas:[],fours:[]};
+/* mentions du groupe WhatsApp, à utiliser partout où l'on écrit à un agent (règle de Noureddine, 19/10/2026) */
+const WA_TAG={imane:'@imane sis4',soufiane:'@Soufiane%',ahmed:'@Papa',noureddine:'@Noureddine'};
 let LIVE=false, DEMO=false, SB=null, USER=null, lastStock=0, lastBons=0, dataErr='';
 
 function parseCSV(t){ const rows=[]; let cur=[],val='',q=false; for(let i=0;i<t.length;i++){ const c=t[i];
@@ -673,8 +684,17 @@ function deliverSteps(e){ return [go(ST.ready1),work(1.5,`Charge la commande ${e
 function deskSteps(a,act,icon,snd){ const icn=(a.id==='ahmed'||a.id==='soufiane')?'phone':icon; return [go(HOME[a.id]),work(4,act,icn,snd)]; }
 
 /* un événement nouveau dans le journal de l'app -> une tâche */
+/* onglet caché : Chrome met l'animation en pause. Chaque nouveauté sonne tout de suite et,
+   si autorisé, s'affiche en notification du système. L'agent fera sa tâche en silence. */
+const EV_SON={bon:'bon',edit:'bon',etat:'bon',paie:'cash',pros:'phone',wa:'phone',note:'note',notefait:'note',tube:'alu',fab:'ready',wajr:'phone'};
+let NOTIF_ON=false; try{ NOTIF_ON=localStorage.getItem('mst-atelier-notif')==='oui'; }catch(e){}
+function bgNotif(son,titre,corps){ if(!document.hidden) return;
+  playSound(son,true);
+  try{ if(NOTIF_ON&&'Notification' in window&&Notification.permission==='granted')
+    new Notification(titre,{body:corps||'',icon:'icon-192.png',tag:'atelier-'+Date.now(),silent:true}); }catch(err){} }
 function onEvent(e){
   const a=agentOf(e.by);
+  bgNotif(e.type==='etat'&&e.etat==='livre'?'deliver':(EV_SON[e.type]||'bon'), (e.by?cap(e.by)+' · ':'')+e.titre, e.sous||'');
   if(e.type==='tube'||e.type==='fab') return;   // gérés par les tubes livrés (Ahmed) et les stores faits (Soufiane)
   if(e.type==='etat'&&e.etat==='livre'){ queue(agentOf('soufiane'),deliverSteps(e),'deliver'); if(a&&a.id!=='soufiane') queue(a,deskSteps(a,`Passe ${e.num} en livré`,'screen'),'bon'); return; }
   if(e.type==='note'||e.type==='notefait'){
@@ -735,6 +755,7 @@ function eventsDuJour(iso){ const out=[];
 }
 let EV=[], EV_SEEN=null, EV_VER=0;
 function processEvents(){ EV=eventsDuJour(jourISO(new Date())); EV_VER++; manqueCompte();
+  if(!MANQUE_AUTO&&LIVE){ MANQUE_AUTO=true; if(MANQUE_N>0&&!popKey) setTimeout(()=>{ if(!popKey) openPop('manque'); },800); }
   if(!EV_SEEN){ EV_SEEN=new Set(EV.map(e=>e.id)); return; }
   EV.forEach(e=>{ if(EV_SEEN.has(e.id)) return; EV_SEEN.add(e.id); if(Date.now()-e.at<15*60000) onEvent(e); }); }
 
@@ -743,8 +764,11 @@ let ALERTS=[], ALERT_SEEN=null;
 const TUBES_ATTENTE_H=24;   // délai avant alerte : tubes livrés mais store pas fait
 function computeAlerts(){ const out=[], today=jourISO(new Date()), now=Date.now(), D=86400000, sent=ORDERS.filter(o=>o.status==='sent');
   sent.forEach(o=>{ const e=etatDe(o), s=soldeDe(o), ech=o.ech?String(o.ech).slice(0,10):'';
+    /* tissu pas choisi : vérifié sur toutes les situations, sauf les devis */
+    if(e!=='devis'){ const dd=ordDims(o), sansChoix=dd.filter(x=>!x.ref).length;
+      if(sansChoix) out.push({id:'choixtissu|'+o.id,g:e==='production'?3:2,t:`${o.num} (${(ETATS[e]||e).toLowerCase()}) : tissu pas choisi pour ${sansChoix} fenêtre${sansChoix>1?'s':''} sur ${dd.length}`,c:o.nom}); }
     if(e==='livre'&&s>0.01) out.push({id:'impaye|'+o.id,g:3,t:`${o.num} livré mais pas soldé : reste ${frm(s)} DH`,c:o.nom});
-    if(ech&&e!=='livre'&&e!=='devis'&&ech<today) out.push({id:'retard|'+o.id,g:3,t:`${o.num} en retard : échéance du ${dateFr(ech)} dépassée`,c:o.nom});
+    if(echDepassee(o)) out.push({id:'retard|'+o.id,g:3,t:`${o.num} en retard : échéance du ${dateFr(ech)} dépassée`,c:o.nom});
     else if(ech&&e==='production'){ const j=Math.round((new Date(ech+'T12:00:00')-new Date(today+'T12:00:00'))/D), d=ordDims(o), f=d.filter(x=>(o.faites||[]).indexOf(x.key)>=0).length;
       if(j<=2&&f<d.length) out.push({id:'proche|'+o.id,g:2,t:`${o.num} : échéance ${j===0?'aujourd\'hui':'dans '+j+' j'}, ${f}/${d.length} stores faits`,c:o.nom}); }
     if(e==='pret'){ const lp=(o.log||[]).filter(x=>x.kind==='etat'&&x.etat==='pret').pop(); if(lp&&now-lp.at>3*D) out.push({id:'pretlong|'+o.id,g:1,t:`${o.num} prêt depuis ${Math.floor((now-lp.at)/D)} jours, pas encore livré`,c:o.nom}); }
@@ -756,12 +780,12 @@ function computeAlerts(){ const out=[], today=jourISO(new Date()), now=Date.now(
   const ouvres=(a,b)=>{ let n=0; const d=new Date(a); d.setHours(0,0,0,0); const fin=new Date(b); fin.setHours(0,0,0,0); while(d<fin){ d.setDate(d.getDate()+1); const j=d.getDay(); if(j!==0&&j!==6) n++; } return n; };
   prodO.forEach(o=>{ const c=coupesTube(o), cut=c.filter(x=>(o.tubes||[]).indexOf(x.key)>=0).length, t=enProdDepuis(o), ech=o.ech?String(o.ech).slice(0,10):'';
     // 1. en production depuis 2 jours ouvrés, aucun tube coupé
-    if(c.length&&cut<c.length&&t&&ouvres(t,now)>=2) out.push({id:'ahmed|'+o.id,g:2,t:`${o.num} en production depuis ${ouvres(t,now)} jours ouvrés : ${c.length-cut} découpe${pl(c.length-cut,'s')} de tubes pas encore faite${pl(c.length-cut,'s')} par Ahmed`,c:o.nom,wa:`@dad - 📢 🔔 ${o.num} · ${o.nom||'client'} · échéance ${echTxt(o)}`});
+    if(c.length&&cut<c.length&&t&&ouvres(t,now)>=2) out.push({id:'ahmed|'+o.id,g:2,t:`${o.num} en production depuis ${ouvres(t,now)} jours ouvrés : ${c.length-cut} découpe${pl(c.length-cut,'s')} de tubes pas encore faite${pl(c.length-cut,'s')} par Ahmed`,c:o.nom,wa:`${WA_TAG.ahmed} 📢 🔔 ${o.num} · ${o.nom||'client'} · échéance ${echTxt(o)}`});
     // 2. échéance dans 3 jours ou moins, découpes de tubes pas finies
     if(ech&&ech>=today&&cut<c.length){ const j=Math.round((new Date(ech+'T12:00:00')-new Date(today+'T12:00:00'))/D);
       if(j<=3) out.push({id:'tubesurg|'+o.id,g:2,t:`${o.num} : échéance ${j===0?"aujourd'hui":'dans '+j+' j'}, ${c.length-cut} découpe${pl(c.length-cut,'s')} de tubes encore à faire`,c:o.nom}); }
     // 5. fenêtre sans tissu reconnu dans le stock
-    const sansTissu=ordDims(o).filter(d=>(o.faites||[]).indexOf(d.key)<0&&(!d.ref||!fab(d.ref))).length;
+    const sansTissu=ordDims(o).filter(d=>(o.faites||[]).indexOf(d.key)<0&&d.ref&&!fab(d.ref)).length;   /* tissu choisi mais absent du stock (pas choisi : règle plus haut) */
     if(sansTissu) out.push({id:'sanstissu|'+o.id,g:2,t:`${o.num} : ${sansTissu} fenêtre${pl(sansTissu,'s')} sans tissu reconnu dans le stock, Soufiane ne peut pas couper`,c:o.nom});
   });
   // Soufiane : dès que les tubes sont livrés, il doit faire la capacité de l'atelier (3 stores) par jour ouvré.
@@ -779,7 +803,7 @@ function computeAlerts(){ const out=[], today=jourISO(new Date()), now=Date.now(
     if(fait>=attendu) return;
     const reste=dims.length-fait, liv=dateFr(jourISO(t0));
     out.push({id:'soufiane|'+o.id,g:2,t:`${o.num} : Soufiane en retard, ${fait}/${attendu} store${pl(attendu,'s')} fait${pl(fait,'s')} depuis les tubes livrés le ${liv} (${capS} par jour), reste ${reste}`,c:o.nom,
-      wa:`@soufiane- 📢 🔔 ${o.num} · ${o.nom||'client'} · échéance ${echTxt(o)} · reste ${reste} store${pl(reste,'s')} à faire. Les tubes sont livrés depuis le ${liv} : ${k} jour${pl(k,'s')} ouvré${pl(k,'s')} à ${capS} stores par jour = ${attendu} store${pl(attendu,'s')} attendu${pl(attendu,'s')}, seulement ${fait} fait${pl(fait,'s')}.`});
+      wa:`${WA_TAG.soufiane} 📢 🔔 ${o.num} · ${o.nom||'client'} · échéance ${echTxt(o)} · reste ${reste} store${pl(reste,'s')} à faire. Les tubes sont livrés depuis le ${liv} : ${k} jour${pl(k,'s')} ouvré${pl(k,'s')} à ${capS} stores par jour = ${attendu} store${pl(attendu,'s')} attendu${pl(attendu,'s')}, seulement ${fait} fait${pl(fait,'s')}.`});
   });
   // 3. charge : les stores à faire tiennent-ils avant chaque échéance ?
   const cap=Math.max(1,parseFloat(ATL.cap)||3); let cumul=0;
@@ -815,10 +839,29 @@ function computeAlerts(){ const out=[], today=jourISO(new Date()), now=Date.now(
   Object.keys(need).forEach(r=>{ const f=fab(r), st=f?stockMl(f):0; if(st<need[r]) out.push({id:'tissu|'+r,g:3,t:`Tissu ${r} : environ ${fr(need[r])} ml à couper, il reste ${fr(st)} ml`,c:'Stock'}); });
   return out.sort((a,b)=>b.g-a.g);
 }
-function processAlerts(){ ALERTS=computeAlerts(); const ids=ALERTS.map(a=>a.id);
+/* ---------- reporter une alerte : elle disparaît du PC (et des sons) jusqu'à la date choisie ----------
+   « jusqu'à changement » : elle revient seule dès que son texte change (un chiffre, une date…). */
+const REP_KEY='mst-atelier-reportees';
+let REPORT={}; try{ REPORT=JSON.parse(localStorage.getItem(REP_KEY)||'{}')||{}; }catch(e){ REPORT={}; }
+let REPORTEES=[];
+function reportSave(){ try{ localStorage.setItem(REP_KEY,JSON.stringify(REPORT)); }catch(e){} }
+function estReportee(a){ const r=REPORT[a.id]; if(!r) return false;
+  if(r.chg) return r.t===a.t;                       /* même texte : toujours reportée */
+  return Date.now()<r.jusqua; }
+function reporter(id,quoi){ const a=[...ALERTS,...REPORTEES].find(x=>x.id===id); if(!a) return;
+  if(quoi==='chg') REPORT[id]={chg:true,t:a.t,at:Date.now()};
+  else { const j={'1j':1,'3j':3,'7j':7,'30j':30}[quoi]||1, d=new Date(); d.setDate(d.getDate()+j); d.setHours(8,0,0,0); REPORT[id]={jusqua:d.getTime(),t:a.t,at:Date.now()}; }
+  reportSave(); processAlerts(); if(popKey) renderPop(); }
+function reactiver(id){ delete REPORT[id]; reportSave(); processAlerts(); if(popKey) renderPop(); }
+function reportTxt(r){ return r.chg?'jusqu\'à ce que ça change':'jusqu\'au '+new Date(r.jusqua).toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'}); }
+function processAlerts(){ const toutes=computeAlerts();
+  /* le ménage seulement quand les bons sont chargés : sinon tout serait oublié au démarrage */
+  if(LIVE&&ORDERS.length){ Object.keys(REPORT).forEach(id=>{ const r=REPORT[id], a=toutes.find(x=>x.id===id); if(!a||(!r.chg&&Date.now()>=r.jusqua)||(r.chg&&r.t!==a.t)) delete REPORT[id]; });
+    reportSave(); }
+  REPORTEES=toutes.filter(estReportee); ALERTS=toutes.filter(a=>!estReportee(a)); const ids=ALERTS.map(a=>a.id);
   if(!ALERT_SEEN){ ALERT_SEEN=new Set(ids); return; }
   const neuves=ALERTS.filter(a=>!ALERT_SEEN.has(a.id)); ids.forEach(i=>ALERT_SEEN.add(i));
-  if(neuves.length) queue(agentOf('noureddine'),[go(ST.deskN),work(5,'Repère : '+neuves[0].t,'alert')],'alert'); }
+  if(neuves.length){ bgNotif('alert','Alerte atelier',neuves[0].t); queue(agentOf('noureddine'),[go(ST.deskN),work(5,'Repère : '+neuves[0].t,'alert')],'alert'); } }
 
 /* ---------- WhatsApp d'Imane : même calcul que l'écran « Aujourd'hui » de l'app (v14.32) ---------- */
 let WA={reg:{},camp:[]};
@@ -939,11 +982,11 @@ const SND_FILES={saw:'sons/scie.mp3',drop:'sons/tubes.mp3',roll:'sons/rouleau.mp
   deliver:'sons/livraison.mp3',alu:'sons/alu-coupe.mp3',tissu:'sons/ciseaux-tissu.mp3',clavier:'sons/clavier-frappe.mp3',note:'sons/note.mp3',cash:'sons/caisse.mp3',phone:'sons/telephone.mp3',bon:'sons/clavier.mp3',alert:'sons/alerte.mp3'};
 let SOUND_ON=true; try{ SOUND_ON=localStorage.getItem('mst-atelier-son')!=='non'; }catch(e){}
 let VOL=0.4; try{ const v=parseFloat(localStorage.getItem('mst-atelier-volume')); if(v>=0&&v<=1) VOL=v; }catch(e){}
-const AUD={}, LAST_SND={}; let actx=null;
+const AUD={}, LAST_SND={}; let actx=null, BG_MUET=false;
 function beep(k){ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); const notes={saw:[220,196,220],drop:[523,392],roll:[330,392,494],cut:[880,660],hammer:[262,262,330],
     ready:[523,659,784,1047],deliver:[392,523,659],note:[659,784],cash:[988,1319],phone:[784,659,784,659],bon:[440,494],alert:[880,698,880,698]}[k]||[440];
   notes.forEach((f,i)=>{ const o=actx.createOscillator(), gn=actx.createGain(), t=actx.currentTime+i*.11; o.type='square'; o.frequency.value=f; gn.gain.setValueAtTime(Math.max(.0011,.12*VOL),t); gn.gain.exponentialRampToValueAtTime(.001,t+.1); o.connect(gn); gn.connect(actx.destination); o.start(t); o.stop(t+.11); }); }catch(e){} }
-function playSound(k){ if(!SOUND_ON||!k) return; const now=Date.now(); if(LAST_SND[k]&&now-LAST_SND[k]<700) return; LAST_SND[k]=now;
+function playSound(k,force){ if(!SOUND_ON||!k) return; if(BG_MUET&&!force) return; const now=Date.now(); if(LAST_SND[k]&&now-LAST_SND[k]<700) return; LAST_SND[k]=now;
   let a=AUD[k]; if(!a){ a=AUD[k]=new Audio(SND_FILES[k]); a.addEventListener('error',()=>{ a.bad=true; }); }
   if(a.bad){ beep(k); return; } try{ a.volume=VOL; a.currentTime=0; const p=a.play(); if(p&&p.catch) p.catch(()=>beep(k)); }catch(e){ beep(k); } }
 
@@ -1113,7 +1156,7 @@ let popKey=null, popTab=null;
 const SCREENS={
  imane:{title:'Accueil · Imane',tabs:['WhatsApp du jour','Historique WhatsApp','Contacts WhatsApp','Dossiers']},
  manque:{title:"Ce que j'ai manqué",tabs:['Tout','Imane','Ahmed','Soufiane','Noureddine']},
- pc:{title:'PC de Noureddine',tabs:['Alertes','Contrôles Imane','En production','Achats','Dossiers','Paiements','Encaissements']},
+ pc:{title:'PC de Noureddine',tabs:['Alertes','Reportées','Contrôles Imane','En production','Achats','Dossiers','Paiements','Encaissements']},
  scie:{title:'Scie à onglet · Ahmed',tabs:['À couper','Déjà coupées','Par bon']},
  profils:{title:'Profilés en stock',tabs:['Enrouleur','Jour et nuit']},
  kpi:{title:'Chiffres du mois',tabs:['Ce mois']},
@@ -1127,7 +1170,7 @@ const SCREENS={
  tubes:{title:'Tubes reçus à l\'atelier',tabs:['Reçus','À couper']},
  prets:{title:'Prêt à livrer',tabs:['Prêts']},
 };
-function openPop(key,tab){ if(key==='manque'){ MANQUE_LU=true; setTimeout(manqueCompte,0); } popKey=key; popTab=tab||SCREENS[key].tabs[0]; renderPop(); pop.classList.add('open'); veil.classList.add('open'); }
+function openPop(key,tab){ if(key==='manque'){ if(!MANQUE_LU) lotNouveau(); MANQUE_LU=true; setTimeout(manqueCompte,0); } popKey=key; popTab=tab||SCREENS[key].tabs[0]; renderPop(); pop.classList.add('open'); veil.classList.add('open'); }
 function closePop(){ pop.classList.remove('open'); veil.classList.remove('open'); popKey=null; }
 
 /* ---------- « Ce que j'ai manqué » : tout ce que l'équipe a fait pendant que le jeu était fermé ----------
@@ -1141,11 +1184,26 @@ if(!MANQUE_DEPUIS) MANQUE_DEPUIS=Date.now()-24*3600000;          /* première fo
 function manquePresence(){ try{ localStorage.setItem(MANQUE_KEY,String(Date.now())); }catch(e){} }
 setInterval(()=>{ if(LIVE&&document.visibilityState==='visible') manquePresence(); },60000);
 addEventListener('pagehide',()=>{ if(LIVE) manquePresence(); });
+let HID_AT=0, MANQUE_AUTO=false;
 document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='hidden'){ if(LIVE) manquePresence(); return; }
+  if(document.visibilityState==='hidden'){ HID_AT=Date.now(); if(LIVE) manquePresence(); return; }
   let der=0; try{ der=+localStorage.getItem(MANQUE_KEY)||0; }catch(e){}
-  if(der&&Date.now()-der>10*60000){ MANQUE_DEPUIS=der; MANQUE_FIN=Date.now(); MANQUE_LU=false; manqueCompte(); } });
-function manqueListe(){ const out=[], vu=new Set(), a=MANQUE_DEPUIS, b=MANQUE_FIN;
+  const depuis=HID_AT||der; HID_AT=0;
+  if(LIVE&&depuis&&Date.now()-depuis>30000){
+    Promise.resolve(refreshBons()).catch(()=>{}).then(()=>{ MANQUE_DEPUIS=depuis; MANQUE_FIN=Date.now(); MANQUE_LU=false; manqueCompte();
+      if(MANQUE_N>0&&!popKey) openPop('manque'); }); } });
+/* chaque ouverture de la fenêtre forme un « lot » avec sa couleur : jaune, puis bleu, puis vert… */
+const LOT_KEY='mst-atelier-lots';
+const LOT_COUL=[['#fff1a8','#c99a00','jaune'],['#cfe2ff','#2f6fd0','bleu'],['#d3f5d3','#2f9e44','vert'],['#ffd6e7','#d6336c','rose'],['#ffe0c2','#e8590c','orange'],['#e5dbff','#7048e8','violet']];
+let LOTS=[]; try{ LOTS=JSON.parse(localStorage.getItem(LOT_KEY)||'[]'); if(!Array.isArray(LOTS)) LOTS=[]; }catch(e){ LOTS=[]; }
+function lotsSave(){ LOTS=LOTS.filter(l=>Date.now()-l.o<14*86400000).slice(-12); try{ localStorage.setItem(LOT_KEY,JSON.stringify(LOTS)); }catch(e){} }
+/* à l'ouverture : ce qui a été manqué devient un nouveau lot, d'une nouvelle couleur */
+function lotNouveau(){ if(!LIVE) return; const L=manqueListe(); if(!L.length) return;
+  const der=LOTS[LOTS.length-1], c=der?(der.c+1)%LOT_COUL.length:0;
+  LOTS.push({d:MANQUE_DEPUIS,f:MANQUE_FIN,o:Date.now(),c:c,n:L.length}); lotsSave();
+  MANQUE_DEPUIS=MANQUE_FIN; manquePresence(); }
+function manqueListe(){ return manqueEntre(MANQUE_DEPUIS, MANQUE_FIN); }
+function manqueEntre(a,b){ const out=[], vu=new Set();
   const d=new Date(a); d.setHours(12,0,0,0);
   for(let i=0;i<15&&d.getTime()<=b+43200000;i++,d.setDate(d.getDate()+1)){
     eventsDuJour(jourISO(d)).forEach(e=>{ if(e.at>a&&e.at<=b&&!vu.has(e.id)){ vu.add(e.id); out.push(e); } }); }
@@ -1156,19 +1214,31 @@ function manqueListe(){ const out=[], vu=new Set(), a=MANQUE_DEPUIS, b=MANQUE_FI
 function manqueCompte(){ try{ MANQUE_N=LIVE?manqueListe().length:0; }catch(e){ MANQUE_N=0; }
   const bt=document.getElementById('manqueBtn'); if(bt) bt.textContent="Ce que j'ai manqué"+(MANQUE_N&&!MANQUE_LU?' ('+MANQUE_N+')':''); }
 function manqueDepuisTxt(){ const d=new Date(MANQUE_DEPUIS); return d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+' à '+hm(MANQUE_DEPUIS); }
-function renderManquePop(){ let L=manqueListe(); const qui=popTab&&popTab!=='Tout'?popTab.toLowerCase():'';
+function renderManquePop(){ const qui=popTab&&popTab!=='Tout'?popTab.toLowerCase():'';
+  const lots=LOTS.slice().reverse();                                   /* le plus récent d'abord */
+  let L=[]; lots.forEach(l=>manqueEntre(l.d,l.f).forEach(e=>L.push({...e,lot:l})));
   if(qui) L=L.filter(e=>String(e.by||'').toLowerCase()===qui);
-  const nb=t=>L.filter(e=>e.type===t).length;
-  const s=sum([['Depuis',manqueDepuisTxt()],['Actions',L.length],['Messages WhatsApp',nb('wa')],['Alertes en cours',ALERTS.length]]);
+  L.sort((x,y)=>y.at-x.at);
+  const d0=lots[0], nb=t=>L.filter(e=>e.type===t).length;
+  const quand=t=>new Date(t).toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+' à '+hm(t);
+  const s=sum([['Cette ouverture',d0?d0.n+' · '+LOT_COUL[d0.c][2]:'—'],['Ouvertures gardées',lots.length],['Messages WhatsApp',nb('wa')],['Alertes en cours',ALERTS.length]]);
+  const legende=lots.length?'<div class="lotleg">'+lots.map(l=>`<span style="background:${LOT_COUL[l.c][0]};border-color:${LOT_COUL[l.c][1]}">${LOT_COUL[l.c][2]} · ouvert le ${quand(l.o)} · ${l.n}</span>`).join('')+'</div>':'';
   let jour='', h='';
-  L.slice(0,400).forEach(e=>{ const j=jourISO(e.at); if(j!==jour){ jour=j; h+=`<h3 class="wag">${new Date(e.at).toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long'})}</h3>`; }
-    h+=`<div class="manq"><b>${hm(e.at)}</b><span>${esc(e.by?cap(e.by):'—')}</span><div>${esc(e.titre)}${e.val?` <i>${esc(e.val)}</i>`:''}<small>${esc(e.sous||'')}</small></div></div>`; });
+  L.slice(0,500).forEach(e=>{ const j=jourISO(e.at); if(j!==jour){ jour=j; h+=`<h3 class="wag">${new Date(e.at).toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long'})}</h3>`; }
+    const k=LOT_COUL[e.lot.c];
+    h+=`<div class="manq" style="background:${k[0]};border-left:5px solid ${k[1]}"><b>${hm(e.at)}</b><span>${esc(e.by?cap(e.by):'—')}</span><div>${esc(e.titre)}${e.val?` <i>${esc(e.val)}</i>`:''}<small>${esc(e.sous||'')}</small></div></div>`; });
   const al=ALERTS.length?'<h3 class="wag">Points à vérifier maintenant · '+ALERTS.length+'</h3>'+ALERTS.slice(0,12).map(x=>`<div class="manq"><b>!</b><span>${x.g>=3?'URGENT':x.g===2?'BIENTÔT':'À SUIVRE'}</span><div>${esc(x.t)}<small>${esc(x.c||'')}</small></div></div>`).join(''):'';
-  return {s, b:needLogin()+(L.length?h:'<div class="empty">Rien de nouveau depuis votre dernière visite.</div>')+al+
+  return {s, b:needLogin()+legende+(L.length?h:'<div class="empty">Rien de nouveau depuis votre dernière visite.</div>')+al+
     '<div class="row" style="margin-top:10px"><button type="button" data-manquevu>✓ J\'ai tout vu</button></div>'}; }
 document.getElementById('popBody').addEventListener('click',e=>{ if(e.target.closest('[data-manquevu]')){ MANQUE_LU=true; MANQUE_DEPUIS=Date.now(); MANQUE_FIN=Date.now(); manquePresence(); manqueCompte(); closePop(); } });
 
 document.getElementById('manqueBtn').onclick=()=>openPop('manque');
+function notifLab(){ const b=document.getElementById('notifBtn'); if(b) b.textContent='Notifications : '+(NOTIF_ON&&'Notification' in window&&Notification.permission==='granted'?'OUI':'NON'); }
+document.getElementById('notifBtn').onclick=async()=>{
+  if(!('Notification' in window)){ alert('Ce navigateur ne gère pas les notifications.'); return; }
+  if(NOTIF_ON){ NOTIF_ON=false; } else { const p=Notification.permission==='granted'?'granted':await Notification.requestPermission(); NOTIF_ON=p==='granted'; }
+  try{ localStorage.setItem('mst-atelier-notif',NOTIF_ON?'oui':'non'); }catch(e){} notifLab(); };
+notifLab();
 document.getElementById('popClose').onclick=closePop; veil.onclick=closePop; addEventListener('keydown',e=>{ if(e.key==='Escape') closePop(); });
 document.getElementById('popTabs').onclick=e=>{ const b=e.target.closest('button[data-t]'); if(b){ popTab=b.dataset.t; renderPop(); } };
 const etatTag=k=>`<span class="tag" style="background:${ETAT_C[k]||'#888'}">${ETATS[k]||k}</span>`;
@@ -1211,8 +1281,15 @@ function renderPop(){
       '<div class="muted" style="padding:6px 0">Noureddine fait ce contrôle à 12 h et à 18 h quand la page est ouverte, ou dès l\'ouverture si l\'heure est passée. Les contrôles sont gardés dans ce navigateur.</div>';
   } else if(popTab==='Alertes'){
     const G={3:'<span class="tag" style="background:#c03030">URGENT</span>',2:'<span class="tag" style="background:#d08020">BIENTÔT</span>',1:'<span class="tag" style="background:#6878a0">À SUIVRE</span>'};
-    s=sum([['Points à vérifier',ALERTS.length],['Urgents',ALERTS.filter(a=>a.g>=3).length]]);
-    b=needLogin()+tbl(['','Ce que Noureddine a repéré','Concerne',''],ALERTS.map(a=>[G[a.g],esc(a.t),esc(a.c||''),a.wa?waBtn(a.wa):'']));
+    s=sum([['Points à vérifier',ALERTS.length],['Urgents',ALERTS.filter(a=>a.g>=3).length],['Reportées',REPORTEES.length]]);
+    b=needLogin()+tbl(['','Ce que Noureddine a repéré','Concerne','Envoyer à','Reporter'],ALERTS.map(a=>[G[a.g],esc(a.t),esc(a.c||''),alerteActions(a),
+      `<select data-alrep="${esc(a.id)}"><option value="">Reporter…</option><option value="1j">à demain</option><option value="3j">dans 3 jours</option><option value="7j">dans 1 semaine</option><option value="30j">dans 1 mois</option><option value="chg">jusqu'à ce que ça change</option></select>`]));
+  } else if(popTab==='Reportées'){
+    s=sum([['Alertes reportées',REPORTEES.length]]);
+    b=needLogin()+(REPORTEES.length?tbl(['Alerte','Concerne','Reportée','Revient',''],REPORTEES.map(a=>{ const r=REPORT[a.id]||{};
+      return [esc(a.t),esc(a.c||''),r.at?new Date(r.at).toLocaleDateString('fr-FR'):'',reportTxt(r),`<button type="button" data-alreact="${esc(a.id)}">Réactiver</button>`]; }))
+      :'<div class="empty">Aucune alerte reportée.</div>')+
+      '<div class="muted" style="padding:6px 0">Une alerte reportée ne s\'affiche plus sur le PC et ne fait plus de son jusqu\'à la date choisie. « Jusqu\'à ce que ça change » : elle revient dès que son texte change. Une alerte réglée disparaît d\'elle-même.</div>';
   } else if(popKey==='scie'){
     const prod=ORDERS.filter(o=>o.status==='sent'&&etatDe(o)==='production').sort((a,b)=>String(a.ech||'9').localeCompare(String(b.ech||'9')));
     const all=[]; prod.forEach(o=>coupesTube(o).forEach(c=>all.push({...c,o,done:(o.tubes||[]).indexOf(c.key)>=0})));
@@ -1256,9 +1333,14 @@ function renderPop(){
     const k=kpi(); s=sum([['Facturé ce mois',frm(k.fact)+' DH'],['Encaissé ce mois',frm(k.enc)+' DH'],['Reste à encaisser',frm(k.reste)+' DH'],['En production',`${k.nProd} bons · ${k.fait}/${k.tot} stores`]]);
     b=needLogin()+'<div class="muted" style="padding:6px 0">Mêmes calculs que l\'accueil de l\'app : facturé = bons envoyés (hors devis) datés de ce mois ; encaissé = paiements datés de ce mois ; reste = solde de tous les bons hors devis. Stores = fenêtres faites / fenêtres des bons en production.</div>';
   } else if(popKey==='notes'){
-    const all=NOTES.filter(n=>n&&!n.sup).sort((a,b)=>(b.at||0)-(a.at||0)), L=popTab==='À faire'?all.filter(n=>!n.fait):popTab==='Faites'?all.filter(n=>n.fait):all;
+    const qf=n=>!NOTE_QUI||(NOTE_QUI==='*'?!n.pour:n.pour===NOTE_QUI);
+    const all=NOTES.filter(n=>n&&!n.sup).sort((a,b)=>(b.at||0)-(a.at||0)), L=(popTab==='À faire'?all.filter(n=>!n.fait):popTab==='Faites'?all.filter(n=>n.fait):all).filter(qf);
     s=sum([['À faire',all.filter(n=>!n.fait).length],['Faites',all.filter(n=>n.fait).length]]);
-    b=needLogin()+tbl(['Note','De','Pour','Bon','Date','État'],L.map(n=>[esc(n.txt||''),esc(n.by||''),esc(n.pour||'tous'),esc(n.num||n.bon||''),n.at?new Date(n.at).toLocaleDateString('fr-FR'):'',n.fait?'Fait'+(n.faitBy?' par '+esc(n.faitBy):''):'À faire']));
+    /* filtre par agent : ce qui reste à faire pour chacun */
+    const reste=q=>all.filter(n=>!n.fait&&(!q||(q==='*'?!n.pour:n.pour===q))).length;
+    const puces='<div class="notqui">'+[['','Tous'],...NOTE_AGENTS.map(q=>[q,cap(q)]),['*','Pour tout le monde']].map(([k,l])=>`<button type="button" data-nqf="${k}" aria-pressed="${NOTE_QUI===k}">${l} · ${reste(k)}</button>`).join('')+'</div>';
+    b=needLogin()+puces+tbl(['Note','De','Pour','Bon','Date','État',''],L.map(n=>[esc(n.txt||''),esc(cap(n.by||'')),esc(n.pour?cap(n.pour):'Tout le monde'),esc(noteBonNum(n)),n.at?new Date(n.at).toLocaleDateString('fr-FR'):'',
+      n.fait?'Fait'+(n.faitBy?' par '+esc(cap(n.faitBy)):''):'À faire', n.fait?'':noteActions(n)]));
   } else if(popTab==='En production'){
     const L=sent.filter(o=>etatDe(o)==='production').sort((a,b)=>String(a.ech||'9').localeCompare(String(b.ech||'9')));
     const k=kpi(); s=sum([['Bons en production',L.length],['Stores faits',`${k.fait}/${k.tot}`],['Tubes à couper',TO_CUT.length],['Tissus à couper',FABQ.filter(f=>!CUT_WAIT.has(f.id)).length]]);
@@ -1308,17 +1390,72 @@ agents.forEach(a=>{ const box=document.createElement('div'); box.className='agbo
   box.appendChild(el); box.appendChild(lg); list.appendChild(box); a.el=info; a.lg=lg; });
 const hm=t=>t?new Date(t).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';
 let panelVer=-1;
-function echCell(o){ if(!o||!o.ech) return '—'; const e=String(o.ech).slice(0,10), late=e<jourISO(new Date())&&etatDe(o)!=='livre';
+function echCell(o){ if(!o||!o.ech) return '—'; const e=String(o.ech).slice(0,10), late=echDepassee(o);
   return late?`<span class="late">${dateFr(e)} · en retard</span>`:dateFr(e); }
 const ORD=num=>ORDERS.find(o=>o.num===num);
 function echTxt(o){ return o&&o.ech?dateFr(String(o.ech).slice(0,10)):'sans échéance'; }
 /* message WhatsApp pour un bon en retard (échéance dépassée) ou signalé par Noureddine */
-function enRetard(o){ return !!(o&&o.ech&&String(o.ech).slice(0,10)<jourISO(new Date())&&etatDe(o)!=='livre'); }
+/* un bon prêt mais pas livré n'est « en retard » que 5 jours après son passage en Prêt (échéance dépassée ou non) */
+const PRET_RETARD_J=5;
+function echDepassee(o){ if(!o||!o.ech) return false; const e=etatDe(o), ech=String(o.ech).slice(0,10);
+  if(e==='livre'||e==='devis') return false;
+  if(e==='pret'){ const lp=(o.log||[]).filter(x=>x&&x.kind==='etat'&&x.etat==='pret'&&x.at).pop();
+    if(!lp) return false;                                   /* pas de date de passage en Prêt : on ne crie pas au retard */
+    return Date.now()-lp.at>PRET_RETARD_J*86400000; }       /* 5 jours après le passage en Prêt, toujours pas livré */
+  return ech<jourISO(new Date()); }
+function enRetard(o){ return echDepassee(o); }
 function waAhmed(o){ const a=o&&ALERTS.find(x=>x.id==='ahmed|'+o.id); if(a) return a.wa; if(!enRetard(o)) return '';
-  return `@dad - 📢 🔔 ${o.num} · ${o.nom||'client'} · échéance ${echTxt(o)} (en retard)`; }
+  return `${WA_TAG.ahmed} 📢 🔔 ${o.num} · ${o.nom||'client'} · échéance ${echTxt(o)} (en retard)`; }
 function waSouf(o){ const a=o&&ALERTS.find(x=>x.id==='soufiane|'+o.id); if(a) return a.wa; if(!enRetard(o)) return '';
   const r=ordDims(o).filter(x=>(o.faites||[]).indexOf(x.key)<0).length;
-  return `@soufiane- 📢 🔔 ${o.num} · ${o.nom||'client'} · échéance ${echTxt(o)} (en retard) · reste ${r} store${r>1?'s':''} à faire`; }
+  return `${WA_TAG.soufiane} 📢 🔔 ${o.num} · ${o.nom||'client'} · échéance ${echTxt(o)} (en retard) · reste ${r} store${r>1?'s':''} à faire`; }
+/* ---------- notes : transférer à un agent, partager dans le groupe WhatsApp (v14.45) ----------
+   Le transfert est la seule écriture du jeu : il relit la rangée cfg-notes, change le
+   destinataire de cette seule note et la renvoie (fusion par note, comme l'app). */
+const NOTE_AGENTS=['imane','ahmed','soufiane','noureddine'];
+let NOTE_QUI='';
+/* ---------- alertes du PC : choisir l'agent, copier le message pour le groupe WhatsApp ---------- */
+const ALERTE_QUI=[[/^(ahmed|tubesurg|silence)\|?/,'ahmed'],[/^(soufiane|sanstissu|retard|proche|pretlong|charge|agenda)\|?/,'soufiane'],
+  [/^(impaye|choixtissu|wa)/,'imane'],[/^(banque|profil|achat|achpaye|tissu)\|?/,'noureddine']];
+function alerteQuiDefaut(a){ if(a.id.startsWith('note|')){ const n=NOTES.find(x=>'note|'+x.id===a.id); return (n&&n.pour)||''; }
+  const r=ALERTE_QUI.find(([re])=>re.test(a.id)); return r?r[1]:''; }
+function alerteActions(a){ const d=alerteQuiDefaut(a);
+  return `<div class="notact"><select data-alq="${esc(a.id)}">`+['',...NOTE_AGENTS].map(q=>`<option value="${q}"${q===d?' selected':''}>${q?cap(q):'Tout le monde'}</option>`).join('')+
+    `</select><button type="button" class="wabtn" data-alwa="${esc(a.id)}">WhatsApp</button></div>`; }
+function alerteMsg(a,qui){ const tag=(qui?(WA_TAG[qui]||'@'+qui):'@tout le monde')+' ';
+  if(a.wa){ const w=String(a.wa), i=w.indexOf('📢'); return tag+(i>=0?w.slice(i):w); }
+  return `${tag}📢 🔔 ${a.t}`+(a.c&&String(a.t).indexOf(a.c)<0?` · ${a.c}`:''); }
+document.getElementById('popBody').addEventListener('change',e=>{ const r=e.target.closest('[data-alrep]'); if(r&&r.value) reporter(r.dataset.alrep,r.value); });
+document.getElementById('popBody').addEventListener('click',e=>{ const r=e.target.closest('[data-alreact]'); if(r) reactiver(r.dataset.alreact); });
+document.getElementById('popBody').addEventListener('click',e=>{ const w=e.target.closest('[data-alwa]'); if(!w) return;
+  const a=ALERTS.find(x=>x.id===w.dataset.alwa); if(!a) return; const sel=document.querySelector(`select[data-alq="${CSS.escape(a.id)}"]`);
+  const m=alerteMsg(a,sel?sel.value:alerteQuiDefaut(a)); try{ navigator.clipboard.writeText(m); }catch(_){} w.textContent='Copié ✓'; setTimeout(()=>{ w.textContent='WhatsApp'; },1800); });
+document.getElementById('popBody').addEventListener('click',e=>{ const q=e.target.closest('[data-nqf]'); if(!q) return; NOTE_QUI=NOTE_QUI===q.dataset.nqf?'':q.dataset.nqf; renderPop(); });
+function noteBonNum(n){ const o=n&&n.bon?ORDERS.find(x=>x.id===n.bon):null; return o?(o.num||'')+(o.nom?' · '+o.nom:''):(n.num||''); }
+function noteMsgWa(n,qui){ const tag=(qui?(WA_TAG[qui]||'@'+qui):'@tout le monde')+' ', bon=noteBonNum(n);
+  return `${tag}📢 🔔 Note de ${cap(n.by||'Noureddine')} : ${n.txt||''}`+(bon&&String(n.txt||'').indexOf(bon.split(' · ')[0])<0?` · ${bon}`:'')+(n.at?` · ${new Date(n.at).toLocaleDateString('fr-FR')}`:''); }
+function noteActions(n){
+  return `<div class="notact"><select data-nqui="${esc(n.id)}">`+['',...NOTE_AGENTS].map(q=>`<option value="${q}"${(n.pour||'')===q?' selected':''}>${q?cap(q):'Tout le monde'}</option>`).join('')+`</select>`+
+    `<button type="button" data-ntrans="${esc(n.id)}">Transférer</button><button type="button" class="wabtn" data-nwa="${esc(n.id)}">WhatsApp</button></div>`; }
+async function noteTransfere(id,pour){
+  if(!SB||!LIVE) throw new Error('pas connecté');
+  const {data,error}=await SB.from('bons').select('data').eq('id','cfg-notes').limit(1); if(error) throw error;
+  const liste=(data&&data[0]&&data[0].data&&Array.isArray(data[0].data.liste))?data[0].data.liste:[];
+  const n=liste.find(x=>x&&x.id===id); if(!n) throw new Error('note introuvable');
+  n.pour=pour; n.maj=Date.now(); n.transBy=USER||'noureddine'; n.transAt=Date.now();
+  const r=await SB.from('bons').upsert({id:'cfg-notes',num:'__NOTES__',author:USER||'noureddine',data:{v:1,liste},updated_at:new Date().toISOString()}); if(r.error) throw r.error;
+  NOTES=liste; return n; }
+document.getElementById('popBody').addEventListener('click',async e=>{
+  const t=e.target.closest('[data-ntrans]');
+  if(t){ const id=t.dataset.ntrans, sel=document.querySelector(`select[data-nqui="${CSS.escape(id)}"]`), qui=sel?sel.value:'';
+    t.disabled=true; t.textContent='…';
+    try{ await noteTransfere(id,qui); t.textContent='Transférée ✓'; setTimeout(()=>{ if(popKey==='notes') renderPop(); },900); }
+    catch(err){ t.disabled=false; t.textContent='Transférer'; alert('Transfert impossible : '+(err.message||err)); }
+    return; }
+  const w=e.target.closest('[data-nwa]');
+  if(w){ const n=NOTES.find(x=>x&&x.id===w.dataset.nwa); if(!n) return; const sel=document.querySelector(`select[data-nqui="${CSS.escape(n.id)}"]`);
+    const m=noteMsgWa(n,sel?sel.value:(n.pour||'')); try{ navigator.clipboard.writeText(m); }catch(_){} w.textContent='Copié ✓'; }
+});
 function waBtn(m){ return `<button type="button" class="wabtn" data-wa="${esc(m)}">WhatsApp</button>`; }
 document.getElementById('popBody').addEventListener('click',e=>{ const c=e.target.closest('[data-cal]'); if(c){ calSel=c.dataset.cal; renderPop(); return; }
   const nv=e.target.closest('[data-calnav]'); if(nv){ const v=+nv.dataset.calnav, t=new Date(); if(!calMois) calMois=new Date(t.getFullYear(),t.getMonth(),1);
@@ -1396,6 +1533,11 @@ async function start(){ drawBackground(); resize(); loadAgenda(); setInterval(lo
 let last=performance.now(),pt=0;
 function step(dt){ time+=dt; agents.forEach(a=>tickAgent(a,dt)); }
 function loop(now){ const dt=Math.min(.05,(now-last)/1000); last=now; step(dt); render(); pt+=dt; if(pt>.25){ pt=0; updatePanel(); } requestAnimationFrame(loop); }
+let BG_LAST=performance.now();
+setInterval(()=>{ const now=performance.now();
+  if(!document.hidden){ BG_LAST=now; return; }
+  let el=Math.min(300,(now-BG_LAST)/1000); BG_LAST=now; BG_MUET=true;
+  try{ while(el>0){ const d=Math.min(.05,el); step(d); el-=d; } } catch(e){} finally{ BG_MUET=false; } },1000);
 start(); requestAnimationFrame(loop);
 </script>
 </body>
