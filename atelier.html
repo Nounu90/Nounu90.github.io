@@ -107,6 +107,12 @@
   .calev { border-left:4px solid; padding:4px 8px; margin:4px 0; background:#f0f4fc; font-size:7px; line-height:1.7; } .calev small { display:block; color:#707888; }
   .wabtn { background:#25d366; color:#fff; border-color:#128c7e; font-size:7px; padding:4px 6px; white-space:nowrap; }
   .wabtn:hover { background:#1ebe5b; }
+  .alnotes { display:block; width:100%; text-align:left; margin:0 0 8px; padding:6px 8px; background:#fff4d6; color:#8a5a00; border:1px solid #d08020; font-size:8px; cursor:pointer; }
+  .notretard { color:#c03030; font-weight:bold; }
+  .albar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:4px 0 8px; font-size:8px; }
+  .albar label { display:flex; align-items:center; gap:4px; cursor:pointer; }
+  .albar .wabtn:disabled { opacity:.45; cursor:default; }
+  input[data-alsel], #alTout { width:14px; height:14px; cursor:pointer; }
   h3.wag { font-size:8px; color:#384868; margin:12px 0 4px; font-weight:normal; }
 </style>
 </head>
@@ -129,6 +135,7 @@
     <div id="loggedBox" class="row" style="display:none">
       <button id="manqueBtn" type="button">Ce que j'ai manqué</button>
       <button id="chiffresBtn" type="button">📊 Chiffres</button>
+      <button id="logsBtn" type="button">📜 Logs</button>
       <button id="refreshBtn" type="button">Actualiser</button>
       <button id="logoutBtn" type="button">Retour à l'app</button>
     </div>
@@ -293,7 +300,7 @@ function stockM2(f){ const lz=f.laize>0?f.laize/100:1; return f.type!=='JN'?f.di
 function nbRouleaux(f){ const v=parseInt((ATL.rouleaux||{})[f.ref],10); return v>=0?v:1; }
 function fab(ref){ return CATALOGUE.find(f=>f.ref===ref)||null; }
 
-const BON_FIELDS=['log','fini','status','etat','type','multi','refs','dims','tubes','faites','nom','tel','ville','date','ech','prix','prixJN','arr','fact','remise','posePrix','poseMode','pose','paies','sheetAt','pcErr','pieces','modeles'];
+const BON_FIELDS=['log','fini','status','etat','type','multi','refs','dims','tubes','faites','nom','tel','ville','date','ech','prix','prixJN','arr','fact','remise','posePrix','poseMode','pose','paies','sheetAt','pcErr','pieces','modeles','sage'];
 const COLS='id,num,author,updated_at,'+BON_FIELDS.map(k=>k+':data->'+k).join(',');
 async function loadBons(){
   let all=[];
@@ -499,6 +506,7 @@ const SPOTS=[
  {key:'manque',x:3*T+46,y:4*T-16,w:14,h:14},
  {key:'chiffres',x:14*T+6,y:T+5,w:12,h:12},
  {key:'pc',x:3*T,y:4*T-6,w:48,h:15},
+ {key:'logs',x:3*T-15,y:4*T-16,w:12,h:12},
  {key:'imane',x:9*T,y:14*T-6,w:3*T,h:3*T+6},
  {key:'notes',x:9*T,y:T+1,w:5*T,h:2*T-7},
  {key:'atelier',x:14*T,y:9*T,w:4*T,h:4*T},
@@ -772,6 +780,12 @@ function processEvents(){ EV=eventsDuJour(jourISO(new Date())); EV_VER++; manque
 /* ---------- Noureddine : ce qui demande son attention ---------- */
 let ALERTS=[], ALERT_SEEN=null;
 const TUBES_ATTENTE_H=24;   // délai avant alerte : tubes livrés mais store pas fait
+/* v14.69 : date de livraison (dernier passage à « livré ») et paiements pas encore vus en banque */
+function livreAt(o){ const l=(o.log||[]).filter(x=>x&&x.kind==='etat'&&x.etat==='livre'&&x.at).pop(); return l?l.at:0; }
+function aConfirmer(){ const out=[], now=Date.now();
+  ORDERS.filter(o=>o.status==='sent').forEach(o=>paiements(o).forEach(p=>{ if(!p||p.recu) return; const t=p.at||(p.date?new Date(p.date+'T12:00:00').getTime():now);
+    out.push({o,p,m:parseFloat(p.montant)||0,j:Math.max(0,Math.floor((now-t)/86400000))}); }));
+  return out.sort((a,b)=>b.j-a.j); }
 function computeAlerts(){ notesRegle(); const out=[], today=jourISO(new Date()), now=Date.now(), D=86400000, sent=ORDERS.filter(o=>o.status==='sent');
   /* v14.53 : formulaire du site reçu depuis plus d'un jour, contact pas encore créé par Imane */
   formsSansContact().forEach(o=>{ const j=Math.floor((now-o.at)/D);
@@ -783,13 +797,26 @@ function computeAlerts(){ notesRegle(); const out=[], today=jourISO(new Date()),
       if(sansChoix) out.push({id:'choixtissu|'+o.id,g:e==='production'?3:2,t:`${o.num} (${(ETATS[e]||e).toLowerCase()}) : tissu pas choisi pour ${sansChoix} fenêtre${sansChoix>1?'s':''} sur ${dd.length}`,c:o.nom}); }
     /* v14.48 : pièces du Plan de coupe supérieures au stock (écrit par l'app sur le bon) */
     if(Array.isArray(o.pcErr)&&o.pcErr.length&&e!=='livre') out.push({id:'pcstock|'+o.id,at:((o.log||[]).filter(x=>x&&x.kind==='stock'&&x.k==='stock-err').pop()||{}).at,g:3,t:`${o.num} : pièces supérieures au stock, envoi au tableau bloqué · `+o.pcErr.map(x=>x.t).join(' · '),c:o.nom});
-    if(e==='livre'&&s>0.01) out.push({id:'impaye|'+o.id,g:3,t:`${o.num} livré mais pas soldé : reste ${frm(s)} DH`,c:o.nom});
-    if(echDepassee(o)) out.push({id:'retard|'+o.id,g:3,t:`${o.num} en retard : échéance du ${dateFr(ech)} dépassée`,c:o.nom});
+    const liv=livreAt(o), jl=liv?Math.floor((now-liv)/D):0;
+    if(e==='livre'&&s>0.01) out.push({id:'impaye|'+o.id,g:3,t:`${o.num} livré${liv?' il y a '+jl+' j':''} mais pas soldé : reste ${frm(s)} DH`+(paiements(o).length?'':' (aucun paiement enregistré)'),c:o.nom,
+      wa:`${WA_TAG.imane} 📢 🔔 ${o.num} · ${o.nom||'client'} livré${liv?' le '+dateFr(jourISO(liv)):''} : reste ${frm(s)} DH à encaisser. Merci de relancer le client.`});
+    /* v14.69 : livré mais pas saisi dans SAGE (travail de Noureddine : jamais caché par une note) */
+    if(e==='livre'&&!o.sage&&liv&&jourISO(liv)<today) out.push({id:'sage|'+o.id,g:jl>=7?3:2,t:`${o.num} livré le ${dateFr(jourISO(liv))} (il y a ${jl} j), pas encore saisi dans SAGE`,c:o.nom});
+    /* v14.69 : contrôle de cohérence, lecture seule */
+    if(e!=='devis'&&ordDims(o).length&&!(orderTotals(o).prix>0)) out.push({id:'cohprix|'+o.id,g:2,t:`🔍 ${o.num} (${(ETATS[e]||e).toLowerCase()}) : prix au m² à 0`,c:o.nom});
+    if((e==='production'||e==='pret')&&duDe(o)>0&&payeDe(o)<0.3*duDe(o)) out.push({id:'cohacompte|'+o.id,g:2,t:`🔍 ${o.num} (${(ETATS[e]||e).toLowerCase()}) : acompte de ${frm(payeDe(o))} DH, moins de 30 % de ${frm(duDe(o))} DH`,c:o.nom});
+    if(echDepassee(o)){ const dl=((o.log||[]).filter(x=>x&&x.kind==='etat'&&x.at).pop()||{}).at||0, js=dl?Math.floor((now-dl)/D):0;
+      out.push({id:'retard|'+o.id,g:3,t:`${o.num} en retard : échéance du ${dateFr(ech)} dépassée`+(js>=3?` · 🔍 aucun changement d’état depuis ${js} jours`:''),c:o.nom}); }
     else if(ech&&e==='production'){ const j=Math.round((new Date(ech+'T12:00:00')-new Date(today+'T12:00:00'))/D), d=ordDims(o), f=d.filter(x=>(o.faites||[]).indexOf(x.key)>=0).length;
       if(j<=2&&f<d.length) out.push({id:'proche|'+o.id,g:2,t:`${o.num} : échéance ${j===0?'aujourd\'hui':'dans '+j+' j'}, ${f}/${d.length} stores faits`,c:o.nom}); }
     if(e==='pret'){ const lp=(o.log||[]).filter(x=>x.kind==='etat'&&x.etat==='pret').pop(); if(lp&&now-lp.at>3*D) out.push({id:'pretlong|'+o.id,g:1,t:`${o.num} prêt depuis ${Math.floor((now-lp.at)/D)} jours, pas encore livré`,c:o.nom}); }
-    paiements(o).forEach((p,i)=>{ if(!p.recu&&p.date&&now-new Date(p.date+'T12:00:00')>3*D) out.push({id:'banque|'+o.id+'|'+i,g:1,t:`Paiement de ${frm(p.montant)} DH (${o.num}) pas encore vu en banque`,c:o.nom}); });
   });
+  /* v14.69 : même client, deux bons créés le même jour */
+  const vus={}; sent.filter(o=>etatDe(o)!=='devis'&&o.date).forEach(o=>{ const k=jourISO(o.date)+'|'+(String(o.tel||'').replace(/[^0-9]/g,'').slice(-9)||String(o.nom||'').trim().toLowerCase()); if(k.split('|')[1]) (vus[k]=vus[k]||[]).push(o); });
+  Object.values(vus).filter(L=>L.length>1).forEach(L=>out.push({id:'cohdouble|'+L.map(o=>o.id).join('-'),g:1,t:`🔍 ${L[0].nom||'Même client'} : ${L.length} bons créés le ${dateFr(jourISO(L[0].date))} (${L.map(o=>o.num).join(', ')}) · doublon ?`,c:L[0].nom}));
+  const AC=aConfirmer();
+  if(AC.length){ const vieux=Math.max(...AC.map(x=>x.j)), tot=AC.reduce((t,x)=>t+x.m,0);
+    out.push({id:'banque',g:vieux>7?3:vieux>=3?2:1,voir:'Paiements',t:`💳 ${AC.length} paiement${AC.length>1?'s':''} enregistré${AC.length>1?'s':''} à confirmer en banque (${frm(tot)} DH)`+(vieux?`, le plus ancien depuis ${vieux} j`:''),c:'Banque'}); }
   // ---------- atelier et production ----------
   const prodO=sent.filter(o=>etatDe(o)==='production'), pl=(n,m)=>n>1?m:'';
   const enProdDepuis=o=>{ const l=(o.log||[]).filter(x=>x.kind==='etat'&&x.etat==='production').pop(); return l?l.at:0; };
@@ -851,7 +878,7 @@ function computeAlerts(){ notesRegle(); const out=[], today=jourISO(new Date()),
     const resteJour=L.nouv.length+L.vus.length;
     if(!L.weekend&&new Date().getHours()>=17&&resteJour) out.push({id:'wajour',g:2,t:`Imane n'a pas fini ses tâches WhatsApp du jour : ${resteJour} restante${resteJour>1?'s':''} (${L.nouv.length} demande${L.nouv.length>1?'s':''}, ${L.vus.filter(x=>x.bloc==='rappel').length} rappel(s) promis, ${L.vus.filter(x=>x.bloc==='relance').length} relance(s), ${L.vus.filter(x=>x.bloc==='client'||x.bloc==='promo').length} autre(s))`,c:'WhatsApp'});
     if(!L.weekend&&new Date().getHours()>=12&&L.fait<L.quota) out.push({id:'waquota',g:1,t:`Imane : ${L.fait}/${L.quota} messages WhatsApp envoyés aujourd'hui`,c:'WhatsApp'}); }
-  NOTES.filter(n=>n&&!n.sup&&!nFaite(n)&&n.at&&now-n.at>2*D).forEach(n=>out.push({id:'note|'+n.id,at:n.at,g:1,t:`Note pour ${n.pour?cap(n.pour):'tous'} pas faite depuis ${Math.floor((now-n.at)/D)} jours : ${String(n.txt||'').slice(0,40)}`,c:'Notes équipe'}));
+  /* v14.66 : les notes en retard ne sont plus des alertes : une ligne de résumé en haut, le détail dans Notes équipe */
   const need={}; FABQ.forEach(f=>{ if(f.ref) need[f.ref]=(need[f.ref]||0)+f.len/100; });
   Object.keys(need).forEach(r=>{ const f=fab(r), st=f?stockMl(f):0; if(st<need[r]) out.push({id:'tissu|'+r,g:3,t:`Tissu ${r} : environ ${fr(need[r])} ml à couper, il reste ${fr(st)} ml`,c:'Stock'}); });
   return out.sort((a,b)=>b.g-a.g);
@@ -895,20 +922,73 @@ function autoReglee(n){ const id=String(n&&n.id||'');
     case 'fen': return dd.length>0&&dd.every(d=>(o.faites||[]).indexOf(d.key)>=0);
   }
   return false; }
-function notesRegle(){ NOTES.forEach(n=>{ if(n&&n.auto&&!n.fait&&!n.sup) n.regle=autoReglee(n); }); }
+/* v14.67 : une note écrite à la main qui demande le téléphone d'un client (« Chrifi alaoui N° Tel »)
+   est réglée dès que le bon de ce client a un téléphone. Le client est le bon lié à la note,
+   sinon le bon dont le nom contient tous les mots de la note (hors « tel », « n° »…). */
+const noteNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+const NOTE_TEL=/\b(tel|tele|telephone|tlf|numero|num|gsm|phone)\b/;
+function manReglee(n){ const txt=noteNorm(n.txt); if(!NOTE_TEL.test(txt)) return false;
+  if(n.bon){ const o=ORDERS.find(x=>x.id===n.bon); return !!(o&&String(o.tel||'').trim()); }
+  const mots=txt.split(' ').filter(w=>w.length>=3&&!NOTE_TEL.test(w)&&!/^(pour|client|manque|ajouter|le|la|du|de|des)$/.test(w)); if(!mots.length) return false;
+  const L=ORDERS.filter(o=>{ const nm=' '+noteNorm(o.nom)+' '; return mots.every(w=>nm.indexOf(' '+w+' ')>=0); });
+  return L.length>0&&L.every(o=>!!String(o.tel||'').trim()); }
+function notesRegle(){ NOTES.forEach(n=>{ if(n&&!n.fait&&!n.sup) n.regle=n.auto?autoReglee(n):manReglee(n); }); }
+/* quand une note passe à « faite » pendant que le jeu est ouvert, Noureddine va la déchirer au tableau */
+let NOTE_OUV=null; const RIP=new Set(), MAN_ECRIT=new Set();
+function notesDechire(){ if(!LIVE||!ORDERS.length) return;
+  const ouv=new Set(NOTES.filter(n=>n&&!n.sup&&!nFaite(n)).map(n=>n.id));
+  if(NOTE_OUV){ NOTE_OUV.forEach(id=>{ if(ouv.has(id)) return; const n=NOTES.find(x=>x&&x.id===id); if(!n||RIP.has(id)) return; RIP.add(id);
+    queue(agentOf('noureddine'),[go(pick([ST.notes1,ST.notes2])),work(2,'Déchire la note : '+String(n.txt||'').slice(0,40),'note'),
+      call(()=>{ playRip(); RIP.delete(id); }),go(ST.deskN)]); }); }
+  NOTE_OUV=ouv;
+  /* une note manuelle réglée est aussi cochée dans la base, pour l'app */
+  NOTES.filter(n=>n&&!n.auto&&!n.fait&&!n.sup&&n.regle&&!MAN_ECRIT.has(n.id)).forEach(n=>{ MAN_ECRIT.add(n.id);
+    noteEcrit(n.id,x=>{ x.fait=Date.now(); x.faitBy='auto'; }).catch(()=>MAN_ECRIT.delete(n.id)); }); }
+/* bruit de papier déchiré : du bruit blanc filtré, haché en petites déchirures */
+function playRip(){ if(!SOUND_ON||BG_MUET) return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const d=.55, sr=actx.sampleRate, buf=actx.createBuffer(1,Math.floor(sr*d),sr), x=buf.getChannelData(0);
+  for(let i=0;i<x.length;i++){ const p=i/x.length, crac=Math.random()<.04?1:.35+.65*Math.abs(Math.sin(i/(sr*.006))); x[i]=(Math.random()*2-1)*crac*Math.min(1,p*12)*(1-p); }
+  const s=actx.createBufferSource(), f=actx.createBiquadFilter(), gn=actx.createGain(); s.buffer=buf; f.type='bandpass'; f.frequency.setValueAtTime(1800,actx.currentTime);
+  f.frequency.linearRampToValueAtTime(3800,actx.currentTime+d); f.Q.value=.8; gn.gain.value=.6*VOL; s.connect(f); f.connect(gn); gn.connect(actx.destination); s.start(); }catch(e){} }
 const nFaite=n=>!!(n&&(n.fait||n.regle));
 /* date et heure où chaque alerte est apparue sur le PC (gardée sur ce navigateur) */
 const ALAT_KEY='mst-atelier-alertat';
 let ALAT={}; try{ ALAT=JSON.parse(localStorage.getItem(ALAT_KEY)||'{}')||{}; }catch(e){ ALAT={}; }
 function alerteQuand(a){ const t=a.at||ALAT[a.id]; if(!t) return ''; const d=new Date(t);
   return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
-function processAlerts(){ const toutes=computeAlerts();
+/* v14.66 : sujet d'alerte -> point de note automatique (auto-<bon>-<point>, écrite par l'app) */
+const AL_NOTE={choixtissu:'tissu',sanstissu:'tissu',impaye:'solde',retard:'livre',pretlong:'livre',banque:'banque',ahmed:'tubes',tubesurg:'tubes',proche:'fen',soufiane:'fen'};
+function alSansNotes(L){ const ouv=new Set(NOTES.filter(n=>n&&n.auto&&!n.sup&&!nFaite(n)).map(n=>String(n.id).replace(/^auto-/,'')));
+  return L.filter(a=>{ const p=a.id.split('|'), k=AL_NOTE[p[0]]; return !(k&&p[1]&&ouv.has(p[1]+'-'+k)); }); }
+const notesEnRetard=()=>NOTES.filter(n=>n&&!n.sup&&!nFaite(n)&&n.at&&Date.now()-n.at>2*86400000);
+const noteJours=n=>Math.floor((Date.now()-(n.at||Date.now()))/86400000);
+/* v14.69 : à l'URGENT par escalade, Noureddine va voir l'agent concerné (une fois par alerte) */
+const ESC_KEY='mst-atelier-escvu'; let ESCVU={}, ESCINIT=true; try{ ESCINIT=!localStorage.getItem(ESC_KEY); }catch(e){} try{ ESCVU=JSON.parse(localStorage.getItem(ESC_KEY)||'{}')||{}; }catch(e){ ESCVU={}; }
+function bossEscalade(){ if(!LIVE||!ORDERS.length) return; let ch=false;
+  ALERTS.filter(a=>a.esc&&a.g>=3&&!ESCVU[a.id]).forEach(a=>{ ESCVU[a.id]=Date.now(); ch=true; if(ESCINIT) return; const q=alerteQuiDefaut(a);
+    if(q&&q!=='noureddine'&&HOME[q]) queue(agentOf('noureddine'),[go(HOME[q]),work(3,'Va voir '+cap(q)+' : '+a.t,'alert'),go(ST.deskN)],'alert'); });
+  Object.keys(ESCVU).forEach(id=>{ if(!ALERTS.some(a=>a.id===id)){ delete ESCVU[id]; ch=true; } });
+  ESCINIT=false; try{ localStorage.setItem(ESC_KEY,JSON.stringify(ESCVU)); }catch(e){} }   /* 1re fois : on note sans déranger personne */
+/* v14.69 : briefing du matin, à la première ouverture du jour */
+const BRIEF_KEY='mst-atelier-brief'; let BRIEF=null; try{ BRIEF=JSON.parse(localStorage.getItem(BRIEF_KEY)||'null'); }catch(e){ BRIEF=null; }
+function bossBriefing(){ if(!LIVE||!ORDERS.length) return; const auj=jourISO(new Date()); if(BRIEF&&BRIEF.date===auj) return;
+  const h=new Date(); h.setDate(h.getDate()-1); const hier=jourISO(h);
+  const enc=ORDERS.reduce((t,o)=>t+paiements(o).filter(p=>p&&String(p.date||'')===hier).reduce((s,p)=>s+(parseFloat(p.montant)||0),0),0);
+  const urg=ALERTS.filter(a=>a.g>=3).length, ac=aConfirmer().length, rdv=evDuJour(auj).length, sg=ALERTS.filter(a=>a.id.indexOf('sage|')===0).length;
+  const txt=`Briefing du matin : ${urg} urgent${urg>1?'s':''} · encaissé hier ${frm(enc)} DH · ${ac} paiement${ac>1?'s':''} à confirmer · ${sg} bon${sg>1?'s':''} à saisir dans SAGE · ${rdv} rendez-vous aujourd’hui`;
+  BRIEF={date:auj,at:Date.now(),txt}; try{ localStorage.setItem(BRIEF_KEY,JSON.stringify(BRIEF)); }catch(e){}
+  queue(agentOf('noureddine'),[go(ST.kpi),work(3,txt,'note'),go(ST.deskN)],'note'); }
+function processAlerts(){ const toutes=alSansNotes(computeAlerts()); try{ notesDechire(); }catch(e){}
   if(LIVE&&ORDERS.length){ const vus={}; toutes.forEach(a=>{ vus[a.id]=1; if(!ALAT[a.id]) ALAT[a.id]=a.at||Date.now(); });
     Object.keys(ALAT).forEach(id=>{ if(!vus[id]) delete ALAT[id]; }); try{ localStorage.setItem(ALAT_KEY,JSON.stringify(ALAT)); }catch(e){} }
   /* le ménage seulement quand les bons sont chargés : sinon tout serait oublié au démarrage */
   if(LIVE&&ORDERS.length){ Object.keys(REPORT).forEach(id=>{ const r=REPORT[id], a=toutes.find(x=>x.id===id); if(!a||(!r.chg&&Date.now()>=r.jusqua)||(r.chg&&alNorm(r.t)!==alNorm(a.t))) delete REPORT[id]; });
     reportSave(); }
+  /* v14.69 : escalade, une alerte restée 2 jours sans Fait ni Reporter monte d'un niveau (tous les 2 jours) */
+  toutes.forEach(a=>{ const t0=ALAT[a.id]; if(!t0||a.g>=3) return; const up=Math.floor((Date.now()-t0)/(2*86400000)); if(up>0){ a.g=Math.min(3,a.g+up); a.esc=true; } });
+  toutes.sort((a,b)=>b.g-a.g);
   REPORTEES=toutes.filter(estReportee); ALERTS=toutes.filter(a=>!estReportee(a)); const ids=ALERTS.map(a=>a.id);
+  try{ bossEscalade(); bossBriefing(); }catch(e){}
   if(!ALERT_SEEN){ ALERT_SEEN=new Set(ids); return; }
   const neuves=ALERTS.filter(a=>!ALERT_SEEN.has(a.id)); ids.forEach(i=>ALERT_SEEN.add(i));
   if(neuves.length){ bgNotif('alert','Alerte atelier',neuves[0].t); queue(agentOf('noureddine'),[go(ST.deskN),work(5,'Repère : '+neuves[0].t,'alert')],'alert'); } }
@@ -1112,7 +1192,7 @@ function render(){
   HITS=[]; TAGS=[]; ctx=g; g.drawImage(bg,0,0);
   const ents=[...PROPS.map(p=>({y:p.sortY,draw:()=>p.draw(p)})),...agents.map(a=>({y:a.y*T+T-.5,draw:()=>drawAgent(a)}))];
   ents.sort((a,b)=>a.y-b.y).forEach(e=>e.draw()); drawLumiere(); agents.forEach(drawBubble); drawNotesWall(); drawAgendaMur();
-  ctx=g; drawChiffresIcon();
+  ctx=g; drawChiffresIcon(); drawLogsIcon();
   const sp=hoverSpot(); if(sp&&!hoverAgent()&&Math.floor(time*3)%2){ ctx=g; R(sp.x-1,sp.y-1,sp.w+2,1,'#fff'); R(sp.x-1,sp.y+sp.h,sp.w+2,1,'#fff'); R(sp.x-1,sp.y,1,sp.h,'#fff'); R(sp.x+sp.w,sp.y,1,sp.h,'#fff'); }
   v.imageSmoothingEnabled=false; v.fillStyle='#101820'; v.fillRect(0,0,view.width,view.height);
   v.drawImage(world,SX(0),SY(0),Math.round(W*T*Z),Math.round(H*T*Z));
@@ -1211,6 +1291,8 @@ function renderChiffres(an){ const Y=+an, sent=ORDERS.filter(o=>o.status==='sent
   b+=`<div class="chbox"><h3>7 · Bénéfice par mois</h3>${chBarresPN(CH_MOIS,[{n:'Encaissé',c:'#38b764',v:enc},{n:'Charges + salaires + impôts',c:'#b13e53',v:chM},{n:'Bénéfice',c:'#3b5dc9',neg:'#7f1d1d',v:ben}],chDH)}
     <p class="muted">Bénéfice ${an} : ${chDH(tE-tCh)} (encaissé ${chDH(tE)} − charges ${chDH(tCh)}). Les achats de marchandise ne sont pas encore déduits : ils viendront avec la Trésorerie.</p></div>`;
   return {s,b}; }
+function drawLogsIcon(){ const x=3*T-15,y=4*T-16;   /* v14.68 : le journal, à gauche du PC */
+  R(x,y,12,12,'#2c3550'); R(x+2,y+1,8,10,'#f4f4f4'); R(x+3,y+3,6,1,'#8890a0'); R(x+3,y+5,6,1,'#8890a0'); R(x+3,y+7,4,1,'#8890a0'); R(x+3,y+9,5,1,'#ef7d57'); }
 function drawChiffresIcon(){ const x=14*T+6,y=T+5;   /* au mur, à droite du tableau des notes */ R(x,y,12,12,'#2c3550'); R(x+2,y+7,2,3,'#38b764'); R(x+5,y+4,2,6,'#ffcd75'); R(x+8,y+2,2,8,'#41a6f6'); R(x+1,y+10,10,1,'#f4f4f4'); }
 function badgeNum(n,wx,wy){ if(!LIVE) return; const x=SX(wx),y=SY(wy),r=Math.max(9,Math.round(4.5*Z));
   v.fillStyle='#601010'; v.beginPath(); v.arc(x,y,r+2,0,7); v.fill(); v.fillStyle=n?'#e83030':'#48a858'; v.beginPath(); v.arc(x,y,r,0,7); v.fill();
@@ -1225,7 +1307,7 @@ function drawLumiere(){ const h=new Date().getHours(), nuit=h>=19||h<7, soir=h>=
   LAMPES.forEach(([lx,ly])=>{ const cx=lx*T, cy=ly*T, r=nuit?72:50, rg=g.createRadialGradient(cx,cy,2,cx,cy,r);
     rg.addColorStop(0,`rgba(255,212,150,${nuit?.24:.08})`); rg.addColorStop(1,'rgba(255,212,150,0)'); g.fillStyle=rg; g.fillRect(cx-r,cy-r,2*r,2*r); });
   g.restore(); }
-function drawNotesWall(){ ctx=g; const live=NOTES.filter(n=>n&&!n.sup&&!nFaite(n)), x0=9*T+4, y0=T+4;
+function drawNotesWall(){ ctx=g; const live=NOTES.filter(n=>n&&!n.sup&&(!nFaite(n)||RIP.has(n.id))), x0=9*T+4, y0=T+4;
   const list=live.slice(0,16);
   list.forEach((n,i)=>{ const x=x0+(i%8)*9, y=y0+Math.floor(i/8)*11; const c=nFaite(n)?'#a8e098':(n.pour?'#f8b0c8':'#f8e870');
     R(x+1,y+1,7,8,'rgba(60,30,10,.35)'); R(x,y,7,8,c); R(x+1,y+2,5,1,shade(c,.7)); R(x+1,y+4,4,1,shade(c,.7)); R(x+3,y,1,1,'#d03030'); }); }
@@ -1258,6 +1340,7 @@ function drawDialog(){
     v.fillStyle='#d0d0c8'; v.fillText(part,tx+2,ly+2); v.fillStyle='#383838'; v.fillText(part,tx,ly); });
   if(n>=total&&Math.floor(time*3)%2){ v.fillStyle='#d03030'; v.beginPath(); const ax=x+w-16*S,ay=y+h-12*S; v.moveTo(ax,ay); v.lineTo(ax+6*S,ay); v.lineTo(ax+3*S,ay+4*S); v.fill(); }
   d.fini=n>=total;
+  if(time-d.start>=10){ if(dialog===d) dialog=null; else if(DIALOGQ[0]===d) DIALOGQ.shift(); return; }   /* v14.68 : 10 s puis il s'efface */
   if(DIALOGQ.length>(auto?1:0)){ const plus=`+${DIALOGQ.length-(auto?1:0)}`; v.fillStyle='#8890a8'; v.textAlign='right'; v.fillText(plus,x+w-24*S,y+10*S); v.textAlign='left'; }
 }
 function hoverAgent(){ if(!mouse) return null; return agents.find(a=>mouse.x>=a.x*T&&mouse.x<=a.x*T+16&&mouse.y>=a.y*T-4&&mouse.y<=a.y*T+16)||null; }
@@ -1289,6 +1372,7 @@ let popKey=null, popTab=null;
 const SCREENS={
  imane:{title:'Accueil · Imane',tabs:['WhatsApp du jour','Historique WhatsApp','Contacts WhatsApp','Dossiers']},
  manque:{title:"Ce que j'ai manqué",tabs:['Tout','Imane','Ahmed','Soufiane','Noureddine']},
+ logs:{title:'📜 Logs',tabs:['Tout','Imane','Ahmed','Soufiane','Noureddine']},
  pc:{title:'PC de Noureddine',tabs:['Alertes','Reportées','Contrôles Imane','En production','Achats','Dossiers','Paiements','Encaissements']},
  scie:{title:'Scie à onglet · Ahmed',tabs:['À couper','Déjà coupées','Par bon']},
  profils:{title:'Profilés en stock',tabs:['Enrouleur','Jour et nuit']},
@@ -1304,6 +1388,10 @@ const SCREENS={
  tubes:{title:'Tubes reçus à l\'atelier',tabs:['Reçus','À couper']},
  prets:{title:'Prêt à livrer',tabs:['Prêts']},
 };
+let LOGJ=jourISO(new Date());
+document.getElementById('logsBtn').addEventListener('click',()=>{ LOGJ=jourISO(new Date()); openPop('logs'); });
+document.getElementById('popBody').addEventListener('click',e=>{ const b=e.target.closest('[data-logj]'); if(!b) return; const v=+b.dataset.logj;
+  if(!v) LOGJ=jourISO(new Date()); else { const d=new Date(LOGJ+'T12:00:00'); d.setDate(d.getDate()+v); LOGJ=jourISO(d); } renderPop(); });
 function openPop(key,tab){ if(key==='chiffres') SCREENS.chiffres.tabs=chAnnees(); if(key==='manque'){ if(!MANQUE_LU) lotNouveau(); MANQUE_LU=true; setTimeout(manqueCompte,0); } popKey=key; popTab=tab||SCREENS[key].tabs[0]; renderPop(); pop.classList.add('open'); veil.classList.add('open'); }
 function closePop(){ pop.classList.remove('open'); veil.classList.remove('open'); popKey=null; }
 
@@ -1386,7 +1474,16 @@ function renderPop(){ try{ notesRegle(); }catch(e){}
   document.getElementById('popTabs').innerHTML=sc.tabs.map(t=>`<button type="button" data-t="${t}" aria-pressed="${t===popTab}">${t}</button>`).join('');
   let s='',b='';
   const sent=ORDERS.filter(o=>o.status==='sent');
-  if(popKey==='manque'){ const r=renderManquePop(); s=r.s; b=r.b;
+  if(popKey==='logs'){ /* v14.68 : les mêmes opérations que la page Logs de l'app, jour par jour */
+    const qui=popTab&&popTab!=='Tout'?popTab.toLowerCase():'', ev=eventsDuJour(LOGJ), L=ev.filter(x=>!qui||String(x.by||'').toLowerCase()===qui).slice().reverse();
+    const auj=jourISO(new Date()), dj=new Date(LOGJ+'T12:00:00'), ec=Math.round((new Date(auj+'T12:00:00')-dj)/86400000);
+    const lab=dj.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    s=sum([['Opérations',L.length],['Encaissé',frm(L.filter(x=>x.type==='paie').reduce((t,x)=>t+(parseFloat(String(x.val).replace(/[^0-9,.-]/g,'').replace(',','.'))||0),0))+' MAD']]);
+    b=`<div class="albar"><button type="button" data-logj="-1">◀</button><b style="flex:1;text-align:center">${esc(cap(lab))} · ${ec===0?"aujourd’hui":ec===1?'hier':'il y a '+ec+' jours'}</b><button type="button" data-logj="1"${LOGJ>=auj?' disabled':''}>▶</button>${ec?'<button type="button" data-logj="0">Aujourd’hui</button>':''}</div>`+
+      (BRIEF&&BRIEF.date===LOGJ&&!qui?`<div class="manq"><b>📋</b><span>${hm(BRIEF.at)}</span><div>${esc(BRIEF.txt)}</div></div>`:'')+
+      (L.length?tbl(['Heure','Opération','Détail','Par','>Montant'],L.map(x=>[hm(x.at),esc(x.titre||''),esc(x.sous||''),esc(x.by?cap(x.by):''),esc(x.val||'')]))
+      :'<div class="empty">Rien ce jour-là'+(qui?' pour '+esc(cap(qui)):'')+'.</div>');
+  } else if(popKey==='manque'){ const r=renderManquePop(); s=r.s; b=r.b;
   } else if(popKey==='chiffres'){ const r=renderChiffres(popTab); s=r.s; b=r.b;
   } else if(popKey==='agenda'){ s=''; b=renderAgendaPop();
   } else if(popTab==='WhatsApp du jour'){
@@ -1418,7 +1515,9 @@ function renderPop(){ try{ notesRegle(); }catch(e){}
   } else if(popTab==='Alertes'){
     const G={3:'<span class="tag" style="background:#c03030">URGENT</span>',2:'<span class="tag" style="background:#d08020">BIENTÔT</span>',1:'<span class="tag" style="background:#6878a0">À SUIVRE</span>'};
     s=sum([['Points à vérifier',ALERTS.length],['Urgents',ALERTS.filter(a=>a.g>=3).length],['Reportées',REPORTEES.length]]);
-    b=needLogin()+tbl(['','Écrite le','Ce que Noureddine a repéré','Concerne','Envoyer à','Reporter',''],ALERTS.map(a=>[G[a.g],alerteQuand(a),esc(a.t),esc(a.c||''),alerteActions(a),
+    ALSEL.forEach(id=>{ if(!ALERTS.some(a=>a.id===id)) ALSEL.delete(id); });
+    const nr=notesEnRetard().length;
+    b=needLogin()+(nr?`<button type="button" class="alnotes" data-alnotes>📝 ${nr} note${nr>1?'s':''} en retard de plus de 2 jours → Notes équipe</button>`:'')+(ALERTS.length?alBarre():'')+tbl(['','','Écrite le','Ce que Noureddine a repéré','Concerne','Envoyer à','Reporter',''],ALERTS.map(a=>[`<input type="checkbox" data-alsel="${esc(a.id)}"${ALSEL.has(a.id)?' checked':''}>`,G[a.g]+(a.esc?'<br><small style="color:#c03030">⬆ escaladée</small>':''),alerteQuand(a),esc(a.t)+(a.voir?` <button type="button" data-alvoir="${esc(a.voir)}">Voir ›</button>`:''),esc(a.c||''),alerteActions(a),
       `<button type="button" class="wabtn" data-alfait="${esc(a.id)}">✓ Fait</button> <select data-alrep="${esc(a.id)}"><option value="">Reporter…</option><option value="1j">à demain</option><option value="3j">dans 3 jours</option><option value="7j">dans 1 semaine</option><option value="30j">dans 1 mois</option><option value="chg">jusqu'à ce que ça change</option></select>`]));
   } else if(popTab==='Reportées'){
     s=sum([['Alertes reportées',REPORTEES.length]]);
@@ -1457,9 +1556,9 @@ function renderPop(){ try{ notesRegle(); }catch(e){}
     s=sum([['Bons fournisseur',L.length],['Total TTC',frm(L.reduce((t,x)=>t+tot(x).ttc,0))+' DH'],['Reste à payer',frm(L.reduce((t,x)=>t+tot(x).reste,0))+' DH']]);
     b=needLogin()+tbl(['Bon','Fournisseur','Date','État','>TTC','>Payé','>Reste'],L.map(x=>{ const t=tot(x); return [esc(x.num||''),esc(four(x.four)),dateFr(x.date),etat(x),frm(t.ttc),frm(t.paye),frm(t.reste)]; }));
   } else if(popTab==='Paiements'){
-    const L=sent.filter(o=>etatDe(o)!=='devis'&&soldeDe(o)>0.01).sort(byDate);
-    s=sum([['Bons non soldés',L.length],['Reste à encaisser',frm(L.reduce((t,o)=>t+soldeDe(o),0))+' DH']]);
-    b=needLogin()+tbl(['Bon','Client','Situation','>Dû','>Payé','>Reste'],L.map(o=>[esc(o.num),esc(o.nom||'—'),etatTag(etatDe(o)),frm(duDe(o)),frm(payeDe(o)),'<b style="color:#c03030;font-weight:normal">'+frm(soldeDe(o))+'</b>']));
+    const L=sent.filter(o=>etatDe(o)!=='devis'&&soldeDe(o)>0.01).sort(byDate), AC=aConfirmer();
+    s=sum([['À confirmer en banque',AC.length],['Bons non soldés',L.length],['Reste à encaisser',frm(L.reduce((t,o)=>t+soldeDe(o),0))+' DH']]);
+    b=needLogin()+(AC.length?'<h3 class="wag">À confirmer en banque · '+AC.length+'</h3>'+tbl(['Bon','Client','Paiement','Date','Par','>Montant','>Attente'],AC.map(x=>[esc(x.o.num),esc(x.o.nom||'—'),esc(x.p.mode||''),x.p.date?dateFr(x.p.date):'',esc(cap(x.p.by||'')),frm(x.m),x.j+' j']))+'<h3 class="wag">Bons non soldés</h3>':'')+tbl(['Bon','Client','Situation','>Dû','>Payé','>Reste'],L.map(o=>[esc(o.num),esc(o.nom||'—'),etatTag(etatDe(o)),frm(duDe(o)),frm(payeDe(o)),'<b style="color:#c03030;font-weight:normal">'+frm(soldeDe(o))+'</b>']));
   } else if(popTab==='Encaissements'){
     const L=[]; ORDERS.forEach(o=>paiements(o).forEach(p=>L.push({o,p}))); L.sort((a,b)=>String(b.p.date||'').localeCompare(String(a.p.date||'')));
     const mois=L.filter(x=>ceMois(String(x.p.date||'')+'T12:00:00'));
@@ -1475,8 +1574,8 @@ function renderPop(){ try{ notesRegle(); }catch(e){}
     /* filtre par agent : ce qui reste à faire pour chacun */
     const reste=q=>all.filter(n=>!nFaite(n)&&(!q||(q==='*'?!n.pour:n.pour===q))).length;
     const puces='<div class="notqui">'+[['','Tous'],...NOTE_AGENTS.map(q=>[q,cap(q)]),['*','Pour tout le monde']].map(([k,l])=>`<button type="button" data-nqf="${k}" aria-pressed="${NOTE_QUI===k}">${l} · ${reste(k)}</button>`).join('')+'</div>';
-    b=needLogin()+puces+tbl(['Note','De','Pour','Bon','Date','État',''],L.map(n=>[esc(n.txt||''),esc(cap(n.by||'')),esc(n.pour?cap(n.pour):'Tout le monde'),esc(noteBonNum(n)),n.at?new Date(n.at).toLocaleDateString('fr-FR'):'',
-      n.fait?'Fait'+(n.faitBy?' par '+esc(cap(n.faitBy)):''):n.regle?'Réglé dans le bon':'À faire', nFaite(n)?'':noteActions(n)]));
+    b=needLogin()+puces+tbl(['Note','Pour','Bon','Date','État',''],L.map(n=>[esc(n.txt||''),esc(n.pour?cap(n.pour):'Tout le monde'),esc(noteBonNum(n)),n.at?new Date(n.at).toLocaleDateString('fr-FR'):'',
+      n.fait?'Fait'+(n.faitBy?' par '+esc(cap(n.faitBy)):''):n.regle?(n.auto||n.bon?'Réglé dans le bon':'Réglé : téléphone ajouté au bon'):noteJours(n)>2?`<span class="notretard">À faire · ${noteJours(n)} j</span>`:'À faire', nFaite(n)?'':noteActions(n)]));
   } else if(popTab==='En production'){
     const L=sent.filter(o=>etatDe(o)==='production').sort((a,b)=>String(a.ech||'9').localeCompare(String(b.ech||'9')));
     const k=kpi(); s=sum([['Bons en production',L.length],['Stores faits',`${k.fait}/${k.tot}`],['Tubes à couper',TO_CUT.length],['Tissus à couper',FABQ.filter(f=>!CUT_WAIT.has(f.id)).length]]);
@@ -1553,17 +1652,37 @@ let NOTE_QUI='';
 /* ---------- alertes du PC : choisir l'agent, copier le message pour le groupe WhatsApp ---------- */
 const ALERTE_QUI=[[/^(ahmed|tubesurg|silence)\|?/,'ahmed'],[/^(soufiane|pcstock|sanstissu|retard|proche|pretlong|charge|agenda)\|?/,'soufiane'],
   [/^(impaye|choixtissu|formcontact|wa)/,'imane'],[/^(banque|profil|achat|achpaye|tissu)\|?/,'noureddine']];
+ALERTE_QUI.unshift([/^(sage)/,'noureddine'],[/^(cohprix|cohacompte|cohdouble)/,'imane']);
 function alerteQuiDefaut(a){ if(a.id.startsWith('note|')){ const n=NOTES.find(x=>'note|'+x.id===a.id); return (n&&n.pour)||''; }
   const r=ALERTE_QUI.find(([re])=>re.test(a.id)); return r?r[1]:''; }
 function alerteActions(a){ const d=alerteQuiDefaut(a);
   return `<div class="notact"><select data-alq="${esc(a.id)}">`+['',...NOTE_AGENTS].map(q=>`<option value="${q}"${q===d?' selected':''}>${q?cap(q):'Tout le monde'}</option>`).join('')+
     `</select><button type="button" class="wabtn" data-alwa="${esc(a.id)}">WhatsApp</button></div>`; }
+/* v14.65 : cocher plusieurs alertes, un seul message copié, rangé par agent */
+const ALSEL=new Set(), AL_ORDRE=['soufiane','ahmed','imane','noureddine',''];
+function alBarre(){ const n=ALSEL.size;
+  return `<div class="albar"><label><input type="checkbox" id="alTout"${n&&n===ALERTS.length?' checked':''}> Tout sélectionner</label>`+
+    `<button type="button" class="wabtn" data-alwasel${n?'':' disabled'}>WhatsApp · ${n} alerte${n>1?'s':''} par agent</button></div>`; }
+function alQui(a){ const sel=document.querySelector(`select[data-alq="${CSS.escape(a.id)}"]`); return sel?sel.value:alerteQuiDefaut(a); }
+function alerteMsgGroupe(){ const par={};
+  ALERTS.filter(a=>ALSEL.has(a.id)).forEach(a=>{ const q=alQui(a); (par[q]=par[q]||[]).push(alerteMsg(a,q)); });
+  const NL=String.fromCharCode(10), L2=NL+NL;
+  return AL_ORDRE.filter(q=>par[q]).map(q=>`* ${q?cap(q):'Tout le monde'} :`+L2+par[q].join(L2)).join(L2); }
+document.getElementById('popBody').addEventListener('click',e=>{ if(e.target.closest('[data-alnotes]')) openPop('notes'); const v=e.target.closest('[data-alvoir]'); if(v){ popTab=v.dataset.alvoir; renderPop(); } });
+function alMajBarre(){ const b=document.querySelector('.albar'); if(b) b.outerHTML=alBarre(); }
+document.getElementById('popBody').addEventListener('change',e=>{
+  const c=e.target.closest('[data-alsel]'); if(c){ c.checked?ALSEL.add(c.dataset.alsel):ALSEL.delete(c.dataset.alsel); alMajBarre(); return; }
+  if(e.target.id==='alTout'){ const on=e.target.checked; ALSEL.clear(); if(on) ALERTS.forEach(a=>ALSEL.add(a.id));
+    document.querySelectorAll('input[data-alsel]').forEach(x=>{ x.checked=on; }); alMajBarre(); } });
+document.getElementById('popBody').addEventListener('click',e=>{ const w=e.target.closest('[data-alwasel]'); if(!w||!ALSEL.size) return;
+  try{ navigator.clipboard.writeText(alerteMsgGroupe()); }catch(_){} w.textContent='Copié ✓ · collez dans le groupe'; setTimeout(alMajBarre,2200); });
 function alerteMsg(a,qui){ const tag=(qui?(WA_TAG[qui]||'@'+qui):'@tout le monde')+' ';
   if(a.wa){ const w=String(a.wa), i=w.indexOf('📢'); return tag+(i>=0?w.slice(i):w); }
   return `${tag}📢 🔔 ${a.t}`+(a.c&&String(a.t).indexOf(a.c)<0?` · ${a.c}`:''); }
 document.getElementById('popBody').addEventListener('change',e=>{ const r=e.target.closest('[data-alrep]'); if(r&&r.value) reporter(r.dataset.alrep,r.value); });
 document.getElementById('popBody').addEventListener('click',e=>{ const r=e.target.closest('[data-alreact]'); if(r) reactiver(r.dataset.alreact); });
-document.getElementById('popBody').addEventListener('click',e=>{ const f=e.target.closest('[data-alfait]'); if(f) reporter(f.dataset.alfait,'fait'); });
+document.getElementById('popBody').addEventListener('click',async e=>{ const f=e.target.closest('[data-alfait]'); if(!f) return; const id=f.dataset.alfait;
+  reporter(id,'fait'); });
 document.getElementById('popBody').addEventListener('click',e=>{ const w=e.target.closest('[data-alwa]'); if(!w) return;
   const a=ALERTS.find(x=>x.id===w.dataset.alwa); if(!a) return; const sel=document.querySelector(`select[data-alq="${CSS.escape(a.id)}"]`);
   const m=alerteMsg(a,sel?sel.value:alerteQuiDefaut(a)); try{ navigator.clipboard.writeText(m); }catch(_){} w.textContent='Copié ✓'; setTimeout(()=>{ w.textContent='WhatsApp'; },1800); });
@@ -1573,7 +1692,29 @@ function noteMsgWa(n,qui){ const tag=(qui?(WA_TAG[qui]||'@'+qui):'@tout le monde
   return `${tag}📢 🔔 Note de ${cap(n.by||'Noureddine')} : ${n.txt||''}`+(bon&&String(n.txt||'').indexOf(bon.split(' · ')[0])<0?` · ${bon}`:'')+(n.at?` · ${new Date(n.at).toLocaleDateString('fr-FR')}`:''); }
 function noteActions(n){
   return `<div class="notact"><select data-nqui="${esc(n.id)}">`+['',...NOTE_AGENTS].map(q=>`<option value="${q}"${(n.pour||'')===q?' selected':''}>${q?cap(q):'Tout le monde'}</option>`).join('')+`</select>`+
-    `<button type="button" data-ntrans="${esc(n.id)}">Transférer</button><button type="button" class="wabtn" data-nwa="${esc(n.id)}">WhatsApp</button></div>`; }
+    `<button type="button" data-ntrans="${esc(n.id)}" disabled title="Choisissez un autre agent pour lui donner cette note">Transférer</button><button type="button" class="wabtn" data-nwa="${esc(n.id)}">WhatsApp</button>`+
+    `<button type="button" data-nfait="${esc(n.id)}">✓ Fait</button><button type="button" data-nsup="${esc(n.id)}" style="color:#c03030">Supprimer</button></div>`; }
+/* v14.65 : relit cfg-notes, change cette seule note, la renvoie (fusion par note et par maj, comme l'app) */
+async function noteEcrit(id,f){
+  if(!SB||!LIVE) throw new Error('pas connecté');
+  const {data,error}=await SB.from('bons').select('data').eq('id','cfg-notes').limit(1); if(error) throw error;
+  const liste=(data&&data[0]&&data[0].data&&Array.isArray(data[0].data.liste))?data[0].data.liste:[];
+  const n=liste.find(x=>x&&x.id===id); if(!n) throw new Error('note introuvable');
+  f(n); n.maj=Date.now();
+  const r=await SB.from('bons').upsert({id:'cfg-notes',num:'__NOTES__',author:USER||'noureddine',data:{v:1,liste},updated_at:new Date().toISOString()}); if(r.error) throw r.error;
+  NOTES=liste; notesRegle(); processAlerts(); if(popKey) renderPop(); return n; }
+const noteFaite=id=>noteEcrit(id,n=>{ n.fait=Date.now(); n.faitBy=USER||'noureddine'; });
+const noteSupprime=id=>noteEcrit(id,n=>{ n.sup=true; });
+document.getElementById('popBody').addEventListener('change',e=>{ const s=e.target.closest('[data-nqui]'); if(!s) return;
+  const n=NOTES.find(x=>x&&x.id===s.dataset.nqui), b=document.querySelector(`[data-ntrans="${CSS.escape(s.dataset.nqui)}"]`);
+  if(b){ const ch=!!n&&(n.pour||'')!==s.value; b.disabled=!ch; b.textContent=ch?'Transférer à '+(s.value?cap(s.value):'tous'):'Transférer'; } });
+document.getElementById('popBody').addEventListener('click',async e=>{
+  const f=e.target.closest('[data-nfait]'), d=e.target.closest('[data-nsup]'); if(!f&&!d) return;
+  const id=(f||d).dataset[f?'nfait':'nsup'], n=NOTES.find(x=>x&&x.id===id);
+  if(d&&!confirm('Supprimer cette note pour tout le monde ?'+String.fromCharCode(10)+(n?n.txt||'':''))) return;
+  (f||d).disabled=true; (f||d).textContent='…';
+  try{ await (f?noteFaite(id):noteSupprime(id)); }
+  catch(err){ (f||d).disabled=false; (f||d).textContent=f?'✓ Fait':'Supprimer'; alert('Impossible : '+(err.message||err)); } });
 async function noteTransfere(id,pour){
   if(!SB||!LIVE) throw new Error('pas connecté');
   const {data,error}=await SB.from('bons').select('data').eq('id','cfg-notes').limit(1); if(error) throw error;
