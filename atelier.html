@@ -272,7 +272,7 @@ function parseCSV(t){ const rows=[]; let cur=[],val='',q=false; for(let i=0;i<t.
   if(val||cur.length){cur.push(val);rows.push(cur);} return rows; }
 function numFr(v){ let t=String(v==null?'':v).replace(/[\s  ]/g,''); if(t.indexOf('.')>=0&&t.indexOf(',')>=0) t=(t.indexOf('.')<t.indexOf(','))?t.replace(/\./g,''):t.replace(/,/g,''); t=t.replace(',','.').replace(/[^0-9.\-]/g,''); const n=parseFloat(t); return isFinite(n)?n:0; }
 function laizeOf(ref){ const n=(ref.match(/\d{2,4}/g)||[]).map(Number).filter(n=>n>=150&&n<=400); return n.length?n[n.length-1]:250; }
-function qtyCol(rows){ for(let i=0;i<Math.min(rows.length,30);i++){ const j=(rows[i]||[]).findIndex(c=>/^qt[ée]s?$/i.test(String(c||'').replace(/\s+/g,' ').trim())); if(j>=0) return j; } return 15; }
+function qtyCol(rows){ for(let i=0;i<Math.min(rows.length,30);i++){ const j=(rows[i]||[]).findIndex(c=>/^qt[ée]s?$/i.test(String(c||'').replace(/\s+/g,' ').trim())); if(j>=0){ for(let k=j;k<j+4;k++){ let n=0; for(let q=0;q<rows.length&&n<3;q++){ const r=rows[q]||[]; if(String(r[0]||'').trim()&&parseFloat(String(r[k]||'').replace(/,/g,''))>0) n++; } if(n>=3) return k; } return j; } } return 15; }
 const SERVICES=["ACOMPTE","POSE","LIVRAISON","INSTALLATION","DEPLACEMENT","REMISE","AVOIR"];
 function designationDe(r,qc){ const fin=Math.min(r.length,qc>0?qc:15); for(let j=1;j<fin;j++){ const t=String(r[j]==null?'':r[j]).trim(); if(t&&!/^[\d\s.,\-]+$/.test(t)) return t; } return ''; }
 async function loadStock(){
@@ -293,7 +293,7 @@ function stockM2(f){ const lz=f.laize>0?f.laize/100:1; return f.type!=='JN'?f.di
 function nbRouleaux(f){ const v=parseInt((ATL.rouleaux||{})[f.ref],10); return v>=0?v:1; }
 function fab(ref){ return CATALOGUE.find(f=>f.ref===ref)||null; }
 
-const BON_FIELDS=['log','fini','status','etat','type','multi','refs','dims','tubes','faites','nom','tel','ville','date','ech','prix','prixJN','arr','fact','remise','posePrix','poseMode','pose','paies'];
+const BON_FIELDS=['log','fini','status','etat','type','multi','refs','dims','tubes','faites','nom','tel','ville','date','ech','prix','prixJN','arr','fact','remise','posePrix','poseMode','pose','paies','sheetAt','pcErr','pieces','modeles'];
 const COLS='id,num,author,updated_at,'+BON_FIELDS.map(k=>k+':data->'+k).join(',');
 async function loadBons(){
   let all=[];
@@ -302,10 +302,10 @@ async function loadBons(){
     if(error) throw error; all=all.concat(data||[]); if(!data||data.length<1000) break;
   }
   ORDERS=all.filter(o=>o.num&&!String(o.num).startsWith('__'));
-  const c=await SB.from('bons').select('id,data').in('id',['cfg-atelier','cfg-notes','cfg-prospects','cfg-achats','cfg-wamsg']);
+  const c=await SB.from('bons').select('id,data').in('id',['cfg-atelier','cfg-notes','cfg-prospects','cfg-achats','cfg-wamsg','cfg-depenses','cfg-mesures']);
   if(!c.error) (c.data||[]).forEach(r=>{ const d=r.data||{};
     if(r.id==='cfg-atelier') ATL=d; if(r.id==='cfg-notes') NOTES=Array.isArray(d.liste)?d.liste:[];
-    if(r.id==='cfg-prospects') PROS=Array.isArray(d.liste)?d.liste:[]; if(r.id==='cfg-achats') ACH={bas:d.bas||[],fours:d.fours||[]}; if(r.id==='cfg-wamsg') WA={reg:d.reg||{},camp:Array.isArray(d.camp)?d.camp:[]}; });
+    if(r.id==='cfg-prospects') PROS=Array.isArray(d.liste)?d.liste:[]; if(r.id==='cfg-achats') ACH={bas:d.bas||[],fours:d.fours||[]}; if(r.id==='cfg-mesures') MESJ=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-depenses') DEPAPP=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-wamsg') WA={reg:d.reg||{},camp:Array.isArray(d.camp)?d.camp:[]}; });
   lastBons=Date.now();
 }
 
@@ -697,7 +697,8 @@ let NOTIF_ON=false; try{ NOTIF_ON=localStorage.getItem('mst-atelier-notif')==='o
 function bgNotif(son,titre,corps){ if(!document.hidden) return;
   playSound(son,true);
   try{ if(NOTIF_ON&&'Notification' in window&&Notification.permission==='granted')
-    new Notification(titre,{body:corps||'',icon:'icon-192.png',tag:'atelier-'+Date.now(),silent:true}); }catch(err){} }
+    { const n=new Notification(titre,{body:corps||'',icon:'icon-192.png',tag:'atelier-'+Date.now(),silent:true,requireInteraction:false});
+      setTimeout(()=>{ try{ n.close(); }catch(e){} },5000); } }catch(err){} }      /* v14.61 : disparaît seule après 5 secondes */
 function onEvent(e){
   const a=agentOf(e.by);
   bgNotif(e.type==='etat'&&e.etat==='livre'?'deliver':(EV_SON[e.type]||'bon'), (e.by?cap(e.by)+' · ':'')+e.titre, e.sous||'');
@@ -755,12 +756,14 @@ function eventsDuJour(iso){ const out=[];
     (p.env||[]).forEach(x=>{ if(x&&x.at&&jourISO(x.at)===iso) out.push({id:'wa|'+p.id+'|'+x.at,at:x.at,by:x.by||'',type:'wa',titre:'WhatsApp · '+(WA_K[x.k]||(String(x.k||'').indexOf('u:')===0?'message libre (modèle d’Imane)':(x.k||'message'))),sous:(p.nom||'Sans nom')+(p.tel?' · '+p.tel:''),val:''}); });
     if(p.at&&jourISO(p.at)===iso) out.push({id:'pros|'+p.id,at:p.at,by:p.by||'',type:'pros',titre:'Nouveau contact WhatsApp',sous:(p.nom||'Sans nom')+(p.tel?' · '+p.tel:''),val:''});
     if(p.vu&&jourISO(p.vu)===iso&&!(p.at&&jourISO(p.at)===iso)) out.push({id:'prosvu|'+p.id+'|'+p.vu,at:p.vu,by:p.vuBy||p.by||'',type:'pros',titre:'Contact rappelé',sous:(p.nom||'Sans nom')+(p.tel?' · '+p.tel:''),val:''}); });
+  MESJ.forEach(x=>{ if(!x||x.sup||!x.mesAt||jourISO(x.mesAt)!==iso) return; const nb=(x.fen||[]).reduce((t,f)=>t+(parseInt(f.q,10)||1),0);
+    out.push({id:'mes|'+x.id+'|'+x.mesAt,at:x.mesAt,by:x.mesBy||'soufiane',type:'edit',titre:'📏 Mesures prises · '+(x.nom||'client'),sous:nb+' store'+(nb>1?'s':'')+' · '+(x.fen||[]).map(f=>f.l+'×'+f.h).join(', '),val:''}); });
   NOTES.forEach(n=>{ if(!n||n.sup) return; const court=String(n.txt||'').slice(0,70);
     if(n.at&&jourISO(n.at)===iso) out.push({id:'note|'+n.id,at:n.at,by:n.by||'',type:'note',titre:'Note laissée',sous:court+(n.pour?' · pour '+cap(n.pour):' · pour tout le monde'),val:''});
     if(n.fait&&typeof n.fait==='number'&&jourISO(n.fait)===iso) out.push({id:'notefait|'+n.id,at:n.fait,by:n.faitBy||'',type:'notefait',titre:'Note faite',sous:court+(n.by?' · demandée par '+cap(n.by):''),val:''}); });
   return out.sort((a,b)=>a.at-b.at);
 }
-let EV=[], EV_SEEN=null, EV_VER=0;
+let EV=[], EV_SEEN=null, EV_VER=0; let MESJ=[];      /* v14.61 : prises de mesures */
 function processEvents(){ EV=eventsDuJour(jourISO(new Date())); EV_VER++; manqueCompte();
   if(!MANQUE_AUTO&&LIVE){ MANQUE_AUTO=true; if(MANQUE_N>0&&!popKey) setTimeout(()=>{ if(!popKey) openPop('manque'); },800); }
   if(!EV_SEEN){ EV_SEEN=new Set(EV.map(e=>e.id)); return; }
@@ -769,17 +772,17 @@ function processEvents(){ EV=eventsDuJour(jourISO(new Date())); EV_VER++; manque
 /* ---------- Noureddine : ce qui demande son attention ---------- */
 let ALERTS=[], ALERT_SEEN=null;
 const TUBES_ATTENTE_H=24;   // délai avant alerte : tubes livrés mais store pas fait
-function computeAlerts(){ const out=[], today=jourISO(new Date()), now=Date.now(), D=86400000, sent=ORDERS.filter(o=>o.status==='sent');
+function computeAlerts(){ notesRegle(); const out=[], today=jourISO(new Date()), now=Date.now(), D=86400000, sent=ORDERS.filter(o=>o.status==='sent');
   /* v14.53 : formulaire du site reçu depuis plus d'un jour, contact pas encore créé par Imane */
   formsSansContact().forEach(o=>{ const j=Math.floor((now-o.at)/D);
-    out.push({id:'formcontact|'+o.date+'|'+o.tel,g:j>=3?3:2,t:`Formulaire du site du ${o.date} pas ajouté aux contacts (${j} jour${j>1?'s':''} de retard) : ${o.nom||'sans nom'}${o.tel?' · '+o.tel:''}${o.ville?' · '+o.ville:''}`,c:o.nom||o.tel,
+    out.push({id:'formcontact|'+o.date+'|'+o.tel,at:o.at,g:j>=3?3:2,t:`Formulaire du site du ${o.date} pas ajouté aux contacts (${j} jour${j>1?'s':''} de retard) : ${o.nom||'sans nom'}${o.tel?' · '+o.tel:''}${o.ville?' · '+o.ville:''}`,c:o.nom||o.tel,
       wa:`${WA_TAG.imane} 📢 🔔 Formulaire du site du ${o.date} pas encore dans les contacts : ${o.nom||'sans nom'}${o.tel?' · '+o.tel:''}. Merci de l'ajouter depuis WhatsApp › Formulaires.`}); });
   sent.forEach(o=>{ const e=etatDe(o), s=soldeDe(o), ech=o.ech?String(o.ech).slice(0,10):'';
     /* tissu pas choisi : vérifié sur toutes les situations, sauf les devis */
     if(e!=='devis'){ const dd=ordDims(o), sansChoix=dd.filter(x=>!x.ref).length;
       if(sansChoix) out.push({id:'choixtissu|'+o.id,g:e==='production'?3:2,t:`${o.num} (${(ETATS[e]||e).toLowerCase()}) : tissu pas choisi pour ${sansChoix} fenêtre${sansChoix>1?'s':''} sur ${dd.length}`,c:o.nom}); }
     /* v14.48 : pièces du Plan de coupe supérieures au stock (écrit par l'app sur le bon) */
-    if(Array.isArray(o.pcErr)&&o.pcErr.length&&e!=='livre') out.push({id:'pcstock|'+o.id,g:3,t:`${o.num} : pièces supérieures au stock, envoi au tableau bloqué · `+o.pcErr.map(x=>x.t).join(' · '),c:o.nom});
+    if(Array.isArray(o.pcErr)&&o.pcErr.length&&e!=='livre') out.push({id:'pcstock|'+o.id,at:((o.log||[]).filter(x=>x&&x.kind==='stock'&&x.k==='stock-err').pop()||{}).at,g:3,t:`${o.num} : pièces supérieures au stock, envoi au tableau bloqué · `+o.pcErr.map(x=>x.t).join(' · '),c:o.nom});
     if(e==='livre'&&s>0.01) out.push({id:'impaye|'+o.id,g:3,t:`${o.num} livré mais pas soldé : reste ${frm(s)} DH`,c:o.nom});
     if(echDepassee(o)) out.push({id:'retard|'+o.id,g:3,t:`${o.num} en retard : échéance du ${dateFr(ech)} dépassée`,c:o.nom});
     else if(ech&&e==='production'){ const j=Math.round((new Date(ech+'T12:00:00')-new Date(today+'T12:00:00'))/D), d=ordDims(o), f=d.filter(x=>(o.faites||[]).indexOf(x.key)>=0).length;
@@ -848,7 +851,7 @@ function computeAlerts(){ const out=[], today=jourISO(new Date()), now=Date.now(
     const resteJour=L.nouv.length+L.vus.length;
     if(!L.weekend&&new Date().getHours()>=17&&resteJour) out.push({id:'wajour',g:2,t:`Imane n'a pas fini ses tâches WhatsApp du jour : ${resteJour} restante${resteJour>1?'s':''} (${L.nouv.length} demande${L.nouv.length>1?'s':''}, ${L.vus.filter(x=>x.bloc==='rappel').length} rappel(s) promis, ${L.vus.filter(x=>x.bloc==='relance').length} relance(s), ${L.vus.filter(x=>x.bloc==='client'||x.bloc==='promo').length} autre(s))`,c:'WhatsApp'});
     if(!L.weekend&&new Date().getHours()>=12&&L.fait<L.quota) out.push({id:'waquota',g:1,t:`Imane : ${L.fait}/${L.quota} messages WhatsApp envoyés aujourd'hui`,c:'WhatsApp'}); }
-  NOTES.filter(n=>n&&!n.sup&&!n.fait&&n.at&&now-n.at>2*D).forEach(n=>out.push({id:'note|'+n.id,g:1,t:`Note pour ${n.pour?cap(n.pour):'tous'} pas faite depuis ${Math.floor((now-n.at)/D)} jours : ${String(n.txt||'').slice(0,40)}`,c:'Notes équipe'}));
+  NOTES.filter(n=>n&&!n.sup&&!nFaite(n)&&n.at&&now-n.at>2*D).forEach(n=>out.push({id:'note|'+n.id,at:n.at,g:1,t:`Note pour ${n.pour?cap(n.pour):'tous'} pas faite depuis ${Math.floor((now-n.at)/D)} jours : ${String(n.txt||'').slice(0,40)}`,c:'Notes équipe'}));
   const need={}; FABQ.forEach(f=>{ if(f.ref) need[f.ref]=(need[f.ref]||0)+f.len/100; });
   Object.keys(need).forEach(r=>{ const f=fab(r), st=f?stockMl(f):0; if(st<need[r]) out.push({id:'tissu|'+r,g:3,t:`Tissu ${r} : environ ${fr(need[r])} ml à couper, il reste ${fr(st)} ml`,c:'Stock'}); });
   return out.sort((a,b)=>b.g-a.g);
@@ -859,18 +862,51 @@ const REP_KEY='mst-atelier-reportees';
 let REPORT={}; try{ REPORT=JSON.parse(localStorage.getItem(REP_KEY)||'{}')||{}; }catch(e){ REPORT={}; }
 let REPORTEES=[];
 function reportSave(){ try{ localStorage.setItem(REP_KEY,JSON.stringify(REPORT)); }catch(e){} }
+/* v14.55 : le texte comparé ignore les compteurs de jours (« depuis 4 jours », « 3 jours de retard ») :
+   avant, une alerte reportée « jusqu'à ce que ça change » revenait chaque matin parce que ce chiffre bougeait */
+function alNorm(t){ return String(t||'').replace(/\d+\s*jours?/g,'N jours'); }
 function estReportee(a){ const r=REPORT[a.id]; if(!r) return false;
-  if(r.chg) return r.t===a.t;                       /* même texte : toujours reportée */
+  if(r.chg) return alNorm(r.t)===alNorm(a.t);       /* même texte (hors jours) : toujours reportée */
   return Date.now()<r.jusqua; }
 function reporter(id,quoi){ const a=[...ALERTS,...REPORTEES].find(x=>x.id===id); if(!a) return;
   if(quoi==='chg') REPORT[id]={chg:true,t:a.t,at:Date.now()};
+  else if(quoi==='fait') REPORT[id]={chg:true,fait:true,t:a.t,at:Date.now()};      /* v14.55 : « c'est fait » */
   else { const j={'1j':1,'3j':3,'7j':7,'30j':30}[quoi]||1, d=new Date(); d.setDate(d.getDate()+j); d.setHours(8,0,0,0); REPORT[id]={jusqua:d.getTime(),t:a.t,at:Date.now()}; }
   reportSave(); processAlerts(); if(popKey) renderPop(); }
 function reactiver(id){ delete REPORT[id]; reportSave(); processAlerts(); if(popKey) renderPop(); }
-function reportTxt(r){ return r.chg?'jusqu\'à ce que ça change':'jusqu\'au '+new Date(r.jusqua).toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'}); }
+function reportTxt(r){ if(r.fait) return 'marquée faite (revient si elle change)'; return r.chg?'jusqu\'à ce que ça change':'jusqu\'au '+new Date(r.jusqua).toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'}); }
+/* ---------- v14.54 : une note automatique dont le point est déjà réglé n'est plus « à faire » ----------
+   L'app coche ces notes quand elle se synchronise ; le jeu ne l'attend pas : il vérifie lui-même le bon
+   (téléphone rempli, prix, tissu, fiche envoyée, livré, soldé, virements vus, fenêtres fabriquées, facture d'achat).
+   Rien n'est écrit : la note est seulement marquée « réglée » ici. */
+function autoReglee(n){ const id=String(n&&n.id||'');
+  if(id.indexOf('auto-ba-')===0){ const bid=id.slice(8).replace(/-facture$/,''), b=((ACH&&ACH.bas)||[]).find(x=>x&&x.id===bid); return !b||!!b.factureOk||!!b.sup; }
+  const m=id.match(/^auto-(.+)-([a-z]+)$/); if(!m) return false;
+  const o=ORDERS.find(x=>x.id===m[1]); if(!o) return ORDERS.length>0;          /* bon supprimé */
+  const dd=ordDims(o);
+  switch(m[2]){
+    case 'tel': return !!String(o.tel||'').trim();
+    case 'prix': return orderTotals(o).prix>0;
+    case 'tissu': return dd.length>0&&dd.every(d=>!!d.ref);
+    case 'fiche': return !!o.sheetAt;
+    case 'livre': return etatDe(o)==='livre';
+    case 'solde': return soldeDe(o)<=0.01;
+    case 'banque': { const P=paiements(o); return P.length>0&&P.every(p=>!!p.recu); }
+    case 'fen': return dd.length>0&&dd.every(d=>(o.faites||[]).indexOf(d.key)>=0);
+  }
+  return false; }
+function notesRegle(){ NOTES.forEach(n=>{ if(n&&n.auto&&!n.fait&&!n.sup) n.regle=autoReglee(n); }); }
+const nFaite=n=>!!(n&&(n.fait||n.regle));
+/* date et heure où chaque alerte est apparue sur le PC (gardée sur ce navigateur) */
+const ALAT_KEY='mst-atelier-alertat';
+let ALAT={}; try{ ALAT=JSON.parse(localStorage.getItem(ALAT_KEY)||'{}')||{}; }catch(e){ ALAT={}; }
+function alerteQuand(a){ const t=a.at||ALAT[a.id]; if(!t) return ''; const d=new Date(t);
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
 function processAlerts(){ const toutes=computeAlerts();
+  if(LIVE&&ORDERS.length){ const vus={}; toutes.forEach(a=>{ vus[a.id]=1; if(!ALAT[a.id]) ALAT[a.id]=a.at||Date.now(); });
+    Object.keys(ALAT).forEach(id=>{ if(!vus[id]) delete ALAT[id]; }); try{ localStorage.setItem(ALAT_KEY,JSON.stringify(ALAT)); }catch(e){} }
   /* le ménage seulement quand les bons sont chargés : sinon tout serait oublié au démarrage */
-  if(LIVE&&ORDERS.length){ Object.keys(REPORT).forEach(id=>{ const r=REPORT[id], a=toutes.find(x=>x.id===id); if(!a||(!r.chg&&Date.now()>=r.jusqua)||(r.chg&&r.t!==a.t)) delete REPORT[id]; });
+  if(LIVE&&ORDERS.length){ Object.keys(REPORT).forEach(id=>{ const r=REPORT[id], a=toutes.find(x=>x.id===id); if(!a||(!r.chg&&Date.now()>=r.jusqua)||(r.chg&&alNorm(r.t)!==alNorm(a.t))) delete REPORT[id]; });
     reportSave(); }
   REPORTEES=toutes.filter(estReportee); ALERTS=toutes.filter(a=>!estReportee(a)); const ids=ALERTS.map(a=>a.id);
   if(!ALERT_SEEN){ ALERT_SEEN=new Set(ids); return; }
@@ -1096,7 +1132,7 @@ function render(){
 }
 /* ---------- v14.52 : 📊 Chiffres, à côté du PC de Noureddine (lecture seule) ---------- */
 const CH_MOIS=['jan','fév','mar','avr','mai','juin','juil','août','sep','oct','nov','déc'];
-function chAnnees(){ const a=new Set([new Date().getFullYear()]);
+function chAnnees(){ const a=new Set([new Date().getFullYear()]); HVENTES.forEach(v=>a.add(+v.date.slice(0,4)));
   ORDERS.forEach(o=>{ const y=new Date(o.date||0).getFullYear(); if(y>2000) a.add(y); });
   return [...a].sort((x,y)=>y-x).map(String); }
 function chLegende(series){ return '<div class="chleg">'+series.map(s=>`<span><i style="background:${s.c}"></i>${s.n}</span>`).join('')+'</div>'; }
@@ -1112,8 +1148,10 @@ const chDH=v=>frm(v)+' DH', chN=v=>String(Math.round(v));
 function renderChiffres(an){ const Y=+an, sent=ORDERS.filter(o=>o.status==='sent'), dansAn=t=>new Date(t).getFullYear()===Y, mo=t=>new Date(t).getMonth();
   /* 1. ventes : montant client (TTC si facture, comme l'encaissé) au mois de création, hors devis */
   const vendu=Array(12).fill(0), enc=Array(12).fill(0);
-  sent.forEach(o=>{ if(etatDe(o)!=='devis'&&o.date&&dansAn(o.date)) vendu[mo(o.date)]+=duDe(o);
-    paiements(o).forEach(p=>{ const d=String(p.date||''); if(d.slice(0,4)===an) enc[parseInt(d.slice(5,7),10)-1]+=parseFloat(p.montant)||0; }); });
+  /* avant le 13/08/2026 : la feuille historique (ventes réglées = encaissées le même mois) ; après : les bons de l'app, sans doublon */
+  HVENTES.forEach(v=>{ if(v.date.slice(0,4)!==an) return; const m=parseInt(v.date.slice(5,7),10)-1; vendu[m]+=v.ttc; if(/^pay/i.test(v.regl)) enc[m]+=v.ttc; });
+  sent.forEach(o=>{ if(etatDe(o)!=='devis'&&o.date&&dansAn(o.date)&&jourISO(o.date)>=HIST_CUT_V) vendu[mo(o.date)]+=duDe(o);
+    paiements(o).forEach(p=>{ const d=String(p.date||''); if(d.slice(0,4)===an&&d>=HIST_CUT_V) enc[parseInt(d.slice(5,7),10)-1]+=parseFloat(p.montant)||0; }); });
   const tV=vendu.reduce((a,b)=>a+b,0), tE=enc.reduce((a,b)=>a+b,0);
   /* 2. devis créés (tout bon commence en devis) et commandes (passage en production) */
   const dev=Array(12).fill(0), cmd=Array(12).fill(0);
@@ -1150,7 +1188,7 @@ function renderChiffres(an){ const Y=+an, sent=ORDERS.filter(o=>o.status==='sent
   const SRC_C={Instagram:'#a855f7',Facebook:'#3b5dc9',Google:'#ef7d57',Pub:'#b13e53',Formulaire:'#94a3b8',Autre:'#566c86'};
   const s=`<div><b>${frm(tV)} DH</b>vendu en ${an}</div><div><b>${frm(tE)} DH</b>encaissé en ${an}</div><div><b>${frm(tR)} DH</b>reste à encaisser aujourd'hui</div>`;
   let b='';
-  b+=`<div class="chbox"><h3>1 · Ventes par mois</h3>${chBarres(CH_MOIS,[{n:'Vendu (montant client)',c:'#38b764',v:vendu},{n:'Encaissé',c:'#3b5dc9',v:enc}],chDH)}</div>`;
+  b+=`<div class="chbox"><h3>1 · Ventes par mois</h3>${chBarres(CH_MOIS,[{n:'Vendu (montant client)',c:'#38b764',v:vendu},{n:'Encaissé',c:'#3b5dc9',v:enc}],chDH)}<p class="muted">Avant le 13/08/2026 : feuille « MSTORECASA Historique » (une vente réglée compte comme encaissée le mois de la vente). Après : les bons de l'app.</p></div>`;
   b+=`<div class="chbox"><h3>2 · Devis et commandes par mois</h3>${chBarres(CH_MOIS,[{n:'Devis créés',c:'#94a3b8',v:dev},{n:'Commandes (passées en production)',c:'#38b764',v:cmd}],chN)}<p class="muted">${tC} commandes pour ${tD} devis en ${an} : ${pc(tC,tD)} transformés.</p></div>`;
   const seg=[['Livré non soldé','#b13e53',reste.livre],['En production','#ef7d57',reste.production],['Prêt','#ffcd75',reste.pret]];
   b+=`<div class="chbox"><h3>3 · Reste à encaisser aujourd'hui</h3><svg viewBox="0 0 600 34" width="100%" shape-rendering="crispEdges" class="chsvg">`;
@@ -1160,6 +1198,18 @@ function renderChiffres(an){ const Y=+an, sent=ORDERS.filter(o=>o.status==='sent
   b+=`<div class="chbox"><h3>5 · Contacts WhatsApp par mois</h3>${chBarres(CH_MOIS,[{n:'Nouveaux contacts',c:'#38b764',v:nv},{n:'Devenus devis',c:'#a855f7',v:cd},{n:'Commandes confirmées',c:'#3b5dc9',v:cc}],chN)}
     <p class="muted">${tN} contacts en ${an} : ${pc(tCD+tCC,tN)} ont reçu un devis · ${pc(tCC,tN)} ont commandé.</p>
     ${chLegende(Object.keys(src).sort((a,b)=>src[b]-src[a]).map(k=>({n:k+' '+pc(src[k],tN),c:SRC_C[k]||'#566c86'})))}</div>`;
+  /* 6. charges par mois, empilées par catégorie ; 7. bénéfice = encaissé − charges, salaires, impôts */
+  const DEPS=HDEP.concat(depAppNorm()).filter(x=>x.date.slice(0,4)===an), parCat={};
+  DEPS.forEach(x=>{ parCat[x.cat]=(parCat[x.cat]||0)+x.mt; });
+  const top5=Object.keys(parCat).sort((a,b)=>parCat[b]-parCat[a]).slice(0,5), PAL=['#ef7d57','#3b5dc9','#b13e53','#a855f7','#38b764'];
+  const serC=top5.map((c,i)=>({n:c,c:PAL[i],v:Array(12).fill(0)})).concat([{n:'Autres',c:'#94a3b8',v:Array(12).fill(0)}]);
+  DEPS.forEach(x=>{ const i=top5.indexOf(x.cat), m=parseInt(x.date.slice(5,7),10)-1; serC[i>=0?i:5].v[m]+=x.mt; });
+  const chM=Array(12).fill(0); DEPS.forEach(x=>{ chM[parseInt(x.date.slice(5,7),10)-1]+=x.mt; });
+  const tCh=chM.reduce((a,c)=>a+c,0), ben=enc.map((v,i)=>v-chM[i]);
+  b+=`<div class="chbox"><h3>6 · Charges par mois (charges, salaires, impôts)</h3>${DEPS.length?chEmpile(CH_MOIS,serC.filter(s=>s.v.some(v=>v)),chDH):'<div class="empty">Aucune dépense pour cette année.</div>'}
+    <p class="muted">Total ${an} : ${chDH(tCh)}${top5.length?` · catégorie la plus lourde : ${top5[0]} (${chDH(parCat[top5[0]])})`:''}. Avant le 01/08/2026 : feuille historique ; après : page Dépenses.</p></div>`;
+  b+=`<div class="chbox"><h3>7 · Bénéfice par mois</h3>${chBarresPN(CH_MOIS,[{n:'Encaissé',c:'#38b764',v:enc},{n:'Charges + salaires + impôts',c:'#b13e53',v:chM},{n:'Bénéfice',c:'#3b5dc9',neg:'#7f1d1d',v:ben}],chDH)}
+    <p class="muted">Bénéfice ${an} : ${chDH(tE-tCh)} (encaissé ${chDH(tE)} − charges ${chDH(tCh)}). Les achats de marchandise ne sont pas encore déduits : ils viendront avec la Trésorerie.</p></div>`;
   return {s,b}; }
 function drawChiffresIcon(){ const x=14*T+6,y=T+5;   /* au mur, à droite du tableau des notes */ R(x,y,12,12,'#2c3550'); R(x+2,y+7,2,3,'#38b764'); R(x+5,y+4,2,6,'#ffcd75'); R(x+8,y+2,2,8,'#41a6f6'); R(x+1,y+10,10,1,'#f4f4f4'); }
 function badgeNum(n,wx,wy){ if(!LIVE) return; const x=SX(wx),y=SY(wy),r=Math.max(9,Math.round(4.5*Z));
@@ -1175,9 +1225,9 @@ function drawLumiere(){ const h=new Date().getHours(), nuit=h>=19||h<7, soir=h>=
   LAMPES.forEach(([lx,ly])=>{ const cx=lx*T, cy=ly*T, r=nuit?72:50, rg=g.createRadialGradient(cx,cy,2,cx,cy,r);
     rg.addColorStop(0,`rgba(255,212,150,${nuit?.24:.08})`); rg.addColorStop(1,'rgba(255,212,150,0)'); g.fillStyle=rg; g.fillRect(cx-r,cy-r,2*r,2*r); });
   g.restore(); }
-function drawNotesWall(){ ctx=g; const live=NOTES.filter(n=>n&&!n.sup&&!n.fait), x0=9*T+4, y0=T+4;
+function drawNotesWall(){ ctx=g; const live=NOTES.filter(n=>n&&!n.sup&&!nFaite(n)), x0=9*T+4, y0=T+4;
   const list=live.slice(0,16);
-  list.forEach((n,i)=>{ const x=x0+(i%8)*9, y=y0+Math.floor(i/8)*11; const c=n.fait?'#a8e098':(n.pour?'#f8b0c8':'#f8e870');
+  list.forEach((n,i)=>{ const x=x0+(i%8)*9, y=y0+Math.floor(i/8)*11; const c=nFaite(n)?'#a8e098':(n.pour?'#f8b0c8':'#f8e870');
     R(x+1,y+1,7,8,'rgba(60,30,10,.35)'); R(x,y,7,8,c); R(x+1,y+2,5,1,shade(c,.7)); R(x+1,y+4,4,1,shade(c,.7)); R(x+3,y,1,1,'#d03030'); }); }
 function drawKpiBoard(){ if(Z<1.9) return; const k=kpi(), x=SX(2*T+6), y=SY(T+3), lh=5.3*Z, size=Z>=4?16:8, right=SX(7*T-4);
   v.font=`${size}px 'Press Start 2P', monospace`; v.textBaseline='top';
@@ -1299,14 +1349,14 @@ function manqueCompte(){ try{ MANQUE_N=LIVE?manqueListe().length:0; }catch(e){ M
   const bt=document.getElementById('manqueBtn'); if(bt) bt.textContent="Ce que j'ai manqué"+(MANQUE_N&&!MANQUE_LU?' ('+MANQUE_N+')':''); }
 function manqueDepuisTxt(){ const d=new Date(MANQUE_DEPUIS); return d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+' à '+hm(MANQUE_DEPUIS); }
 function renderManquePop(){ const qui=popTab&&popTab!=='Tout'?popTab.toLowerCase():'';
-  const lots=LOTS.slice().reverse();                                   /* le plus récent d'abord */
+  const lots=LOTS.slice(-1);          /* v14.61 : seulement ce qui s'est passé depuis la dernière ouverture */
   let L=[]; lots.forEach(l=>manqueEntre(l.d,l.f).forEach(e=>L.push({...e,lot:l})));
   if(qui) L=L.filter(e=>String(e.by||'').toLowerCase()===qui);
   L.sort((x,y)=>y.at-x.at);
   const d0=lots[0], nb=t=>L.filter(e=>e.type===t).length;
   const quand=t=>new Date(t).toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'})+' à '+hm(t);
-  const s=sum([['Cette ouverture',d0?d0.n+' · '+LOT_COUL[d0.c][2]:'—'],['Ouvertures gardées',lots.length],['Messages WhatsApp',nb('wa')],['Alertes en cours',ALERTS.length]]);
-  const legende=lots.length?'<div class="lotleg">'+lots.map(l=>`<span style="background:${LOT_COUL[l.c][0]};border-color:${LOT_COUL[l.c][1]}">${LOT_COUL[l.c][2]} · ouvert le ${quand(l.o)} · ${l.n}</span>`).join('')+'</div>':'';
+  const s=sum([['Depuis la dernière ouverture',d0?d0.n:0],['Messages WhatsApp',nb('wa')],['Alertes en cours',ALERTS.length]]);
+  const legende=d0?`<div class="muted" style="margin-bottom:6px">Du ${quand(d0.d)} au ${quand(d0.f)}</div>`:'';
   let jour='', h='';
   L.slice(0,500).forEach(e=>{ const j=jourISO(e.at); if(j!==jour){ jour=j; h+=`<h3 class="wag">${new Date(e.at).toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long'})}</h3>`; }
     const k=LOT_COUL[e.lot.c];
@@ -1331,7 +1381,7 @@ const tbl=(head,rows)=>rows.length?`<table><thead><tr>${head.map(h=>`<th${h.star
 const sum=cells=>cells.map(c=>`<div>${c[0]}<b>${c[1]}</b></div>`).join('');
 const needLogin=()=>!LIVE?'<div class="empty">Connectez-vous (panneau de droite) pour voir les données de l\'app.</div>':'';
 function byDate(a,b){ return new Date(b.date||0)-new Date(a.date||0); }
-function renderPop(){
+function renderPop(){ try{ notesRegle(); }catch(e){}
   const sc=SCREENS[popKey]; document.getElementById('popTitle').textContent=sc.title;
   document.getElementById('popTabs').innerHTML=sc.tabs.map(t=>`<button type="button" data-t="${t}" aria-pressed="${t===popTab}">${t}</button>`).join('');
   let s='',b='';
@@ -1368,8 +1418,8 @@ function renderPop(){
   } else if(popTab==='Alertes'){
     const G={3:'<span class="tag" style="background:#c03030">URGENT</span>',2:'<span class="tag" style="background:#d08020">BIENTÔT</span>',1:'<span class="tag" style="background:#6878a0">À SUIVRE</span>'};
     s=sum([['Points à vérifier',ALERTS.length],['Urgents',ALERTS.filter(a=>a.g>=3).length],['Reportées',REPORTEES.length]]);
-    b=needLogin()+tbl(['','Ce que Noureddine a repéré','Concerne','Envoyer à','Reporter'],ALERTS.map(a=>[G[a.g],esc(a.t),esc(a.c||''),alerteActions(a),
-      `<select data-alrep="${esc(a.id)}"><option value="">Reporter…</option><option value="1j">à demain</option><option value="3j">dans 3 jours</option><option value="7j">dans 1 semaine</option><option value="30j">dans 1 mois</option><option value="chg">jusqu'à ce que ça change</option></select>`]));
+    b=needLogin()+tbl(['','Écrite le','Ce que Noureddine a repéré','Concerne','Envoyer à','Reporter',''],ALERTS.map(a=>[G[a.g],alerteQuand(a),esc(a.t),esc(a.c||''),alerteActions(a),
+      `<button type="button" class="wabtn" data-alfait="${esc(a.id)}">✓ Fait</button> <select data-alrep="${esc(a.id)}"><option value="">Reporter…</option><option value="1j">à demain</option><option value="3j">dans 3 jours</option><option value="7j">dans 1 semaine</option><option value="30j">dans 1 mois</option><option value="chg">jusqu'à ce que ça change</option></select>`]));
   } else if(popTab==='Reportées'){
     s=sum([['Alertes reportées',REPORTEES.length]]);
     b=needLogin()+(REPORTEES.length?tbl(['Alerte','Concerne','Reportée','Revient',''],REPORTEES.map(a=>{ const r=REPORT[a.id]||{};
@@ -1420,13 +1470,13 @@ function renderPop(){
     b=needLogin()+'<div class="muted" style="padding:6px 0">Mêmes calculs que l\'accueil de l\'app : facturé = bons envoyés (hors devis) datés de ce mois ; encaissé = paiements datés de ce mois ; reste = solde de tous les bons hors devis. Stores = fenêtres faites / fenêtres des bons en production.</div>';
   } else if(popKey==='notes'){
     const qf=n=>!NOTE_QUI||(NOTE_QUI==='*'?!n.pour:n.pour===NOTE_QUI);
-    const all=NOTES.filter(n=>n&&!n.sup).sort((a,b)=>(b.at||0)-(a.at||0)), L=(popTab==='À faire'?all.filter(n=>!n.fait):popTab==='Faites'?all.filter(n=>n.fait):all).filter(qf);
-    s=sum([['À faire',all.filter(n=>!n.fait).length],['Faites',all.filter(n=>n.fait).length]]);
+    const all=NOTES.filter(n=>n&&!n.sup).sort((a,b)=>(b.at||0)-(a.at||0)), L=(popTab==='À faire'?all.filter(n=>!nFaite(n)):popTab==='Faites'?all.filter(n=>nFaite(n)):all).filter(qf);
+    s=sum([['À faire',all.filter(n=>!nFaite(n)).length],['Faites',all.filter(n=>nFaite(n)).length]]);
     /* filtre par agent : ce qui reste à faire pour chacun */
-    const reste=q=>all.filter(n=>!n.fait&&(!q||(q==='*'?!n.pour:n.pour===q))).length;
+    const reste=q=>all.filter(n=>!nFaite(n)&&(!q||(q==='*'?!n.pour:n.pour===q))).length;
     const puces='<div class="notqui">'+[['','Tous'],...NOTE_AGENTS.map(q=>[q,cap(q)]),['*','Pour tout le monde']].map(([k,l])=>`<button type="button" data-nqf="${k}" aria-pressed="${NOTE_QUI===k}">${l} · ${reste(k)}</button>`).join('')+'</div>';
     b=needLogin()+puces+tbl(['Note','De','Pour','Bon','Date','État',''],L.map(n=>[esc(n.txt||''),esc(cap(n.by||'')),esc(n.pour?cap(n.pour):'Tout le monde'),esc(noteBonNum(n)),n.at?new Date(n.at).toLocaleDateString('fr-FR'):'',
-      n.fait?'Fait'+(n.faitBy?' par '+esc(cap(n.faitBy)):''):'À faire', n.fait?'':noteActions(n)]));
+      n.fait?'Fait'+(n.faitBy?' par '+esc(cap(n.faitBy)):''):n.regle?'Réglé dans le bon':'À faire', nFaite(n)?'':noteActions(n)]));
   } else if(popTab==='En production'){
     const L=sent.filter(o=>etatDe(o)==='production').sort((a,b)=>String(a.ech||'9').localeCompare(String(b.ech||'9')));
     const k=kpi(); s=sum([['Bons en production',L.length],['Stores faits',`${k.fait}/${k.tot}`],['Tubes à couper',TO_CUT.length],['Tissus à couper',FABQ.filter(f=>!CUT_WAIT.has(f.id)).length]]);
@@ -1513,6 +1563,7 @@ function alerteMsg(a,qui){ const tag=(qui?(WA_TAG[qui]||'@'+qui):'@tout le monde
   return `${tag}📢 🔔 ${a.t}`+(a.c&&String(a.t).indexOf(a.c)<0?` · ${a.c}`:''); }
 document.getElementById('popBody').addEventListener('change',e=>{ const r=e.target.closest('[data-alrep]'); if(r&&r.value) reporter(r.dataset.alrep,r.value); });
 document.getElementById('popBody').addEventListener('click',e=>{ const r=e.target.closest('[data-alreact]'); if(r) reactiver(r.dataset.alreact); });
+document.getElementById('popBody').addEventListener('click',e=>{ const f=e.target.closest('[data-alfait]'); if(f) reporter(f.dataset.alfait,'fait'); });
 document.getElementById('popBody').addEventListener('click',e=>{ const w=e.target.closest('[data-alwa]'); if(!w) return;
   const a=ALERTS.find(x=>x.id===w.dataset.alwa); if(!a) return; const sel=document.querySelector(`select[data-alq="${CSS.escape(a.id)}"]`);
   const m=alerteMsg(a,sel?sel.value:alerteQuiDefaut(a)); try{ navigator.clipboard.writeText(m); }catch(_){} w.textContent='Copié ✓'; setTimeout(()=>{ w.textContent='WhatsApp'; },1800); });
@@ -1607,7 +1658,49 @@ async function loadForms(){ try{
 function formsSansContact(){ const t9=t=>String(t||'').replace(/\D/g,'').slice(-9), now=Date.now();
   const tels=new Set(PROS.filter(p=>p&&!p.sup).map(p=>t9(p.tel)).filter(x=>x.length===9));
   return FORMS.filter(o=>o.at>=FORM_DEPUIS&&now-o.at>86400000&&!(t9(o.tel).length===9&&tels.has(t9(o.tel)))); }
-async function refreshStock(){ loadForms(); try{ await loadStock(); dataErr=''; buildRolls(); derive(); }catch(e){ dataErr='Stock illisible : '+e.message; } }
+/* v14.59 : ventes d'avant le 13/08/2026 lues dans la feuille « MSTORECASA Historique » (lecture seule) */
+const HIST_SHEET='13HH6v57rE2XHNPAYCnM4wNuITbI09zxRf0fs9VEdXBw', HIST_CUT_V='2026-08-13';
+let HVENTES=[];
+async function loadHistVentes(){ try{ const r=await fetch(`https://docs.google.com/spreadsheets/d/${HIST_SHEET}/gviz/tq?tqx=out:csv&sheet=ventes&mst=${Date.now()}`,{cache:'no-store'}); if(!r.ok) return;
+  const L=parseCSV(await r.text()); if(!L.length) return; const h=L[0].map(x=>String(x||'').trim().toLowerCase()), c=k=>h.indexOf(k), n=v=>parseFloat(String(v||'').replace(/\s/g,''))||0;
+  HVENTES=L.slice(1).map(x=>({date:String(x[c('date')]||'').trim(),ttc:n(x[c('montant_ttc')]),regl:String(x[c('reglement')]||'')})).filter(v=>v.date&&v.date<HIST_CUT_V);
+  if(popKey==='chiffres') renderPop(); }catch(e){} }
+/* v14.60 : charges, salaires et impôts — avant les coupures la feuille historique, après la page Dépenses de l'app */
+const HIST_CUT_DEP={charge:'2026-08-01',salaire:'2026-08-01',impot:'2026-07-01'};
+let HDEP=[], DEPAPP=[];
+async function loadHistDep(){ try{
+  const get=async nom=>{ const r=await fetch(`https://docs.google.com/spreadsheets/d/${HIST_SHEET}/gviz/tq?tqx=out:csv&sheet=${nom}&mst=${Date.now()}`,{cache:'no-store'}); if(!r.ok) return [];
+    const L=parseCSV(await r.text()); if(!L.length) return []; const h=L[0].map(x=>String(x||'').trim().toLowerCase());
+    return L.slice(1).map(x=>{ const o={}; h.forEach((k,i)=>o[k]=String(x[i]==null?'':x[i]).trim()); return o; }); };
+  const n=v=>parseFloat(String(v||'').replace(/\s/g,''))||0, [ch,sa,im]=await Promise.all(['charges','salaires','etats_impots'].map(get)), out=[];
+  ch.forEach(r=>{ if(/^epargne/i.test(r.type||'')||/^epargne/i.test(r.nature||'')) return;      /* l'épargne n'est pas une charge */
+    if(r.date&&r.date<HIST_CUT_DEP.charge) out.push({date:r.date,cat:r.nature||'Autre',mt:n(r.montant_ttc)||n(r.paye_banque)+n(r.paye_caisse)}); });
+  sa.forEach(r=>{ if(r.date&&r.date<HIST_CUT_DEP.salaire) out.push({date:r.date,cat:'Salaires',mt:n(r.montant)}); });
+  im.forEach(r=>{ if(r.date&&r.date<HIST_CUT_DEP.impot) out.push({date:r.date,cat:'Impôts',mt:n(r.montant)}); });
+  HDEP=out; if(popKey==='chiffres') renderPop(); }catch(e){} }
+function depAppNorm(){ return DEPAPP.filter(x=>x&&!x.sup&&x.date).map(x=>{ const t=x.type||(x.cat==='Salaire'?'salaire':/TVA|IS$/.test(x.cat||'')?'impot':'charge');
+  return {date:x.date,cat:t==='salaire'?'Salaires':t==='impot'?'Impôts':(x.cat||'Autre'),mt:(parseFloat(x.banque)||0)+(parseFloat(x.caisse)||0),t}; })
+  .filter(x=>x.date>=HIST_CUT_DEP[x.t]&&!/^epargne/i.test(x.cat)); }
+/* barres empilées */
+function chEmpile(labels,series,fmt){ const Wd=600,Hd=160,top=16,bas=18,ga=(Wd-10)/labels.length,bw=Math.max(6,Math.floor(ga*0.62));
+  const tot=labels.map((_,i)=>series.reduce((t,s)=>t+(s.v[i]||0),0)), max=Math.max(1,...tot);
+  let h=`<svg viewBox="0 0 ${Wd} ${Hd}" width="100%" shape-rendering="crispEdges" class="chsvg">`;
+  [0.5,1].forEach(f=>{ const y=top+(Hd-top-bas)*(1-f); h+=`<rect x="0" y="${y}" width="${Wd}" height="1" fill="#d8d8e0"/><text x="${Wd-2}" y="${y-2}" text-anchor="end" font-size="7" fill="#8890a0">${fmt(max*f)}</text>`; });
+  labels.forEach((l,i)=>{ const x0=6+i*ga+(ga-bw)/2; let y=Hd-bas;
+    series.forEach(s=>{ const v=s.v[i]||0, hh=Math.round((Hd-top-bas)*v/max); if(hh>0){ y-=hh; h+=`<rect x="${x0}" y="${y}" width="${bw}" height="${hh}" fill="${s.c}"><title>${s.n} · ${l} : ${fmt(v)}</title></rect>`; } });
+    h+=`<text x="${x0+bw/2}" y="${Hd-5}" text-anchor="middle" font-size="7" fill="#505868">${l}</text>`; });
+  return h+'</svg>'+chLegende(series); }
+/* barres groupées acceptant le négatif (bénéfice) */
+function chBarresPN(labels,series,fmt){ const Wd=600,Hd=170,top=14,bas=18,ga=(Wd-10)/labels.length,nb=series.length,bw=Math.max(3,Math.floor((ga-6)/nb));
+  const all=series.flatMap(s=>s.v), mx=Math.max(1,...all), mn=Math.min(0,...all), plage=mx-mn, zero=top+(Hd-top-bas)*mx/plage;
+  let h=`<svg viewBox="0 0 ${Wd} ${Hd}" width="100%" shape-rendering="crispEdges" class="chsvg"><rect x="0" y="${Math.round(zero)}" width="${Wd}" height="1" fill="#505868"/>`;
+  h+=`<text x="${Wd-2}" y="${top-2}" text-anchor="end" font-size="7" fill="#8890a0">${fmt(mx)}</text>`;
+  if(mn<0) h+=`<text x="${Wd-2}" y="${Hd-bas+8}" text-anchor="end" font-size="7" fill="#8890a0">${fmt(mn)}</text>`;
+  labels.forEach((l,i)=>{ const x0=6+i*ga;
+    series.forEach((s,j)=>{ const v=s.v[i]||0, hh=Math.round((Hd-top-bas)*Math.abs(v)/plage); if(hh>0) h+=`<rect x="${x0+j*bw}" y="${v>=0?Math.round(zero)-hh:Math.round(zero)+1}" width="${bw-1}" height="${hh}" fill="${v<0&&s.neg?s.neg:s.c}"><title>${s.n} · ${l} : ${fmt(v)}</title></rect>`; });
+    h+=`<text x="${x0+(bw*nb)/2}" y="${Hd-5}" text-anchor="middle" font-size="7" fill="#505868">${l}</text>`; });
+  return h+'</svg>'+chLegende(series); }
+async function refreshStock(){ loadForms(); loadHistVentes(); loadHistDep(); try{ await loadStock(); dataErr=''; buildRolls(); derive(); }catch(e){ dataErr='Stock illisible : '+e.message; } }
 async function refreshBons(){ if(!LIVE) return; try{ await loadBons(); dataErr=''; buildRolls(); derive(); if(popKey) renderPop(); }catch(e){ dataErr='Bons illisibles : '+(e.message||e); } }
 /* temps réel : la base prévient la page à chaque bon modifié dans l'app (comme l'app elle-même) */
 let liveCh=null, RT='', rtTimer=null;

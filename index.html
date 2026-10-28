@@ -303,6 +303,50 @@ select{appearance:none; -webkit-appearance:none}
   background:var(--card2); color:var(--ink); font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600}
 .pcinfo{padding:0 12px 7px; font-size:11px; color:var(--muted)}
 /* v14.49 : estimations client */
+/* v14.61 : prises de mesures */
+.mescard{padding:11px; border-radius:12px; border:1px solid var(--line); background:var(--card); margin-bottom:10px}
+.mescard .mh{display:flex; justify-content:space-between; align-items:center; gap:8px}
+.mescard .mh b{font-size:15px}
+.mestag{font-size:11px; font-weight:700; padding:3px 8px; border-radius:7px; white-space:nowrap}
+.mestag.a{background:#fff4d6; color:#8a5a00} .mestag.m{background:#e3f5ea; color:#12833F}
+.mesquand{color:var(--ok); font-weight:700; font-size:13px; margin-top:4px}
+.mesmut{color:var(--muted); font-size:12.5px; margin-top:3px; line-height:1.45}
+.mesfen{padding:10px; border:1px solid var(--line); border-radius:10px; margin:8px 0; display:grid; gap:7px}
+.mesfen .g3{display:grid; grid-template-columns:1fr 1fr 64px 32px; gap:6px; align-items:center}
+.mesfen input{width:100%; box-sizing:border-box; padding:9px; border:1px solid var(--line); border-radius:9px; background:var(--card2); color:var(--ink); font-size:15px}
+.mesfen .x{border:0; background:none; color:#c62828; font-size:20px; cursor:pointer}
+.messeg{display:flex; gap:5px; flex-wrap:wrap} .messeg button{flex:1; padding:8px 6px; border:1px solid var(--line); border-radius:9px; background:var(--card2); color:var(--muted); font-weight:600; font-size:12.5px; cursor:pointer}
+.messeg button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.mesph{display:flex; gap:6px; flex-wrap:wrap; align-items:center} .mesph img{width:64px; height:64px; object-fit:cover; border-radius:8px; cursor:pointer}
+.mesbtn{display:block; width:100%; padding:12px; border:0; border-radius:11px; background:var(--accent); color:#fff; font-weight:700; font-size:14.5px; cursor:pointer; margin-top:8px}
+.mesbtn2{display:block; width:100%; padding:11px; border:1px solid var(--line); border-radius:11px; background:var(--card2); color:var(--ink); font-weight:600; cursor:pointer; margin-top:8px}
+.meslien{border:0; background:none; color:var(--accent); font-weight:600; padding:6px 0; cursor:pointer}
+.messup{border:0; background:none; color:#c62828; font-weight:600; padding:6px 0; cursor:pointer}
+.mesnet{margin:8px 0; padding:9px 11px; border-radius:9px; background:#fff4d6; color:#8a5a00; font-size:12.5px}
+/* v14.57 : dépenses */
+.depmois{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
+.depmois button{border:1px solid var(--line); background:var(--card2); color:var(--ink); border-radius:9px; padding:7px 12px; font-size:16px; cursor:pointer}
+.deptot{padding:12px; border-radius:12px; background:var(--card2); border:1px solid var(--line); margin-bottom:10px}
+.deptot b{display:block; font-size:22px; font-family:"IBM Plex Mono",monospace}
+.deptot small{color:var(--muted); font-size:12px}
+.depcard{padding:11px; border-radius:12px; border:1px solid var(--line); background:var(--card); margin-bottom:10px}
+.depcard h4{margin:0 0 8px; font-size:12px; color:var(--muted); font-weight:600; letter-spacing:.03em; text-transform:uppercase}
+.deprow{display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid var(--line); font-size:13.5px; cursor:pointer}
+.deprow:first-of-type{border-top:0}
+.deprow .dl{flex:1; min-width:0} .deprow .dl small{display:block; color:var(--muted); font-size:11.5px}
+.deprow .dm{font-family:"IBM Plex Mono",monospace; font-weight:700; white-space:nowrap}
+.deprow .ok{border:0; background:var(--accent); color:#fff; border-radius:8px; padding:6px 10px; font-weight:700; cursor:pointer}
+.depf{display:grid; gap:8px}
+.depf label{font-size:12px; color:var(--muted); display:block}
+.depf input,.depf select{width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid var(--line); border-radius:9px; background:var(--card2); color:var(--ink); font-size:14px}
+.depseg{display:flex; gap:6px} .depseg button{flex:1; padding:9px; border:1px solid var(--line); border-radius:9px; background:var(--card2); color:var(--muted); font-weight:600; cursor:pointer}
+.depseg button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.depwarn{padding:9px 11px; border-radius:9px; background:#fff4d6; color:#8a5a00; font-size:12.5px; line-height:1.4}
+.depsave{padding:12px; border:0; border-radius:11px; background:var(--accent); color:#fff; font-weight:700; font-size:14.5px; cursor:pointer}
+.deplink{border:0; background:none; color:var(--accent); font-weight:600; padding:6px 0; cursor:pointer; text-align:left}
+.depdel{border:0; background:none; color:#c62828; font-weight:600; padding:6px 0; cursor:pointer}
+.depimg{max-width:120px; border-radius:8px; display:block; margin-top:4px; cursor:pointer}
+.depcut{font-size:11.5px; color:var(--muted); margin:4px 2px 0}
 .estnew{display:block; width:100%; padding:13px; border:1px dashed var(--accent); border-radius:12px;
   background:var(--accent-soft); color:var(--accent); font-weight:700; font-size:14px; cursor:pointer}
 .estli{display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--line);
@@ -2936,6 +2980,11 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
           <span class="tt"><b>Plan de coupe</b><small id="tileCutSub">Barres et tissu d'un bon</small></span>
           <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
+        <button class="tile" id="tileMes" type="button" hidden>
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="1.5"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/></svg></span>
+          <span class="tt"><b>Prises de mesures</b><small id="tileMesSub">Mesures prises chez le client</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
         <button class="tile" id="tileCli" type="button">
           <span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.4 2.9-5.2 6.5-5.2s6.5 1.8 6.5 5.2"/><path d="M17 8.5a3 3 0 010 5M19.5 6a6 6 0 010 10"/></svg></span>
           <span class="tt"><b>Clients</b><small id="tileCliSub">Historique et paiements par client</small></span>
@@ -2977,6 +3026,11 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
         <button class="tile" id="tileAch" type="button" hidden>
           <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11.2a2 2 0 002 1.6h7.7a2 2 0 002-1.5L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg></span>
           <span class="tt"><b>Achats</b><small id="tileAchSub">Bons de commande fournisseur</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tileDep" type="button" hidden>
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span>
+          <span class="tt"><b>Dépenses</b><small id="tileDepSub">Charges, salaires, impôts</small></span>
           <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
       </div>
@@ -3330,6 +3384,24 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
 </div>
 
 <!-- v14.21 : ACHATS -->
+<div class="sheet" id="mesSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="mesSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Prises de mesures</h2>
+    <button class="icon-btn" type="button" data-refresh aria-label="Actualiser"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+  </div>
+  <div class="sheet-body" id="mesBody"></div>
+</div>
+
+<div class="sheet" id="depSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="depSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Dépenses</h2>
+    <button class="icon-btn" type="button" data-refresh aria-label="Actualiser"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+  </div>
+  <div class="sheet-body" id="depBody"></div>
+</div>
+
 <div class="sheet" id="achSheet">
   <div class="sheet-top">
     <button class="icon-btn" data-close="achSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -4140,7 +4212,8 @@ function trouveQtyCol(rows){
   for (let i = 0; i < Math.min(rows.length, 30); i++){
     const r = rows[i] || [];
     const j = r.findIndex(c => /^qt[ée]s?$/i.test(String(c || "").replace(/\s+/g, " ").trim()));
-    if (j >= 0) return j;
+    /* v14.56 : l'en-tête « Qtés » est fusionné, les chiffres peuvent être une colonne plus loin (O → P le 26/10) */
+    if (j >= 0){ for (let k = j; k < j + 4; k++){ if (colonneChiffree(rows, k)) return k; } return j; }
   }
   for (let i = 0; i < Math.min(rows.length, 30); i++){
     const r = rows[i] || [];
@@ -4823,7 +4896,9 @@ function couleurDe(ref){
   let t = String(f.nom);
   /* la feuille garde parfois les accents abîmés (« CrÃ¨me ») : on les répare */
   if (/Ã|Â/.test(t)) try { t = decodeURIComponent(escape(t)); } catch(e){}
-  return t.split(" - ")[0].trim();
+  /* v14.56 : la feuille écrit « Type - Couleur - modèle » (« Blackout - Noir », « Screen - Beige - LINK - T3002 ») */
+  const p = t.split(" - ").map(x => x.trim()).filter(Boolean);
+  return (p.length > 1 ? p[1] : p[0] || "").trim();
 }
 $("ice").addEventListener("input", e => { S.ice = e.target.value.replace(/[^0-9]/g, ""); e.target.value = S.ice; });
 $("remise").addEventListener("input", e => {
@@ -5473,6 +5548,7 @@ function saveOrder(status){
     } catch(e){}
   }
   if (status === "sent"){ try { prosLie(rec); } catch(e){} }
+  if (status === "sent" && rec.mesure){ try { mesFait(rec); } catch(e){} }
   if (i >= 0) all[i] = rec; else all.unshift(rec);
   ORDERS = all;                     /* v14.41 : plus de coupe à 150 bons (les plus anciens disparaissaient de l'écran) */
   const ok = persistOrders();
@@ -5531,6 +5607,9 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
   if (id === "promoSheet"){ nav("prosSheet"); renderPros(); return; }
   if (id === "invRollSheet"){ nav("invSheet"); renderInv(); return; }
   if (id === "achSheet"){ achRetour(); return; }
+  if (id === "mesSheet"){ mesRetour(); return; }
+  if (id === "depSheet"){ nav("home"); return; }
+  if (id === "coutSheet" && COUT_RETOUR === "mesSheet"){ nav("mesSheet"); renderMes(); return; }
   if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
       id === "nomSheet"   || id === "coutSheet" || id === "cliSheet" || id === "docSheet" ||
       id === "logSheet" || id === "paySheet" || id === "triSheet" ||
@@ -6454,7 +6533,15 @@ async function pullBonsVrai(){
     const distants = {};
     ids.forEach(r => { distants[r.id] = true; });
     data.forEach(r => {
-      if ([ATL_ID, PROS_ID, WA_ID, PROMO_ID, INV_ID, PERSO_ID, NOTE_ID, NOM_ID, ACH_ID, EST_ID].indexOf(r.id) >= 0) CFGUA[r.id] = r.updated_at;
+      if ([ATL_ID, PROS_ID, WA_ID, PROMO_ID, INV_ID, PERSO_ID, NOTE_ID, NOM_ID, ACH_ID, EST_ID, DEP_ID, MES_ID].indexOf(r.id) >= 0) CFGUA[r.id] = r.updated_at;
+      if (r.id === MES_ID){                         /* v14.61 : prises de mesures, pas des bons */
+        if (mesFusion(r.data)) try { mesApplique(); if ($("mesSheet").classList.contains("open") && !MES_ED) renderMes(); renderMesTile(); } catch(e){}
+        return;
+      }
+      if (r.id === DEP_ID){                         /* v14.57 : dépenses, pas des bons */
+        if (adminAllowed() && depFusion(r.data)) try { if ($("depSheet").classList.contains("open")) renderDep(); renderDepTile(); } catch(e){}
+        return;
+      }
       if (r.id === EST_ID){                         /* v14.49 : estimations client, pas des bons */
         if (coutAllowed() && estFusion(r.data)) try { if (COUT_TAB === "estim") renderEst(); } catch(e){}
         return;
@@ -6737,10 +6824,12 @@ async function bootAuth(){
 }
 
 /* ============ Navigation ============ */
+let COUT_RETOUR = null;       /* v14.63 : page d'où l'estimation a été ouverte (mesSheet) */
 function nav(where){
   armBack();
+  if (where !== "coutSheet") COUT_RETOUR = null;
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet","noteSheet","persoSheet","promoSheet","invSheet","invRollSheet","achSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet","noteSheet","persoSheet","promoSheet","invSheet","invRollSheet","achSheet","mesSheet","depSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -7188,6 +7277,8 @@ function renderHome(){
   try { renderAchTile(); } catch(e){}
   try { renderGrosTile(); } catch(e){}
   try { renderJeuTile(); } catch(e){}
+  try { renderDepTile(); } catch(e){}
+  try { renderMesTile(); } catch(e){}
   const ti = $("tileInv");
   if (ti){
     ti.hidden = !invAllowed();
@@ -8510,7 +8601,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.51";
+const APP_VERSION = "14.64";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -12373,6 +12464,12 @@ function montantsConnus(){
     if (rs > 0.01 && Math.abs(rs - du) > 0.01)
       out.push({o:o, v:rs, quoi:"Reste à encaisser", client:client, cls:"att", d:dBon});
   });
+  /* v14.59 : les ventes d'avant le 13/08/2026 (feuille historique), sans dossier à ouvrir */
+  ((HIST && HIST.ventes) || []).forEach(v => {
+    const client = (v.client || "Client") + "  ·  vente du " + depDateFr(v.date);
+    if (v.ttc > 0) out.push({o:null, v:v.ttc, quoi:"Historique · " + (v.etat === "FN" ? "TTC" : "total") + (v.des ? " · " + v.des : ""), client:client, cls:"", d:v.date});
+    if (v.ht > 0 && Math.abs(v.ht - v.ttc) > 0.01) out.push({o:null, v:v.ht, quoi:"Historique · HT", client:client, cls:"", d:v.date});
+  });
   return out;
 }
 function renderMontant(){
@@ -12392,7 +12489,7 @@ function renderMontant(){
   box.innerHTML = list.map(x => {
     const exact = x.ec < 0.005;
     const pct = cible > 0 ? x.ec / cible * 100 : 0;
-    return '<button type="button" class="mtrow' + (exact ? " exact" : "") + '" data-mtdoc="' + x.o.id + '">' +
+    return '<button type="button" class="mtrow' + (exact ? " exact" : "") + '"' + (x.o ? ' data-mtdoc="' + x.o.id + '"' : ' style="cursor:default"') + '>' +
       '<span class="mtv"><b>' + fr(x.v, 2) + '</b><small>' +
         (exact ? "montant exact" : (x.v > cible ? "+ " : "− ") + fr(x.ec, 2) +
           (pct >= 0.1 ? "  (" + fr(pct, 1) + " %)" : "")) + '</small></span>' +
@@ -12400,7 +12497,7 @@ function renderMontant(){
     '</button>';
   }).join("");
 }
-$("docMontant").addEventListener("input", renderMontant);
+$("docMontant").addEventListener("input", () => { renderMontant(); histCharge().then(ch => { if (ch) renderMontant(); }); });
 $("docMtD1").addEventListener("change", renderMontant);
 $("docMtD2").addEventListener("change", renderMontant);
 $("docMontantRes").addEventListener("click", e => {
@@ -12579,6 +12676,7 @@ $("tileDoc").addEventListener("click", () => {
   if (!docAllowed()) return;
   renderDoc(); nav("docSheet");
   pullBons().then(() => renderDoc());
+  histCharge();                       /* v14.59 : anciennes ventes pour « Chercher un montant » */
 });
 
 /* ============ Clients ============ */
@@ -15289,6 +15387,7 @@ function renderProsFicheAct(){
   $("prosFicheActLab").hidden = false;
   box.hidden = false;
   box.innerHTML =
+    '<button class="prbtn" type="button" data-prmes="' + p.id + '">📏 À mesurer' + (mesDuContact(p.id) ? ' ✓' : '') + '</button>' +
     (coutAllowed() ? (function(){ const es = estDuContact(p.id);
       return '<button class="prbtn" type="button" data-prest="' + p.id + '">💰 Estimer un prix</button>' +
         (es ? '<p class="prest">Dernière estimation : ' + fr(estTotaux(es).du, 0) + ' DH, le ' +
@@ -15510,6 +15609,14 @@ function prosClic(e){
       prosSave(); if (dansFiche) prosFicheFerme(); else renderPros(); renderHome();
       toast("Contact supprimé");
     });
+    return;
+  }
+  const pmes = e.target.closest("[data-prmes]");
+  if (pmes){
+    const p = PROS.find(x => x.id === pmes.dataset.prmes);
+    if (!p) return;
+    if (dansFiche && prosEdit === p.id){ prosApplique(p); prosSave(); }
+    mesAMesurer(p);
     return;
   }
   const pe = e.target.closest("[data-prest]");
@@ -17780,12 +17887,19 @@ function remuTests(){
   return L;
 }
 
+/* v14.60 : une pose compte le mois où le bon passe « Livré » (dernier passage), plus le mois de création du bon */
+function livreLe(o){
+  if (etatDe(o) !== "livre") return 0;
+  const L = (o.log || []).filter(x => x && x.kind === "etat" && x.etat === "livre" && x.at);
+  return L.length ? L[L.length - 1].at : 0;
+}
 function remuSoufiane(iso){
-  const lignes = bonsDuMois(iso)
-    .filter(o => etatDe(o) !== "devis" && o.pose !== "Livraison")
+  const lignes = (ORDERS || [])
+    .filter(o => o && o.status === "sent" && o.pose !== "Livraison" && livreLe(o) && moisISO(livreLe(o)) === iso)
+    .sort((a, b) => livreLe(a) - livreLe(b))
     .map(o => {
       const p = posePrime(o);
-      return {o:o, p:p, facture: poseFacturee(o)};
+      return {o:o, p:p, facture: poseFacturee(o), livre:livreLe(o)};
     })
     .filter(l => l.p.n > 0);
   const client  = lignes.filter(l => l.p.mode === "client").reduce((t,l) => t + l.p.montant, 0);
@@ -17860,7 +17974,8 @@ function renderRemu(){
   cs += '<div class="rmsub">' + S2.lignes.length + " pose" + (S2.lignes.length > 1 ? "s" : "") + '</div>';
   cs += S2.lignes.length ? S2.lignes.map(l =>
       '<div class="rmline">' +
-        '<span class="n">' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") + '</span>' +
+        '<span class="n">' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") +
+          (l.livre ? '  ·  livré le ' + pad(new Date(l.livre).getDate()) + '/' + pad(new Date(l.livre).getMonth() + 1) : '') + '</span>' +
         '<span class="v' + (l.p.montant > 0.01 ? "" : " nul") + '">' + fr(l.p.montant, 2) + '</span>' +
         '<span class="s">' + l.p.n + ' fenêtre' + (l.p.n > 1 ? "s" : "") + '  ·  ' +
           (l.p.mode === "societe"
@@ -19328,7 +19443,8 @@ function estFormHTML(e){
   const tissus = t => CATALOGUE.filter(f => f.type === t).map(f => f.ref);
   const optT = (t, v) => '<option value="">Tissu (pour le coût)</option>' +
     tissus(t).map(r => '<option' + (r === v ? ' selected' : '') + '>' + esc(r) + '</option>').join("");
-  let h = '<button type="button" class="pcreset" data-estback style="padding-left:2px">‹ Toutes les estimations</button>';
+  let h = '<button type="button" class="pcreset" data-estback style="padding-left:2px">‹ Toutes les estimations</button>' +
+    (e.mesAt ? '<div class="mesnet" style="background:#e3f5ea;color:#12833F">📏 Mesures de Soufiane du ' + pad(new Date(e.mesAt).getDate()) + '/' + pad(new Date(e.mesAt).getMonth() + 1) + ' : les fenêtres sont exactes.</div>' : '');
   h += '<div class="estf">' +
     '<label>Contact WhatsApp<select data-estf="pros"><option value="">— aucun, saisir le nom —</option>' +
       contacts.map(p => '<option value="' + p.id + '"' + (p.id === e.pros ? ' selected' : '') + '>' +
@@ -19493,6 +19609,646 @@ function estDepuisContact(p){
   pullNom().then(ok => { if (ok) renderEst(); });
 }
 
+
+/* ============ v14.57 : Dépenses (charges, salaires, impôts) ============ */
+/* Ce qui était tapé dans l'Excel « Data analysis » se saisit ici. L'Excel est figé :
+   charges et salaires jusqu'au 31/07/2026, impôts jusqu'au 30/06/2026. Tout vit dans la
+   rangée réservée cfg-depenses, fusionnée ligne par ligne. Visible par Noureddine seul. */
+const DEP_ID = "cfg-depenses";
+const DEP_CUT = {charge:"2026-08-01", salaire:"2026-08-01", impot:"2026-07-01"};
+const DEP_CATS = ["Carburant","Website","Frais bancaires","Pose","Fournitures de production","Transport","Honoraire",
+  "Facebook ads","Magasin","Gestion automobile","Maintenance automobile","Maintenance magasin","Frais de communication",
+  "CNSS","Eau et electricite","Administration","PortNet","Echantillon","Acompte","Epargne","Autre"];
+const DEP_IMPOTS = ["TVA","Acompte IS","Reliquat IS","IS"];
+const DEP_EMP = ["Imane","Soufiane","Noureddine"];
+/* charges, salaires et impôts 2026 de l'Excel : seulement date, montant, nature, pour l'anti-doublon */
+const DEP_XL = [["2026-01-01",130.9,"Frais bancaires"],["2026-01-10",500.0,"Carburant"],["2026-01-13",4.08,"Frais bancaires"],["2026-01-13",1322.25,"CNSS"],["2026-01-17",1920.0,"PortNet"],["2026-01-17",58.99,"Frais de communication"],["2026-01-27",2966.0,"TVA"],["2026-02-01",130.9,"Frais bancaires"],["2026-02-09",20.0,"Administration"],["2026-02-12",1384.97,"CNSS"],["2026-02-20",400.0,"Carburant"],["2026-02-27",12.1,"Frais bancaires"],["2026-02-28",1.0,"Frais bancaires"],["2026-03-31",220.83,"Gestion automobile"],["2026-03-31",82.5,"Website"],["2026-03-31",93.33,"Website"],["2026-03-31",120.83,"Website"],["2026-03-31",500.0,"Gestion automobile"],["2026-03-31",100.0,"Website"],["2026-03-31",1890.0,"Facebook ads"],["2026-03-31",0.0,"Honoraire"],["2026-03-31",1500.0,"Epargne"],["2026-03-31",500.0,"Autre"],["2026-03-01",130.9,"Frais bancaires"],["2026-03-12",1384.97,"CNSS"],["2026-03-27",0.0,"Honoraire"],["2026-04-01",130.9,"Frais bancaires"],["2026-04-10",1384.97,"CNSS"],["2026-04-27",12.1,"Frais bancaires"],["2026-04-28",9944.0,"TVA"],["2026-04-30",117.98,"Frais de communication"],["2026-05-01",130.9,"Frais bancaires"],["2026-05-12",1384.97,"CNSS"],["2026-05-15",7263.21,"Transport"],["2026-06-01",130.9,"Frais bancaires"],["2026-06-01",12.1,"Frais bancaires"],["2026-06-11",63.98,"Frais de communication"],["2026-06-12",1384.97,"CNSS"],["2026-06-26",0.0,"Honoraire"],["2026-06-29",12.1,"Frais bancaires"],["2026-07-01",130.9,"Frais bancaires"],["2026-07-06",58.99,"Frais de communication"],["2026-07-07",3600.0,"Transport"],["2026-07-14",1384.97,"CNSS"],["2026-07-28",5391.0,"TVA"],["2026-06-30",850.0,"Transport"],["2026-05-29",420.0,"Autre"],["2026-06-05",11580.0,"Autre"],["2026-06-18",2936.86,"Autre"],["2026-01-31",100.0,"Pose"],["2026-01-31",100.0,"Transport"],["2026-01-31",10.0,"Fournitures de production"],["2026-01-31",10.0,"Fournitures de production"],["2026-01-31",220.0,"Transport"],["2026-01-31",150.0,"Transport"],["2026-01-31",227.0,"Pose"],["2026-01-31",288.0,"Pose"],["2026-01-31",50.0,"Pose"],["2026-02-27",10.0,"Fournitures de production"],["2026-02-27",21.0,"Pose"],["2026-02-27",35.0,"Fournitures de production"],["2026-02-27",30.0,"Fournitures de production"],["2026-02-27",170.0,"Transport"],["2026-02-27",125.0,"Pose"],["2026-03-31",220.0,"Transport"],["2026-03-31",225.0,"Pose"],["2026-03-31",10.0,"Fournitures de production"],["2026-03-31",10.0,"Fournitures de production"],["2026-04-30",250.0,"Pose"],["2026-04-30",10.0,"Fournitures de production"],["2026-04-30",250.0,"Transport"],["2026-04-30",100.0,"Pose"],["2026-04-30",100.0,"Pose"],["2026-05-30",150.0,"Fournitures de production"],["2026-05-30",100.0,"Fournitures de production"],["2026-05-30",800.0,"Fournitures de production"],["2026-05-30",170.0,"Transport"],["2026-05-30",80.0,"Fournitures de production"],["2026-05-30",40.0,"Fournitures de production"],["2026-05-30",100.0,"Fournitures de production"],["2026-05-30",50.0,"Fournitures de production"],["2026-05-30",24.0,"Fournitures de production"],["2026-05-30",40.0,"Fournitures de production"],["2026-05-30",150.0,"Pose"],["2026-05-30",10.0,"Fournitures de production"],["2026-05-30",150.0,"Transport"],["2026-05-30",40.0,"Fournitures de production"],["2026-05-30",10.0,"Fournitures de production"],["2026-05-30",200.0,"Pose"],["2026-05-30",170.0,"Transport"],["2026-05-30",70.0,"Fournitures de production"],["2026-05-30",25.0,"Pose"],["2026-05-30",75.0,"Pose"],["2026-05-30",50.0,"Pose"],["2026-05-30",75.0,"Pose"],["2026-05-30",180.0,"Transport"],["2026-05-30",80.0,"Transport"],["2026-05-30",375.0,"Pose"],["2026-06-30",125.0,"Pose"],["2026-06-30",10.0,"Pose"],["2026-06-30",5.0,"Fournitures de production"],["2026-06-30",5.0,"Fournitures de production"],["2026-06-30",25.0,"Pose"],["2026-06-30",35.0,"Fournitures de production"],["2026-07-31",80.0,"Transport"],["2026-07-31",60.0,"Fournitures de production"],["2026-07-31",40.0,"Fournitures de production"],["2026-07-31",10.0,"Fournitures de production"],["2026-07-31",180.0,"Transport"],["2026-01-31",220.83,"Gestion automobile"],["2026-01-31",82.5,"Website"],["2026-01-31",93.33,"Website"],["2026-01-31",120.83,"Website"],["2026-01-31",500.0,"Gestion automobile"],["2026-01-31",100.0,"Website"],["2026-01-31",1180.0,"Facebook ads"],["2026-02-28",82.5,"Website"],["2026-02-28",93.33,"Website"],["2026-02-28",120.83,"Website"],["2026-02-28",100.0,"Website"],["2026-02-28",600.0,"Facebook ads"],["2026-03-31",82.5,"Website"],["2026-03-31",93.33,"Website"],["2026-03-31",120.83,"Website"],["2026-03-31",100.0,"Website"],["2026-04-30",82.5,"Website"],["2026-04-30",93.33,"Website"],["2026-04-30",120.83,"Website"],["2026-04-30",100.0,"Website"],["2026-05-31",82.5,"Website"],["2026-05-31",93.33,"Website"],["2026-05-31",120.83,"Website"],["2026-05-31",100.0,"Website"],["2026-06-30",82.5,"Website"],["2026-06-30",93.33,"Website"],["2026-06-30",120.83,"Website"],["2026-06-30",100.0,"Website"],["2026-07-31",82.5,"Website"],["2026-07-31",93.33,"Website"],["2026-07-31",120.83,"Website"],["2026-07-31",100.0,"Website"],["2026-01-17",100.0,"Maintenance automobile"],["2026-05-05",200.0,"Maintenance automobile"],["2026-05-05",150.0,"Carburant"],["2026-01-15",800.0,"Salaire"],["2026-01-31",2600.0,"Salaire"],["2026-01-31",2600.0,"Salaire"],["2026-02-28",2600.0,"Salaire"],["2026-02-28",2600.0,"Salaire"],["2026-03-15",1000.0,"Salaire"],["2026-03-31",3300.0,"Salaire"],["2026-03-31",2600.0,"Salaire"],["2026-04-30",3000.0,"Salaire"],["2026-04-30",2200.0,"Salaire"],["2026-04-30",1000.0,"Salaire"],["2026-05-31",3000.0,"Salaire"],["2026-05-31",2200.0,"Salaire"],["2026-05-31",1000.0,"Salaire"],["2026-06-30",3200.0,"Salaire"],["2026-06-30",2000.0,"Salaire"],["2026-06-30",1000.0,"Salaire"],["2026-07-31",3200.0,"Salaire"],["2026-07-31",2000.0,"Salaire"],["2026-07-31",1000.0,"Salaire"],["2026-04-28",9944.0,"TVA"],["2026-06-30",5391.0,"TVA"]];
+let DEP = Object.assign({v:1, items:[], recur:[], cats:[]}, LS.get("mst_dep", {}));
+["items","recur","cats"].forEach(k => { if (!Array.isArray(DEP[k])) DEP[k] = []; });
+/* v14.58 : l'historique d'avant les coupures vit dans la feuille Google « MSTORECASA Historique »
+   (partagée en lecture par lien). L'app la lit, ne l'écrit jamais. Corriger une vieille ligne = la corriger là-bas. */
+const HIST_SHEET = "13HH6v57rE2XHNPAYCnM4wNuITbI09zxRf0fs9VEdXBw";
+let HIST = LS.get("mst_hist", null);          /* {at, dep:[{date,cat,emp,lib,banque,caisse,mt}]} */
+let HIST_EN_COURS = null;
+const HIST_CUT = {ventes:"2026-08-13", achats:"2026-08-20"};     /* au-delà, ce sont les bons et les achats de l'app */
+if (HIST && !HIST.ventes) HIST = null;                              /* ancienne forme (v14.58) : relire */
+function histNum(v){ return parseFloat(String(v == null ? "" : v).replace(/\s/g, "").replace(",", ".")) || 0; }
+async function histOnglet(nom){
+  const r = await fetch("https://docs.google.com/spreadsheets/d/" + HIST_SHEET + "/gviz/tq?tqx=out:csv&sheet=" + encodeURIComponent(nom) + "&mst=" + Date.now(), {cache:"no-store"});
+  if (!r.ok) throw new Error("http " + r.status);
+  const L = parseCSV(await r.text());
+  if (!L.length) return [];
+  const h = L[0].map(x => String(x || "").trim().toLowerCase());
+  return L.slice(1).filter(x => x.some(c => String(c).trim())).map(x => { const o = {}; h.forEach((k, i) => o[k] = String(x[i] == null ? "" : x[i]).trim()); return o; });
+}
+/* relue au plus toutes les 10 minutes, gardée sur le téléphone pour le hors ligne */
+function histCharge(force){
+  if (!force && HIST && Date.now() - (HIST.at || 0) < 600000) return Promise.resolve(false);
+  if (HIST_EN_COURS) return HIST_EN_COURS;
+  /* v14.59 : ventes lues pour tous (recherche de montant) ; dépenses, salaires et achats pour la direction seulement */
+  const dir = adminAllowed();
+  const ong = dir ? ["charges", "salaires", "etats_impots", "achats_factures", "ventes"] : ["ventes"];
+  HIST_EN_COURS = Promise.all(ong.map(histOnglet)).then(R => {
+    const [ch, sa, im, ac, ve] = dir ? R : [[], [], [], [], R[0]];
+    const dep = [];
+    ch.forEach(r => { const b = histNum(r.paye_banque), c = histNum(r.paye_caisse), m = histNum(r.montant_ttc);
+      if (r.date) dep.push({date:r.date, cat:r.nature || "Autre", lib:r.libelle || "", banque:b, caisse:c || (b ? 0 : m), mt:m || b + c, t:"charge"}); });
+    sa.forEach(r => { if (r.date) dep.push({date:r.date, cat:"Salaire", emp:r.employe || "", lib:"Salaire " + (r.employe || ""), banque:0, caisse:0, mt:histNum(r.montant), t:"salaire"}); });
+    im.forEach(r => { if (r.date) dep.push({date:r.date, cat:r.type || "Impôt", lib:r.type || "", banque:histNum(r.montant), caisse:0, mt:histNum(r.montant), t:"impot"}); });
+    const achats = ac.filter(r => r.date && r.date < HIST_CUT.achats).map(r => ({date:r.date, four:r.fournisseur || "", fac:r.facture || "",
+      ht:histNum(r.montant_ht), tva:histNum(r.tva), ttc:histNum(r.montant_ttc), regl:r.reglement || "", verif:r.a_verifier || ""}));
+    const ventes = ve.filter(r => r.date && r.date < HIST_CUT.ventes).map(r => ({date:r.date, client:r.client || "", etat:r.etat || "",
+      des:r.designation || "", ville:r.ville || "", ttc:histNum(r.montant_ttc), ht:histNum(r.montant_ht), regl:r.reglement || ""}));
+    HIST = {at:Date.now(), dep:dep, achats:achats, ventes:ventes, dir:dir};
+    LS.set("mst_hist", HIST);
+    return true;
+  }).catch(() => false).finally(() => { HIST_EN_COURS = null; });
+  return HIST_EN_COURS;
+}
+/* les lignes de l'historique d'un mois, seulement avant la coupure de leur type */
+function histDuMois(iso){
+  if (!HIST || !Array.isArray(HIST.dep)) return [];
+  return HIST.dep.filter(x => x.date.slice(0, 7) === iso && x.date < DEP_CUT[x.t])
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+let DEP_MOIS = jourISO(new Date()).slice(0, 7);
+let DEPF = null;              /* la saisie en cours */
+let DEP_FORCE = false;        /* « enregistrer quand même » après un avertissement */
+
+function depType(cat){ return cat === "Salaire" ? "salaire" : DEP_IMPOTS.indexOf(cat) >= 0 ? "impot" : "charge"; }
+function depCats(){ return DEP_CATS.concat(DEP.cats.filter(c => DEP_CATS.indexOf(c) < 0)); }
+function depUid(p){ return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function depFusion(d){
+  if (!d || typeof d !== "object") return false;
+  let bouge = false;
+  ["items","recur"].forEach(k => {
+    const par = {};
+    DEP[k].forEach(x => { if (x && x.id) par[x.id] = x; });
+    (Array.isArray(d[k]) ? d[k] : []).forEach(x => {
+      if (!x || !x.id) return;
+      const l = par[x.id];
+      if (!l || (x.maj || 0) > (l.maj || 0)){ par[x.id] = x; bouge = true; }
+    });
+    DEP[k] = Object.keys(par).map(i => par[i]);
+  });
+  (Array.isArray(d.cats) ? d.cats : []).forEach(c => { if (DEP.cats.indexOf(c) < 0){ DEP.cats.push(c); bouge = true; } });
+  if (bouge) LS.set("mst_dep", DEP);
+  return bouge;
+}
+async function depPull(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", DEP_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data;
+    return d ? depFusion(d) : false;
+  } catch(e){ return false; }
+}
+let DEP_T = null;
+function depSave(){
+  LS.set("mst_dep", DEP);
+  clearTimeout(DEP_T);
+  DEP_T = setTimeout(async () => {
+    if (!SB || !USER) return;
+    await depPull();                          /* d'abord ce qu'un autre téléphone a écrit */
+    try {
+      await SB.from("bons").upsert({id:DEP_ID, num:"__DEPENSES__", author:USER.login,
+        data:DEP, updated_at:new Date().toISOString()});
+    } catch(e){}
+  }, 700);
+}
+function depVivantes(){ return DEP.items.filter(x => x && !x.sup); }
+function depMt(x){ return (parseFloat(x.banque) || 0) + (parseFloat(x.caisse) || 0); }
+function depDuMois(iso){ return depVivantes().filter(x => String(x.date || "").slice(0, 7) === iso)
+  .sort((a, b) => String(b.date).localeCompare(String(a.date)) || (b.at || 0) - (a.at || 0)); }
+function depDecale(iso, n){ const a = iso.split("-").map(Number), d = new Date(a[0], a[1] - 1 + n, 1);
+  return d.getFullYear() + "-" + pad(d.getMonth() + 1); }
+function depDateFr(iso){ return String(iso || "").split("-").reverse().join("/"); }
+
+/* le salaire proposé : celui que calcule la page Rémunération pour ce mois */
+function depSalaireCalc(emp, iso){
+  try {
+    if (emp === "Imane") return r2(remuImane(iso).total);
+    if (emp === "Soufiane") return r2(remuSoufiane(iso).total);
+  } catch(e){}
+  return 0;
+}
+/* ce qui reste à confirmer pour le mois affiché : dépenses qui reviennent, salaires du mois */
+function depAConfirmer(iso){
+  const L = [], du = depDuMois(iso);
+  if (iso < DEP_CUT.charge.slice(0, 7)) return L;      /* v14.58 : mois couvert par l'historique */
+  DEP.recur.filter(r => r && !r.sup).forEach(r => {
+    if (du.some(x => x.recur === r.id)) return;
+    L.push({k:"r:" + r.id, cat:r.cat, lib:r.lib || r.cat, mt:parseFloat(r.mt) || 0, mode:r.mode || "banque", recur:r.id, sous:"chaque mois"});
+  });
+  ["Imane","Soufiane"].forEach(emp => {
+    if (du.some(x => x.cat === "Salaire" && x.emp === emp)) return;
+    const m = depSalaireCalc(emp, iso);
+    if (m > 0) L.push({k:"s:" + emp, cat:"Salaire", emp:emp, lib:"Salaire " + emp + " · " + moisLisible(iso), mt:m, mode:"banque", sous:"calculé par Rémunération"});
+  });
+  return L;
+}
+function depDateDuMois(iso){ const auj = jourISO(new Date()); return auj.slice(0, 7) === iso ? auj : (iso < auj.slice(0, 7) ? jourISO(new Date(+iso.slice(0, 4), +iso.slice(5, 7), 0)) : iso + "-01"); }
+
+function depNouveau(x){
+  DEPF = Object.assign({id:"", date:depDateDuMois(DEP_MOIS), cat:"Carburant", emp:"", lib:"", mt:"", mode:"caisse",
+    banque:"", caisse:"", photo:"", rep:false}, x || {});
+  DEP_FORCE = false;
+}
+function depAvert(F){
+  const W = [], t = depType(F.cat), cut = DEP_CUT[t];
+  const tape = F.mode === "partage" ? (parseFloat(F.banque) || 0) + (parseFloat(F.caisse) || 0) > 0 : parseFloat(F.mt) > 0;
+  if (!tape) return W;                        /* v14.58 : rien de tapé, rien à signaler */
+  if (F.date && F.date < cut) W.push("Date avant le " + depDateFr(cut) + " : cette période est déjà dans la feuille « MSTORECASA Historique ». Risque de doublon.");
+  const mt = F.mode === "partage" ? (parseFloat(F.banque) || 0) + (parseFloat(F.caisse) || 0) : parseFloat(F.mt) || 0;
+  const app = depVivantes().find(x => x.id !== F.id && x.date === F.date && x.cat === F.cat && Math.abs(depMt(x) - mt) < 0.01);
+  if (app) W.push("Il y a déjà une dépense « " + F.cat + " » de " + fr(mt) + " DH le " + depDateFr(F.date) + " dans l'app.");
+  const xl = (HIST && Array.isArray(HIST.dep)
+      ? HIST.dep.map(x => [x.date, x.mt, x.cat])
+      : DEP_XL).find(r => r[0] === F.date && Math.abs(r[1] - mt) < 0.01 && r[2] === F.cat);
+  if (xl) W.push("La même dépense (" + F.cat + ", " + fr(mt) + " DH, " + depDateFr(F.date) + ") est déjà dans la feuille historique.");
+  return W;
+}
+function depEnregistre(){
+  const F = DEPF; if (!F) return;
+  const mt = F.mode === "partage" ? (parseFloat(F.banque) || 0) + (parseFloat(F.caisse) || 0) : parseFloat(F.mt) || 0;
+  if (!F.date){ toast("Indiquez la date"); return; }
+  if (!(mt > 0)){ toast("Indiquez le montant"); return; }
+  if (F.cat === "Salaire" && !F.emp){ toast("Choisissez l'employé"); return; }
+  const W = depAvert(F);
+  if (W.length && !DEP_FORCE){ DEP_FORCE = true; renderDep(); toast("Vérifiez l'avertissement, puis enregistrez à nouveau"); return; }
+  const now = Date.now(), by = (USER && USER.login) || "";
+  let x = F.id && DEP.items.find(y => y.id === F.id);
+  if (!x){ x = {id:depUid("dp"), at:now, by:by}; DEP.items.push(x); }
+  Object.assign(x, {date:F.date, cat:F.cat, type:depType(F.cat), emp:F.cat === "Salaire" ? F.emp : "",
+    lib:String(F.lib || "").trim(), mode:F.mode,
+    banque:F.mode === "banque" ? mt : F.mode === "partage" ? (parseFloat(F.banque) || 0) : 0,
+    caisse:F.mode === "caisse" ? mt : F.mode === "partage" ? (parseFloat(F.caisse) || 0) : 0,
+    photo:F.photo || "", recur:F.recur || x.recur || "", maj:now});
+  if (F.rep && !x.recur){
+    const r = {id:depUid("dr"), cat:x.cat, lib:x.lib, mt:depMt(x), mode:x.mode === "partage" ? "banque" : x.mode, maj:now};
+    DEP.recur.push(r); x.recur = r.id;
+  }
+  depSave(); renderDepTile();
+  toast(F.id ? "Dépense modifiée" : "Dépense enregistrée");
+  DEP_MOIS = x.date.slice(0, 7);
+  depNouveau(); renderDep();
+}
+
+function renderDep(){
+  const z = $("depBody"); if (!z) return;
+  if (!DEPF) depNouveau();
+  const iso = DEP_MOIS, du = depDuMois(iso), F = DEPF, hi = histDuMois(iso);
+  const tB = du.reduce((t, x) => t + (parseFloat(x.banque) || 0), 0), tC = du.reduce((t, x) => t + (parseFloat(x.caisse) || 0), 0);
+  const tH = hi.reduce((t, x) => t + x.mt, 0);
+  let h = '<div class="depmois"><button type="button" data-depm="-1" aria-label="Mois précédent">‹</button><b>' + moisLisible(iso) +
+    '</b><button type="button" data-depm="1" aria-label="Mois suivant">›</button></div>';
+  h += '<div class="deptot"><small>Dépenses · ' + moisLisible(iso) + '</small><b>' + frm(tB + tC + tH, 2) + ' DH</b>' +
+    '<small>' + (tH ? 'dont historique ' + frm(tH, 2) + ' (' + hi.length + ' lignes)' + (du.length ? ' · app ' + frm(tB + tC, 2) : '')
+      : 'banque ' + frm(tB, 2) + ' · caisse ' + frm(tC, 2) + ' · ' + du.length + ' ligne' + (du.length > 1 ? 's' : '')) + '</small></div>';
+  const ac = depAConfirmer(iso);
+  if (ac.length){
+    h += '<div class="depcard"><h4>À confirmer ce mois · ' + ac.length + '</h4>' + ac.map(a =>
+      '<div class="deprow"><span class="dl">' + esc(a.lib) + '<small>' + esc(a.cat) + ' · ' + a.sous + ' · ' + (a.mode === "caisse" ? "caisse" : "banque") + '</small></span>' +
+      '<span class="dm">' + frm(a.mt, 2) + '</span><button type="button" class="ok" data-depok="' + esc(a.k) + '" aria-label="Confirmer">✓</button>' +
+      '<button type="button" class="deplink" data-depedac="' + esc(a.k) + '" style="padding:0 4px">Modifier</button></div>').join("") + '</div>';
+  }
+  /* la saisie */
+  const sal = F.cat === "Salaire", W = depAvert(F);
+  h += '<div class="depcard"><h4>' + (F.id ? "Modifier la dépense" : "Nouvelle dépense") + '</h4><div class="depf">' +
+    '<label>Date<input type="date" data-depf="date" value="' + esc(F.date) + '"></label>' +
+    '<label>Nature<select data-depf="cat">' +
+      '<optgroup label="Charges">' + depCats().map(c => '<option' + (c === F.cat ? ' selected' : '') + '>' + esc(c) + '</option>').join("") + '</optgroup>' +
+      '<optgroup label="Salaires"><option' + (sal ? ' selected' : '') + '>Salaire</option></optgroup>' +
+      '<optgroup label="Impôts et taxes">' + DEP_IMPOTS.map(c => '<option' + (c === F.cat ? ' selected' : '') + '>' + c + '</option>').join("") + '</optgroup>' +
+      '<option value="__neuf">+ Nouvelle catégorie…</option></select></label>' +
+    (sal ? '<label>Employé<select data-depf="emp"><option value="">—</option>' + DEP_EMP.map(e => '<option' + (e === F.emp ? ' selected' : '') + '>' + e + '</option>').join("") + '</select></label>' : '') +
+    '<label>Libellé<input data-depf="lib" value="' + esc(F.lib || "") + '" placeholder="Ex : Diesel camionnette"></label>' +
+    '<div class="depseg">' + [["banque","Banque"],["caisse","Caisse"],["partage","Partagé"]].map(m =>
+      '<button type="button" data-depmode="' + m[0] + '" aria-pressed="' + (F.mode === m[0]) + '">' + m[1] + '</button>').join("") + '</div>' +
+    (F.mode === "partage"
+      ? '<label>Payé par la banque (DH)<input inputmode="decimal" data-depf="banque" value="' + esc(String(F.banque || "")) + '"></label>' +
+        '<label>Payé par la caisse (DH)<input inputmode="decimal" data-depf="caisse" value="' + esc(String(F.caisse || "")) + '"></label>'
+      : '<label>Montant TTC (DH)<input inputmode="decimal" data-depf="mt" value="' + esc(String(F.mt || "")) + '"></label>') +
+    '<div>' + (F.photo ? '<img class="depimg" data-pimg="' + esc(F.photo) + '" data-depvoir="' + esc(F.photo) + '" alt="Reçu">' : '') +
+      '<label class="deplink">📷 ' + (F.photo ? 'Changer la photo du reçu' : 'Photo du reçu (facultatif)') + '<input type="file" accept="image/*" data-depphoto hidden></label></div>' +
+    (F.id || sal ? '' : '<label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" data-depf="rep"' + (F.rep ? ' checked' : '') + ' style="width:auto"> Revient chaque mois (proposée le 1er du mois)</label>') +
+    (W.length ? '<div class="depwarn">⚠️ ' + W.map(esc).join("<br>⚠️ ") + '</div>' : '') +
+    '<button type="button" class="depsave" data-depsave>' + (W.length && DEP_FORCE ? "Enregistrer quand même" : F.id ? "Enregistrer la modification" : "Enregistrer") + '</button>' +
+    (F.id ? '<button type="button" class="deplink" data-depannule>Annuler la modification</button><button type="button" class="depdel" data-depsup>Supprimer cette dépense</button>' : '') +
+  '</div></div>';
+  /* la liste du mois */
+  h += '<div class="depcard"><h4>' + moisLisible(iso) + ' · ' + du.length + '</h4>' + (du.length ? du.map(x =>
+    '<div class="deprow" data-deped="' + x.id + '"><span class="dl">' + depDateFr(x.date).slice(0, 5) + ' · ' + esc(x.cat === "Salaire" ? "Salaire " + (x.emp || "") : x.cat) +
+      (x.photo ? ' 📷' : '') + (x.recur ? ' 🔁' : '') + '<small>' + esc(x.lib || "") + '</small></span>' +
+    '<span class="dm">' + frm(depMt(x), 2) + '</span><small style="color:var(--muted);font-size:11px">' +
+      (x.mode === "partage" ? "partagé" : x.mode) + '</small></div>').join("")
+    : (hi.length ? '' : '<div class="empty">Aucune dépense ce mois-ci.</div>')) + '</div>';
+  if (hi.length) h += '<div class="depcard" style="opacity:.75"><h4>Historique (feuille Google) · ' + hi.length + '</h4>' + hi.map(x =>
+    '<div class="deprow" style="cursor:default"><span class="dl">' + depDateFr(x.date).slice(0, 5) + ' · ' + esc(x.cat === "Salaire" ? "Salaire " + (x.emp || "") : x.cat) +
+      '<small>' + esc(x.lib || "") + '</small></span><span class="dm">' + frm(x.mt, 2) + '</span><small style="color:var(--muted);font-size:11px">' +
+      (x.t === "salaire" ? "" : x.banque && x.caisse ? "partagé" : x.banque ? "banque" : "caisse") + '</small></div>').join("") +
+    '<p class="depcut">Lecture seule. Pour corriger une ligne, corrigez-la dans la feuille « MSTORECASA Historique ».</p></div>';
+  const rec = DEP.recur.filter(r => r && !r.sup);
+  if (rec.length) h += '<div class="depcard"><h4>Dépenses qui reviennent · ' + rec.length + '</h4>' + rec.map(r =>
+    '<div class="deprow"><span class="dl">' + esc(r.lib || r.cat) + '<small>' + esc(r.cat) + ' · ' + r.mode + '</small></span><span class="dm">' + frm(r.mt, 2) +
+    '</span><button type="button" class="depdel" data-deprsup="' + r.id + '">Arrêter</button></div>').join("") + '</div>';
+  h += '<p class="depcut">Avant le 01/08/2026 (charges, salaires) et le 01/07/2026 (impôts), les dépenses viennent de la feuille « MSTORECASA Historique »' +
+    (HIST && HIST.at ? ', lue à ' + pad(new Date(HIST.at).getHours()) + ':' + pad(new Date(HIST.at).getMinutes()) : ', pas encore lue') + '. Une saisie dans cette période est signalée.</p>';
+  z.innerHTML = h;
+  try { chargeVignettes(z); } catch(e){}
+}
+function renderDepTile(){
+  const t = $("tileDep"); if (!t) return;
+  t.hidden = !adminAllowed();
+  if (t.hidden) return;
+  const iso = jourISO(new Date()).slice(0, 7), du = depDuMois(iso), n = depAConfirmer(iso).length;
+  $("tileDepSub").textContent = "Ce mois : " + frm(du.reduce((s, x) => s + depMt(x), 0), 0) + " DH" + (n ? "  ·  " + n + " à confirmer" : "");
+}
+$("tileDep").addEventListener("click", () => {
+  if (!adminAllowed()) return;
+  DEP_MOIS = jourISO(new Date()).slice(0, 7); depNouveau();
+  renderDep(); nav("depSheet");
+  depPull().then(ch => { if (ch){ renderDep(); renderDepTile(); } });
+  histCharge().then(ch => { if (ch && $("depSheet").classList.contains("open")) renderDep(); });
+});
+$("depBody").addEventListener("click", e => {
+  const g = s => e.target.closest(s);
+  const m = g("[data-depm]");
+  if (m){ DEP_MOIS = depDecale(DEP_MOIS, +m.dataset.depm); if (!DEPF.id) DEPF.date = depDateDuMois(DEP_MOIS); renderDep();
+    histCharge().then(ch => { if (ch) renderDep(); }); return; }
+  const md = g("[data-depmode]");
+  if (md){ DEPF.mode = md.dataset.depmode; DEP_FORCE = false; renderDep(); return; }
+  if (g("[data-depsave]")){ depEnregistre(); return; }
+  if (g("[data-depannule]")){ depNouveau(); renderDep(); return; }
+  if (g("[data-depsup]") && DEPF.id){
+    const x = DEP.items.find(y => y.id === DEPF.id);
+    ask("Supprimer la dépense ?", (x ? x.cat + " · " + fr(depMt(x)) + " DH" : "Cette dépense") + " sera retirée.", () => {
+      if (x){ x.sup = true; x.maj = Date.now(); depSave(); }
+      depNouveau(); renderDep(); renderDepTile(); toast("Dépense supprimée");
+    });
+    return;
+  }
+  const ok = g("[data-depok]"), edac = g("[data-depedac]");
+  if (ok || edac){
+    const a = depAConfirmer(DEP_MOIS).find(y => y.k === (ok ? ok.dataset.depok : edac.dataset.depedac));
+    if (!a) return;
+    depNouveau({date:depDateDuMois(DEP_MOIS), cat:a.cat, emp:a.emp || "", lib:a.lib, mt:a.mt, mode:a.mode, recur:a.recur || ""});
+    if (ok){ DEP_FORCE = true; depEnregistre(); }
+    else { renderDep(); $("depBody").scrollTop = 0; }
+    return;
+  }
+  const rs = g("[data-deprsup]");
+  if (rs){
+    const r = DEP.recur.find(y => y.id === rs.dataset.deprsup);
+    ask("Arrêter cette dépense qui revient ?", (r ? (r.lib || r.cat) : "Elle") + " ne sera plus proposée chaque mois. Les dépenses déjà enregistrées restent.", () => {
+      if (r){ r.sup = true; r.maj = Date.now(); depSave(); }
+      renderDep(); renderDepTile();
+    });
+    return;
+  }
+  const v = g("[data-depvoir]");
+  if (v){ try { voirPimg(v.dataset.depvoir, "Reçu"); } catch(err){} return; }
+  const ed = g("[data-deped]");
+  if (ed){
+    const x = DEP.items.find(y => y.id === ed.dataset.deped);
+    if (!x) return;
+    depNouveau({id:x.id, date:x.date, cat:x.cat, emp:x.emp || "", lib:x.lib || "", mode:x.mode || "banque",
+      mt:x.mode === "partage" ? "" : depMt(x), banque:x.banque || "", caisse:x.caisse || "", photo:x.photo || "", recur:x.recur || ""});
+    renderDep(); $("depBody").scrollTop = 0;
+  }
+});
+function depChamp(e, fin){
+  const t = e.target, k = t.dataset.depf;
+  if (k){
+    if (k === "rep"){ DEPF.rep = t.checked; return; }
+    if (k === "cat" && t.value === "__neuf"){
+      const n = (window.prompt("Nom de la nouvelle catégorie") || "").trim();
+      if (n && depCats().indexOf(n) < 0 && n !== "Salaire" && DEP_IMPOTS.indexOf(n) < 0){ DEP.cats.push(n); depSave(); }
+      if (n) DEPF.cat = n;
+      renderDep(); return;
+    }
+    DEPF[k] = t.value;
+    if (k === "emp" && DEPF.cat === "Salaire" && !DEPF.id){
+      const m = depSalaireCalc(t.value, DEPF.date.slice(0, 7) || DEP_MOIS);
+      if (m > 0){ DEPF.mt = m; if (!DEPF.lib) DEPF.lib = "Salaire " + t.value + " · " + moisLisible(DEPF.date.slice(0, 7)); }
+    }
+    DEP_FORCE = false;
+    if (fin || k === "cat" || k === "emp" || k === "date") renderDep();
+    return;
+  }
+  if (t.dataset.depphoto !== undefined && t.files && t.files[0]){
+    reduitImage(t.files[0], 1400).then(img => {
+      const id = "pimg-dep-" + Date.now().toString(36);
+      pimgPut(id, img); DEPF.photo = id; renderDep(); toast("Photo ajoutée");
+    }).catch(() => toast("Photo illisible"));
+  }
+}
+$("depBody").addEventListener("change", e => depChamp(e, true));
+$("depBody").addEventListener("input", e => { if (e.target.dataset.depf && e.target.type !== "checkbox" && e.target.tagName !== "SELECT") depChamp(e, false); });
+
+
+/* ============ v14.61 : Prises de mesures ============ */
+/* Imane met un contact « À mesurer » ; Soufiane va chez le client et écrit les mesures exactes.
+   Il ne voit aucun prix. Ses mesures remplacent les fenêtres approximatives des estimations du
+   client (pas celles déjà devenues devis) et de la fiche contact. Les photos des fenêtres restent
+   sur son téléphone (IndexedDB), elles ne partent jamais en ligne. Rangée réservée cfg-mesures. */
+const MES_ID = "cfg-mesures";
+let MES = Object.assign({v:1, items:[]}, LS.get("mst_mes", {}));
+if (!Array.isArray(MES.items)) MES.items = [];
+let MES_ED = null;            /* id de la fiche en saisie */
+let MESF = null;              /* fenêtres en cours de saisie */
+function mesGere(){ return coutAllowed() || prosAllowed(); }      /* Imane et Noureddine */
+function mesAllowed(){ return !!USER; }
+function mesUid(){ return "ms" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function mesVivantes(){ return MES.items.filter(x => x && !x.sup && x.etat !== "fait"); }
+function mesDuContact(pid){ return mesVivantes().find(x => x.pros === pid) || null; }
+function mesFusion(d){
+  if (!d || !Array.isArray(d.items)) return false;
+  const par = {}; let bouge = false;
+  MES.items.forEach(x => { if (x && x.id) par[x.id] = x; });
+  d.items.forEach(x => { if (!x || !x.id) return; const l = par[x.id]; if (!l || (x.maj || 0) > (l.maj || 0)){ par[x.id] = x; bouge = true; } });
+  MES.items = Object.keys(par).map(i => par[i]);
+  if (bouge) LS.set("mst_mes", MES);
+  return bouge;
+}
+async function mesPull(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", MES_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data;
+    return d ? mesFusion(d) : false;
+  } catch(e){ return false; }
+}
+/* hors réseau : gardé ici, renvoyé dès que possible */
+let MES_T = null;
+function mesSave(){
+  LS.set("mst_mes", MES); LS.set("mst_mes_pend", 1);
+  clearTimeout(MES_T);
+  MES_T = setTimeout(mesEnvoi, 600);
+}
+async function mesEnvoi(){
+  if (!SB || !USER || navigator.onLine === false){ renderMesNet(); return; }
+  try {
+    await mesPull();
+    const {error} = await SB.from("bons").upsert({id:MES_ID, num:"__MESURES__", author:USER.login, data:MES, updated_at:new Date().toISOString()});
+    if (error) throw error;
+    LS.set("mst_mes_pend", 0);
+  } catch(e){}
+  renderMesNet();
+}
+window.addEventListener("online", () => { if (LS.get("mst_mes_pend", 0)) mesEnvoi(); });
+setInterval(() => { if (USER && LS.get("mst_mes_pend", 0) && navigator.onLine !== false) mesEnvoi(); }, 60000);
+function renderMesNet(){ const z = $("mesNet"); if (z) z.hidden = !(LS.get("mst_mes_pend", 0) && (navigator.onLine === false || !SB)); }
+window.addEventListener("offline", renderMesNet);
+
+/* --- photos : seulement sur ce téléphone --- */
+let MES_DB = null;
+function mesDb(){
+  if (MES_DB) return MES_DB;
+  MES_DB = new Promise((ok, ko) => {
+    try {
+      const r = indexedDB.open("mst-mesures", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("photos");
+      r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error);
+    } catch(e){ ko(e); }
+  });
+  return MES_DB;
+}
+function phPut(id, img){ return mesDb().then(db => new Promise((ok, ko) => { const t = db.transaction("photos", "readwrite"); t.objectStore("photos").put(img, id); t.oncomplete = ok; t.onerror = () => ko(t.error); })); }
+function phGet(id){ return mesDb().then(db => new Promise(ok => { const q = db.transaction("photos").objectStore("photos").get(id); q.onsuccess = () => ok(q.result || ""); q.onerror = () => ok(""); })).catch(() => ""); }
+function phVignettes(root){
+  (root || document).querySelectorAll("img[data-mesph]:not([src])").forEach(im => phGet(im.dataset.mesph).then(v => { if (v) im.src = v; else im.remove(); }));
+}
+async function phPartage(id){
+  const v = await phGet(id); if (!v) return;
+  try {
+    const b = await (await fetch(v)).blob(), file = new File([b], "fenetre.jpg", {type:b.type || "image/jpeg"});
+    if (navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:"Fenêtre"}); return; }
+  } catch(e){}
+  try { voirImage(v); } catch(e){ window.open(v, "_blank"); }
+}
+function voirImage(v){ const w = window.open(); if (w) w.document.write('<img src="' + v + '" style="max-width:100%">'); }
+
+/* --- ce qu'Imane avait noté : estimation encore ouverte, sinon fiche contact --- */
+function mesApprox(x){
+  let dims = [], type = x.type || "ENR";
+  if (!x.pros) return {type:type, txt:x.approx || ""};          /* client sans fiche : rien à lire ailleurs */
+  const es = (typeof EST !== "undefined" ? EST.items : []).filter(e => e && !e.sup && !e.devis && e.pros === x.pros).sort((a, b) => (b.maj || 0) - (a.maj || 0))[0];
+  if (es){ dims = es.dims || []; type = es.type || type; }
+  else { const p = (typeof PROS !== "undefined" ? PROS : []).find(y => y.id === x.pros); if (p){ dims = p.dims || []; type = p.type || type; } }
+  const L = dims.filter(d => parseFloat(d.l) > 0 && parseFloat(d.h) > 0).map(d => (parseFloat(d.q) > 1 ? d.q + " × " : "") + d.l + " × " + d.h);
+  return {type:type, txt:L.join(" · ") || (x.approx || "")};
+}
+function mesCap(v){ v = String(v || ""); return v ? v[0].toUpperCase() + v.slice(1) : ""; }
+function mesTypeLab(t){ return t === "JN" ? "Jour et nuit" : t === "MIX" ? "Enrouleur et jour et nuit" : "Enrouleur"; }
+
+/* --- Imane : « À mesurer » depuis la fiche du contact --- */
+function mesAMesurer(p){
+  if (mesDuContact(p.id)){ toast((p.nom || "Ce client") + " est déjà dans les prises de mesures"); return; }
+  const x = {id:mesUid(), pros:p.id, nom:p.nom || "", tel:p.tel || "", type:p.type || "ENR", etat:"a", fen:[],
+             at:Date.now(), by:(USER && USER.login) || "", maj:Date.now()};
+  x.approx = mesApprox(x).txt;              /* gardé pour Soufiane, qui ne lit pas les estimations */
+  MES.items.push(x); mesSave(); renderMesTile();
+  toast("📏 " + (p.nom || "Client") + " ajouté à « Prises de mesures »");
+}
+/* --- Soufiane enregistre : les estimations et la fiche du client suivent (appliqué chez Imane / Noureddine) --- */
+function mesApplique(){
+  if (!mesGere()) return;
+  let chE = false, chP = false;
+  MES.items.forEach(x => {
+    if (!x || x.sup || x.etat === "a" || !x.mesAt) return;
+    /* client créé par Soufiane : il entre dans les contacts */
+    if (!x.pros && typeof PROS !== "undefined"){
+      const n = String(x.tel || "").replace(/\D/g, "").slice(-9);
+      let p = n.length === 9 ? PROS.find(y => !y.sup && String(y.tel || "").replace(/\D/g, "").slice(-9) === n) : null;
+      if (!p){ p = {id:"p" + Date.now() + Math.floor(Math.random() * 900), at:Date.now(), by:x.mesBy || "soufiane", nom:x.nom || "", tel:x.tel || "",
+                    type:x.type || "ENR", note:"Ajouté par Soufiane lors d'une prise de mesures", maj:Date.now()}; PROS.unshift(p); chP = true; }
+      x.pros = p.id; x.maj = Date.now(); mesSave();
+    }
+    const dims = (x.fen || []).filter(d => parseFloat(d.l) > 0 && parseFloat(d.h) > 0)
+      .map(d => ({l:String(d.l), h:String(d.h), q:String(d.q || ""), type:d.type === "JN" ? "JN" : "ENR", ref:"", note:[d.piece, d.pose, d.rem].filter(Boolean).join(" · ")}));
+    if (!dims.length) return;
+    const types = [...new Set(dims.map(d => d.type))], t = types.length > 1 ? "MIX" : types[0];
+    (typeof EST !== "undefined" ? EST.items : []).forEach(e => {
+      if (!e || e.sup || e.devis || !x.pros || e.pros !== x.pros || (e.mesAt || 0) >= x.mesAt) return;
+      e.dims = dims.map(d => ({l:d.l, h:d.h, q:d.q, type:d.type, ref:""})); e.type = t; e.mesAt = x.mesAt; e.maj = Date.now(); chE = true;
+    });
+    const p = (typeof PROS !== "undefined" ? PROS : []).find(y => y.id === x.pros);
+    if (p && (p.mesAt || 0) < x.mesAt){ p.dims = dims.map(d => ({l:d.l, h:d.h, q:d.q, type:d.type})); p.type = t; p.mesAt = x.mesAt; p.maj = Date.now(); chP = true; }
+  });
+  if (chE) try { estSave(); } catch(e){}
+  if (chP) try { prosSave(); } catch(e){}
+}
+/* --- le bon de commande créé depuis une prise de mesures --- */
+function mesVersBon(x){
+  const p = (PROS || []).find(y => y.id === x.pros);
+  if (p) prosVersBon(p, "devis");
+  else { newOrderSynced(); S.nom = x.nom || ""; $("nom").value = S.nom; S.tel = x.tel || ""; $("tel").value = S.tel; nav("form"); }
+  const dims = (x.fen || []).filter(d => parseFloat(d.l) > 0 && parseFloat(d.h) > 0);
+  const types = [...new Set(dims.map(d => d.type === "JN" ? "JN" : "ENR"))];
+  S.type = types.length > 1 ? "MIX" : (types[0] || "ENR");
+  S.dims = dims.map(d => ({l:String(d.l), h:String(d.h), q:String(d.q || ""), ref:"", type:d.type === "JN" ? "JN" : "ENR",
+    note:[d.piece, d.pose, d.rem].filter(Boolean).join(" · ")}));
+  S.multi = S.dims.length > 1;
+  S.mesure = x.id;
+  [...$("seg").children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.type === S.type)));
+  [...$("segMulti").children].forEach(b => b.setAttribute("aria-pressed", String((b.dataset.multi === "1") === !!S.multi)));
+  renderAll();
+  toast("Bon prérempli avec les mesures de Soufiane : choisissez le prix et le tissu");
+}
+function mesFait(rec){
+  const x = MES.items.find(y => y.id === rec.mesure);
+  if (!x || x.etat === "fait") return;
+  x.etat = "fait"; x.bon = rec.num; x.maj = Date.now(); mesSave(); renderMesTile();
+}
+
+/* --- affichage --- */
+function renderMesTile(){
+  const t = $("tileMes"); if (!t) return;
+  t.hidden = !mesAllowed(); if (t.hidden) return;
+  const L = mesVivantes(), a = L.filter(x => x.etat === "a").length, m = L.filter(x => x.etat === "m").length;
+  $("tileMesSub").textContent = a || m ? a + " à mesurer · " + m + " mesurée" + (m > 1 ? "s" : "") : "Mesures prises chez le client";
+  try { homeBadge("tileMes", a); } catch(e){}
+}
+function mesCarte(x){
+  const ap = mesApprox(x), gere = mesGere();
+  const d = x.mesAt ? new Date(x.mesAt) : null;
+  let h = '<div class="mescard"><div class="mh"><b>' + esc(x.nom || "Client sans nom") + '</b>' +
+    (x.etat === "a" ? '<span class="mestag a">À mesurer</span>' : '<span class="mestag m">Mesurée ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '</span>') + '</div>';
+  h += '<div class="mesmut">' + mesTypeLab(ap.type) + (ap.txt ? ' · approx. ' + esc(ap.txt) : '') + (gere && x.tel ? ' · ' + esc(x.tel) : '') + '</div>';
+  if (x.etat === "m"){
+    const n = (x.fen || []).reduce((t, f) => t + (parseInt(f.q, 10) || 1), 0);
+    /* v14.64 : le moment exact où Soufiane a appuyé sur Enregistrer */
+    h += '<div class="mesquand">✓ Enregistrées le ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() +
+      ' à ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + '</div>';
+    h += '<div style="margin:7px 0;line-height:1.7;font-size:13.5px">' + (x.fen || []).map(f =>
+      '<b>' + esc(f.l) + ' × ' + esc(f.h) + '</b>' + (parseInt(f.q, 10) > 1 ? ' ×' + esc(f.q) : '') + ' · ' + (f.type === "JN" ? "J/N" : "Enr.") +
+      (f.piece ? ' · ' + esc(f.piece) : '') + (f.pose ? ' · ' + esc(f.pose) : '') + (f.rem ? ' · ' + esc(f.rem) : '')).join("<br>") + '</div>' +
+      '<div class="mesmut">' + n + ' store' + (n > 1 ? 's' : '') + ' · par ' + esc(mesCap(x.mesBy || "soufiane")) +
+      ((x.fen || []).some(f => (f.ph || []).length) ? ' · 📷 ' + (x.fen || []).reduce((t, f) => t + (f.ph || []).length, 0) + ' photo(s) sur le téléphone de Soufiane' : '') +
+      (gere && (EST.items || []).some(e => e && !e.sup && !e.devis && e.pros === x.pros && e.mesAt === x.mesAt) ? ' · Estimation mise à jour ✓' : '') + '</div>';
+    if (USER && x.mesBy === USER.login && (x.fen || []).some(f => (f.ph || []).length))
+      h += '<div class="mesph" style="margin-top:6px">' + (x.fen || []).flatMap(f => f.ph || []).map(id => '<img data-mesph="' + id + '" data-mesphv="' + id + '" alt="Fenêtre">').join("") + '</div>';
+  }
+  h += '<button type="button" class="' + (x.etat === "a" ? 'mesbtn' : 'mesbtn2') + '" data-mesed="' + x.id + '">📏 ' + (x.etat === "a" ? 'Saisir les mesures' : 'Corriger les mesures') + '</button>';
+  if (gere && x.etat === "m") h += '<button type="button" class="mesbtn" data-mesbon="' + x.id + '">Créer le bon de commande</button>';
+  if (gere) h += '<div style="display:flex;justify-content:space-between">' +
+    (coutAllowed() && x.pros ? '<button type="button" class="meslien" data-mesest="' + x.id + '">Voir l\'estimation ›</button>' : '<span></span>') +
+    '<button type="button" class="messup" data-messup="' + x.id + '">Retirer</button></div>';
+  return h + '</div>';
+}
+function renderMes(){
+  const z = $("mesBody"); if (!z) return;
+  if (MES_ED) return renderMesSaisie(z);
+  const L = mesVivantes().sort((a, b) => (b.maj || 0) - (a.maj || 0));
+  const A = L.filter(x => x.etat === "a"), M = L.filter(x => x.etat === "m");
+  z.innerHTML = '<div class="mesnet" id="mesNet" hidden>⏳ En attente de réseau : vos mesures sont gardées sur ce téléphone et partiront toutes seules.</div>' +
+    '<button type="button" class="mesbtn2" data-mesnew>+ Nouveau client</button>' +
+    '<p class="hint" style="margin-top:12px">À mesurer · ' + A.length + '</p>' + (A.length ? A.map(mesCarte).join("") : '<div class="empty">Personne à mesurer pour l\'instant.</div>') +
+    '<p class="hint" style="margin-top:12px">Mesurées · ' + M.length + '</p>' + (M.length ? M.map(mesCarte).join("") : '<div class="empty">Aucune mesure en attente d\'un bon.</div>');
+  renderMesNet(); phVignettes(z);
+}
+function renderMesSaisie(z){
+  const x = MES.items.find(y => y.id === MES_ED);
+  if (!x){ MES_ED = null; return renderMes(); }
+  const ap = mesApprox(x);
+  let h = '<button type="button" class="pcreset" data-mesback style="padding-left:2px">‹ Retour à la liste</button>';
+  h += '<div class="mescard"><div class="mh"><b>' + (x.nouveau ? '<input data-mesnom value="' + esc(x.nom || "") + '" placeholder="Nom du client" style="width:100%;padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--card2);color:var(--ink)">' : esc(x.nom || "Client")) + '</b></div>' +
+    (x.nouveau ? '<input data-mestel inputmode="tel" value="' + esc(x.tel || "") + '" placeholder="Téléphone" style="width:100%;margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--card2);color:var(--ink)">' : '') +
+    '<div class="mesmut">' + mesTypeLab(ap.type) + (ap.txt ? ' · approx. ' + esc(ap.txt) : '') + '</div></div>';
+  MESF.forEach((f, i) => {
+    h += '<div class="mesfen"><div class="mesmut" style="margin:0">Fenêtre ' + (i + 1) + '</div>' +
+      '<div class="g3"><input inputmode="decimal" placeholder="Largeur" data-mesf="' + i + '" data-c="l" value="' + esc(String(f.l || "")) + '">' +
+      '<input inputmode="decimal" placeholder="Hauteur" data-mesf="' + i + '" data-c="h" value="' + esc(String(f.h || "")) + '">' +
+      '<input inputmode="numeric" placeholder="×1" data-mesf="' + i + '" data-c="q" value="' + esc(String(f.q || "")) + '">' +
+      '<button type="button" class="x" data-mesdel="' + i + '" aria-label="Retirer">×</button></div>' +
+      '<div class="messeg">' + [["ENR","Enrouleur"],["JN","Jour et nuit"]].map(t => '<button type="button" data-mest="' + i + '" data-v="' + t[0] + '" aria-pressed="' + ((f.type || "ENR") === t[0]) + '">' + t[1] + '</button>').join("") + '</div>' +
+      '<div class="messeg">' + ["Encadrement","Mur","Plafond"].map(t => '<button type="button" data-mespose="' + i + '" data-v="' + t + '" aria-pressed="' + (f.pose === t) + '">' + t + '</button>').join("") + '</div>' +
+      '<input placeholder="Pièce (salon, chambre…)" data-mesf="' + i + '" data-c="piece" value="' + esc(f.piece || "") + '">' +
+      '<input placeholder="Remarque" data-mesf="' + i + '" data-c="rem" value="' + esc(f.rem || "") + '">' +
+      '<div class="mesph">' + (f.ph || []).map(id => '<img data-mesph="' + id + '" data-mesphv="' + id + '" alt="Fenêtre">').join("") +
+        '<label class="meslien">📷 Photo<input type="file" accept="image/*" capture="environment" data-mesphoto="' + i + '" hidden></label></div></div>';
+  });
+  h += '<button type="button" class="mesbtn2" data-mesadd>+ Ajouter une fenêtre</button>' +
+    '<button type="button" class="mesbtn" data-messave>Enregistrer les mesures</button>' +
+    '<p class="hint">Les photos restent sur ce téléphone. Sans réseau, les mesures partent dès qu\'il revient.</p>';
+  z.innerHTML = h; phVignettes(z);
+}
+function mesOuvreSaisie(x){
+  MES_ED = x.id;
+  MESF = (x.fen && x.fen.length ? JSON.parse(JSON.stringify(x.fen)) : [{l:"", h:"", q:"", type:x.type === "JN" ? "JN" : "ENR", pose:"", piece:"", rem:"", ph:[]}]);
+  renderMes(); try { $("mesSheet").querySelector(".sheet-body").scrollTo({top:0}); } catch(e){}
+}
+function mesEnregistre(){
+  const x = MES.items.find(y => y.id === MES_ED); if (!x) return;
+  const fen = MESF.filter(f => parseFloat(String(f.l).replace(",", ".")) > 0 && parseFloat(String(f.h).replace(",", ".")) > 0);
+  if (!fen.length){ toast("Écrivez au moins une largeur et une hauteur"); return; }
+  if (x.nouveau && !String(x.nom || "").trim()){ toast("Écrivez le nom du client"); return; }
+  x.fen = fen.map(f => Object.assign({}, f, {l:String(f.l).replace(",", "."), h:String(f.h).replace(",", ".")}));
+  x.etat = "m"; x.mesAt = Date.now(); x.mesBy = (USER && USER.login) || ""; x.maj = Date.now(); delete x.nouveau;
+  mesSave(); mesApplique(); renderMesTile();
+  MES_ED = null; MESF = null; renderMes();
+  toast("📏 Mesures enregistrées. Appelez Imane.");
+}
+/* v14.62 : Précédent depuis la saisie revient à la liste, depuis la liste à l'accueil */
+function mesRetour(){
+  if (!MES_ED){ nav("home"); return; }
+  const x = MES.items.find(y => y.id === MES_ED);
+  if (x && x.nouveau && !x.mesAt) MES.items = MES.items.filter(y => y !== x);     /* nouveau client abandonné */
+  MES_ED = null; MESF = null; renderMes();
+}
+$("tileMes").addEventListener("click", () => {
+  if (!mesAllowed()) return;
+  MES_ED = null; renderMes(); nav("mesSheet");
+  mesPull().then(ch => { if (ch){ mesApplique(); if (!MES_ED) renderMes(); renderMesTile(); } });
+});
+$("mesBody").addEventListener("click", e => {
+  const g = sel => e.target.closest(sel);
+  if (g("[data-mesnew]")){
+    const x = {id:mesUid(), pros:"", nom:"", tel:"", type:"ENR", etat:"a", fen:[], at:Date.now(), by:(USER && USER.login) || "", maj:Date.now(), nouveau:true};
+    MES.items.push(x); mesOuvreSaisie(x); return;
+  }
+  const ed = g("[data-mesed]"); if (ed){ const x = MES.items.find(y => y.id === ed.dataset.mesed); if (x) mesOuvreSaisie(x); return; }
+  if (g("[data-mesback]")){ mesRetour(); return;
+  }
+  if (g("[data-mesadd]")){ const der = MESF[MESF.length - 1] || {}; MESF.push({l:"", h:"", q:"", type:der.type || "ENR", pose:der.pose || "", piece:"", rem:"", ph:[]}); renderMes(); return; }
+  const dl = g("[data-mesdel]"); if (dl){ MESF.splice(+dl.dataset.mesdel, 1); if (!MESF.length) MESF.push({l:"", h:"", q:"", type:"ENR", pose:"", piece:"", rem:"", ph:[]}); renderMes(); return; }
+  const ty = g("[data-mest]"); if (ty){ MESF[+ty.dataset.mest].type = ty.dataset.v; renderMes(); return; }
+  const po = g("[data-mespose]"); if (po){ const f = MESF[+po.dataset.mespose]; f.pose = f.pose === po.dataset.v ? "" : po.dataset.v; renderMes(); return; }
+  if (g("[data-messave]")){ mesEnregistre(); return; }
+  const pv = g("[data-mesphv]"); if (pv){ phPartage(pv.dataset.mesphv); return; }
+  const bn = g("[data-mesbon]"); if (bn){ const x = MES.items.find(y => y.id === bn.dataset.mesbon); if (x) mesVersBon(x); return; }
+  const es = g("[data-mesest]");
+  if (es){ const x = MES.items.find(y => y.id === es.dataset.mesest); const p = x && PROS.find(y => y.id === x.pros); if (p){ estDepuisContact(p); COUT_RETOUR = "mesSheet"; } return; }
+  const su = g("[data-messup]");
+  if (su){
+    const x = MES.items.find(y => y.id === su.dataset.messup);
+    ask("Retirer ce client ?", (x ? x.nom || "Ce client" : "Ce client") + " quitte les prises de mesures. Les mesures déjà copiées dans l'estimation restent.", () => {
+      if (x){ x.sup = true; x.maj = Date.now(); mesSave(); }
+      renderMes(); renderMesTile();
+    });
+  }
+});
+$("mesBody").addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset.mesf !== undefined){ MESF[+t.dataset.mesf][t.dataset.c] = t.value; return; }
+  const x = MES.items.find(y => y.id === MES_ED); if (!x) return;
+  if (t.dataset.mesnom !== undefined) x.nom = t.value;
+  if (t.dataset.mestel !== undefined) x.tel = t.value;
+});
+$("mesBody").addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.mesphoto !== undefined && t.files && t.files[0]){
+    const i = +t.dataset.mesphoto;
+    reduitImage(t.files[0], 1400).then(img => {
+      const id = "mph-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+      return phPut(id, img).then(() => { (MESF[i].ph = MESF[i].ph || []).push(id); renderMes(); toast("Photo gardée sur ce téléphone"); });
+    }).catch(() => toast("Photo impossible à garder"));
+  }
+});
+
 /* ============ Rafraîchissement automatique ============ */
 /* Les agents oublient d'appuyer sur Actualiser. L'application va donc chercher
    les nouveautés toute seule, sans jamais couper une saisie : si l'agent écrit,
@@ -19550,6 +20306,9 @@ function backOneStep(){
   if ($("invRollSheet").classList.contains("open")){ nav("invSheet"); renderInv(); return true; }
   if ($("invSheet").classList.contains("open")){ nav("home"); return true; }
   if ($("achSheet").classList.contains("open")){ achRetour(); return true; }
+  if ($("mesSheet").classList.contains("open")){ mesRetour(); return true; }
+  if ($("coutSheet").classList.contains("open") && COUT_RETOUR === "mesSheet"){ nav("mesSheet"); renderMes(); return true; }
+  if ($("depSheet").classList.contains("open")){ nav("home"); return true; }
   if ($("promoSheet").classList.contains("open")){ nav("prosSheet"); renderPros(); return true; }
   if ($("paySheet").classList.contains("open") && payBon){ payFermeBon(); return true; }
   if ($("prosSheet").classList.contains("open") && $("prosSheet").classList.contains("fiche")){ prosFicheFerme(); return true; }
@@ -19776,11 +20535,12 @@ function achRetour(){
 function renderAch(){
   const box = $("achBody");
   if (!box) return;
-  const T = {liste:"Achats", ba:"Bon d'achat", four:"Fournisseurs", cmd:"À commander"};
+  const T = {liste:"Achats", ba:"Bon d'achat", four:"Fournisseurs", cmd:"À commander", histo:"Achats · historique"};
   $("achTitre").textContent = T[ACH_VUE] || "Achats";
   if (ACH_VUE === "ba") return achRendBa(box);
   if (ACH_VUE === "four") return achRendFours(box);
   if (ACH_VUE === "cmd") return achRendCmd(box);
+  if (ACH_VUE === "histo") return achRendHisto(box);
   achRendListe(box);
 }
 const ACH_NOSTOCK = '<div class="achnostock">📦 Les achats <b>ne touchent pas au stock de l\'app</b>. Le stock change quand vous saisissez dans SAGE puis mettez à jour la feuille Google.</div>';
@@ -19810,11 +20570,33 @@ function achRendListe(box){
     '<button type="button" class="achbig" data-achnew>+ Nouveau bon d\'achat</button>' +
     (mq.length ? '<button type="button" class="achwarn" data-achvue="cmd"><b>' + mq.length + ' tissu' + (mq.length > 1 ? 's' : '') +
        ' à commander pour des bons clients</b>' + mq.slice(0, 4).map(m => esc(m.ref)).join(" · ") + (mq.length > 4 ? '…' : '') + ' → voir « À commander »</button>' : '') +
-    '<div class="achduo"><button type="button" data-achvue="cmd">À commander</button><button type="button" data-achvue="four">Fournisseurs</button></div>' +
+    '<div class="achduo"><button type="button" data-achvue="cmd">À commander</button><button type="button" data-achvue="four">Fournisseurs</button><button type="button" data-achvue="histo">Historique</button></div>' +
     '<div class="pypuces">' + [["tous", "Tous"], ["brouillon", "Brouillons"], ["recevoir", "À recevoir"], ["recu", "Reçus"], ["payer", "À payer"], ["sage", "À saisir dans SAGE"], ["facture", "Facture à récupérer"]]
       .filter(([k]) => k === "tous" || nb[k]).map(([k, l]) => '<button type="button" class="prchip" data-achf="' + k + '" aria-pressed="' + (ACH_F === k) + '">' + l + ' <b>' + nb[k] + '</b></button>').join("") + '</div>' +
     (vus.length ? vus.map(achCarte).join("") : '<div class="empty">' + (L.length ? 'Rien dans ce filtre.' : 'Aucun bon d\'achat pour l\'instant.<br>« + Nouveau bon d\'achat » pour commencer.') + '</div>') +
     ACH_NOSTOCK;
+}
+/* v14.59 : les factures fournisseurs d'avant le 20/08/2026, lues dans la feuille « MSTORECASA Historique » */
+function achRendHisto(box){
+  if (!HIST || !Array.isArray(HIST.achats)){
+    box.innerHTML = '<div class="empty">Lecture de la feuille « MSTORECASA Historique »…</div>';
+    histCharge(true).then(() => { if (ACH_VUE === "histo") renderAch(); });
+    return;
+  }
+  const par = {};
+  HIST.achats.forEach(a => { const m = a.date.slice(0, 7); (par[m] = par[m] || []).push(a); });
+  const mois = Object.keys(par).sort().reverse();
+  const tot = HIST.achats.reduce((t, a) => t + a.ttc, 0);
+  box.innerHTML = '<div class="deptot"><small>Achats avant le 20/08/2026 · ' + HIST.achats.length + ' factures</small><b>' + frm(tot, 2) + ' DH TTC</b>' +
+      '<small>Lecture seule. Les achats suivants sont les bons d\'achat de l\'app.</small></div>' +
+    (mois.length ? mois.map(m => { const L = par[m].sort((a, b) => b.date.localeCompare(a.date));
+      const ht = L.reduce((t, a) => t + a.ht, 0), ttc = L.reduce((t, a) => t + a.ttc, 0);
+      return '<div class="depcard" style="opacity:.85"><h4>' + moisLisible(m) + ' · ' + frm(ttc, 2) + ' TTC · ' + frm(ht, 2) + ' HT</h4>' + L.map(a =>
+        '<div class="deprow" style="cursor:default"><span class="dl">' + depDateFr(a.date).slice(0, 5) + ' · ' + esc(a.four) +
+          '<small>' + esc(a.fac) + (a.regl ? ' · ' + esc(a.regl) : '') + (a.verif ? ' · ⚠️ ' + esc(a.verif) : '') + '</small></span>' +
+        '<span class="dm">' + frm(a.ttc, 2) + '</span></div>').join("") + '</div>'; }).join("")
+      : '<div class="empty">Aucune facture dans l\'historique.</div>') +
+    '<p class="depcut">Pour corriger une facture, corrigez-la dans la feuille « MSTORECASA Historique » (onglet achats_factures).</p>';
 }
 function achCarte(b){
   const f = achFour(b.four), t = achTot(b), e = achEtat(b), p = achPayeLab(b);
