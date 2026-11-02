@@ -373,6 +373,45 @@ select{appearance:none; -webkit-appearance:none}
 .estbtns .go{background:#2e7d32; border-color:#2e7d32; color:#fff}
 .estbtns .del{color:#c62828; background:none; border:0; font-weight:600}
 .estfait{margin-top:12px; padding:11px; border-radius:10px; background:#e8f5e9; color:#2e7d32; font-weight:700}
+.dlbox{width:100%; margin:8px 0 0; padding:10px 12px; border-radius:12px; background:var(--info-soft); color:var(--info); font-size:13px}
+.dlbox.att{background:var(--warn-soft); color:var(--warn)}
+.dlbox small{display:block; font-size:11.5px; opacity:.85; margin:2px 0}
+.dlbox .dll{display:flex; justify-content:space-between; gap:8px; padding:3px 0; align-items:baseline}
+.dlbox .dll.un b{font-size:17px}
+.dlbox .dll em{font-style:normal; font-size:11.5px}
+.atjk{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:8px 0 10px}
+.atjk > div{background:var(--card2); border-radius:12px; padding:10px}
+.atjk b{display:block; font-size:20px} .atjk small{color:var(--muted); font-size:11.5px}
+.atjk .ko b{color:var(--accent)}
+.atjr{display:grid; grid-template-columns:1.2fr 1fr 1fr auto; gap:6px; padding:6px 0; border-bottom:1px solid var(--line); font-size:13px; align-items:center}
+.atjr.h{color:var(--muted); font-size:11.5px}
+.atjexp{font-size:12.5px; color:var(--muted); margin:4px 0 8px; line-height:1.5}
+.atjday{border-bottom:1px solid var(--line); padding:8px 0}
+.atjday summary{display:grid; grid-template-columns:1fr auto; gap:2px 8px; align-items:center; cursor:pointer; list-style:none}
+.atjday summary::-webkit-details-marker{display:none}
+.atjday summary .d{font-weight:700; font-size:14px}
+.atjday summary small{grid-column:1 / -1; color:var(--muted); font-size:12px}
+.atjw{display:grid; grid-template-columns:44px 1fr; gap:8px; padding:6px 0 2px; font-size:13px}
+.atjw .h{color:var(--muted); font-variant-numeric:tabular-nums}
+.atjw small{display:block; color:var(--muted); font-size:12px}
+.atjatt{font-size:12px; font-weight:700; color:var(--warn); margin:8px 0 0}
+.atjvide{font-size:12px; color:var(--muted); padding:8px 0; border-bottom:1px solid var(--line); font-style:italic}
+.atjr > span:nth-child(2), .atjr > span:nth-child(3){text-align:center}
+.atj{font-style:normal; font-size:11px; font-weight:700; padding:2px 8px; border-radius:7px; background:var(--card2); color:var(--muted); white-space:nowrap}
+.atj.ok{background:var(--ok-soft); color:var(--ok)} .atj.ko{background:#FDE3E6; color:var(--accent)} .atj.wa{background:var(--warn-soft); color:var(--warn)} .atj.en{background:var(--info-soft); color:var(--info)}
+.sttop{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 12px; margin:0 0 12px}
+.sttop summary{font-weight:700; cursor:pointer; padding:2px 0 6px}
+.stper{margin:2px 0 8px}
+.stdates{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 0 8px}
+.stdates label{font-size:11.5px; color:var(--muted)}
+.stdates input{display:block; width:100%; margin-top:3px; padding:8px; border-radius:9px; border:1px solid var(--line); background:var(--card2); color:inherit; font:inherit}
+.stbar{display:grid; grid-template-columns:1.3fr 1fr auto; gap:8px; align-items:center; padding:5px 0; font-size:13px}
+.stbar small{display:block; color:var(--muted); font-size:11px}
+.stbar i{display:block; height:10px; border-radius:5px; background:var(--accent)}
+.stbar em{font-style:normal; font-weight:700; font-size:12px; white-space:nowrap}
+.stvide{font-size:12px; color:var(--muted); margin:6px 0 0}
+.achdes{display:block; font-size:11.5px; color:var(--muted); margin:6px 0 2px}
+.achdes input{display:block; width:100%; margin-top:3px; padding:8px 10px; border-radius:9px; border:1px solid var(--line); background:var(--card2); color:var(--ink, inherit); font:inherit; font-size:13.5px}
 .prest{font-size:12px; color:var(--muted); margin:6px 0 0; width:100%}
 .pcinfo.err{color:#c62828; font-weight:700}
 .pcrow input.stkerr{border-color:#c62828 !important; background:#fdecea !important; color:#c62828 !important}
@@ -2134,6 +2173,8 @@ button.wa.full{width:100%}
 .achcard .label{margin-bottom:8px}
 .achsel, .achq, .achlab input{width:100%; padding:11px 12px; border-radius:11px; border:1px solid var(--line); background:var(--card2); font:inherit; font-size:14px; color:var(--ink); margin-bottom:7px}
 .achlab{display:block; font-size:11.5px; color:var(--muted); margin-top:6px} .achlab input{margin-top:4px}
+.achfacnom{margin-top:10px} .achfacnom input{display:block; width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--card2); color:inherit; font:inherit; font-size:15px}
+.achfacman{margin:6px 0 0; font-size:12px; font-weight:700; color:var(--accent)}
 .achln{border:1px solid var(--line); border-radius:11px; padding:9px 10px; margin-bottom:7px}
 .achln .lh{display:flex; flex-wrap:wrap; align-items:center; gap:6px}
 .achln .lh b{flex:1; font-size:13.5px} .achln .lh small{width:100%; color:var(--muted); font-size:11.5px}
@@ -2573,6 +2614,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
   font-family:"Archivo",sans-serif; font-size:9px; font-weight:700; letter-spacing:.04em; line-height:1;
 }
 .hchk.on{border-style:solid; border-color:var(--ok); background:var(--ok-soft); color:var(--ok)}
+.dkcp{cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px}
 .hchk.sage.on{border-color:var(--info); background:var(--info-soft); color:var(--info)}
 .hchk.sagedev.on{border-color:var(--warn); background:var(--warn-soft,#FAEFDD); color:var(--warn)}
 /* l'état de la fiche des pièces, avant même d'ouvrir le dossier :
@@ -2720,7 +2762,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
       <p class="numhint" id="numHint"></p>
       <div class="field">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>
-        <input id="nom" type="text" placeholder="Nom du client" autocomplete="name">
+        <input id="nom" type="text" placeholder="Nom du client" autocomplete="off" list="cliNoms"><datalist id="cliNoms"></datalist>
         <button class="fbtn" type="button" id="cliPick" aria-label="Reprendre un client connu">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.4 2.9-5.2 6.5-5.2s6.5 1.8 6.5 5.2"/><path d="M17 8.5a3 3 0 010 5"/></svg>
         </button>
@@ -3134,6 +3176,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
       <input id="stockSearch" type="search" placeholder="Rechercher une référence ou un nom" autocomplete="off">
     </div>
+    <div id="stockTop"></div>
     <div class="filters" id="stockFilters">
       <button type="button" data-f="stock" aria-pressed="true">En stock</button>
       <button type="button" data-f="all" aria-pressed="false">Toutes</button>
@@ -3918,6 +3961,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
     <div class="lgstat" id="atlStat"></div>
+    <div class="atbox" id="atlSouf"></div>
 
     <div class="atbox">
       <h3>Ce qui compose la file</h3>
@@ -4842,6 +4886,8 @@ function renderRecap(){
   majEchSug();
 }
 
+/* v14.65 : bon déjà enregistré en production : on corrige (téléphone…) sans renvoyer l'image à l'atelier */
+function dejaEnProd(){ const o = ORDERS.find(x => x.id === S.id); return !!(o && o.status === "sent" && etatDe(o) === "production"); }
 function renderProgress(){
   let done = 0;
   if (S.nom.trim() && S.tel.trim()) done++;
@@ -4856,7 +4902,7 @@ function renderProgress(){
      s'enregistre même incomplet : c'est une proposition, pas un ordre de
      fabrication. Une commande lancée exige un bon complet. */
   const etb = etatDe(S);
-  const env = etb === "production";
+  const env = etb === "production" && !dejaEnProd();
   const bs = $("btnSend");
   bs.disabled = env ? (done < 5) : !S.nom.trim();
   bs.innerHTML = (env
@@ -4867,6 +4913,7 @@ function renderProgress(){
   bs.title = env ? "" : (etb === "devis"
     ? "Le devis est enregistré et visible par tout le monde"
     : "Le bon est enregistré sans image à envoyer");
+  if (etb === "production" && !env) bs.innerHTML = bs.innerHTML.replace("Enregistrer le bon", "Enregistrer les modifications");
   $("numBadge").textContent = S.num;
   const known = ORDERS.some(o => o.id === S.id);
   const dern = lastNum();
@@ -4884,7 +4931,13 @@ function renderAll(){
 function majEchSug(){ try { renderEchSug(); } catch(e){} }
 
 /* ============ Events ============ */
-$("nom").addEventListener("input", e => { S.nom = e.target.value; renderProgress(); });
+$("nom").addEventListener("input", e => { S.nom = e.target.value; renderProgress();
+  /* v14.65 : nom d'un client connu tapé ou choisi dans la liste : ses coordonnées se remplissent */
+  const k = cleClient(S.nom); if (!k) return;
+  const c = clients().find(x => x.cle === k && !x.bons.some(o => o.id === S.id));
+  if (c && cliRemplit(c, false)) toast("Client connu : coordonnées de " + c.nom + " reprises");
+});
+$("nom").addEventListener("focus", cliListeNoms);
 $("tel").addEventListener("input", e => { S.tel = e.target.value; renderProgress(); });
 $("adresse").addEventListener("input", e => { S.adresse = e.target.value; });
 $("ville").addEventListener("change", e => { S.ville = e.target.value; });
@@ -5448,7 +5501,7 @@ function toast2(titre, detail){
 /* Ce qui a changé entre la version enregistrée et celle qu'on écrit.
    Sert au journal : « bon modifié · prix au m², mesures ». */
 const CHAMPS_SUIVIS = [
-  ["nom","client"], ["tel","téléphone"], ["ice","ICE"], ["adresse","adresse"],
+  ["num","numéro"], ["nom","client"], ["tel","téléphone"], ["ice","ICE"], ["adresse","adresse"],
   ["gps","lien GPS"], ["notes","remarque"], ["ech","échéance"],
   ["type","type de store"], ["prix","prix au m²"], ["prixJN","prix au m² jour et nuit"],
   ["pose","mode de pose"], ["posePrix","prix de la pose"], ["poseMode","calcul de la pose"],
@@ -5965,7 +6018,7 @@ $("btnSend").addEventListener("click", async () => {
   const etb = etatDe(S);
   /* Seule une commande lancée part à l'atelier en image. Un devis ou un bon
      déjà fabriqué s'enregistre sans rien à partager. */
-  if (etb !== "production"){
+  if (etb !== "production" || dejaEnProd()){
     S.status = "sent";
     if (saveOrder("sent")){
       renderAll();
@@ -6978,8 +7031,8 @@ function renderHomeK3(){
     let enc = 0;
     (ORDERS || []).forEach(o => paiements(o).forEach(p => {
       const d = new Date(String(p.date || "") + "T12:00:00");
-      if (!isNaN(d.getTime()) && d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth())
-        enc += parseFloat(p.montant) || 0;
+      if (!isNaN(d.getTime()) && d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && p.recu)
+        enc += parseFloat(p.montant) || 0;     /* v14.68 : un paiement compte quand Noureddine l'a confirmé */
     }));
     const reste = (ORDERS || []).filter(o => o && o.status === "sent" && etatDe(o) !== "devis")
       .reduce((t, o) => t + soldeDe(o), 0);
@@ -7532,7 +7585,73 @@ $("artSort").addEventListener("click", e => {
 let stockFilter = "stock";
 let stockSort = LS.get("mst_stocksort", "sheet");   /* sheet | asc | desc */
 
+/* v14.76 : un tissu se classe au nombre de bons qui le contiennent : un bon de 20 stores du même tissu
+   compte pour 1. Devis exclus. */
+let STK_PER = {k:"tout", du:"", au:""}, STK_OUVERT = true;
+/* v14.78 : les ventes de l'Excel « Data analysis » (onglet ventes_tissus, 14/01/2023 → 12/08/2026), figées.
+   Une entrée = un bon : [date, [[tissu, fenêtres, m² vendus], …]]. Sans les noms de clients.
+   9 commandes ressaisies dans l'app en septembre (F2026037-43, BL26XX15, BL26XX17) en sont retirées : comptées une seule fois, avec le tissu de l'app. */
+const TISSU_XL = [["2023-01-14",[["S-028-200",3,9.17]]],["2023-01-18",[["S-041-320",25,95.46]]],["2023-01-21",[["B-007-250",2,5.47]]],["2023-01-25",[["S-044-250",2,4.64]]],["2023-02-13",[["S-046-250",2,4.6]]],["2023-03-06",[["S-044-250",16,27.6]]],["2023-03-15",[["S-048-250",1,3.5],["S-025-200",2,3.61]]],["2023-03-16",[["S-041-320",1,2.72]]],["2023-03-31",[["S-051-200",6,13.55]]],["2023-04-03",[["B-007-250",4,12.07]]],["2023-04-06",[["S-051-200",6,19.12]]],["2023-04-09",[["S-043-250",2,6.28]]],["2023-04-09",[["S-051-200",9,25.34]]],["2023-04-19",[["S-043-250",1,2.25]]],["2023-04-20",[["S-043-250",2,4.58]]],["2023-04-21",[["S-047-250",1,2.21]]],["2023-04-27",[["S-042-250",6,24.38]]],["2023-04-30",[["S-041-250",2,6.8],["B-007-250",2,6.9]]],["2023-05-10",[["S-048-250",6,11.22],["S-040-250",4,9.16]]],["2023-05-11",[["S-040-250",2,7.74],["S-048-250",2,5.46]]],["2023-05-12",[["S-051-200",7,17.6]]],["2023-05-17",[["S-040-250",2,14.39]]],["2023-05-24",[["S-048-250",3,7.09]]],["2023-05-24",[["S-043-250",2,3.84]]],["2023-05-30",[["S-040-250",1,1.61]]],["2023-06-01",[["S-051-200",12,34.13]]],["2023-06-06",[["S-050-250",2,6.29]]],["2023-06-08",[["S-042-250",6,13.23]]],["2023-06-12",[["S-050-250",0,24.58]]],["2023-06-12",[["S-051-200",5,17.62]]],["2023-06-21",[["S-045-250",6,24.84]]],["2023-06-27",[["S-038-250",1,2.6]]],["2023-07-20",[["S-047-250",2,4.8]]],["2023-07-20",[["S-044-250",1,4.08]]],["2023-07-21",[["S-040-250",8,21.17]]],["2023-07-27",[["S-045-250",2,5.8]]],["2023-08-02",[["S-046-250",1,5.98]]],["2023-08-08",[["S-047-250",2,11.6]]],["2023-08-08",[["S-043-250",4,18.34]]],["2023-08-10",[["S-043-250",8,15.35]]],["2023-08-10",[["S-032-250",3,7.0]]],["2023-08-16",[["S-040-250",3,10.48]]],["2023-08-16",[["S-048-250",8,27.42]]],["2023-08-29",[["S-050-250",11,28.66],["S-041-250",19,50.7]]],["2023-08-29",[["S-043-250",1,1.7]]],["2023-10-02",[["S-047-250",2,5.42]]],["2023-10-03",[["S-042-250",3,12.9]]],["2023-10-05",[["B-007-250",2,5.74]]],["2023-10-19",[["S-053-300",42,55.74]]],["2023-10-25",[["S-050-250",5,15.84]]],["2023-11-03",[["S-051-200",16,36.65]]],["2023-11-09",[["S-051-200",2,6.02]]],["2023-11-09",[["S-050-250",2,5.44]]],["2023-11-10",[["S-042-250",2,3.85]]],["2023-11-16",[["S-050-300",3,6.23],["S-050-250",2,5.38]]],["2023-11-20",[["B-007-250",3,9.29]]],["2023-11-29",[["S-050-200",2,7.32]]],["2023-11-30",[["S-043-250",3,8.97],["S-050-200",2,5.5]]],["2023-12-01",[["S-042-250",2,2.4]]],["2023-12-08",[["S-043-250",2,7.89]]],["2023-12-14",[["S-042-250",7,12.49]]],["2023-12-16",[["S-051-200",5,16.98]]],["2024-01-08",[["S-050-300",2,5.67]]],["2024-01-08",[["S-041-250",1,4.05]]],["2024-01-26",[["S-054-300",24,29.0],["B-008-250",10,15.0]]],["2024-01-27",[["S-055-300",2,5.73]]],["2024-02-01",[["S-051-300",6,16.85]]],["2024-02-02",[["S-048-250",5,18.44]]],["2024-02-06",[["S-048-250",3,6.92]]],["2024-02-13",[["S-043-250",5,12.62]]],["2024-02-15",[["B-006-250",2,6.65]]],["2024-02-19",[["S-050-250",3,8.19]]],["2024-02-28",[["S-055-300",8,28.8]]],["2024-03-01",[["S-050-300",3,4.35],["S-050-200",4,7.4]]],["2024-03-15",[["S-055-300",4,9.3]]],["2024-03-19",[["S-051-200",2,7.22]]],["2024-03-31",[["S-051-300",2,5.79]]],["2024-03-31",[["S-052-300",5,15.48]]],["2024-03-31",[["S-052-300",2,8.01]]],["2024-03-31",[["S-051-300",2,3.6]]],["2024-03-31",[["S-041-250",3,18.3]]],["2024-04-08",[["S-047-250",8,30.8]]],["2024-04-30",[["S-054-300",3,7.59]]],["2024-05-07",[["S-049-250",21,43.8]]],["2024-05-14",[["S-055-250",8,17.57]]],["2024-05-14",[["S-052-300",4,16.21]]],["2024-05-17",[["S-055-250",1,3.0],["S-055-300",2,4.0]]],["2024-06-10",[["S-051-200",4,12.0],["B-007-250",1,1.8]]],["2024-07-04",[["S-050-250",7,19.55]]],["2024-07-10",[["S-054-250",2,7.58],["B-008-250",2,3.6]]],["2024-07-15",[["S-046-250",30,30.87]]],["2024-07-16",[["S-046-250",3,10.5]]],["2024-07-18",[["B-006-250",2,8.27]]],["2024-07-23",[["S-045-250",1,4.08]]],["2024-07-23",[["S-051-300",2,4.5]]],["2024-07-30",[["S-055-250",6,33.69]]],["2024-08-23",[["S-051-250",6,19.94]]],["2024-08-26",[["S-046-250",3,9.0]]],["2024-08-30",[["S-051-250",4,18.8]]],["2024-08-30",[["S-052-300",2,4.9]]],["2024-08-30",[["S-043-250",2,6.67]]],["2024-08-30",[["S-046-250",1,1.62]]],["2024-08-30",[["S-050-200",4,12.9],["S-050-250",2,8.24],["S-050-300",15,46.28]]],["2024-09-07",[["S-047-250",4,10.0]]],["2024-09-23",[["S-048-250",5,7.25]]],["2024-09-24",[["S-049-250",3,12.65]]],["2024-09-25",[["S-043-250",1,3.91]]],["2024-09-26",[["S-055-300",1,2.08]]],["2024-09-30",[["S-050-300",2,6.72]]],["2024-10-02",[["S-051-300",6,22.0],["S-051-250",2,6.11],["S-051-200",1,4.19]]],["2024-10-09",[["S-047-250",1,3.92]]],["2024-10-11",[["S-051-250",3,12.11]]],["2024-10-12",[["S-051-300",2,5.25]]],["2024-10-27",[["S-043-250",3,9.22]]],["2024-10-31",[["S-053-300",2,4.48]]],["2024-10-31",[["S-043-250",2,4.8]]],["2024-10-31",[["S-043-250",1,5.75]]],["2024-11-08",[["S-047-250",5,9.22]]],["2024-11-11",[["S-050-200",3,9.76]]],["2024-11-13",[["S-053-300",4,6.96]]],["2024-11-14",[["S-053-300",54,126.62]]],["2024-11-30",[["S-055-300",5,30.12]]],["2024-12-09",[["S-046-250",8,19.9]]],["2024-12-17",[["B-001-265",2,3.82]]],["2024-12-17",[["S-047-250",2,6.87]]],["2024-12-17",[["S-043-250",1,4.15]]],["2024-12-17",[["S-055-300",2,4.8]]],["2024-12-20",[["S-055-300",2,8.13]]],["2024-12-27",[["S-053-300",4,9.18]]],["2024-12-27",[["S-047-250",3,12.3]]],["2024-12-27",[["S-051-200",1,3.8]]],["2024-12-30",[["S-052-300",2,5.46]]],["2024-12-30",[["S-047-250",2,3.58]]],["2024-12-30",[["S-055-300",2,7.0]]],["2025-01-06",[["S-053-300",20,91.94]]],["2025-01-08",[["S-056-300",8,22.87]]],["2025-01-20",[["S-050-300",6,28.68]]],["2025-01-20",[["S-050-200",1,3.47]]],["2025-01-20",[["S-051-300",4,6.72]]],["2025-01-20",[["S-043-250",6,12.1]]],["2025-01-23",[["S-047-250",4,7.8]]],["2025-01-28",[["S-051-300",5,15.25]]],["2025-02-01",[["S-051-300",2,7.4]]],["2025-02-05",[["S-051-300",8,20.0]]],["2025-02-10",[["S-051-300",5,12.8]]],["2025-02-18",[["S-046-250",1,4.26]]],["2025-02-18",[["S-055-300",8,31.75]]],["2025-02-18",[["S-050-300",4,5.2]]],["2025-02-24",[["S-055-300",1,2.24]]],["2025-02-24",[["S-051-300",4,14.21]]],["2025-02-24",[["S-052-300",1,2.0]]],["2025-02-28",[["B-006-250",2,6.92]]],["2025-02-28",[["B-007-250",1,2.42],["S-046-250",1,2.16]]],["2025-03-06",[["S-050-300",8,30.96]]],["2025-03-06",[["B-006-250",2,9.2],["S-051-300",2,6.92]]],["2025-03-10",[["S-053-300",1,2.0]]],["2025-03-19",[["S-052-300",1,2.2]]],["2025-03-20",[["S-047-250",3,12.2]]],["2025-03-31",[["S-043-250",2,5.5]]],["2025-04-08",[["S-046-250",3,13.61]]],["2025-04-09",[["S-044-250",1,1.44]]],["2025-04-10",[["S-057-300",11,22.6]]],["2025-04-10",[["JN_001_320",1,4.0]]],["2025-04-22",[["S-051-300",5,20.35]]],["2025-04-24",[["S-051-300",6,14.26]]],["2025-04-24",[["S-050-300",3,16.43]]],["2025-05-05",[["S-053-300",4,15.6]]],["2025-05-06",[["S-045-250",2,3.8]]],["2025-05-08",[["S-051-300",2,5.5]]],["2025-05-08",[["JN_006_320",1,1.65]]],["2025-05-09",[["S-050-300",3,10.59]]],["2025-05-11",[["S-051-300",5,26.96]]],["2025-05-14",[["JN_008_320",2,4.85]]],["2025-05-15",[["S-051-300",1,3.48]]],["2025-05-19",[["S-051-300",6,15.0]]],["2025-06-01",[["S-051-300",7,15.0]]],["2025-06-06",[["JN_005_320",2,7.48]]],["2025-06-12",[["JN_001_320",3,8.97]]],["2025-06-28",[["S-052-300",12,39.84]]],["2025-06-28",[["JN_001_320",3,8.97]]],["2025-07-01",[["JN_006_320",5,14.0]]],["2025-07-02",[["S-039-300",6,14.8]]],["2025-07-02",[["S-052-300",10,26.76]]],["2025-07-09",[["S-054-250",2,5.05]]],["2025-07-15",[["S-051-300",4,13.54]]],["2025-07-21",[["S-050-300",2,5.89]]],["2025-07-22",[["B-006-250",2,6.87]]],["2025-07-23",[["S-051-300",4,18.19]]],["2025-07-23",[["S-050-300",1,3.24]]],["2025-07-24",[["S-055-300",13,44.19]]],["2025-08-01",[["S-055-300",3,13.14]]],["2025-08-03",[["JN_003_320",7,19.39]]],["2025-08-05",[["S-056-300",0,0.0]]],["2025-08-07",[["S-051-300",7,22.47]]],["2025-08-12",[["S-023-200",6,13.1]]],["2025-08-16",[["S-052-300",7,27.24]]],["2025-09-02",[["JN_003_320",18,21.6]]],["2025-09-10",[["S-051-300",2,8.4]]],["2025-09-16",[["S-050-300",6,22.91]]],["2025-09-18",[["S-054-300",20,62.02]]],["2025-09-19",[["B-008-250",4,15.24]]],["2025-09-21",[["S-051-300",3,6.63]]],["2025-09-22",[["S-047-250",2,7.56]]],["2025-09-23",[["S-055-300",1,3.5]]],["2025-09-30",[["JN_005_320",19,34.17]]],["2025-10-01",[["S-051-300",9,21.2]]],["2025-10-01",[["S-051-300",1,1.8],["S-045-250",1,1.63]]],["2025-10-01",[["JN_003_320",1,2.34]]],["2025-10-10",[["S-052-300",8,14.59]]],["2025-10-15",[["JN_006_320",2,6.0]]],["2025-10-16",[["S-055-300",1,2.0]]],["2025-10-18",[["S-051-300",7,14.47]]],["2025-10-22",[["S-051-300",10,34.01]]],["2025-10-22",[["S-047-250",1,2.4]]],["2025-10-23",[["S-051-300",4,8.56]]],["2025-10-26",[["S-043-250",1,2.21]]],["2025-11-01",[["S-051-300",2,5.16]]],["2025-11-02",[["S-057-300",2,5.4]]],["2025-11-04",[["S-052-300",2,5.76]]],["2025-11-05",[["S-052-300",2,5.0]]],["2025-11-09",[["S-047-250",2,6.72]]],["2025-11-11",[["S-051-300",8,30.0]]],["2025-11-27",[["S-052-300",2,4.84]]],["2025-11-27",[["S-053-300",1,2.76]]],["2025-11-30",[["S-050-300",3,6.24]]],["2025-11-30",[["JN_008_320",3,7.56]]],["2025-12-01",[["S-051-300",4,15.02]]],["2025-12-05",[["JN_005_320",2,4.32]]],["2025-12-10",[["S-053-300",5,19.09]]],["2025-12-20",[["S-054-250",44,10.37]]],["2025-12-21",[["S-053-300",1,3.0]]],["2025-12-22",[["S-051-300",2,3.64]]],["2025-12-29",[["S-051-300",4,11.46]]],["2025-12-29",[["S-050-300",1,3.8]]],["2025-12-31",[["JN_006_320",1,3.4]]],["2026-01-08",[["S-051-300",7,43.48]]],["2026-01-12",[["S-051-300",2,5.05]]],["2026-01-19",[["S-052-300",5,20.12]]],["2026-01-22",[["JN_005_320",8,8.64]]],["2026-02-03",[["S-055-300",2,4.7]]],["2026-02-06",[["S-052-300",1,5.74]]],["2026-02-16",[["B-006-250",9,23.85]]],["2026-02-16",[["JN_006_320",2,5.49]]],["2026-02-16",[["JN_001_320",6,8.93]]],["2026-02-16",[["JN_006_320",2,5.49]]],["2026-02-24",[["S-051-300",12,38.88]]],["2026-02-25",[["S-052-300",2,7.73]]],["2026-02-25",[["S-052-300",1,5.74]]],["2026-02-28",[["S-051-300",3,16.07]]],["2026-03-02",[["S-023-200",6,13.1]]],["2026-03-03",[["S-050-300",5,21.29]]],["2026-03-03",[["JN_003_320",18,21.6]]],["2026-03-04",[["S-055-300",1,3.5]]],["2026-03-07",[["JN_008_320",3,7.56]]],["2026-03-11",[["S-051-300",5,28.57]]],["2026-03-12",[["S-055-300",9,32.98]]],["2026-03-17",[["S-047-250",4,11.14]]],["2026-03-19",[["S-050-300",10,34.67]]],["2026-03-24",[["S-058-300",31,79.4]]],["2026-04-06",[["B-009-300",47,114.93]]],["2026-04-22",[["S-050-300",8,29.61]]],["2026-04-29",[["S-054-300",4,7.14]]],["2026-04-30",[["S-054-300",1,2.56]]],["2026-05-11",[["S-057-300",8,33.96]]],["2026-05-11",[["S-051-300",10,53.27]]],["2026-05-12",[["S-051-300",4,10.48]]],["2026-05-21",[["S-051-300",3,8.6]]],["2026-05-22",[["S-050-300",15,44.25]]],["2026-05-22",[["S-056-300",5,16.5]]],["2026-05-23",[["S-057-300",4,11.2]]],["2026-05-24",[["S-051-300",4,15.22]]],["2026-06-01",[["S-050-300",1,4.15]]],["2026-06-09",[["S-053-300",5,15.45]]],["2026-06-10",[["S-051-300",4,12.64]]],["2026-06-15",[["S-051-300",5,13.36]]],["2026-06-16",[["S-051-300",4,12.92]]],["2026-06-19",[["S-053-300",7,22.17]]],["2026-06-24",[["S-057-300",5,12.16]]],["2026-06-25",[["S-057-300",20,105.0],["S-058-300",4,10.0]]],["2026-07-03",[["S-057-300",8,34.25]]],["2026-07-06",[["S-051-300",6,23.65]]]];
+function stkDepuis(mois){ const d = new Date(); d.setMonth(d.getMonth() - mois); return jourISO(d); }
+function stockPeriode(){
+  const P = STK_PER;
+  if (P.k === "6m") return {du:stkDepuis(6), au:"", lab:"6 derniers mois"};
+  if (P.k === "tout") return {du:"", au:"", lab:"toute la durée"};
+  if (P.k === "per"){
+    const a = P.du && P.au && P.du > P.au ? P.au : P.du, b = P.du && P.au && P.du > P.au ? P.du : P.au;
+    const fr2 = iso => String(iso).split("-").reverse().join("/");
+    return {du:a, au:b, lab:a && b ? "du " + fr2(a) + " au " + fr2(b) : a ? "depuis le " + fr2(a) : b ? "jusqu'au " + fr2(b) : "choisissez les dates"};
+  }
+  return {du:stkDepuis(12), au:"", lab:"1 an"};
+}
+function ventesTissus(du, au){
+  const V = {};
+  TISSU_XL.forEach((b, i) => {
+    if ((du && b[0] < du) || (au && b[0] > au)) return;
+    b[1].forEach(([ref, fen, m2]) => { const v = V[ref] || (V[ref] = {ref:ref, m2:0, fen:0, bons:{}});
+      v.m2 += m2; v.fen += fen; v.bons["x" + i] = (v.bons["x" + i] || 0) + m2; });
+  });
+  (ORDERS || []).forEach(o => {
+    if (!o || o.status !== "sent" || etatDe(o) === "devis") return;
+    const j = jourISO(new Date(o.date || 0));
+    if ((du && j < du) || (au && j > au)) return;
+    ordDims(o).forEach(d => { if (!d.ref) return;
+      const v = V[d.ref] || (V[d.ref] = {ref:d.ref, m2:0, fen:0, bons:{}});
+      const m = Math.max(d.l, MINCM) * Math.max(d.h, MINCM) / 10000;
+      v.m2 += m; v.fen++; v.bons[o.id] = (v.bons[o.id] || 0) + m; });
+  });
+  return Object.keys(V).map(k => { const v = V[k]; v.nb = Object.keys(v.bons).length; return v; })
+    .sort((a, b) => b.nb - a.nb || b.fen - a.fen || a.ref.localeCompare(b.ref));
+}
+function renderStockTop(){
+  const box = $("stockTop"); if (!box) return;
+  const act = document.activeElement;
+  if (act && box.contains(act) && act.type === "date") return;      /* on ne redessine pas pendant qu'une date se choisit */
+  const P = stockPeriode(), V = ventesTissus(P.du, P.au), top = V.slice(0, 10), max = top.length ? top[0].nb : 1;
+  const nom = ref => { const f = fab(ref); return f && f.nom ? f.nom : ref; };
+  box.innerHTML = '<details class="sttop"' + (STK_OUVERT ? ' open' : '') + '><summary>📈 Les tissus les plus commandés · ' + esc(P.lab) + '</summary>' +
+    '<div class="filters stper">' + [["6m", "6 mois"], ["1an", "1 an"], ["tout", "Toute la durée"], ["per", "Période"]].map(([k, l]) =>
+      '<button type="button" data-stper="' + k + '" aria-pressed="' + (STK_PER.k === k) + '">' + l + '</button>').join("") + '</div>' +
+    (STK_PER.k === "per" ? '<div class="stdates"><label>Du<input type="date" data-stdu value="' + esc(STK_PER.du) + '"></label><label>Au<input type="date" data-stau value="' + esc(STK_PER.au) + '"></label></div>' : '') +
+    (top.length ? top.map(v => '<div class="stbar"><span><b>' + esc(nom(v.ref)) + '</b><small>' + esc(v.ref) + ' · ' + v.fen + ' fenêtre' + (v.fen > 1 ? 's' : '') + '</small></span>' +
+        '<i style="width:' + Math.max(4, Math.round(v.nb / max * 100)) + '%"></i><em>' + v.nb + ' bon' + (v.nb > 1 ? 's' : '') + '</em></div>').join("")
+      : '<p class="stvide">Aucun bon avec un tissu sur cette période.</p>') +
+    '<p class="stvide">Un bon compte pour 1, quel que soit son nombre de stores. Les devis ne comptent pas. Données : l\'Excel depuis janvier 2023, puis les bons de l\'app.</p>' +
+    '</details>';
+}
+$("stockTop").addEventListener("click", e => {
+  const b = e.target.closest("[data-stper]"); if (!b) return;
+  STK_PER.k = b.dataset.stper; renderStockTop();
+});
+$("stockTop").addEventListener("change", e => {
+  if (e.target.matches("[data-stdu]")) STK_PER.du = e.target.value;
+  else if (e.target.matches("[data-stau]")) STK_PER.au = e.target.value;
+  else return;
+  e.target.blur(); renderStockTop();
+});
+$("stockTop").addEventListener("toggle", e => { if (e.target.matches && e.target.matches(".sttop")) STK_OUVERT = e.target.open; }, true);
 function renderStock(){
+  try { renderStockTop(); } catch(e){}
   /* on ne redessine pas sous les doigts de celui qui tape un nombre de rouleaux */
   const act = document.activeElement;
   if (act && act.matches && act.matches("input[data-nroul]")) return;
@@ -8601,7 +8720,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.64";
+const APP_VERSION = "14.79";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -10625,6 +10744,28 @@ function frm(n, d){
 let payVue = "attendre", payChip = "tous", payPerA = "tous", payBon = "", payVoirSoldes = false;
 const payNew = {};
 payFiltre = "mois";
+/* v14.68 : trois états d'un paiement.
+   « preuve »  : Imane a reçu la capture ou le reçu du client (la commande peut démarrer)
+   « cred »    : Imane le marque crédité après le OK de Noureddine (compte pour sa commission)
+   « conf »    : Noureddine l'a vu lui-même en banque (compte dans les encaissements)
+   Les espèces sont créditées dès la saisie. Un paiement saisi avant la v14.68 sans confirmation
+   est « cred » : jusque-là Imane n'écrivait un virement qu'après le OK de Noureddine. */
+const PAY3_DEPUIS = new Date(2026, 9, 30).getTime();
+function payEspece(p){ return /^esp/i.test(String(p && p.mode || "")); }
+function payStatut(p){
+  if (!p) return "preuve";
+  if (p.recu) return "conf";
+  if (p.credit || payEspece(p) || (p.at || 0) < PAY3_DEPUIS) return "cred";
+  return "preuve";
+}
+/* le jour qui compte pour la commission d'Imane : celui où elle a marqué « crédité » */
+function payJourCredit(p){ return p && p.credit && p.credit.at ? jourISO(new Date(p.credit.at)) : String(p && p.date || ""); }
+const PAY_ETAT_LAB = {preuve:"⏳ preuve reçue", cred:"🏦 crédité", conf:"✓ confirmé"};
+function payCreditBascule(p){
+  if (!p || p.recu) return false;
+  if (p.credit) delete p.credit; else p.credit = {at: Date.now(), by: (USER && USER.login) || ""};
+  return true;
+}
 function payNonConf(o){ return paiements(o).filter(x => !x.recu); }
 function payConfDe(o){ return paiements(o).filter(x => x.recu).reduce((t, x) => t + (parseFloat(x.montant) || 0), 0); }
 function payAttDe(o){ return payNonConf(o).reduce((t, x) => t + (parseFloat(x.montant) || 0), 0); }
@@ -10802,10 +10943,10 @@ function renderPayEnc(){
   });
   const L = Object.keys(G).map(k => G[k]).sort((a, b) => b.tot - a.tot);
   $("payHero").innerHTML = '<div class="pyhero enc"><div class="k">Encaissé ' + esc(payLabEnc()) + '</div>' +
-    '<div class="big">' + frm(tot, 0) + ' MAD</div>' +
+    '<div class="big">' + frm(tot - att, 0) + ' MAD</div>' +
     '<div class="l" style="margin-top:0"><span>' + P.length + (P.length > 1 ? " paiements" : " paiement") + '  ·  ' +
       L.length + (L.length > 1 ? " clients" : " client") + '</span>' +
-      (att > 0 ? '<span>dont à confirmer <b class="att">' + frm(att, 0) + '</b></span>' : '') + '</div>' +
+      (att > 0 ? '<span>+ pas encore confirmé <b class="att">' + frm(att, 0) + '</b></span>' : '') + '</div>' +
     '<div class="pymodes">' + Object.keys(modes).map(m => '<div><b>' + frm(modes[m], 0) + '</b>' + m + '</div>').join("") +
       (autre ? '<div><b>' + frm(autre, 0) + '</b>Autre</div>' : '') + '</div></div>';
   const box = $("payList");
@@ -10837,9 +10978,11 @@ function renderPayBon(o){
   const nw = payNew[o.id] || (payNew[o.id] = {montant: solde ? "" : fr(Math.round(r * 100) / 100, 2),
     mode:"Espèce", type: p > 0 ? "Reste" : "Acompte", date: jourISO(new Date()), dateOn:false});
   const peutOk = payConfirmAllowed();
-  const statut = x => x.recu
-    ? (peutOk ? '<button type="button" class="pycf y" data-pyrecu="' + o.id + ':' + x.id + '">✓ reçu</button>' : '<span class="pycf y">✓ reçu</span>')
-    : (peutOk ? '<button type="button" class="pycbtn" data-pyrecu="' + o.id + ':' + x.id + '">Confirmer</button>' : '<span class="pycf n">à confirmer</span>');
+  const statut = x => { const et = payStatut(x), k = o.id + ':' + x.id;
+    if (et === "conf") return peutOk ? '<button type="button" class="pycf y" data-pyrecu="' + k + '">✓ confirmé</button>' : '<span class="pycf y">✓ confirmé</span>';
+    if (peutOk) return '<span class="pycf n">' + PAY_ETAT_LAB[et] + '</span><button type="button" class="pycbtn" data-pyrecu="' + k + '">Confirmer</button>';
+    if (et === "cred") return '<button type="button" class="pycf y" data-pycred="' + k + '"' + (payEspece(x) ? ' disabled' : '') + '>🏦 crédité</button>';
+    return '<button type="button" class="pycbtn" data-pycred="' + k + '" style="background:var(--info)">🏦 Marquer crédité</button>'; };
   const mt = parseFloat(String(nw.montant).replace(/\s/g, "").replace(",", ".")) || 0;
   const lienRecu = p > 0 ? payLienTexte(o, payTexteRecu(o)) : "";
   $("payList").innerHTML =
@@ -11005,6 +11148,19 @@ $("payList").addEventListener("change", e => {
 });
 
 $("payList").addEventListener("click", e => {
+  /* v14.68 : Imane marque « crédité » après le OK de Noureddine */
+  const cr = e.target.closest("button[data-pycred]");
+  if (cr){
+    e.preventDefault(); e.stopPropagation();
+    if (!payAllowed()) return;
+    const [oid, pid] = cr.dataset.pycred.split(":");
+    const o = ORDERS.find(x => x.id === oid), p = o && paiements(o).find(x => x.id === pid);
+    if (!p || !payCreditBascule(p)) return;
+    touche(o); persistOrders(); pushBon(o); payPush(o);
+    renderPay();
+    toast(p.credit ? "Marqué crédité, Noureddine confirmera" : "Crédit retiré");
+    return;
+  }
   /* confirmation d'un encaissement, avant tout autre geste sur la ligne */
   const cf = e.target.closest("button[data-pyrecu]");
   if (cf){
@@ -11016,7 +11172,7 @@ $("payList").addEventListener("click", e => {
     const p = paiements(o).find(x => x.id === pid);
     if (!p) return;
     if (p.recu) delete p.recu;
-    else p.recu = {at: Date.now(), by: (USER && USER.login) || ""};
+    else { p.recu = {at: Date.now(), by: (USER && USER.login) || ""}; if (!p.credit && !payEspece(p) && (p.at || 0) >= PAY3_DEPUIS) p.credit = {at: p.recu.at, by: p.recu.by}; }
     touche(o); persistOrders(); pushBon(o); payPush(o);
     renderPay();
     toast(p.recu ? "Encaissement confirmé" : "Confirmation retirée");
@@ -11061,6 +11217,7 @@ $("payList").addEventListener("click", e => {
     o.paies.push({id: payUid(), date: nw.date || jourISO(new Date()),
                   mode: nw.mode + " " + nw.type.toLowerCase(), montant: montant,
                   by: (USER && USER.login) || "", at: Date.now()});
+    if (/^esp/i.test(nw.mode)) o.paies[o.paies.length - 1].credit = {at: Date.now(), by: (USER && USER.login) || ""};
     delete payNew[id];
     touche(o); persistOrders(); pushBon(o); payPush(o);
     renderPay(); renderHome();
@@ -12141,11 +12298,11 @@ function docCarte(o){
       const ok = done.indexOf(dm.key) >= 0;
       const m2 = (Math.max(dm.l, MINCM) * Math.max(dm.h, MINCM)) / 10000;
       h += '<div class="dkmes"><i class="' + (ok ? "on" : "") + '"></i>' +
-        '<span><b>' + fr(dm.l,0) + ' × ' + fr(dm.h,0) + ' cm</b>' +
+        '<span><b>' + dkCp(fr(dm.l,0)) + ' × ' + dkCp(fr(dm.h,0)) + ' cm</b>' +
           '<small>fenêtre ' + dm.n + '  ·  ' + (dm.t === "JN" ? "jour et nuit" : "enrouleur") +
-          (dm.ref ? '  ·  ' + esc(dm.ref) : '  ·  sans tissu') +
+          (dm.ref ? '  ·  <u class="dkcp" data-dkcp="' + esc(dm.ref) + '">' + esc(dm.ref) + '</u>' : '  ·  sans tissu') +
           (ok ? '  ·  fabriquée' : '') + '</small></span>' +
-        '<em>' + fr(m2, 2) + ' m²</em></div>';
+        '<em class="dkcp" data-dkcp="' + fr(m2, 2) + '">' + fr(m2, 2) + ' m²</em></div>';
     });
     h += '</div>';
 
@@ -12171,9 +12328,9 @@ function docCarte(o){
     fc.forEach(f => {
       h += '<div class="dkfam"><span>' + (f.fam === "JN" ? "Jour et nuit" : "Enrouleur") +
            "  ·  " + f.nb + " store" + (f.nb > 1 ? "s" : "") + '</span>' +
-        f.tissu.map(x => r(x.l, (x.v === "" ? "—" : fr(x.v, 2)) + " " + x.u)).join("") +
-        f.pieces.map(x => r(x.l + (x.m ? '  <em style="font-style:normal;color:var(--accent)">' + esc(x.m) + '</em>' : ""),
-                            (x.v === "" ? "—" : (typeof x.v === "number" ? fr(x.v, 2) : esc(String(x.v)))) + " " + x.u)).join("") +
+        f.tissu.map(x => r(x.l, (x.v === "" ? "—" : dkCp(fr(x.v, 2))) + " " + x.u)).join("") +
+        f.pieces.map(x => r(x.l + (x.m ? '  <em class="dkcp" data-dkcp="' + esc(x.m) + '" style="font-style:normal;color:var(--accent)">' + esc(x.m) + '</em>' : ""),
+                            (x.v === "" ? "—" : dkCp(typeof x.v === "number" ? fr(x.v, 2) : esc(String(x.v)))) + " " + x.u)).join("") +
       '</div>';
     });
     h += '</div>';
@@ -12202,18 +12359,21 @@ function docCarte(o){
     h += '<div class="dkbloc"><h4>Paiements</h4>';
     if (!pl.length) h += '<div class="dkr"><span>Aucun paiement enregistré</span><b>0,00</b></div>';
     pl.forEach(x => {
+      const cochee = payConfirmAllowed() ? payVu(x) : payStatut(x) !== "preuve";
       h += '<div class="dkpay' + (payVu(x) ? " vu" : "") + '">' +
-        '<button class="dkbank' + (payVu(x) ? " on" : "") + '" type="button" ' +
+        '<button class="dkbank' + (cochee ? " on" : "") + '" type="button" ' +
           'data-bank="' + o.id + ':' + x.id + '" title="' +
-          (payVu(x) ? "Vu sur le compte" : "Cocher quand l\'argent est sur le compte") + '">' +
-          (payVu(x) ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : '') +
+          (payVu(x) ? "Confirmé par Noureddine" : payConfirmAllowed() ? "Confirmer : l\'argent est sur le compte" : payStatut(x) === "cred" ? "Crédité (appuyer pour retirer)" : "Marquer crédité après le OK de Noureddine") + '">' +
+          (cochee ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' : '') +
         '</button>' +
         '<span class="d">' + esc(dateFR(x.date)) + '</span>' +
-        '<span class="m">' + esc(x.mode || "") + (payVu(x) ? "" : "  ·  à vérifier") + '</span>' +
+        '<span class="m">' + esc(x.mode || "") + "  ·  " + PAY_ETAT_LAB[payStatut(x)] + '</span>' +
         '<span class="v">' + frm(parseFloat(x.montant) || 0, 2) + '</span>' +
       '</div>';
     });
-    h += '<div class="dkr gros"><span>Encaissé</span><b class="ok">' + frm(pay, 2) + ' MAD</b></div>' +
+    const pconf = pl.filter(x => x.recu).reduce((t, x) => t + (parseFloat(x.montant) || 0), 0);
+    h += '<div class="dkr gros"><span>Encaissé (confirmé)</span><b class="ok">' + frm(pconf, 2) + ' MAD</b></div>' +
+      (pay - pconf > 0.01 ? '<div class="dkr"><span>Payé, pas encore confirmé</span><b class="att">' + frm(pay - pconf, 2) + ' MAD</b></div>' : '') +
       '<div class="dkr"><span>' + (rst > 0.01 ? "Reste à payer" : "Soldé") + '</span><b class="' +
         (rst > 0.01 ? "att" : "ok") + '">' + frm(rst, 2) + ' MAD</b></div>' +
     '</div>';
@@ -12618,10 +12778,13 @@ $("docList").addEventListener("click", e => {
     if (!o) return;
     const p = paiements(o).find(x => x.id === pid);
     if (!p) return;
-    if (p.recu) delete p.recu; else p.recu = {at: Date.now(), by: (USER && USER.login) || ""};
+    /* v14.68 : Noureddine confirme ; Imane marque seulement « crédité » */
+    if (payConfirmAllowed()){ if (p.recu) delete p.recu; else { p.recu = {at: Date.now(), by: (USER && USER.login) || ""}; if (!p.credit && !payEspece(p) && (p.at || 0) >= PAY3_DEPUIS) p.credit = {at: p.recu.at, by: p.recu.by}; } }
+    else if (payAllowed()){ if (!payCreditBascule(p)){ toast("Déjà confirmé par Noureddine"); return; } }
+    else return;
     touche(o); persistOrders(); pushBon(o); payPush(o);
     renderDoc(); renderPay();
-    toast(p.recu ? "Paiement vu sur le compte" : "Vérification retirée");
+    toast(p.recu ? "Paiement confirmé" : p.credit ? "Marqué crédité" : "Retiré");
     return;
   }
   const pcs = e.target.closest("button[data-docpcs]");
@@ -12684,6 +12847,36 @@ $("tileDoc").addEventListener("click", () => {
    même nom sont le même client, quelle que soit la casse ou les espaces. */
 function cleClient(nom){
   return String(nom || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+/* v14.65 : Dossiers > Mesures, un appui sur un m² ou un tissu le copie (à coller dans SAGE) */
+document.addEventListener("click", e => {
+  const c = e.target.closest("[data-dkcp]"); if (!c) return;
+  const v = c.dataset.dkcp;
+  const fin = () => toast("Copié : " + v);
+  try { navigator.clipboard.writeText(v).then(fin, () => { copieSecours(v); fin(); }); } catch(err){ copieSecours(v); fin(); }
+});
+/* v14.66 : un nombre du dossier qu'un appui copie */
+function dkCp(v){ return '<span class="dkcp" data-dkcp="' + v + '">' + v + '</span>'; }
+function copieSecours(v){ const t = document.createElement("textarea"); t.value = v; t.style.position = "fixed"; t.style.opacity = "0";
+  document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch(e){} t.remove(); }
+/* v14.65 : les coordonnées d'un client = pour chaque champ, le bon le plus récent qui l'a rempli */
+const CLI_CHAMPS = ["tel", "adresse", "ville", "gps", "ice"];
+function cliInfos(c){
+  const r = {};
+  CLI_CHAMPS.forEach(k => { const o = (c.bons || []).find(b => String(b[k] || "").trim()); r[k] = o ? String(o[k]).trim() : ""; });
+  return r;
+}
+/* remplit seulement les cases vides du formulaire ; rend le nombre de cases remplies */
+function cliRemplit(c, tout){
+  const inf = cliInfos(c); let n = 0;
+  CLI_CHAMPS.forEach(k => { if (inf[k] && (tout || !String(S[k] || "").trim())){ S[k] = inf[k]; const el = $(k); if (el) el.value = inf[k]; n++; } });
+  try { renderGps(); } catch(e){}
+  renderProgress();
+  return n;
+}
+function cliListeNoms(){
+  const dl = $("cliNoms"); if (!dl) return;
+  dl.innerHTML = clients().map(c => '<option value="' + esc(c.nom) + '">').join("");
 }
 function clients(){
   const par = {};
@@ -12763,12 +12956,14 @@ function renderCliOne(){
   const c = clients().find(x => x.cle === cliOuvert);
   if (!c){ nav("cliSheet"); renderCli(); return; }
   $("cliOneTitre").textContent = c.nom;
+  const inf = cliInfos(c); if (inf.tel) c.tel = inf.tel;
   const wa = telWa(c.tel);
   $("cliOneHead").innerHTML =
     '<b>' + esc(c.nom) + '</b>' +
     '<small>' + c.n + " bon" + (c.n > 1 ? "s" : "") + "  ·  " + c.stores + " store" + (c.stores > 1 ? "s" : "") +
       "  ·  " + fr(c.du, 2) + " MAD au total" +
       (c.reste > 0.01 ? "  ·  reste " + fr(c.reste, 2) + " MAD" : "  ·  tout est encaissé") + '</small>' +
+    ((inf.adresse || inf.ville || inf.ice) ? '<small>' + esc([inf.adresse, inf.ville, inf.ice ? "ICE " + inf.ice : ""].filter(Boolean).join("  ·  ")) + '</small>' : '') +
     (c.tel ? '<span class="pywa" data-wa="' + esc(wa) + '" role="link" tabindex="0">' +
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1121 11.5z"/><path d="M8.6 9.4c0 3.3 2.7 6 6 6"/></svg>' +
         esc(telAffiche(c.tel)) + '</span>' : '');
@@ -12852,20 +13047,9 @@ $("cliPickBody").addEventListener("click", e => {
     renderPay();
     return;
   }
-  const dernier = c.bons[0] || {};
   S.nom = c.nom;
-  S.tel     = dernier.tel || "";
-  S.adresse = dernier.adresse || "";
-  S.ville   = dernier.ville || "";
-  S.gps     = dernier.gps || "";
-  S.ice     = dernier.ice || "";
   $("nom").value = S.nom;
-  $("tel").value = S.tel || "";
-  $("adresse").value = S.adresse || "";
-  $("ville").value = S.ville || "";
-  $("gps").value = S.gps || "";
-  $("ice").value = S.ice || "";
-  renderGps(); renderProgress();
+  cliRemplit(c, true);
   $("cliPickSheet").classList.remove("open");
   toast("Client " + c.nom + " repris");
 });
@@ -13294,12 +13478,12 @@ function suggereEch(nb, exclureId, manque, fileConnue, pose){
   const four = Math.max(0, parseInt(ATL.four, 10) || 0);
   /* v14.21 : tissu déjà commandé (bon d'achat envoyé avec une date de livraison) : c'est cette date qui compte */
   const ach = mq.length ? achJourMatiere(mq) : 0;
-  const jMat = mq.length ? (ach ? ach.j : (2 + four)) : 1;        /* jour ouvré où la matière est là */
+  const jMat = mq.length ? (ach ? ach.j : (1 + four)) : 1;        /* v14.70 : commandé aujourd'hui, là après le délai fournisseur */
   const jFile = Math.ceil(F / cap);
   const jBon  = Math.max(1, Math.ceil(N / cap));
   const jTot  = Math.max(1, Math.ceil((F + N) / cap));
   /* soit la file commande, soit la matière : le plus tard des deux */
-  const finJ  = Math.max(jTot, jMat + jBon - 1);
+  const finJ  = Math.max(jTot, jMat + jBon - 1) + 1;                /* v14.70 : tubes livrés le soir, Soufiane commence le lendemain */
   const fin   = jourOuvreN(finJ);
   const brut  = marge > 0 ? ajouteOuvres(fin, marge) : fin;
   /* Une pose par jour : si la date tombe sur un jour déjà promis à un autre
@@ -13329,8 +13513,101 @@ function cadencePour(iso, nb, exclureId){
           cadence: jours > 0 ? (F + N) / jours : Infinity};
 }
 
+/* v14.69 : chaque fenêtre d'un bon lancé : le jour où elle est prête (le jour ouvré après la livraison
+   de son dernier tube, livrés le soir) et le jour où elle a été fabriquée. */
+function atlFenetres(){
+  const out = [];
+  (ORDERS || []).forEach(o => {
+    if (!o || o.status !== "sent") return;
+    const et = etatDe(o); if (et === "devis") return;
+    const log = o.log || [], faitesO = faites(o), ct = coupesTube(o);
+    const prod = (log.filter(x => x && x.kind === "etat" && x.etat === "production" && x.at).pop() || {}).at || 0;
+    ordDims(o).forEach(d => {
+      const ks = ct.filter(x => x.key === "t:" + x.fam + ":" + x.prof + ":" + d.key).map(x => x.key);
+      let pret = 0;
+      if (ks.length){
+        const liv = ks.map(k => (log.filter(x => x && (x.kind === "tube" || x.kind === "livr") && x.k === k && x.on && x.at).pop() || {}).at || 0);
+        if (liv.every(t => t > 0)) pret = Math.max.apply(null, liv);
+      } else pret = prod;
+      const fe = faitesO.indexOf(d.key) >= 0 ? (log.filter(x => x && (x.kind || "fab") === "fab" && x.k === d.key && x.on && x.at).pop() || null) : null;
+      out.push({o:o, d:d, tubesAt:pret,
+        pret: pret ? isoDe(ajouteOuvres(new Date(pret), 1)) : "",     /* prête le jour ouvré suivant (tubes livrés le soir) */
+        fait: fe ? isoDe(new Date(fe.at)) : (faitesO.indexOf(d.key) >= 0 ? "0000-00-00" : ""),
+        fabAt: fe ? fe.at : 0, fabBy: fe ? (fe.by || "") : "",
+        /* v14.73 : tubes et fabrication cochés à quelques minutes d'écart = une mise à jour après coup, pas du travail du jour */
+        regul: !!(fe && pret && Math.abs(fe.at - pret) < 10 * 60000)});
+    });
+  });
+  return out;
+}
+function atlJournal(nb){
+  const W = atlFenetres(), cap = atlCap(), jours = [];
+  for (let i = 0; jours.length < nb && i < 90; i++){
+    const x = new Date(Date.now() - i * 86400000); x.setHours(12, 0, 0, 0);
+    if (estOuvre(x)) jours.push(isoDe(x));
+  }
+  return jours.map(j => {
+    const P = W.filter(w => w.pret && w.pret <= j && (!w.fait || w.fait >= j) && !(w.fait === j && w.regul)), pretes = P.length;
+    const restees = P.filter(w => w.fait !== j).sort((a, b) => a.pret.localeCompare(b.pret));      /* v14.74 : prêtes ce matin-là et pas faites ce jour-là */
+    const liste = W.filter(w => w.fait === j).sort((a, b) => a.fabAt - b.fabAt);
+    const vraies = liste.filter(w => !w.regul).length;
+    return {j:j, pretes:pretes, restees:restees, liste:liste, faites:vraies, att:Math.min(cap, pretes)};
+  });
+}
+function renderAtlSouf(){
+  const box = $("atlSouf"); if (!box) return;
+  const J = atlJournal(30), auj = isoDe(new Date()), cap = atlCap();
+  const passes = J.filter(x => x.j < auj);
+  const bilan = L => { const a = L.reduce((t, x) => t + x.att, 0), f = L.reduce((t, x) => t + Math.min(x.faites, x.att), 0), tf = L.reduce((t, x) => t + x.faites, 0);
+    return {a:a, f:f, tf:tf, pct: a ? Math.round(f / a * 100) : null}; };
+  const b5 = bilan(passes.slice(0, 5)), b30 = bilan(passes), vides = passes.filter(x => x.att > 0 && x.faites === 0);
+  const NOMJ = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+  const lab = iso => { const d = new Date(iso + "T12:00:00"); return NOMJ[d.getDay()] + " " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1); };
+  const court = iso => { const d = new Date(iso + "T12:00:00"); return pad(d.getDate()) + "/" + pad(d.getMonth() + 1); };
+  const hh = t => { const d = new Date(t); return pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+  const kpi = (b, mots) => b.pct === null ? '<b>—</b><small>' + mots + ' : aucune fenêtre n\'avait ses tubes</small>'
+    : '<b>' + b.pct + ' %</b><small>' + mots + ' : ' + b.f + ' faite' + (b.f > 1 ? 's' : '') + ' sur ' + b.a + ' attendue' + (b.a > 1 ? 's' : '') + '</small>';
+  const verdict = x => {
+    if (x.j === auj) return x.att ? '<i class="atj en">en cours · ' + x.faites + '/' + x.att + '</i>' : '<i class="atj en">en cours</i>';
+    if (!x.att) return x.faites ? '<i class="atj">+' + x.faites + ' sans tubes du matin</i>' : x.liste.length ? '<i class="atj">mise à jour après coup</i>' : '<i class="atj">rien de prêt</i>';
+    if (x.faites >= x.att) return '<i class="atj ok">✓ objectif' + (x.faites > x.att ? ' +' + (x.faites - x.att) : '') + '</i>';
+    if (!x.faites) return '<i class="atj ko">✗ rien fait</i>';
+    return '<i class="atj wa">' + x.faites + ' sur ' + x.att + '</i>';
+  };
+  /* les jours sans rien (rien de prêt, rien fait) qui se suivent tiennent sur une ligne */
+  let h = '<h3>Soufiane · ce qu\'il fabrique</h3>' +
+    '<p class="atjexp">Une fenêtre est <b>prête</b> le matin qui suit la livraison de ses tubes par Ahmed. Objectif du jour : ' + cap + ' fenêtres, ou moins s\'il y en a moins de prêtes.</p>' +
+    '<div class="atjk"><div>' + kpi(b5, "5 derniers jours") + '</div><div>' + kpi(b30, "30 jours") + '</div>' +
+      '<div class="' + (vides.length ? "ko" : "") + '"><b>' + vides.length + '</b><small>jour' + (vides.length > 1 ? 's' : '') + ' sans rien fabriquer alors que des fenêtres étaient prêtes</small></div></div>';
+  let vide = [];
+  const fermeVide = () => { if (!vide.length) return ""; const r = '<div class="atjvide">' + (vide.length > 1 ? court(vide[vide.length - 1]) + ' → ' + court(vide[0]) : lab(vide[0])) +
+    ' · rien de prêt, rien à faire</div>'; vide = []; return r; };
+  J.slice(0, 20).forEach(x => {
+    if (!x.pretes && !x.liste.length && x.j !== auj){ vide.push(x.j); return; }
+    h += fermeVide();
+    h += '<details class="atjday"' + (x.j === auj ? ' open' : '') + '><summary><span class="d">' + lab(x.j) + '</span>' + verdict(x) +
+      '<small>' + x.pretes + ' prête' + (x.pretes > 1 ? 's' : '') + ' le matin · ' + x.liste.length + ' fabriquée' + (x.liste.length > 1 ? 's' : '') + '</small></summary>' +
+      (x.liste.length ? x.liste.map(w => '<div class="atjw"><span class="h">' + hh(w.fabAt) + '</span><span><b>' + esc(w.o.num || "") + '</b> · ' + esc(w.o.nom || "") +
+          '<small>' + fr(w.d.l, 0) + ' × ' + fr(w.d.h, 0) + ' cm' + (w.d.ref ? ' · ' + esc((fab(w.d.ref) || {}).nom || w.d.ref) : '') +
+          (w.fabBy && w.fabBy !== "soufiane" ? ' · coché par ' + esc(nomDe(w.fabBy)) : '') + (w.regul ? ' · mise à jour après coup, pas comptée' : '') + '</small></span></div>').join("")
+        : '<div class="atjw"><span></span><span><small>Aucune fenêtre fabriquée ce jour-là.</small></span></div>') +
+      (x.restees.length ? '<div class="atjatt">' + (x.liste.length ? 'Restées en attente ce jour-là' : 'Elles avaient leurs tubes et attendaient') + ' · ' + x.restees.length + '</div>' +
+        x.restees.map(w => '<div class="atjw"><span class="h">⏳</span><span><b>' + esc(w.o.num || "") + '</b> · ' + esc(w.o.nom || "") +
+          '<small>' + fr(w.d.l, 0) + ' × ' + fr(w.d.h, 0) + ' cm · tubes livrés le ' + court(isoDe(new Date(w.tubesAt))) +
+          (w.fait && w.fait !== "0000-00-00" ? ' · fabriquée le ' + court(w.fait) : ' · pas encore fabriquée') + '</small></span></div>').join("") : '') + '</details>';
+  });
+  h += fermeVide();
+  const W = atlFenetres().filter(w => w.pret && w.pret <= auj && !w.fait).sort((a, b) => a.pret.localeCompare(b.pret));
+  h += '<h3 style="margin-top:16px">En attente chez Soufiane · ' + W.length + '</h3>' +
+    (W.length ? W.map(w => '<div class="atjw"><span class="h">' + court(w.pret) + '</span><span><b>' + esc(w.o.num || "") + '</b> · ' + esc(w.o.nom || "") +
+        '<small>' + fr(w.d.l, 0) + ' × ' + fr(w.d.h, 0) + ' cm · tubes livrés le ' + court(isoDe(new Date(w.tubesAt))) +
+        (w.pret < auj ? ' · <b style="color:var(--accent)">attend depuis le ' + court(w.pret) + '</b>' : ' · prête aujourd\'hui') + '</small></span></div>').join("")
+      : '<p class="atjexp">Rien en attente : tout ce qui a ses tubes est fabriqué.</p>');
+  box.innerHTML = h;
+}
 function renderAtl(){
   if (!adminAllowed()) return;
+  try { renderAtlSouf(); } catch(e){}
   $("atlCap").value = String(ATL.cap);
   $("atlMarge").value = String(ATL.marge);
   $("atlFour").value = String(ATL.four);
@@ -13522,12 +13799,15 @@ function notesVivantes(){ return NOTES.filter(n => n && !n.sup); }
    supprimée ou cochée à la main n'est jamais recréée. Bons créés depuis le 1er octobre 2026. */
 const NA_DEPUIS = new Date(2026, 9, 1).getTime();
 const NA_J = 86400000;
+/* v14.67 : chaque point va directement à l'agent qui le règle */
+const NA_POUR = {tel:"imane", prix:"imane", tissu:"imane", fiche:"imane", solde:"imane", pieces:"soufiane",
+  tubes:"ahmed", fen:"soufiane", livre:"soufiane", banque:"noureddine", sage:"noureddine"};
 const NA_POINTS = {
   "Téléphone du client":            {k:"tel",    t:"téléphone du client manquant"},
   "Prix au m²":                     {k:"prix",   t:"prix au m² manquant"},
   "Tissu choisi sur chaque mesure": {k:"tissu",  t:"tissu pas choisi sur toutes les mesures"},
   "Pièces utilisées remplies":      {k:"pieces", t:"pièces utilisées pas remplies alors que le bon est prêt"},
-  "Fiche de production envoyée":    {k:"fiche",  t:"fiche de production pas envoyée au tableau"},
+  "Fiche de production envoyée":    {k:"fiche",  t:"prêt, mais les pièces utilisées ne sont pas envoyées au tableau"},
   "Découpes livrées au magasin 2":  {k:"tubes",  t:"découpes de tubes pas toutes livrées au magasin 2"},
   "Fenêtres fabriquées":            {k:"fen",    t:"fenêtres pas toutes fabriquées, en production depuis 3 jours"},
   "Commande livrée":                {k:"livre",  t:"pas encore livré, l'échéance est passée"},
@@ -13548,7 +13828,8 @@ function naQuand(o, k){
     case "tel": case "prix": return cree;                                   /* dès la création du bon */
     case "tissu": return et !== "devis" ? (prod || cree) : 0;
     case "pieces": return (et === "pret" || et === "livre") ? (naDepuisEtat(o, "pret") || naDepuisEtat(o, "livre") || cree) : 0;
-    case "fiche": return enProd && prod ? prod + NA_J : 0;
+    /* v14.72 : seulement quand le bon est prêt, 3 heures après : les pièces utilisées doivent être au tableau */
+    case "fiche": return (et === "pret" || et === "livre") ? (naDepuisEtat(o, "pret") || naDepuisEtat(o, "livre") || cree) + 3 * 3600000 : 0;
     case "tubes": return enProd && prod ? prod + 2 * NA_J : 0;
     case "fen": return enProd && prod ? prod + 3 * NA_J : 0;
     case "livre": return (o.ech && et !== "devis" && et !== "livre" && String(o.ech) < jourISO(new Date())) ? Date.now() : 0;
@@ -13572,11 +13853,13 @@ function notesAuto(){
     cp.manque.forEach(lab => { const P = NA_POINTS[lab]; if (P) manque[P.k] = P; });
     Object.keys(NA_POINTS).forEach(lab => {
       const P = NA_POINTS[lab], id = "auto-" + o.id + "-" + P.k, n = par[id];
+      /* v14.72 : les anciennes notes « fiche » d'un bon pas encore prêt disparaissent */
+      if (P.k === "fiche" && n && n.auto && !n.sup && !n.fait && !naQuand(o, "fiche")){ n.sup = true; n.maj = now; ch++; return; }
       if (manque[P.k]){
         const q = naQuand(o, P.k);
         if (n || !q || now < q) return;                           /* déjà écrite (même supprimée) ou pas encore l'heure */
         const note = {id:id, txt:(o.num || "Bon") + " · " + (o.nom || "client") + " : " + P.t,
-                      pour:"", bon:o.id, at:now, maj:now, by:"noureddine", auto:true};
+                      pour:NA_POUR[P.k] || "", bon:o.id, at:now, maj:now, by:"noureddine", auto:true};
         NOTES.unshift(note); par[id] = note; ch++;
       } else if (n && !n.sup && !n.fait && n.auto){
         n.fait = now; n.faitBy = "noureddine"; n.maj = now; ch++;  /* le point est réglé : la note se coche */
@@ -13593,7 +13876,7 @@ function notesAuto(){
         if (n || !b.recuAt || now < q) return;
         const f = achFour(b.four), note = {id:id, txt:(b.num || "Achat") + " · " + (f ? f.nom : "fournisseur") +
           " : marchandise reçue le " + prosDate(b.recuAt) + ", facture du fournisseur pas encore reçue",
-          pour:"", at:now, maj:now, by:"noureddine", auto:true};
+          pour:"noureddine", at:now, maj:now, by:"noureddine", auto:true};
         NOTES.unshift(note); par[id] = note; ch++;
       } else if (n && !n.sup && !n.fait && n.auto){ n.fait = now; n.faitBy = "noureddine"; n.maj = now; ch++; }
     });
@@ -13707,6 +13990,7 @@ function renderNote(){
           (n.fait
             ? tag("fait le " + noteDate(n.fait) + (n.faitBy ? "  ·  " + esc(nomDe(n.faitBy)) : ""), "ok")
             : (notePourMoi(n) ? tag("à faire", "att") : tag("en attente"))) +
+          (!n.fait && n.envAt ? tag("📤 envoyée sur WhatsApp le " + noteDate(n.envAt), "inf") : "") +
           tag((mienne ? "de moi" : "de " + esc(nomDe(n.by))) + "  ·  " + notePourLab(n.pour)) +
           (n.at ? tag(noteDate(n.at), "inf") : "") +
           (bon ? tag(esc(bon.num || "bon") + "  ·  " + esc(bon.nom || "")) : "") +
@@ -15393,6 +15677,7 @@ function renderProsFicheAct(){
         (es ? '<p class="prest">Dernière estimation : ' + fr(estTotaux(es).du, 0) + ' DH, le ' +
           pad(new Date(es.maj || es.at).getDate()) + '/' + pad(new Date(es.maj || es.at).getMonth() + 1) +
           (es.devis ? ' · devenue devis ' + esc(es.devis) : '') + '</p>' : ''); })() : '') +
+    (function(){ const b = delaiBonContact(p); return delaiBloc(b.o, b.devine); })() +
     (st === "client" ? '' :
       '<button class="prbtn dev" type="button" data-prdev="' + p.id + '">Faire un devis</button>' +
       '<button class="prbtn prod" type="button" data-prprod="' + p.id + '">Commande ferme</button>') +
@@ -17768,6 +18053,43 @@ function produitHT(o){
 /* --- le délai annoncé au client, en jours ouvrés --- */
 /* Un client au téléphone n'entend pas une date, il entend « dans X jours ».
    Le nombre se recalcule à chaque affichage, il ne peut donc pas être périmé. */
+/* v14.70 : « prêt le … » pour un client, selon le jour où son acompte arrive.
+   C'est l'échéance que l'app fixera au passage en production (suggereEch) : file + ses fenêtres,
+   tubes du soir, tissu en stock ou à commander, marge de pose, jour de pose libre.
+   Pas de tissu choisi : pas de date, Imane doit d'abord faire choisir le tissu. */
+function delaiBloc(o, devine){
+  if (!payAllowed() || !o) return "";
+  const dims = ordDims(o), n = dims.length;
+  if (!n) return '<div class="dlbox"><small>📅 Ajoutez les mesures ou le nombre de fenêtres pour avoir une date.</small></div>';
+  if (dims.some(d => !d.ref))
+    return '<div class="dlbox att"><b>⚠ Tissu pas encore choisi</b><small>Pas de date tant que le tissu n\'est pas confirmé : selon le stock, elle peut changer de ' +
+      Math.max(0, parseInt(ATL.four, 10) || 0) + ' jours ouvrés. Faites choisir le tissu au client, la date exacte s\'affiche ici.</small></div>';
+  const mq = manqueTissu(o, o.id), r = suggereEch(n, o.id, mq, undefined, o.pose);
+  if (!r) return "";
+  const J = ["dim.","lun.","mar.","mer.","jeu.","ven.","sam."];
+  const court = d => J[d.getDay()] + " " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1);
+  const pay0 = prochainOuvre(new Date()), ech0 = new Date(r.iso + "T12:00:00");
+  const L = [0, 1, 2].map(k => ({jour: k ? ajouteOuvres(pay0, k) : pay0, pret: k ? ajouteOuvres(ech0, k) : ech0}));
+  const refs = [...new Set(dims.map(d => d.ref))];
+  const tissu = refs.map(ref => { const m = mq.find(x => x.ref === ref), fb = fab(ref), nom = esc(fb && fb.nom ? fb.nom : ref);
+    return m ? '⚠ ' + nom + ' à commander (il manque ' + fr(m.manque, 1) + ' m²)' + (r.achat ? ', déjà commandé, là le ' + esc(String(r.achat.iso).split("-").reverse().join("/")) : '')
+             : '✅ ' + nom + ' en stock'; }).join("<br>");
+  return '<div class="dlbox"><small>📅 ' + n + ' fenêtre' + (n > 1 ? 's' : '') + (devine ? ' (mesures estimées)' : '') + ' · acompte reçu…</small>' +
+    L.map((x, i) => '<div class="dll' + (i ? '' : ' un') + '"><span>' + (i ? court(x.jour) : "aujourd'hui") + '</span><b>prêt le ' + court(x.pret) + '</b>' +
+      (i ? '' : '<em>' + delaiOuvres(r.iso) + ' j ouvrés</em>') + '</div>').join("") +
+    '<small>' + tissu + '</small>' +
+    '<small>' + r.F + ' fenêtres déjà en attente à l\'atelier + ' + n + ' pour ce client, à ' + r.cap + ' par jour. Si l\'acompte arrive un jour plus tard, la date recule d\'un jour.</small></div>';
+}
+/* le bon « comme si » d'un contact WhatsApp : son estimation, sinon ses mesures, sinon son nombre de fenêtres */
+function delaiBonContact(p){
+  const es = estDuContact(p.id); if (es) return {o: estBon(es), devine: false};
+  const refs = p.refs || [], t = p.type === "JN" ? "JN" : "ENR";
+  let dims = (p.dims || []).filter(d => parseFloat(d.l) > 0 && parseFloat(d.h) > 0).map(d => ({l:d.l, h:d.h, q:d.q || "1", note:"", ref:d.ref || (refs.length === 1 ? refs[0] : ""), type:d.type || t}));
+  let devine = false;
+  if (!dims.length && prosNbFenSaisi(p)){ devine = true;
+    dims = [{l:"150", h:"160", q:String(prosNbFenSaisi(p)), note:"", ref:refs.length === 1 ? refs[0] : "", type:t}]; }
+  return {o: {id:"pros-" + p.id, status:"draft", etat:"devis", type:p.type || "ENR", multi:true, dims:dims, refs:refs, pose:p.pose || "Pose"}, devine: devine};
+}
 function delaiOuvres(iso){
   const n = ouvresJusqua(iso);
   return Math.max(0, estOuvre(new Date()) ? n - 1 : n);
@@ -17860,10 +18182,11 @@ function remuImane(iso){
     String(o.author || "").toLowerCase() === IMANE && etatDe(o) !== "devis");
   const lignes = [];
   siens.forEach(o => paiements(o).forEach(p => {
-    if (String(p.date || "").slice(0, 7) !== iso) return;          /* le mois du paiement, pas du bon */
+    if (payStatut(p) === "preuve") return;                            /* v14.68 : une simple preuve ne paie pas encore de commission */
+    if (payJourCredit(p).slice(0, 7) !== iso) return;               /* le mois où Imane l'a marqué crédité */
     const m = parseFloat(p.montant) || 0;
     if (!(m > 0)) return;
-    lignes.push({o:o, p:p, date:String(p.date), montant:m, ht:partProduitsHT(o, m), recu:!!p.recu});
+    lignes.push({o:o, p:p, date:payJourCredit(p), montant:m, ht:partProduitsHT(o, m), recu:!!p.recu});
   }));
   lignes.sort((x, y) => x.date.localeCompare(y.date) || ((x.p.at || 0) - (y.p.at || 0)));
   /* la commission de chaque paiement suit le cumul : la tranche 7 % ne s'ouvre qu'au-delà de 25 000 */
@@ -19496,6 +19819,7 @@ function estMajRes(e){
       '<div class="l ' + (T.C.benef >= 0 ? 'ok' : 'ko') + '"><span>Bénéfice HT · marge</span><b>' + fr(T.C.benef, 0) + ' · ' + fr(T.C.marge * 100, 0) + ' %</b></div>';
     if (T.C.manque.length) h += '<div class="l ko" style="font-size:12px"><span>Prix manquants : ' + T.C.manque.map(esc).join(", ") + '</span></div>';
   }
+  h += delaiBloc(T.o, false);
   z.innerHTML = h;
 }
 function estTexteWa(e){
@@ -20425,7 +20749,7 @@ function achRecu(b){
 function achEtat(b){
   if (b.etat === "brouillon" || !b.etat) return {k:"brouillon", lab:"Brouillon", c:"#8A8384"};
   const r = achRecu(b);
-  if (r === "tout") return {k:"recu", lab:"Reçu" + (b.recuAt ? " le " + prosDate(b.recuAt) : ""), c:"#12833F"};
+  if (r === "tout") return {k:"recu", lab:"Marchandise reçue" + (b.recuAt ? " le " + prosDate(b.recuAt) : ""), c:"#12833F"};
   return {k:"envoye", lab:"Envoyé" + (b.livr ? " · livraison prévue " + String(b.livr).split("-").reverse().join("/") : ""), c:"#1F5FD1"};
 }
 function achPayeLab(b){
@@ -20444,6 +20768,12 @@ function achNum(){
 }
 /* La liste des articles qu'on peut acheter : tissus et articles de la feuille,
    pièces de la fiche de production, et ce qui a été ajouté ici. */
+/* v14.75 : la désignation imprimée sur le bon envoyé au fournisseur ; un tissu prend son nom du catalogue */
+function achDesig(l){
+  if (l && l.desig !== undefined && l.desig !== null) return String(l.desig);
+  const f = l && l.type === "tissu" && l.ref ? fab(l.ref) : null;
+  return f && f.nom ? f.nom : String(l && l.nom || "");
+}
 function achCatalogue(){
   const L = [], vu = {};
   const add = x => { if (vu[x.k]) return; vu[x.k] = true; L.push(x); };
@@ -20492,7 +20822,7 @@ function achJourMatiere(manque){
     if (!b) return 0;
     /* déjà reçu, en attente de SAGE : le tissu est à l'atelier */
     const recu = achRecu(b) === "tout";
-    const d = recu ? auj : b.livr;
+    const d = recu ? auj : (b.livr || (b.date ? isoDe(ajouteOuvres(new Date(b.date), Math.max(0, parseInt(ATL.four, 10) || 0))) : ""));
     if (!d) return 0;
     if (d > fin) fin = d;
   }
@@ -20609,8 +20939,11 @@ function achCarte(b){
     (p && b.etat !== "brouillon" ? '<span class="st" style="background:' + p.bg + ';color:' + p.c + '">' + esc(p.lab) + '</span>' : '') +
     (b.etat !== "brouillon" && achRecu(b) !== "rien" ? (b.sage ? '<span class="st" style="background:#E3F5EA;color:#12833F">Saisi dans SAGE ✓</span>'
                                                                : '<span class="st" style="background:#FFF4E0;color:#B45309">À saisir dans SAGE</span>') : '') +
-    (b.etat !== "brouillon" && achRecu(b) === "tout" ? (b.factureOk ? '<span class="st" style="background:#E3F5EA;color:#12833F">Facture reçue ✓</span>'
-                                                                     : '<span class="st" style="background:#FDECEE;color:#B42318">Facture à récupérer</span>') : '') +
+    /* v14.76 : la facture se lit toute seule, même si la marchandise n'est pas encore arrivée */
+    (b.etat !== "brouillon" && b.factureOk ? '<span class="st" style="background:#E3F5EA;color:#12833F">Facture reçue ✓' + (b.factureNom ? ' · ' + esc(b.factureNom) : '') + '</span>' : '') +
+    (b.etat !== "brouillon" && b.factureOk && !String(b.factureNom || "").trim() ? '<span class="st" style="background:#FDECEE;color:#B42318">Nom de facture à écrire</span>' : '') +
+    (b.etat !== "brouillon" && b.factureOk && achRecu(b) !== "tout" ? '<span class="st" style="background:#FFF4E0;color:#B45309">Marchandise pas encore reçue</span>' : '') +
+    (b.etat !== "brouillon" && !b.factureOk && achRecu(b) === "tout" ? '<span class="st" style="background:#FDECEE;color:#B42318">Facture à récupérer</span>' : '') +
   '</button>';
 }
 function achNouveau(lignes){
@@ -20648,6 +20981,7 @@ function achRendBa(box){
   h += '<section class="card achcard"><div class="label">Articles du bon</div>' +
     ((b.lignes || []).length ? b.lignes.map((l, i) => '<div class="achln"><div class="lh"><b>' + esc(l.nom) + '</b><button type="button" data-achdel="' + i + '" aria-label="Retirer">✕</button>' +
         '<small>' + esc(l.sous || l.type || "") + ((l.pour || []).length ? ' · pour ' + esc(l.pour.join(", ")) : '') + '</small></div>' +
+        '<label class="achdes">Désignation sur le bon fournisseur<input data-achl="' + i + '" data-k="desig" value="' + esc(achDesig(l)) + '" placeholder="Ce que le fournisseur lira"></label>' +
         '<div class="achli"><label>Qté<input inputmode="decimal" data-achl="' + i + '" data-k="q" value="' + esc(String(l.q == null ? "" : l.q).replace(".", ",")) + '"></label>' +
         '<label>PU HT<input inputmode="decimal" class="ed" data-achl="' + i + '" data-k="pu" value="' + esc(String(l.pu == null ? "" : l.pu).replace(".", ",")) + '"></label>' +
         '<span data-achlt="' + i + '">' + fr((parseFloat(l.q) || 0) * (parseFloat(l.pu) || 0)) + '</span></div></div>').join("")
@@ -20665,15 +20999,21 @@ function achRendBa(box){
     '. ' + (b.livr ? 'Leur échéance tient compte de la livraison prévue le ' + String(b.livr).split("-").reverse().join("/") + ' dès que ce bon est envoyé.' : 'Indiquez la livraison souhaitée : leur échéance la suivra.') + '</div>';
   /* réception et paiements, une fois envoyé */
   if (b.etat && b.etat !== "brouillon"){
-    h += '<section class="card achcard"><div class="label">Réception</div>' +
+    h += '<section class="card achcard"><div class="label">Marchandise</div>' +
       '<div class="achphoto">' + (b.photo ? '<img data-pimg="' + esc(b.photo) + '" data-achvoir alt="Bon de livraison">' : '') +
         '<label class="achfile">📷 ' + (b.photo ? 'Changer la photo du bon de livraison' : 'Photo du bon de livraison') + '<input type="file" accept="image/*" data-achphoto hidden></label></div>' +
-      '<button type="button" class="achsage' + (b.sage ? ' on' : '') + '" data-achsage>' + (b.sage ? '☑ Saisi dans SAGE' + (b.sageAt ? ' le ' + prosDate(b.sageAt) : '') : '☐ Saisi dans SAGE · à cocher une fois fait') + '</button>' +
       '<button type="button" class="achsage' + (achRecu(b) === "tout" ? ' on' : '') + '" data-achrecuok>' +
-        (achRecu(b) === "tout" ? '☑ Reçu' + (b.recuAt ? ' le ' + prosDate(b.recuAt) : '') : '☐ Reçu · à cocher quand la marchandise est arrivée') + '</button>' +
-      /* v14.42 : la facture du fournisseur */
+        (achRecu(b) === "tout" ? '☑ Marchandise reçue' + (b.recuAt ? ' le ' + prosDate(b.recuAt) : '') : '☐ Marchandise reçue · à cocher quand elle est arrivée') + '</button>' +
+      '<button type="button" class="achsage' + (b.sage ? ' on' : '') + '" data-achsage>' + (b.sage ? '☑ Saisi dans SAGE' + (b.sageAt ? ' le ' + prosDate(b.sageAt) : '') : '☐ Saisi dans SAGE · à cocher une fois fait') + '</button>' +
+    '</section>' +
+    /* v14.76 : la facture a sa propre section : elle arrive parfois avant la marchandise */
+    '<section class="card achcard"><div class="label">Facture du fournisseur</div>' +
       '<button type="button" class="achsage' + (b.factureOk ? ' on' : '') + '" data-achfacture>' +
         (b.factureOk ? '☑ Facture reçue' + (b.factureAt ? ' le ' + prosDate(b.factureAt) : '') : '☐ Facture reçue · à cocher quand le fournisseur a donné sa facture') + '</button>' +
+      /* v14.77 : le nom de la facture */
+      (b.factureOk ? '<label class="achlab achfacnom">Nom de la facture<input type="text" data-achchamp="factureNom" autocomplete="off" placeholder="Ex. FA-2026-118" value="' + esc(b.factureNom || "") + '"></label>' +
+        (String(b.factureNom || "").trim() ? '' : '<p class="achfacman">Écrivez le nom de la facture.</p>') : '') +
+      (b.factureOk && achRecu(b) !== "tout" ? '<p class="hint" style="margin:8px 0 0">La marchandise reste à recevoir : cochez « Marchandise reçue » quand elle arrive.</p>' : '') +
     '</section>';
     const P = b.paies || [];
     h += '<section class="card achcard"><div class="label">Paiements fournisseur</div>' +
@@ -20874,8 +21214,9 @@ function achPdf(b){
   (b.lignes || []).forEach(l => {
     if (y < 120){ pages.push(cs); cs = ""; tete(); y = 740; entete(y); y -= 22; }
     const q = parseFloat(l.q) || 0, pu = parseFloat(l.pu) || 0;
-    txt(46, y, String(l.nom).slice(0, 52), 10, true);
-    if (l.ref && l.ref !== l.nom) txt(46, y - 11, l.ref, 8, false, "0.45 0.42 0.42");
+    const des = achDesig(l) || String(l.nom || "");
+    txt(46, y, des.slice(0, 52), 10, true);
+    if (l.ref && l.ref !== des) txt(46, y - 11, l.ref, 8, false, "0.45 0.42 0.42");
     txt(380, y, fr(q, q % 1 ? 2 : 0), 10, false, "0 0 0", true);
     txt(470, y, fr(pu), 10, false, "0 0 0", true);
     txt(549, y, fr(q * pu), 10, true, "0 0 0", true);
@@ -21024,6 +21365,7 @@ $("achSheet").addEventListener("click", e => {
     return;
   }
   if (g("[data-achfacture]") && b){ b.factureOk = !b.factureOk; b.factureAt = b.factureOk ? Date.now() : 0; achTouche(b); renderAch();
+    if (b.factureOk && !String(b.factureNom || "").trim()){ const i = $("achSheet").querySelector('[data-achchamp="factureNom"]'); if (i) i.focus(); }
     try { notesAuto(); renderHome(); } catch(err){} return; }
   if (g("[data-achrecuok]") && b){ b.recuOk = achRecu(b) !== "tout"; b.recuAt = b.recuOk ? Date.now() : 0; achTouche(b); renderAch(); try { renderHome(); } catch(err){} return; }
   if (g("[data-achsage]") && b){ b.sage = !b.sage; b.sageAt = b.sage ? Date.now() : 0; achTouche(b); renderAch(); try { renderHome(); } catch(err){} return; }
@@ -21085,6 +21427,7 @@ $("achSheet").addEventListener("input", e => {
     const l = b.lignes[+t.dataset.achl]; if (!l) return;
     const k = t.dataset.k;
     if (k === "u") l.u = t.value;
+    else if (k === "desig") l.desig = t.value;
     else { const n = achNombre(t.value); l[k] = n === "" ? 0 : n; if (k === "pu" && n !== "") ACH.prix[l.k] = {px:n, at:Date.now()}; }
     achTouche(b); achMajTotaux();
     return;
@@ -21105,7 +21448,7 @@ $("achSheet").addEventListener("change", e => {
     b.four = t.value; ACH_FOUR_ED = null; achTouche(b); renderAch();
     return;
   }
-  if (t.dataset.achchamp && b){ b[t.dataset.achchamp] = t.value; achTouche(b); if (t.dataset.achchamp === "livr") renderAch(); return; }
+  if (t.dataset.achchamp && b){ b[t.dataset.achchamp] = t.dataset.achchamp === "factureNom" ? t.value.trim() : t.value; achTouche(b); if (t.dataset.achchamp === "livr" || t.dataset.achchamp === "factureNom") renderAch(); return; }
   if (t.dataset.achrecu !== undefined && b){
     const l = b.lignes[+t.dataset.achrecu]; if (!l) return;
     const n = achNombre(t.value); l.recu = n === "" ? "" : n;

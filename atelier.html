@@ -24,6 +24,18 @@
   .agent canvas { image-rendering:pixelated; flex:none; }
   .agent .name { font-size:9px; margin-bottom:5px; }
   .agent .act { font-size:7px; line-height:1.6; color:#505868; }
+  .nlist { display:flex; flex-direction:column; gap:3px; margin-bottom:8px; }
+  .nrow { display:flex; align-items:center; gap:6px; padding:5px 6px; background:#fff; border:1px solid #d8d8e0; font-size:8px; line-height:1.6; }
+  .nrow > div { flex:1; min-width:0; }
+  .nrow small { display:block; color:#8890a0; font-size:7px; }
+  .nrow.fait { opacity:.75; } .nrow.fait > span { color:#289048; }
+  .nrow .nage { white-space:nowrap; color:#505868; } .nrow .nage.vieux { color:#c03030; font-weight:bold; }
+  .nrow .nenv { color:#3b5dc9; } .nrow .nrel { color:#c03030; font-weight:bold; }
+  .nrow button { font-size:8px; padding:3px 6px; }
+  .nmore { position:relative; } .nmore summary { list-style:none; cursor:pointer; border:1px solid #384868; padding:2px 6px; background:#fff; }
+  .nmore summary::-webkit-details-marker { display:none; }
+  .nmore[open] .notact { position:absolute; right:0; top:100%; z-index:5; background:#fff; border:2px solid #384868; padding:6px; width:180px; }
+  input[data-nsel], #nTout { width:14px; height:14px; cursor:pointer; }
   .notact { display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
   .notqui { display:flex; gap:4px; flex-wrap:wrap; margin:0 0 8px; }
   .notqui button { font-size:7px; padding:4px 6px; }
@@ -702,7 +714,7 @@ function deskSteps(a,act,icon,snd){ const icn=(a.id==='ahmed'||a.id==='soufiane'
    si autorisé, s'affiche en notification du système. L'agent fera sa tâche en silence. */
 const EV_SON={bon:'bon',edit:'bon',etat:'bon',paie:'cash',pros:'phone',wa:'phone',note:'note',notefait:'note',tube:'alu',fab:'ready',wajr:'phone'};
 let NOTIF_ON=false; try{ NOTIF_ON=localStorage.getItem('mst-atelier-notif')==='oui'; }catch(e){}
-function bgNotif(son,titre,corps){ if(!document.hidden) return;
+function bgNotif(son,titre,corps){ if(!document.hidden) return; corps=avecNom(corps);
   playSound(son,true);
   try{ if(NOTIF_ON&&'Notification' in window&&Notification.permission==='granted')
     { const n=new Notification(titre,{body:corps||'',icon:'icon-192.png',tag:'atelier-'+Date.now(),silent:true,requireInteraction:false});
@@ -766,7 +778,7 @@ function eventsDuJour(iso){ const out=[];
     if(p.vu&&jourISO(p.vu)===iso&&!(p.at&&jourISO(p.at)===iso)) out.push({id:'prosvu|'+p.id+'|'+p.vu,at:p.vu,by:p.vuBy||p.by||'',type:'pros',titre:'Contact rappelé',sous:(p.nom||'Sans nom')+(p.tel?' · '+p.tel:''),val:''}); });
   MESJ.forEach(x=>{ if(!x||x.sup||!x.mesAt||jourISO(x.mesAt)!==iso) return; const nb=(x.fen||[]).reduce((t,f)=>t+(parseInt(f.q,10)||1),0);
     out.push({id:'mes|'+x.id+'|'+x.mesAt,at:x.mesAt,by:x.mesBy||'soufiane',type:'edit',titre:'📏 Mesures prises · '+(x.nom||'client'),sous:nb+' store'+(nb>1?'s':'')+' · '+(x.fen||[]).map(f=>f.l+'×'+f.h).join(', '),val:''}); });
-  NOTES.forEach(n=>{ if(!n||n.sup) return; const court=String(n.txt||'').slice(0,70);
+  NOTES.forEach(n=>{ if(!n||n.sup) return; const court=noteTxt(n).slice(0,70);
     if(n.at&&jourISO(n.at)===iso) out.push({id:'note|'+n.id,at:n.at,by:n.by||'',type:'note',titre:'Note laissée',sous:court+(n.pour?' · pour '+cap(n.pour):' · pour tout le monde'),val:''});
     if(n.fait&&typeof n.fait==='number'&&jourISO(n.fait)===iso) out.push({id:'notefait|'+n.id,at:n.fait,by:n.faitBy||'',type:'notefait',titre:'Note faite',sous:court+(n.by?' · demandée par '+cap(n.by):''),val:''}); });
   return out.sort((a,b)=>a.at-b.at);
@@ -782,9 +794,14 @@ let ALERTS=[], ALERT_SEEN=null;
 const TUBES_ATTENTE_H=24;   // délai avant alerte : tubes livrés mais store pas fait
 /* v14.69 : date de livraison (dernier passage à « livré ») et paiements pas encore vus en banque */
 function livreAt(o){ const l=(o.log||[]).filter(x=>x&&x.kind==='etat'&&x.etat==='livre'&&x.at).pop(); return l?l.at:0; }
-function aConfirmer(){ const out=[], now=Date.now();
-  ORDERS.filter(o=>o.status==='sent').forEach(o=>paiements(o).forEach(p=>{ if(!p||p.recu) return; const t=p.at||(p.date?new Date(p.date+'T12:00:00').getTime():now);
-    out.push({o,p,m:parseFloat(p.montant)||0,j:Math.max(0,Math.floor((now-t)/86400000))}); }));
+/* v14.68 : un paiement est « preuve » (capture reçue par Imane), « cred » (crédité, marqué par Imane) ou « conf » (confirmé par Noureddine) */
+const PAY3_DEPUIS=new Date(2026,9,30).getTime();
+function payStatut(p){ if(!p) return 'preuve'; if(p.recu) return 'conf'; if(p.credit||/^esp/i.test(String(p.mode||''))||(p.at||0)<PAY3_DEPUIS) return 'cred'; return 'preuve'; }
+function joursOuvres(a,b){ let n=0; const d=new Date(a); d.setHours(0,0,0,0); const fin=new Date(b); fin.setHours(0,0,0,0); while(d<fin){ d.setDate(d.getDate()+1); const j=d.getDay(); if(j!==0&&j!==6) n++; } return n; }
+function aConfirmer(etat){ const out=[], now=Date.now();
+  ORDERS.filter(o=>o.status==='sent').forEach(o=>paiements(o).forEach(p=>{ if(!p||p.recu) return; const st=payStatut(p); if(etat&&st!==etat) return;
+    const t=st==='cred'&&p.credit&&p.credit.at?p.credit.at:(p.at||(p.date?new Date(p.date+'T12:00:00').getTime():now));
+    out.push({o,p,st,m:parseFloat(p.montant)||0,j:Math.max(0,Math.floor((now-t)/86400000)),jo:joursOuvres(t,now)}); }));
   return out.sort((a,b)=>b.j-a.j); }
 function computeAlerts(){ notesRegle(); const out=[], today=jourISO(new Date()), now=Date.now(), D=86400000, sent=ORDERS.filter(o=>o.status==='sent');
   /* v14.53 : formulaire du site reçu depuis plus d'un jour, contact pas encore créé par Imane */
@@ -814,9 +831,12 @@ function computeAlerts(){ notesRegle(); const out=[], today=jourISO(new Date()),
   /* v14.69 : même client, deux bons créés le même jour */
   const vus={}; sent.filter(o=>etatDe(o)!=='devis'&&o.date).forEach(o=>{ const k=jourISO(o.date)+'|'+(String(o.tel||'').replace(/[^0-9]/g,'').slice(-9)||String(o.nom||'').trim().toLowerCase()); if(k.split('|')[1]) (vus[k]=vus[k]||[]).push(o); });
   Object.values(vus).filter(L=>L.length>1).forEach(L=>out.push({id:'cohdouble|'+L.map(o=>o.id).join('-'),g:1,t:`🔍 ${L[0].nom||'Même client'} : ${L.length} bons créés le ${dateFr(jourISO(L[0].date))} (${L.map(o=>o.num).join(', ')}) · doublon ?`,c:L[0].nom}));
-  const AC=aConfirmer();
-  if(AC.length){ const vieux=Math.max(...AC.map(x=>x.j)), tot=AC.reduce((t,x)=>t+x.m,0);
-    out.push({id:'banque',g:vieux>7?3:vieux>=3?2:1,voir:'Paiements',t:`💳 ${AC.length} paiement${AC.length>1?'s':''} enregistré${AC.length>1?'s':''} à confirmer en banque (${frm(tot)} DH)`+(vieux?`, le plus ancien depuis ${vieux} j`:''),c:'Banque'}); }
+  /* v14.68 : preuves à vérifier en banque (pour le dire à Imane) et paiements crédités par Imane à confirmer */
+  const PR=aConfirmer('preuve'), CR=aConfirmer('cred'), som=L=>frm(L.reduce((t,x)=>t+x.m,0));
+  if(PR.length){ const lent=PR.filter(x=>x.jo>3);
+    out.push({id:'banque',g:lent.length?3:2,voir:'Paiements',t:`⏳ ${PR.length} preuve${PR.length>1?'s':''} de paiement à vérifier en banque (${som(PR)} DH) : si c'est crédité, dis-le à Imane`+(lent.length?` · ${lent.length} toujours pas arrivé${lent.length>1?'s':''} après 3 jours ouvrés`:''),c:'Banque',
+      wa:lent.length?`${WA_TAG.imane} 📢 🔔 Virement${lent.length>1?'s':''} toujours pas arrivé${lent.length>1?'s':''} sur le compte : `+lent.map(x=>`${x.o.num} · ${x.o.nom||'client'} · ${frm(x.m)} DH (preuve du ${dateFr(x.p.date)})`).join(' ; ')+'. Merci de demander au client de vérifier son virement.':undefined}); }
+  if(CR.length) out.push({id:'banquecred',g:CR.some(x=>x.jo>3)?2:1,voir:'Paiements',t:`🏦 ${CR.length} paiement${CR.length>1?'s':''} crédité${CR.length>1?'s':''} par Imane à confirmer (${som(CR)} DH)`,c:'Banque'});
   // ---------- atelier et production ----------
   const prodO=sent.filter(o=>etatDe(o)==='production'), pl=(n,m)=>n>1?m:'';
   const enProdDepuis=o=>{ const l=(o.log||[]).filter(x=>x.kind==='etat'&&x.etat==='production').pop(); return l?l.at:0; };
@@ -879,8 +899,16 @@ function computeAlerts(){ notesRegle(); const out=[], today=jourISO(new Date()),
     if(!L.weekend&&new Date().getHours()>=17&&resteJour) out.push({id:'wajour',g:2,t:`Imane n'a pas fini ses tâches WhatsApp du jour : ${resteJour} restante${resteJour>1?'s':''} (${L.nouv.length} demande${L.nouv.length>1?'s':''}, ${L.vus.filter(x=>x.bloc==='rappel').length} rappel(s) promis, ${L.vus.filter(x=>x.bloc==='relance').length} relance(s), ${L.vus.filter(x=>x.bloc==='client'||x.bloc==='promo').length} autre(s))`,c:'WhatsApp'});
     if(!L.weekend&&new Date().getHours()>=12&&L.fait<L.quota) out.push({id:'waquota',g:1,t:`Imane : ${L.fait}/${L.quota} messages WhatsApp envoyés aujourd'hui`,c:'WhatsApp'}); }
   /* v14.66 : les notes en retard ne sont plus des alertes : une ligne de résumé en haut, le détail dans Notes équipe */
-  const need={}; FABQ.forEach(f=>{ if(f.ref) need[f.ref]=(need[f.ref]||0)+f.len/100; });
-  Object.keys(need).forEach(r=>{ const f=fab(r), st=f?stockMl(f):0; if(st<need[r]) out.push({id:'tissu|'+r,g:3,t:`Tissu ${r} : environ ${fr(need[r])} ml à couper, il reste ${fr(st)} ml`,c:'Stock'}); });
+  /* v14.71 : tissu insuffisant. La feuille de stock ne baisse qu'à la saisie SAGE : tout bon confirmé pas encore
+     saisi dans SAGE prend encore du tissu (≈ la part de laize de la fenêtre × (hauteur + 30 cm)). */
+  const need={}, pour={};
+  sent.filter(o=>etatDe(o)!=='devis'&&!o.sage).forEach(o=>ordDims(o).forEach(d=>{ if(!d.ref) return;
+    const lz=(fab(d.ref)&&fab(d.ref).laize)||300, l=Math.max(d.l,1), lar=l>=lz?l:lz/Math.max(1,Math.floor(lz/l)); need[d.ref]=(need[d.ref]||0)+lar*(Math.max(d.h,MINCM)+30)/10000; (pour[d.ref]=pour[d.ref]||new Set()).add(o); }));
+  Object.keys(need).forEach(r=>{ const f=fab(r), st=f?stockM2(f):0; if(st>=need[r]) return;
+    const ba=(ACH.bas||[]).find(b=>b&&!b.sup&&b.etat&&b.etat!=='brouillon'&&b.recuOk!==true&&(b.lignes||[]).some(l=>l&&l.ref===r));
+    const bons=[...pour[r]].map(o=>`${o.num} ${o.nom||''}`.trim()).join(', ');
+    out.push({id:'tissu|'+r,g:ba?2:3,t:ba?`Tissu ${f&&f.nom?f.nom+' ('+r+')':r} : il manque ≈ ${fr(need[r]-st,1)} m², déjà commandé (${ba.num||'bon d'+String.fromCharCode(8217)+'achat'}) · pour ${bons}`
+      :`🧵 Commander maintenant : ${f&&f.nom?f.nom+' ('+r+')':r} · il manque ≈ ${fr(need[r]-st,1)} m² (stock ${fr(st,1)} m²) · pour ${bons}`,c:'Stock'}); });
   return out.sort((a,b)=>b.g-a.g);
 }
 /* ---------- reporter une alerte : elle disparaît du PC (et des sons) jusqu'à la date choisie ----------
@@ -938,7 +966,7 @@ let NOTE_OUV=null; const RIP=new Set(), MAN_ECRIT=new Set();
 function notesDechire(){ if(!LIVE||!ORDERS.length) return;
   const ouv=new Set(NOTES.filter(n=>n&&!n.sup&&!nFaite(n)).map(n=>n.id));
   if(NOTE_OUV){ NOTE_OUV.forEach(id=>{ if(ouv.has(id)) return; const n=NOTES.find(x=>x&&x.id===id); if(!n||RIP.has(id)) return; RIP.add(id);
-    queue(agentOf('noureddine'),[go(pick([ST.notes1,ST.notes2])),work(2,'Déchire la note : '+String(n.txt||'').slice(0,40),'note'),
+    queue(agentOf('noureddine'),[go(pick([ST.notes1,ST.notes2])),work(2,'Déchire la note : '+noteTxt(n).slice(0,40),'note'),
       call(()=>{ playRip(); RIP.delete(id); }),go(ST.deskN)]); }); }
   NOTE_OUV=ouv;
   /* une note manuelle réglée est aussi cochée dans la base, pour l'app */
@@ -973,11 +1001,19 @@ function bossEscalade(){ if(!LIVE||!ORDERS.length) return; let ch=false;
 const BRIEF_KEY='mst-atelier-brief'; let BRIEF=null; try{ BRIEF=JSON.parse(localStorage.getItem(BRIEF_KEY)||'null'); }catch(e){ BRIEF=null; }
 function bossBriefing(){ if(!LIVE||!ORDERS.length) return; const auj=jourISO(new Date()); if(BRIEF&&BRIEF.date===auj) return;
   const h=new Date(); h.setDate(h.getDate()-1); const hier=jourISO(h);
-  const enc=ORDERS.reduce((t,o)=>t+paiements(o).filter(p=>p&&String(p.date||'')===hier).reduce((s,p)=>s+(parseFloat(p.montant)||0),0),0);
+  const enc=ORDERS.reduce((t,o)=>t+paiements(o).filter(p=>p&&p.recu&&String(p.date||'')===hier).reduce((s,p)=>s+(parseFloat(p.montant)||0),0),0);
   const urg=ALERTS.filter(a=>a.g>=3).length, ac=aConfirmer().length, rdv=evDuJour(auj).length, sg=ALERTS.filter(a=>a.id.indexOf('sage|')===0).length;
-  const txt=`Briefing du matin : ${urg} urgent${urg>1?'s':''} · encaissé hier ${frm(enc)} DH · ${ac} paiement${ac>1?'s':''} à confirmer · ${sg} bon${sg>1?'s':''} à saisir dans SAGE · ${rdv} rendez-vous aujourd’hui`;
+  const txt=`Briefing du matin : ${urg} urgent${urg>1?'s':''} · encaissé hier ${frm(enc)} DH · ${ac} paiement${ac>1?'s':''} à vérifier en banque · ${sg} bon${sg>1?'s':''} à saisir dans SAGE · ${rdv} rendez-vous aujourd’hui`;
   BRIEF={date:auj,at:Date.now(),txt}; try{ localStorage.setItem(BRIEF_KEY,JSON.stringify(BRIEF)); }catch(e){}
   queue(agentOf('noureddine'),[go(ST.kpi),work(3,txt,'note'),go(ST.deskN)],'note'); }
+/* v14.68 : deux fois par jour (10 h, 16 h), vérifier la banque s'il y a des paiements en attente */
+const BANQUE_KEY='mst-atelier-banque';
+function bossBanque(){ if(!LIVE||!ORDERS.length) return; const h=new Date().getHours(), creneau=h>=16?'16':h>=10?'10':''; if(!creneau) return;
+  const cle=jourISO(new Date())+'-'+creneau; let fait=''; try{ fait=localStorage.getItem(BANQUE_KEY)||''; }catch(e){} if(fait===cle) return;
+  try{ localStorage.setItem(BANQUE_KEY,cle); }catch(e){}
+  const PR=aConfirmer('preuve'), CR=aConfirmer('cred'); if(!PR.length&&!CR.length) return;
+  const txt=`Vérifie la banque : ${PR.length} preuve${PR.length>1?'s':''} à vérifier (dis-le à Imane) · ${CR.length} crédité${CR.length>1?'s':''} à confirmer`;
+  queue(agentOf('noureddine'),[go(ST.deskN),work(3,txt,'alert')],'alert'); bgNotif('alert','Banque à vérifier',txt); }
 function processAlerts(){ const toutes=alSansNotes(computeAlerts()); try{ notesDechire(); }catch(e){}
   if(LIVE&&ORDERS.length){ const vus={}; toutes.forEach(a=>{ vus[a.id]=1; if(!ALAT[a.id]) ALAT[a.id]=a.at||Date.now(); });
     Object.keys(ALAT).forEach(id=>{ if(!vus[id]) delete ALAT[id]; }); try{ localStorage.setItem(ALAT_KEY,JSON.stringify(ALAT)); }catch(e){} }
@@ -988,7 +1024,7 @@ function processAlerts(){ const toutes=alSansNotes(computeAlerts()); try{ notesD
   toutes.forEach(a=>{ const t0=ALAT[a.id]; if(!t0||a.g>=3) return; const up=Math.floor((Date.now()-t0)/(2*86400000)); if(up>0){ a.g=Math.min(3,a.g+up); a.esc=true; } });
   toutes.sort((a,b)=>b.g-a.g);
   REPORTEES=toutes.filter(estReportee); ALERTS=toutes.filter(a=>!estReportee(a)); const ids=ALERTS.map(a=>a.id);
-  try{ bossEscalade(); bossBriefing(); }catch(e){}
+  try{ bossEscalade(); bossBriefing(); bossBanque(); }catch(e){}
   if(!ALERT_SEEN){ ALERT_SEEN=new Set(ids); return; }
   const neuves=ALERTS.filter(a=>!ALERT_SEEN.has(a.id)); ids.forEach(i=>ALERT_SEEN.add(i));
   if(neuves.length){ bgNotif('alert','Alerte atelier',neuves[0].t); queue(agentOf('noureddine'),[go(ST.deskN),work(5,'Repère : '+neuves[0].t,'alert')],'alert'); } }
@@ -1230,8 +1266,8 @@ function renderChiffres(an){ const Y=+an, sent=ORDERS.filter(o=>o.status==='sent
   const vendu=Array(12).fill(0), enc=Array(12).fill(0);
   /* avant le 13/08/2026 : la feuille historique (ventes réglées = encaissées le même mois) ; après : les bons de l'app, sans doublon */
   HVENTES.forEach(v=>{ if(v.date.slice(0,4)!==an) return; const m=parseInt(v.date.slice(5,7),10)-1; vendu[m]+=v.ttc; if(/^pay/i.test(v.regl)) enc[m]+=v.ttc; });
-  sent.forEach(o=>{ if(etatDe(o)!=='devis'&&o.date&&dansAn(o.date)&&jourISO(o.date)>=HIST_CUT_V) vendu[mo(o.date)]+=duDe(o);
-    paiements(o).forEach(p=>{ const d=String(p.date||''); if(d.slice(0,4)===an&&d>=HIST_CUT_V) enc[parseInt(d.slice(5,7),10)-1]+=parseFloat(p.montant)||0; }); });
+  sent.forEach(o=>{ if(HIST_DOUBLONS.has(o.num)) return; if(etatDe(o)!=='devis'&&o.date&&dansAn(o.date)&&jourISO(o.date)>=HIST_CUT_V) vendu[mo(o.date)]+=duDe(o);
+    paiements(o).forEach(p=>{ const d=String(p.date||''); if(p.recu&&d.slice(0,4)===an&&d>=HIST_CUT_V) enc[parseInt(d.slice(5,7),10)-1]+=parseFloat(p.montant)||0; }); });
   const tV=vendu.reduce((a,b)=>a+b,0), tE=enc.reduce((a,b)=>a+b,0);
   /* 2. devis créés (tout bon commence en devis) et commandes (passage en production) */
   const dev=Array(12).fill(0), cmd=Array(12).fill(0);
@@ -1319,7 +1355,9 @@ function tooltip(lines){ const sx=mouse.sx+16, sy=mouse.sy+16; const tmp=frboxSi
 function frboxSize(lines){ const size=FS(); v.font=`${size}px 'Press Start 2P', monospace`; return {w:Math.max(...lines.map(l=>v.measureText(plain(l)).width))+size*2,h:lines.length*Math.round(size*1.75)+size}; }
 /* boîte de dialogue en bas de l'écran (Rouge Feu) : un clic sur un agent, ou chaque tâche terminée */
 let DIALOGQ=[];
-function annonce(a,txt){ if(!a||!txt) return; DIALOGQ.push({agent:a,text:txt,start:null,heure:hm(Date.now())}); if(DIALOGQ.length>10) DIALOGQ.shift(); }
+/* v14.71 : « BC-2026-046 » devient « BC-2026-046 (Saad bouayad) » dans les messages du bas et les notifications */
+function avecNom(txt){ let s=String(txt||''); ORDERS.forEach(o=>{ if(o&&o.num&&o.nom&&s.indexOf(o.num)>=0&&s.indexOf(o.nom)<0) s=s.replace(o.num,o.num+' ('+o.nom+')'); }); return s; }
+function annonce(a,txt){ if(!a||!txt) return; txt=avecNom(txt); DIALOGQ.push({agent:a,text:txt,start:null,heure:hm(Date.now())}); if(DIALOGQ.length>10) DIALOGQ.shift(); }
 /* clic ou Entrée / Espace : 1er appui = afficher tout le texte, 2e appui = message suivant */
 function suiteDialogue(){ const d=dialog||DIALOGQ[0]; if(!d) return; if(!d.fini){ d.start=time-999; return; } if(dialog) dialog=null; else DIALOGQ.shift(); }
 addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&(dialog||DIALOGQ.length)&&!document.getElementById('pop').classList.contains('open')&&e.target.tagName!=='INPUT'){ e.preventDefault(); suiteDialogue(); } });
@@ -1379,7 +1417,7 @@ const SCREENS={
  kpi:{title:'Chiffres du mois',tabs:['Ce mois']},
  chiffres:{title:'📊 Chiffres',tabs:[String(new Date().getFullYear())]},
  agenda:{title:'Agenda',tabs:['Mois']},
- notes:{title:'Notes équipe',tabs:['À faire','Faites','Toutes']},
+ notes:{title:'Notes équipe',tabs:['À envoyer','Envoyées','Faites']},
  atelier:{title:'Atelier · en production',tabs:['En production']},
  stock:{title:'Stock de tissu',tabs:['En stock','Enrouleur','Jour et nuit','Rupture']},
  articles:{title:'Articles',tabs:['En stock','Rupture','Tous']},
@@ -1556,9 +1594,10 @@ function renderPop(){ try{ notesRegle(); }catch(e){}
     s=sum([['Bons fournisseur',L.length],['Total TTC',frm(L.reduce((t,x)=>t+tot(x).ttc,0))+' DH'],['Reste à payer',frm(L.reduce((t,x)=>t+tot(x).reste,0))+' DH']]);
     b=needLogin()+tbl(['Bon','Fournisseur','Date','État','>TTC','>Payé','>Reste'],L.map(x=>{ const t=tot(x); return [esc(x.num||''),esc(four(x.four)),dateFr(x.date),etat(x),frm(t.ttc),frm(t.paye),frm(t.reste)]; }));
   } else if(popTab==='Paiements'){
-    const L=sent.filter(o=>etatDe(o)!=='devis'&&soldeDe(o)>0.01).sort(byDate), AC=aConfirmer();
-    s=sum([['À confirmer en banque',AC.length],['Bons non soldés',L.length],['Reste à encaisser',frm(L.reduce((t,o)=>t+soldeDe(o),0))+' DH']]);
-    b=needLogin()+(AC.length?'<h3 class="wag">À confirmer en banque · '+AC.length+'</h3>'+tbl(['Bon','Client','Paiement','Date','Par','>Montant','>Attente'],AC.map(x=>[esc(x.o.num),esc(x.o.nom||'—'),esc(x.p.mode||''),x.p.date?dateFr(x.p.date):'',esc(cap(x.p.by||'')),frm(x.m),x.j+' j']))+'<h3 class="wag">Bons non soldés</h3>':'')+tbl(['Bon','Client','Situation','>Dû','>Payé','>Reste'],L.map(o=>[esc(o.num),esc(o.nom||'—'),etatTag(etatDe(o)),frm(duDe(o)),frm(payeDe(o)),'<b style="color:#c03030;font-weight:normal">'+frm(soldeDe(o))+'</b>']));
+    const L=sent.filter(o=>etatDe(o)!=='devis'&&soldeDe(o)>0.01).sort(byDate), PR=aConfirmer('preuve'), CR=aConfirmer('cred');
+    const liste=(titre,A,col)=>A.length?'<h3 class="wag">'+titre+' · '+A.length+'</h3>'+tbl(['Bon','Client','Paiement','Date','Par','>Montant',col],A.map(x=>[esc(x.o.num),esc(x.o.nom||'—'),esc(x.p.mode||''),x.p.date?dateFr(x.p.date):'',esc(cap((x.st==='cred'&&x.p.credit&&x.p.credit.by)||x.p.by||'')),frm(x.m),x.jo>3?'<span style="color:#c03030">'+x.jo+' j ouvrés</span>':x.jo+' j'])):'';
+    s=sum([['Preuves à vérifier',PR.length],['Crédités à confirmer',CR.length],['Reste à encaisser',frm(L.reduce((t,o)=>t+soldeDe(o),0))+' DH']]);
+    b=needLogin()+liste('⏳ Preuves reçues : à vérifier en banque, puis le dire à Imane',PR,'>Attente')+liste('🏦 Crédités par Imane : à confirmer dans Dossiers',CR,'>Depuis')+((PR.length||CR.length)?'<h3 class="wag">Bons non soldés</h3>':'')+tbl(['Bon','Client','Situation','>Dû','>Payé','>Reste'],L.map(o=>[esc(o.num),esc(o.nom||'—'),etatTag(etatDe(o)),frm(duDe(o)),frm(payeDe(o)),'<b style="color:#c03030;font-weight:normal">'+frm(soldeDe(o))+'</b>']));
   } else if(popTab==='Encaissements'){
     const L=[]; ORDERS.forEach(o=>paiements(o).forEach(p=>L.push({o,p}))); L.sort((a,b)=>String(b.p.date||'').localeCompare(String(a.p.date||'')));
     const mois=L.filter(x=>ceMois(String(x.p.date||'')+'T12:00:00'));
@@ -1568,14 +1607,19 @@ function renderPop(){ try{ notesRegle(); }catch(e){}
     const k=kpi(); s=sum([['Facturé ce mois',frm(k.fact)+' DH'],['Encaissé ce mois',frm(k.enc)+' DH'],['Reste à encaisser',frm(k.reste)+' DH'],['En production',`${k.nProd} bons · ${k.fait}/${k.tot} stores`]]);
     b=needLogin()+'<div class="muted" style="padding:6px 0">Mêmes calculs que l\'accueil de l\'app : facturé = bons envoyés (hors devis) datés de ce mois ; encaissé = paiements datés de ce mois ; reste = solde de tous les bons hors devis. Stores = fenêtres faites / fenêtres des bons en production.</div>';
   } else if(popKey==='notes'){
-    const qf=n=>!NOTE_QUI||(NOTE_QUI==='*'?!n.pour:n.pour===NOTE_QUI);
-    const all=NOTES.filter(n=>n&&!n.sup).sort((a,b)=>(b.at||0)-(a.at||0)), L=(popTab==='À faire'?all.filter(n=>!nFaite(n)):popTab==='Faites'?all.filter(n=>nFaite(n)):all).filter(qf);
-    s=sum([['À faire',all.filter(n=>!nFaite(n)).length],['Faites',all.filter(n=>nFaite(n)).length]]);
-    /* filtre par agent : ce qui reste à faire pour chacun */
-    const reste=q=>all.filter(n=>!nFaite(n)&&(!q||(q==='*'?!n.pour:n.pour===q))).length;
-    const puces='<div class="notqui">'+[['','Tous'],...NOTE_AGENTS.map(q=>[q,cap(q)]),['*','Pour tout le monde']].map(([k,l])=>`<button type="button" data-nqf="${k}" aria-pressed="${NOTE_QUI===k}">${l} · ${reste(k)}</button>`).join('')+'</div>';
-    b=needLogin()+puces+tbl(['Note','Pour','Bon','Date','État',''],L.map(n=>[esc(n.txt||''),esc(n.pour?cap(n.pour):'Tout le monde'),esc(noteBonNum(n)),n.at?new Date(n.at).toLocaleDateString('fr-FR'):'',
-      n.fait?'Fait'+(n.faitBy?' par '+esc(cap(n.faitBy)):''):n.regle?(n.auto||n.bon?'Réglé dans le bon':'Réglé : téléphone ajouté au bon'):noteJours(n)>2?`<span class="notretard">À faire · ${noteJours(n)} j</span>`:'À faire', nFaite(n)?'':noteActions(n)]));
+    /* v14.67 : cartes par agent, 📤 / ✓ / ⋯, suivi des envois WhatsApp */
+    const all=NOTES.filter(n=>n&&!n.sup).sort((a,b)=>(b.at||0)-(a.at||0)), ouv=all.filter(n=>!nFaite(n));
+    const aEnv=ouv.filter(n=>!n.envAt), env=ouv.filter(n=>n.envAt), faites=all.filter(n=>nFaite(n));
+    s=sum([['À envoyer',aEnv.length],['Envoyées, pas faites',env.length],['Faites',faites.length]]);
+    if(popTab==='Faites'){
+      b=needLogin()+(faites.length?'<div class="nlist">'+faites.slice(0,80).map(n=>`<div class="nrow fait"><span>✓</span><div><b>${esc(noteTete(n).num)}</b> ${esc(noteTete(n).reste)}<small>${n.fait?'fait'+(n.faitBy==='auto'?' automatiquement':n.faitBy?' par '+esc(cap(n.faitBy)):'')+' le '+new Date(n.fait).toLocaleDateString('fr-FR'):'réglé automatiquement dans le bon'}</small></div></div>`).join('')+'</div>':'<div class="empty">Aucune note faite.</div>');
+    } else {
+      const L=popTab==='Envoyées'?env:aEnv; NSEL.forEach(id=>{ if(!L.some(n=>n.id===id)) NSEL.delete(id); });
+      const grp={}; L.forEach(n=>{ const q=noteQui(n); (grp[q]=grp[q]||[]).push(n); });
+      b=needLogin()+(L.length?`<div class="albar"><label><input type="checkbox" id="nTout"${NSEL.size&&NSEL.size===L.length?' checked':''}> Tout sélectionner</label><button type="button" class="wabtn" data-nwasel${NSEL.size?'':' disabled'}>📤 Envoyer la sélection (${NSEL.size})</button></div>`:'')+
+        (L.length?AL_ORDRE.filter(q=>grp[q]).map(q=>`<h3 class="wag">${q?cap(q):'Tout le monde'} · ${grp[q].length}</h3><div class="nlist">`+grp[q].map(noteCarte).join('')+'</div>').join('')
+          :`<div class="empty">${popTab==='Envoyées'?'Aucune note envoyée en attente.':'Tout est envoyé.'}</div>`);
+    }
   } else if(popTab==='En production'){
     const L=sent.filter(o=>etatDe(o)==='production').sort((a,b)=>String(a.ech||'9').localeCompare(String(b.ech||'9')));
     const k=kpi(); s=sum([['Bons en production',L.length],['Stores faits',`${k.fait}/${k.tot}`],['Tubes à couper',TO_CUT.length],['Tissus à couper',FABQ.filter(f=>!CUT_WAIT.has(f.id)).length]]);
@@ -1687,13 +1731,48 @@ document.getElementById('popBody').addEventListener('click',e=>{ const w=e.targe
   const a=ALERTS.find(x=>x.id===w.dataset.alwa); if(!a) return; const sel=document.querySelector(`select[data-alq="${CSS.escape(a.id)}"]`);
   const m=alerteMsg(a,sel?sel.value:alerteQuiDefaut(a)); try{ navigator.clipboard.writeText(m); }catch(_){} w.textContent='Copié ✓'; setTimeout(()=>{ w.textContent='WhatsApp'; },1800); });
 document.getElementById('popBody').addEventListener('click',e=>{ const q=e.target.closest('[data-nqf]'); if(!q) return; NOTE_QUI=NOTE_QUI===q.dataset.nqf?'':q.dataset.nqf; renderPop(); });
+/* v14.65 : une note garde le numéro du bon au moment où elle a été écrite (BC-2026-050) ;
+   si le bon a été renuméroté depuis (D2026050), on affiche le numéro actuel */
+function noteTxt(n){ let s=String(n&&n.txt||''); const o=n&&n.bon?ORDERS.find(x=>x.id===n.bon):null; if(!o||!o.num) return s;
+  const vieux=new Set(); (o.log||[]).forEach(e=>(e&&e.kind==='edit'?(e.champs||[]):[]).forEach(c=>{ if(c&&c.lab==='numéro'&&c.av) vieux.add(String(c.av)); }));
+  const i=s.indexOf(' · '), tete=i>0?s.slice(0,i):''; if(tete&&tete!==o.num&&tete.indexOf(' ')<0&&/[0-9]/.test(tete)) vieux.add(tete);
+  vieux.forEach(v=>{ if(v&&v!==o.num) s=s.split(v).join(o.num); }); return s; }
 function noteBonNum(n){ const o=n&&n.bon?ORDERS.find(x=>x.id===n.bon):null; return o?(o.num||'')+(o.nom?' · '+o.nom:''):(n.num||''); }
 function noteMsgWa(n,qui){ const tag=(qui?(WA_TAG[qui]||'@'+qui):'@tout le monde')+' ', bon=noteBonNum(n);
-  return `${tag}📢 🔔 Note de ${cap(n.by||'Noureddine')} : ${n.txt||''}`+(bon&&String(n.txt||'').indexOf(bon.split(' · ')[0])<0?` · ${bon}`:'')+(n.at?` · ${new Date(n.at).toLocaleDateString('fr-FR')}`:''); }
+  return `${tag}📢 🔔 Note de ${cap(n.by||'Noureddine')} : ${noteTxt(n)}`+(bon&&noteTxt(n).indexOf(bon.split(' · ')[0])<0?` · ${bon}`:'')+(n.at?` · ${new Date(n.at).toLocaleDateString('fr-FR')}`:''); }
+/* v14.67 : agent d'une note (celui choisi, sinon celui du point automatique) */
+const NOTE_POUR_AUTO={tel:'imane',prix:'imane',tissu:'imane',fiche:'imane',solde:'imane',pieces:'soufiane',tubes:'ahmed',fen:'soufiane',livre:'soufiane',banque:'noureddine',sage:'noureddine',facture:'noureddine'};
+function noteQui(n){ if(n.pour) return n.pour; const m=String(n.id||'').match(/-([a-z]+)$/); return (n.auto&&m&&NOTE_POUR_AUTO[m[1]])||''; }
+function noteTete(n){ const s=noteTxt(n), i=s.indexOf(' · '); return i>0&&s.slice(0,i).indexOf(' ')<0?{num:s.slice(0,i),reste:s.slice(i+3)}:{num:'',reste:s}; }
+const NSEL=new Set();
+function noteCarte(n){ const j=noteJours(n), h=noteTete(n), rel=n.envAt&&Date.now()-n.envAt>2*86400000;
+  return `<div class="nrow"><input type="checkbox" data-nsel="${esc(n.id)}"${NSEL.has(n.id)?' checked':''}><div><b>${esc(h.num)}</b> ${esc(h.reste)}`+
+    (n.envAt?`<small>${rel?'<span class="nrel">⚠ relancer</span> · ':''}<span class="nenv">📤 envoyée le ${new Date(n.envAt).toLocaleDateString('fr-FR')} à ${hm(n.envAt)}</span></small>`:'')+`</div>`+
+    `<span class="nage${j>2?' vieux':''}">${j?j+' j':'aujourd'+String.fromCharCode(8217)+'hui'}</span>`+
+    `<button type="button" class="wabtn" data-nwa="${esc(n.id)}" title="${rel?'Relancer':'Envoyer'} dans le groupe WhatsApp">📤</button><button type="button" data-nfait="${esc(n.id)}" title="Marquer faite">✓</button>`+
+    `<details class="nmore"><summary>⋯</summary>${noteActions(n)}</details></div>`; }
+/* écrit plusieurs notes d'un coup (une seule relecture et un seul envoi) */
+async function noteEcritN(ids,f){
+  if(!SB||!LIVE) throw new Error('pas connecté');
+  const {data,error}=await SB.from('bons').select('data').eq('id','cfg-notes').limit(1); if(error) throw error;
+  const liste=(data&&data[0]&&data[0].data&&Array.isArray(data[0].data.liste))?data[0].data.liste:[];
+  liste.forEach(n=>{ if(n&&ids.indexOf(n.id)>=0){ f(n); n.maj=Date.now(); } });
+  const r=await SB.from('bons').upsert({id:'cfg-notes',num:'__NOTES__',author:USER||'noureddine',data:{v:1,liste},updated_at:new Date().toISOString()}); if(r.error) throw r.error;
+  NOTES=liste; notesRegle(); processAlerts(); if(popKey) renderPop(); }
+const noteEnvoyee=ids=>noteEcritN(ids,n=>{ n.envAt=Date.now(); n.envBy=USER||'noureddine'; });
+function noteMsgGroupe(ids){ const par={}; NOTES.filter(n=>n&&ids.indexOf(n.id)>=0).forEach(n=>{ const q=noteQui(n); (par[q]=par[q]||[]).push(noteMsgWa(n,q)); });
+  const NL=String.fromCharCode(10), L2=NL+NL; return AL_ORDRE.filter(q=>par[q]).map(q=>`* ${q?cap(q):'Tout le monde'} :`+L2+par[q].join(L2)).join(L2); }
+document.getElementById('popBody').addEventListener('change',e=>{
+  const c=e.target.closest('[data-nsel]'); if(c){ c.checked?NSEL.add(c.dataset.nsel):NSEL.delete(c.dataset.nsel); const b=document.querySelector('[data-nwasel]'); if(b){ b.disabled=!NSEL.size; b.textContent='📤 Envoyer la sélection ('+NSEL.size+')'; } return; }
+  if(e.target.id==='nTout'){ const on=e.target.checked; NSEL.clear(); document.querySelectorAll('input[data-nsel]').forEach(x=>{ x.checked=on; if(on) NSEL.add(x.dataset.nsel); });
+    const b=document.querySelector('[data-nwasel]'); if(b){ b.disabled=!NSEL.size; b.textContent='📤 Envoyer la sélection ('+NSEL.size+')'; } } });
+document.getElementById('popBody').addEventListener('click',async e=>{ const w=e.target.closest('[data-nwasel]'); if(!w||!NSEL.size) return; const ids=[...NSEL];
+  try{ navigator.clipboard.writeText(noteMsgGroupe(ids)); }catch(_){} w.textContent='Copié ✓ · collez dans le groupe'; NSEL.clear();
+  try{ await noteEnvoyee(ids); }catch(err){ alert('Copié, mais « envoyée » pas enregistré : '+(err.message||err)); } });
 function noteActions(n){
-  return `<div class="notact"><select data-nqui="${esc(n.id)}">`+['',...NOTE_AGENTS].map(q=>`<option value="${q}"${(n.pour||'')===q?' selected':''}>${q?cap(q):'Tout le monde'}</option>`).join('')+`</select>`+
-    `<button type="button" data-ntrans="${esc(n.id)}" disabled title="Choisissez un autre agent pour lui donner cette note">Transférer</button><button type="button" class="wabtn" data-nwa="${esc(n.id)}">WhatsApp</button>`+
-    `<button type="button" data-nfait="${esc(n.id)}">✓ Fait</button><button type="button" data-nsup="${esc(n.id)}" style="color:#c03030">Supprimer</button></div>`; }
+  return `<div class="notact"><select data-nqui="${esc(n.id)}">`+['',...NOTE_AGENTS].map(q=>`<option value="${q}"${noteQui(n)===q?' selected':''}>${q?cap(q):'Tout le monde'}</option>`).join('')+`</select>`+
+    `<button type="button" data-ntrans="${esc(n.id)}" disabled title="Choisissez un autre agent pour lui donner cette note">Transférer</button>`+
+    `<button type="button" data-nsup="${esc(n.id)}" style="color:#c03030">Supprimer</button></div>`; }
 /* v14.65 : relit cfg-notes, change cette seule note, la renvoie (fusion par note et par maj, comme l'app) */
 async function noteEcrit(id,f){
   if(!SB||!LIVE) throw new Error('pas connecté');
@@ -1707,7 +1786,7 @@ const noteFaite=id=>noteEcrit(id,n=>{ n.fait=Date.now(); n.faitBy=USER||'nouredd
 const noteSupprime=id=>noteEcrit(id,n=>{ n.sup=true; });
 document.getElementById('popBody').addEventListener('change',e=>{ const s=e.target.closest('[data-nqui]'); if(!s) return;
   const n=NOTES.find(x=>x&&x.id===s.dataset.nqui), b=document.querySelector(`[data-ntrans="${CSS.escape(s.dataset.nqui)}"]`);
-  if(b){ const ch=!!n&&(n.pour||'')!==s.value; b.disabled=!ch; b.textContent=ch?'Transférer à '+(s.value?cap(s.value):'tous'):'Transférer'; } });
+  if(b){ const ch=!!n&&noteQui(n)!==s.value; b.disabled=!ch; b.textContent=ch?'Transférer à '+(s.value?cap(s.value):'tous'):'Transférer'; } });
 document.getElementById('popBody').addEventListener('click',async e=>{
   const f=e.target.closest('[data-nfait]'), d=e.target.closest('[data-nsup]'); if(!f&&!d) return;
   const id=(f||d).dataset[f?'nfait':'nsup'], n=NOTES.find(x=>x&&x.id===id);
@@ -1731,8 +1810,9 @@ document.getElementById('popBody').addEventListener('click',async e=>{
     catch(err){ t.disabled=false; t.textContent='Transférer'; alert('Transfert impossible : '+(err.message||err)); }
     return; }
   const w=e.target.closest('[data-nwa]');
-  if(w){ const n=NOTES.find(x=>x&&x.id===w.dataset.nwa); if(!n) return; const sel=document.querySelector(`select[data-nqui="${CSS.escape(n.id)}"]`);
-    const m=noteMsgWa(n,sel?sel.value:(n.pour||'')); try{ navigator.clipboard.writeText(m); }catch(_){} w.textContent='Copié ✓'; }
+  if(w){ const n=NOTES.find(x=>x&&x.id===w.dataset.nwa); if(!n) return;
+    const m=noteMsgWa(n,noteQui(n)); try{ navigator.clipboard.writeText(m); }catch(_){} w.textContent='Copié ✓';
+    try{ await noteEnvoyee([n.id]); }catch(err){ alert('Copié, mais « envoyée » pas enregistré : '+(err.message||err)); } }
 });
 function waBtn(m){ return `<button type="button" class="wabtn" data-wa="${esc(m)}">WhatsApp</button>`; }
 document.getElementById('popBody').addEventListener('click',e=>{ const c=e.target.closest('[data-cal]'); if(c){ calSel=c.dataset.cal; renderPop(); return; }
@@ -1801,6 +1881,8 @@ function formsSansContact(){ const t9=t=>String(t||'').replace(/\D/g,'').slice(-
   return FORMS.filter(o=>o.at>=FORM_DEPUIS&&now-o.at>86400000&&!(t9(o.tel).length===9&&tels.has(t9(o.tel)))); }
 /* v14.59 : ventes d'avant le 13/08/2026 lues dans la feuille « MSTORECASA Historique » (lecture seule) */
 const HIST_SHEET='13HH6v57rE2XHNPAYCnM4wNuITbI09zxRf0fs9VEdXBw', HIST_CUT_V='2026-08-13';
+/* commandes déjà dans la feuille historique (toutes réglées) et ressaisies dans l'app, datées de septembre : comptées une seule fois */
+const HIST_DOUBLONS=new Set(['F2026037','F2026038','F2026039','F2026040','F2026041','F2026042','F2026043','BL26XX15','BL26XX17']);
 let HVENTES=[];
 async function loadHistVentes(){ try{ const r=await fetch(`https://docs.google.com/spreadsheets/d/${HIST_SHEET}/gviz/tq?tqx=out:csv&sheet=ventes&mst=${Date.now()}`,{cache:'no-store'}); if(!r.ok) return;
   const L=parseCSV(await r.text()); if(!L.length) return; const h=L[0].map(x=>String(x||'').trim().toLowerCase()), c=k=>h.indexOf(k), n=v=>parseFloat(String(v||'').replace(/\s/g,''))||0;
