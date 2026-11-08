@@ -321,10 +321,10 @@ async function loadBons(){
     if(error) throw error; all=all.concat(data||[]); if(!data||data.length<1000) break;
   }
   ORDERS=all.filter(o=>o.num&&!String(o.num).startsWith('__'));
-  const c=await SB.from('bons').select('id,data').in('id',['cfg-atelier','cfg-notes','cfg-prospects','cfg-achats','cfg-wamsg','cfg-depenses','cfg-mesures']);
+  const c=await SB.from('bons').select('id,data').in('id',['cfg-atelier','cfg-notes','cfg-prospects','cfg-achats','cfg-wamsg','cfg-depenses','cfg-mesures','cfg-rapsage']);
   if(!c.error) (c.data||[]).forEach(r=>{ const d=r.data||{};
     if(r.id==='cfg-atelier') ATL=d; if(r.id==='cfg-notes') NOTES=Array.isArray(d.liste)?d.liste:[];
-    if(r.id==='cfg-prospects') PROS=Array.isArray(d.liste)?d.liste:[]; if(r.id==='cfg-achats') ACH={bas:d.bas||[],fours:d.fours||[]}; if(r.id==='cfg-mesures') MESJ=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-depenses') DEPAPP=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-wamsg') WA={reg:d.reg||{},camp:Array.isArray(d.camp)?d.camp:[]}; });
+    if(r.id==='cfg-prospects') PROS=Array.isArray(d.liste)?d.liste:[]; if(r.id==='cfg-achats') ACH={bas:d.bas||[],fours:d.fours||[]}; if(r.id==='cfg-mesures') MESJ=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-rapsage') RSJ=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-depenses') DEPAPP=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-wamsg') WA={reg:d.reg||{},camp:Array.isArray(d.camp)?d.camp:[]}; });
   lastBons=Date.now();
 }
 
@@ -508,6 +508,7 @@ PROPS.forEach(p=>{ if(!p.noBlock) block(p.tx,p.ty,p.w,p.h); p.sortY=p.front?(p.t
 
 /* zones cliquables -> écrans */
 const SPOTS=[
+ {key:'rapsage',x:T+2,y:4*T,w:13,h:16},
  {key:'agenda',x:8*T,y:T+1,w:16,h:18},
  {key:'scie',tab:'À couper',badge:'tubes',x:8.6*T-7,y:9.1*T-7,w:14,h:14},
  {key:'tissus',badge:'tissus',x:18.2*T-7,y:9*T-7,w:14,h:14},
@@ -531,7 +532,12 @@ const SPOTS=[
 
 function drawBookshelf(p){ const x=p.tx*T,y=p.ty*T-16; floorShadow(x+2,y+31,15); gba(x,y,16,32,'#b87840','#583018');
   const b=['#d84848','#4878d0','#48a858','#f0c040','#9060c0','#e88038'];
-  for(let s=0;s<3;s++){ const sy=y+3+s*9; R(x+2,sy+7,12,2,'#784820'); for(let i=0;i<6;i++) if(hash(s,i)>.2){ const c=b[(i+s*2)%6]; R(x+2+i*2,sy+1,2,6,c); R(x+2+i*2,sy+1,1,6,shade(c,1.2)); } } }
+  for(let s=0;s<3;s++){ const sy=y+3+s*9; R(x+2,sy+7,12,2,'#784820'); for(let i=0;i<6;i++) if(hash(s,i)>.2){ const c=b[(i+s*2)%6]; R(x+2+i*2,sy+1,2,6,c); R(x+2+i*2,sy+1,1,6,shade(c,1.2)); } }
+  /* v14.84 : rappels SAGE, presse-papier bleu posé au pied de l'étagère, clic = la liste */
+  { const rsl=rsOuvJ(), cx=x+3,cy=y+34; floorShadow(cx+1,cy+13,10); gba(cx,cy,11,13,'#e8f0ff','#3060a0'); R(cx+3,cy-1,5,2,'#a0a8b8');
+    R(cx+2,cy+3,7,1,'#3060a0'); R(cx+2,cy+5,5,1,'#3060a0'); R(cx+2,cy+7,7,1,'#3060a0'); R(cx+2,cy+9,4,1,'#3060a0');
+    tag(cx+5,cy+19,'SAGE '+rsl.length); hit(cx-1,cy-2,13,16,!rsl.length?['Rappels SAGE : rien à vérifier',"Noter un chiffre faux vu dans SAGE : app › Rappels SAGE",'Cliquer pour voir les corrigés']:['Rappels SAGE à vérifier à l\'atelier ('+rsl.length+')',...rsl.slice(0,3).map(rsTxtJ),...(rsl.length>3?['+ '+(rsl.length-3)+' autre(s)']:[]),'Cliquer pour voir la liste']); }
+}
 function drawPlant(p){ const x=p.tx*T,y=p.ty*T; R(x+3,y+13,11,3,'rgba(60,30,10,.25)'); spr('plant',x,y-4); }
 function agentWorking(id,st){ const a=agents.find(a=>a.id===id); return a&&!a.path.length&&a.goal===ST[st]&&a.icon; }
 function monitor(mx,y,on,i){ spr('monitor',mx,y-6);
@@ -784,6 +790,11 @@ function eventsDuJour(iso){ const out=[];
   return out.sort((a,b)=>a.at-b.at);
 }
 let EV=[], EV_SEEN=null, EV_VER=0; let MESJ=[];      /* v14.61 : prises de mesures */
+/* v14.83 : rappels SAGE notés par Noureddine dans l'app (cfg-rapsage), ouverts tant que SAGE n'est pas corrigé */
+let RSJ=[]; const RS_UJ={ml:'ml',m2:'m²',m:'m',u:'pièce(s)'};
+const rsOuvJ=()=>RSJ.filter(x=>x&&!x.sup&&!x.fait).sort((a,b)=>(a.at||0)-(b.at||0));
+const rsQJ=v=>fr(v,2).replace(/,00$/,'').replace(/(,\d)0$/,'$1');
+const rsTxtJ=x=>`${x.ref||x.nom||'Article'}${x.ref&&x.nom?' · '+x.nom:''} · SAGE dit ${rsQJ(Number(x.sage)||0)} ${RS_UJ[x.u]||''}${x.note?' · '+x.note:''}`;
 function processEvents(){ EV=eventsDuJour(jourISO(new Date())); EV_VER++; manqueCompte();
   if(!MANQUE_AUTO&&LIVE){ MANQUE_AUTO=true; if(MANQUE_N>0&&!popKey) setTimeout(()=>{ if(!popKey) openPop('manque'); },800); }
   if(!EV_SEEN){ EV_SEEN=new Set(EV.map(e=>e.id)); return; }
@@ -909,6 +920,9 @@ function computeAlerts(){ notesRegle(); const out=[], today=jourISO(new Date()),
     const bons=[...pour[r]].map(o=>`${o.num} ${o.nom||''}`.trim()).join(', ');
     out.push({id:'tissu|'+r,g:ba?2:3,t:ba?`Tissu ${f&&f.nom?f.nom+' ('+r+')':r} : il manque ≈ ${fr(need[r]-st,1)} m², déjà commandé (${ba.num||'bon d'+String.fromCharCode(8217)+'achat'}) · pour ${bons}`
       :`🧵 Commander maintenant : ${f&&f.nom?f.nom+' ('+r+')':r} · il manque ≈ ${fr(need[r]-st,1)} m² (stock ${fr(st,1)} m²) · pour ${bons}`,c:'Stock'}); });
+  /* v14.83 : rappels SAGE, à vérifier à l'atelier puis corriger dans SAGE (fermés dans l'app) */
+  rsOuvJ().forEach(x=>{ const d=new Date(x.at||now);
+    out.push({id:'rapsage|'+x.id,at:x.at,g:2,t:`📋 Rappel SAGE à vérifier à l'atelier : ${rsTxtJ(x)} (noté le ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')})`,c:'SAGE'}); });
   return out.sort((a,b)=>b.g-a.g);
 }
 /* ---------- reporter une alerte : elle disparaît du PC (et des sons) jusqu'à la date choisie ----------
@@ -1002,8 +1016,8 @@ const BRIEF_KEY='mst-atelier-brief'; let BRIEF=null; try{ BRIEF=JSON.parse(local
 function bossBriefing(){ if(!LIVE||!ORDERS.length) return; const auj=jourISO(new Date()); if(BRIEF&&BRIEF.date===auj) return;
   const h=new Date(); h.setDate(h.getDate()-1); const hier=jourISO(h);
   const enc=ORDERS.reduce((t,o)=>t+paiements(o).filter(p=>p&&p.recu&&String(p.date||'')===hier).reduce((s,p)=>s+(parseFloat(p.montant)||0),0),0);
-  const urg=ALERTS.filter(a=>a.g>=3).length, ac=aConfirmer().length, rdv=evDuJour(auj).length, sg=ALERTS.filter(a=>a.id.indexOf('sage|')===0).length;
-  const txt=`Briefing du matin : ${urg} urgent${urg>1?'s':''} · encaissé hier ${frm(enc)} DH · ${ac} paiement${ac>1?'s':''} à vérifier en banque · ${sg} bon${sg>1?'s':''} à saisir dans SAGE · ${rdv} rendez-vous aujourd’hui`;
+  const urg=ALERTS.filter(a=>a.g>=3).length, ac=aConfirmer().length, rdv=evDuJour(auj).length, sg=ALERTS.filter(a=>a.id.indexOf('sage|')===0).length, rs=rsOuvJ().length;
+  const txt=`Briefing du matin : ${urg} urgent${urg>1?'s':''} · encaissé hier ${frm(enc)} DH · ${ac} paiement${ac>1?'s':''} à vérifier en banque · ${sg} bon${sg>1?'s':''} à saisir dans SAGE${rs?` · ${rs} rappel${rs>1?'s':''} SAGE à vérifier à l’atelier`:''} · ${rdv} rendez-vous aujourd’hui`;
   BRIEF={date:auj,at:Date.now(),txt}; try{ localStorage.setItem(BRIEF_KEY,JSON.stringify(BRIEF)); }catch(e){}
   queue(agentOf('noureddine'),[go(ST.kpi),work(3,txt,'note'),go(ST.deskN)],'note'); }
 /* v14.68 : deux fois par jour (10 h, 16 h), vérifier la banque s'il y a des paiements en attente */
@@ -1382,7 +1396,7 @@ function drawDialog(){
   if(DIALOGQ.length>(auto?1:0)){ const plus=`+${DIALOGQ.length-(auto?1:0)}`; v.fillStyle='#8890a8'; v.textAlign='right'; v.fillText(plus,x+w-24*S,y+10*S); v.textAlign='left'; }
 }
 function hoverAgent(){ if(!mouse) return null; return agents.find(a=>mouse.x>=a.x*T&&mouse.x<=a.x*T+16&&mouse.y>=a.y*T-4&&mouse.y<=a.y*T+16)||null; }
-function hoverSpot(){ if(!mouse) return null; return SPOTS.find(s=>mouse.x>=s.x&&mouse.x<=s.x+s.w&&mouse.y>=s.y&&mouse.y<=s.y+s.h)||null; }
+function hoverSpot(){ if(!mouse) return null; return SPOTS.find(s=>(!s.si||s.si())&&mouse.x>=s.x&&mouse.x<=s.x+s.w&&mouse.y>=s.y&&mouse.y<=s.y+s.h)||null; }
 
 /* ---------- souris, molette, clavier ---------- */
 view.addEventListener('mousedown',e=>{ if(e.button===0) drag={x:e.clientX,y:e.clientY,cx:cam.x,cy:cam.y,moved:false}; });
@@ -1411,7 +1425,7 @@ const SCREENS={
  imane:{title:'Accueil · Imane',tabs:['WhatsApp du jour','Historique WhatsApp','Contacts WhatsApp','Dossiers']},
  manque:{title:"Ce que j'ai manqué",tabs:['Tout','Imane','Ahmed','Soufiane','Noureddine']},
  logs:{title:'📜 Logs',tabs:['Tout','Imane','Ahmed','Soufiane','Noureddine']},
- pc:{title:'PC de Noureddine',tabs:['Alertes','Reportées','Contrôles Imane','En production','Achats','Dossiers','Paiements','Encaissements']},
+ pc:{title:'PC de Noureddine',tabs:['Alertes','Reportées','Contrôles Imane','En production','Achats','Dossiers','Paiements','Encaissements','TVA']},
  scie:{title:'Scie à onglet · Ahmed',tabs:['À couper','Déjà coupées','Par bon']},
  profils:{title:'Profilés en stock',tabs:['Enrouleur','Jour et nuit']},
  kpi:{title:'Chiffres du mois',tabs:['Ce mois']},
@@ -1425,6 +1439,7 @@ const SCREENS={
  tissus:{title:'Tissus à couper · Soufiane',tabs:['À couper']},
  tubes:{title:'Tubes reçus à l\'atelier',tabs:['Reçus','À couper']},
  prets:{title:'Prêt à livrer',tabs:['Prêts']},
+ rapsage:{title:'📋 Rappels SAGE',tabs:['À vérifier','Corrigés']},
 };
 let LOGJ=jourISO(new Date());
 document.getElementById('logsBtn').addEventListener('click',()=>{ LOGJ=jourISO(new Date()); openPop('logs'); });
@@ -1598,6 +1613,29 @@ function renderPop(){ try{ notesRegle(); }catch(e){}
     const liste=(titre,A,col)=>A.length?'<h3 class="wag">'+titre+' · '+A.length+'</h3>'+tbl(['Bon','Client','Paiement','Date','Par','>Montant',col],A.map(x=>[esc(x.o.num),esc(x.o.nom||'—'),esc(x.p.mode||''),x.p.date?dateFr(x.p.date):'',esc(cap((x.st==='cred'&&x.p.credit&&x.p.credit.by)||x.p.by||'')),frm(x.m),x.jo>3?'<span style="color:#c03030">'+x.jo+' j ouvrés</span>':x.jo+' j'])):'';
     s=sum([['Preuves à vérifier',PR.length],['Crédités à confirmer',CR.length],['Reste à encaisser',frm(L.reduce((t,o)=>t+soldeDe(o),0))+' DH']]);
     b=needLogin()+liste('⏳ Preuves reçues : à vérifier en banque, puis le dire à Imane',PR,'>Attente')+liste('🏦 Crédités par Imane : à confirmer dans Dossiers',CR,'>Depuis')+((PR.length||CR.length)?'<h3 class="wag">Bons non soldés</h3>':'')+tbl(['Bon','Client','Situation','>Dû','>Payé','>Reste'],L.map(o=>[esc(o.num),esc(o.nom||'—'),etatTag(etatDe(o)),frm(duDe(o)),frm(payeDe(o)),'<b style="color:#c03030;font-weight:normal">'+frm(soldeDe(o))+'</b>']));
+  } else if(popTab==='TVA'){ /* v14.85 : TVA du trimestre en cours, même calcul que l'app (date du paiement) */
+    const now=new Date(), an=now.getFullYear(), tq=Math.floor(now.getMonth()/3), m0=tq*3;
+    const dansT=d=>{ const x=String(d||''), m=+x.slice(5,7)-1; return x.length>=7&&+x.slice(0,4)===an&&m>=m0&&m<=m0+2; };
+    const banq=m=>/^(vir|ch)/i.test(String(m||'').trim());
+    const isoL=t=>{ const x=new Date(t||Date.now()); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); };
+    const court=m=>{ const l=String(m||'').trim().toLowerCase(); return l.startsWith('vir')?'Virement':l.startsWith('ch')?'Chèque':l.startsWith('esp')?'Espèce':(cap(l)||'—'); };
+    const four=id=>((ACH.fours||[]).find(f=>f.id===id)||{}).nom||'—';
+    const L=[];
+    ORDERS.forEach(o=>{ const f20=/^F20/i.test(String(o.num||'').trim()); paiements(o).forEach(p=>{ if(!p) return; const cs=/^ch/i.test(String(p.mode||'').trim())&&String(p.date||'').slice(0,10)>='2026-11-08', att=cs&&!p.recu, jr=cs&&p.recu?String(p.recu.date||isoL(p.recu.at)).slice(0,10):String(p.date||'').slice(0,10); if(!dansT(jr)) return; const ttc=parseFloat(p.montant)||0, bq=banq(p.mode), ok=(bq||f20)&&!att; L.push({v:1,d:jr,num:o.num,qui:o.nom||'—',mode:court(p.mode),f20:f20&&!bq,chq:att,ok,ttc,tva:ok?ttc*0.2/1.2:0}); }); });
+    (ACH.bas||[]).filter(x=>x&&!x.sup).forEach(x=>{ const tx=parseFloat(x.tva)||0; (x.paies||[]).forEach(p=>{ if(!p||!dansT(p.date)) return; const ttc=parseFloat(p.montant)||0, ok=banq(p.mode); L.push({v:0,d:String(p.date).slice(0,10),num:x.num||'BA',qui:four(x.four),mode:court(p.mode),ok,ttc,tva:ok?ttc*tx/(100+tx):0}); }); });
+    L.sort((a,b)=>a.d.localeCompare(b.d)||b.v-a.v);
+    let sol=0; L.forEach(x=>{ sol+=x.v?x.tva:-x.tva; x.sol=sol; });
+    const V=L.filter(x=>x.v&&x.ok), A=L.filter(x=>!x.v&&x.ok), col=V.reduce((t,x)=>t+x.tva,0), ded=A.reduce((t,x)=>t+x.tva,0), du=col-ded;
+    s=sum([['TVA facturée T'+(tq+1)+' '+an,frm(col,2)+' DH'],['TVA récupérable achats',frm(ded,2)+' DH'],[du>=0?'TVA à payer':'Crédit de TVA',frm(Math.abs(du),2)+' DH'],['Déclarer avant le',new Date(an,m0+4,0).toLocaleDateString('fr-FR')]]);
+    const SEP=' style="border-left:2px solid #5a6988"', jm=d=>d.slice(8,10)+'/'+d.slice(5,7);
+    const cote=x=>`<td${x.v?'':SEP}>${esc(x.num)}<br><small>${esc(x.qui)}</small></td><td>${esc(x.mode)}${x.f20?'<br><small style="color:#c07a10">facture F20</small>':''}${x.chq?'<br><small style="color:#c07a10">chèque à verser</small>':''}</td><td class="r">${frm(x.ttc,2)}</td><td class="r">${x.ok?frm(x.tva,2):'—<br><small>non comptée</small>'}</td>`;
+    const vide=v=>`<td${v?SEP:''}></td><td></td><td></td><td></td>`;
+    const rows=L.map(x=>`<tr${x.ok?'':' style="opacity:.5"'}><td>${jm(x.d)}</td>${x.v?cote(x)+vide(1):vide(0)+cote(x)}<td class="r">${frm(x.sol,2)}</td></tr>`).join('');
+    b=needLogin()+(L.length?`<table><thead><tr><th></th><th colspan="4" style="color:#38b764">VENTES · TVA facturée</th><th colspan="4"${SEP.replace('"','"color:#3b5dc9;')}>ACHATS · TVA récupérable</th><th></th></tr>`+
+      `<tr><th>Date</th><th>Bon · client</th><th>Mode</th><th class="r">TTC</th><th class="r">TVA</th><th${SEP}>Bon d'achat · fourn.</th><th>Mode</th><th class="r">TTC</th><th class="r">TVA</th><th class="r">Solde</th></tr></thead><tbody>${rows}</tbody>`+
+      `<tfoot><tr style="font-weight:bold"><td>Total</td><td colspan="2">${V.length} vente(s) comptée(s)</td><td class="r">${frm(V.reduce((t,x)=>t+x.ttc,0),2)}</td><td class="r" style="color:#38b764">${frm(col,2)}</td><td${SEP} colspan="2">${A.length} achat(s) compté(s)</td><td class="r">${frm(A.reduce((t,x)=>t+x.ttc,0),2)}</td><td class="r" style="color:#3b5dc9">${frm(ded,2)}</td><td class="r" style="color:#c03030">${frm(du,2)}</td></tr></tfoot></table>`
+      :'<div class="empty">Aucun paiement de vente ni d\'achat sur ce trimestre.</div>')+
+      '<div class="muted" style="padding:6px 0">Date = jour du paiement (chèque saisi depuis le 08/11/2026 : jour de l\'encaissement confirmé par Noureddine, pâle tant qu\'il n\'est pas versé). Ventes : virement et chèque, plus tout paiement d\'une facture F20 (même en espèce), TVA = TTC × 20/120. Achats : chèque et virement, au taux du bon. Lignes pâles : espèces hors facture F20, non comptées. Solde = TVA due cumulée. Autres trimestres : app › TVA du trimestre.</div>';
   } else if(popTab==='Encaissements'){
     const L=[]; ORDERS.forEach(o=>paiements(o).forEach(p=>L.push({o,p}))); L.sort((a,b)=>String(b.p.date||'').localeCompare(String(a.p.date||'')));
     const mois=L.filter(x=>ceMois(String(x.p.date||'')+'T12:00:00'));
@@ -1654,6 +1692,13 @@ function renderPop(){ try{ notesRegle(); }catch(e){}
     b=tbl(['Bon','Client','Échéance','Stores',''],Object.keys(byNum).map(n=>{ const o=ORD(n), nom=byNum[n][0].nom||'client';
       return [esc(n),esc(byNum[n][0].nom||'—'),echCell(o),byNum[n].map(w=>`${fr(w.l)}×${fr(w.h)}`).join(' · '),(o&&etatDe(o)==='pret')?waBtn(`@soufian - wash had ${n} (${nom}) échéance ${echTxt(o)} tlivrat ola ba9i ?`):'<small class="muted">bon encore en production</small>']; }))+
       '<div class="muted" style="padding:6px 0">Le bouton WhatsApp ouvre WhatsApp avec le message déjà écrit : choisissez le groupe de l\'atelier, puis envoyez. Le message est aussi copié.</div>';
+  } else if(popKey==='rapsage'){ /* v14.84 : rappels SAGE notés dans l'app */
+    const dd=t=>t?new Date(t).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}):'—', art=x=>esc(x.ref||x.nom||'Article')+(x.ref&&x.nom?' · '+esc(x.nom):''), qu=(v,u)=>rsQJ(Number(v)||0)+' '+(RS_UJ[u]||'');
+    if(popTab==='À vérifier'){ const L=rsOuvJ(); s=sum([['À vérifier',L.length]]);
+      b=(L.length?tbl(['Article','>SAGE dit','Note','Noté le','Par'],L.map(x=>[art(x),qu(x.sage,x.u),esc(x.note||'—'),dd(x.at),esc(cap(x.by||'—'))])):'<div class="empty">Aucun rappel ouvert. SAGE est à jour.</div>')+
+        '<div class="muted" style="padding:6px 0">À l\'atelier : compter le vrai stock, corriger SAGE, puis dans l\'app : Rappels SAGE › Corrigé dans SAGE.</div>'; }
+    else { const L=RSJ.filter(x=>x&&!x.sup&&x.fait).sort((a,b)=>(b.fait||0)-(a.fait||0)).slice(0,40); s=sum([['Corrigés',L.length]]);
+      b=L.length?tbl(['Article','>SAGE disait','>Compté','Corrigé le','Par'],L.map(x=>[art(x),qu(x.sage,x.u),x.compte!==''&&x.compte!=null?qu(String(x.compte).replace(',','.'),x.u):'—',dd(x.fait),esc(cap(x.faitBy||'—'))])):'<div class="empty">Aucun rappel corrigé pour le moment.</div>'; }
   }
   document.getElementById('popSum').innerHTML=s; document.getElementById('popBody').innerHTML=b;
 }
@@ -1696,7 +1741,7 @@ let NOTE_QUI='';
 /* ---------- alertes du PC : choisir l'agent, copier le message pour le groupe WhatsApp ---------- */
 const ALERTE_QUI=[[/^(ahmed|tubesurg|silence)\|?/,'ahmed'],[/^(soufiane|pcstock|sanstissu|retard|proche|pretlong|charge|agenda)\|?/,'soufiane'],
   [/^(impaye|choixtissu|formcontact|wa)/,'imane'],[/^(banque|profil|achat|achpaye|tissu)\|?/,'noureddine']];
-ALERTE_QUI.unshift([/^(sage)/,'noureddine'],[/^(cohprix|cohacompte|cohdouble)/,'imane']);
+ALERTE_QUI.unshift([/^(sage|rapsage)/,'noureddine'],[/^(cohprix|cohacompte|cohdouble)/,'imane']);
 function alerteQuiDefaut(a){ if(a.id.startsWith('note|')){ const n=NOTES.find(x=>'note|'+x.id===a.id); return (n&&n.pour)||''; }
   const r=ALERTE_QUI.find(([re])=>re.test(a.id)); return r?r[1]:''; }
 function alerteActions(a){ const d=alerteQuiDefaut(a);

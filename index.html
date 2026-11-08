@@ -347,6 +347,33 @@ select{appearance:none; -webkit-appearance:none}
 .depdel{border:0; background:none; color:#c62828; font-weight:600; padding:6px 0; cursor:pointer}
 .depimg{max-width:120px; border-radius:8px; display:block; margin-top:4px; cursor:pointer}
 .depcut{font-size:11.5px; color:var(--muted); margin:4px 2px 0}
+/* v14.87 : trésorerie */
+.trs2{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.trs4{display:grid; grid-template-columns:repeat(4,1fr); gap:6px}
+.trs4 input{padding:8px 6px}
+.trsp{color:var(--ok)} .trsn{color:#c62828}
+.trsec{font-size:11px; font-weight:700} .trsec.p{color:var(--ok)} .trsec.n{color:#c62828} .trsec.z{color:var(--muted)}
+.trschq{display:flex; gap:8px; align-items:center; padding:0 0 9px}
+.trschq label{font-size:12px; color:var(--muted); white-space:nowrap}
+.trschq input{flex:1; min-width:0; padding:7px 8px; border:1px solid var(--line); border-radius:8px; background:var(--card2); color:var(--ink); font-size:13.5px}
+.trschq .ok{border:0; background:var(--accent); color:#fff; border-radius:8px; padding:8px 12px; font-weight:700; cursor:pointer}
+.hchk.devt.chaud{border-style:solid; border-color:#e8590c; background:#ffe8dc; color:#c2410c}
+.hchk.devt.froid{border-style:solid; border-color:#3b82f6; background:#e3efff; color:#1d4ed8}
+.rscard{padding:10px 0; border-top:1px solid var(--line); display:grid; gap:4px}
+.rscard:first-of-type{border-top:0}
+.rsh{display:flex; justify-content:space-between; gap:8px; align-items:baseline}
+.rsh b{font-size:14.5px} .rsh span{font-size:12px; color:var(--muted)}
+.rsmut{color:var(--muted); font-size:12px}
+.rsl{display:flex; justify-content:space-between; gap:10px; font-size:13.5px}
+.rsl > span{color:var(--muted)} .rsl b{text-align:right; font-family:"IBM Plex Mono",monospace}
+.rsl b small{font-family:inherit; font-weight:400; color:var(--muted); font-size:11.5px}
+.rsl .rsnote{color:var(--ink); text-align:right}
+.rscor{padding:7px 9px; border-radius:9px; background:var(--card2)}
+.rscor b.up{color:#2e7d32} .rscor b.dn{color:#c62828}
+.rslab{font-size:12px; color:var(--muted); display:block; margin-top:4px}
+.rslab input{width:100%; box-sizing:border-box; margin-top:3px; padding:9px 10px; border:1px solid var(--line); border-radius:9px; background:var(--card2); color:var(--ink); font-size:15px}
+.rsbtn{display:flex; gap:10px; align-items:center; margin-top:4px} .rsbtn .depsave{flex:1}
+.rshist summary{cursor:pointer; font-size:12px; color:var(--muted); font-weight:600; letter-spacing:.03em; text-transform:uppercase}
 .estnew{display:block; width:100%; padding:13px; border:1px dashed var(--accent); border-radius:12px;
   background:var(--accent-soft); color:var(--accent); font-weight:700; font-size:14px; cursor:pointer}
 .estli{display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--line);
@@ -368,6 +395,13 @@ select{appearance:none; -webkit-appearance:none}
 .estres .l b{font-family:"IBM Plex Mono",monospace}
 .estres .tot{font-size:17px; font-weight:800; border-bottom:1px dashed var(--line-strong); padding-bottom:7px; margin-bottom:5px}
 .estres .ok{color:#2e7d32} .estres .ko{color:#c62828}
+.estplan small{display:block; margin-top:6px; font-size:12px; color:var(--muted)}
+.estplan small.ko{color:#c62828}
+.estpar{margin-top:6px; padding-top:6px; border-top:1px dashed var(--line); font-size:13px}
+.estplan details{margin-top:8px}
+.estplan summary{cursor:pointer; padding:9px 0 3px; font-weight:700; font-size:14px; color:var(--accent)}
+.estplan .banner{margin-top:14px}
+.estplan .bilan{margin-top:16px; background:var(--card)}
 .estbtns{display:grid; gap:8px; margin-top:12px}
 .estbtns button{padding:12px; border-radius:11px; border:1px solid var(--line); background:var(--card); font-weight:700; font-size:14px; cursor:pointer}
 .estbtns .go{background:#2e7d32; border-color:#2e7d32; color:#fff}
@@ -465,8 +499,13 @@ select{appearance:none; -webkit-appearance:none}
 .uline > em{font-style:normal; font-size:12.5px; color:var(--muted); line-height:1.45}
 
 /* ---------- recap ---------- */
+.pkavs{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px}
+.pkav{font-size:12px; padding:2px 8px; border-radius:7px; background:var(--card2); color:var(--muted)}
+.pkav.fini{background:var(--ok-soft); color:var(--ok)} .pkav.part{background:var(--warn-soft); color:var(--warn)}
 .recap{background:var(--card); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow)}
 .recap .rh{padding:14px 16px 10px}
+.recap .rhtype{display:flex; justify-content:space-between; align-items:center; gap:10px}
+.recap .rhtype b{font-size:13px; font-weight:700; text-align:right}
 .stats{display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--line)}
 .stat{padding:14px 10px; text-align:center; border-right:1px solid var(--line)}
 .stat:last-child{border-right:0}
@@ -740,6 +779,31 @@ select{appearance:none; -webkit-appearance:none}
   text-transform:uppercase}
 .trtag.att{background:var(--warn-soft,#FAEFDD); color:var(--warn)}
 .trtag.nof{background:var(--card2); color:var(--muted)}
+/* --- v14.85 : TVA du trimestre, ventes à gauche, achats à droite, par date --- */
+.tvsum{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:4px 0 12px}
+.tvsum div{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 12px; min-width:0}
+.tvsum small{display:block; font-size:11px; color:var(--muted); line-height:1.3}
+.tvsum b{display:block; font-family:"IBM Plex Mono",monospace; font-size:17px; font-weight:600; color:var(--ink); margin-top:3px; white-space:nowrap}
+.tvsum .du{background:var(--accent-soft); border-color:transparent}
+.tvsum .du small, .tvsum .du b{color:var(--accent)}
+.tvwrap{border:1px solid var(--line); border-radius:12px; background:var(--card); overflow-x:auto; -webkit-overflow-scrolling:touch}
+.tvt{width:100%; min-width:760px; border-collapse:collapse; table-layout:fixed; font-size:12px}
+.tvt th{font-family:"Archivo",sans-serif; font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--muted); text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); background:var(--card2)}
+.tvt td{padding:7px 6px; border-bottom:1px solid var(--line); vertical-align:top; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink)}
+.tvt .r{text-align:right; font-family:"IBM Plex Mono",monospace}
+.tvt td small{display:block; font-size:10.5px; color:var(--muted); overflow:hidden; text-overflow:ellipsis}
+.tvt td u{text-decoration:none; font-family:"IBM Plex Mono",monospace; font-weight:600}
+.tvt .sep{border-left:2px solid var(--line-strong)}
+.tvt th.gv{background:var(--ok-soft); color:var(--ok)}
+.tvt th.ga{background:var(--info-soft); color:var(--info)}
+.tvt tr.off td{color:var(--muted)}
+.tvt tr.off td u{font-weight:400}
+.tvt td small.f20{color:var(--warn)}
+.tvt tfoot td{font-weight:700; border-bottom:0; border-top:2px solid var(--line-strong); background:var(--card2)}
+.tvt tfoot .tvcv{color:var(--ok)} .tvt tfoot .tvca{color:var(--info)} .tvt tfoot .tvcd{color:var(--accent)}
+.tvt .vide td{white-space:normal; color:var(--muted); text-align:center; padding:18px}
+@media (max-width:420px){ .tvsum b{font-size:14px} }
 .trtot{display:grid; grid-template-columns:1fr 84px 84px; gap:8px; padding:12px;
   margin-top:12px; border-radius:12px; background:var(--accent-soft)}
 .trtot span{font-family:"Archivo",sans-serif; font-size:11px; font-weight:700;
@@ -2824,7 +2888,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
         <input id="remise" inputmode="decimal" placeholder="Remise">
         <span class="unit">% HT</span>
       </div>
-      <div class="seg" id="segFact" style="margin-top:9px">
+      <div class="seg" id="segFact" style="margin-top:9px" hidden>
         <button type="button" data-fact="oui" aria-pressed="true">Facturée<span class="sub">TVA 20 %</span></button>
         <button type="button" data-fact="non" aria-pressed="false">Sans facture<span class="sub">prix HT</span></button>
       </div>
@@ -2913,7 +2977,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
 
     <!-- RECAP -->
     <section class="recap" id="recap">
-      <div class="rh"><div class="label">Récapitulatif</div></div>
+      <div class="rh rhtype"><div class="label">Récapitulatif</div><b id="sType"></b></div>
       <div class="stats">
         <div class="stat"><b id="sNb">0</b><span>Stores</span></div>
         <div class="stat"><b id="sM2">0,00</b><span>m² facturés</span></div>
@@ -3065,6 +3129,11 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
           <span class="tt"><b>Inventaire</b><small id="tileInvSub">Compter le stock réel, sans toucher au stock</small></span>
           <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
+        <button class="tile" id="tileRs" type="button" hidden>
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg></span>
+          <span class="tt"><b>Rappels SAGE</b><small id="tileRsSub">Noter un chiffre faux vu dans SAGE</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
         <button class="tile" id="tileAch" type="button" hidden>
           <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.4 11.2a2 2 0 002 1.6h7.7a2 2 0 002-1.5L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg></span>
           <span class="tt"><b>Achats</b><small id="tileAchSub">Bons de commande fournisseur</small></span>
@@ -3088,6 +3157,14 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
         <button class="tile" id="tileTri" type="button">
           <span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v14H3z"/><path d="M3 10h18M9 10v9"/></svg></span>
           <span class="tt"><b>Encaisse&shy;ments</b><small id="tileTriSub">Banque et espèce, bon par bon</small></span>
+        </button>
+        <button class="tile" id="tileTva" type="button" hidden>
+          <span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5L5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></span>
+          <span class="tt"><b>TVA du trimestre</b><small id="tileTvaSub">Ventes et achats, à payer</small></span>
+        </button>
+        <button class="tile" id="tileTres" type="button" hidden>
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 21h18"/></svg></span>
+          <span class="tt"><b>Trésorerie</b><small id="tileTresSub">Caisse et banque</small></span>
         </button>
         <button class="tile" id="tileCout" type="button">
           <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span>
@@ -3426,6 +3503,16 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
   </div>
 </div>
 
+<!-- v14.83 : RAPPELS SAGE -->
+<div class="sheet" id="rsSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="rsSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Rappels SAGE</h2>
+    <button class="icon-btn" type="button" data-refresh aria-label="Actualiser"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+  </div>
+  <div class="sheet-body" id="rsBody"></div>
+</div>
+
 <!-- v14.21 : ACHATS -->
 <div class="sheet" id="mesSheet">
   <div class="sheet-top">
@@ -3443,6 +3530,15 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
     <button class="icon-btn" type="button" data-refresh aria-label="Actualiser"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
   </div>
   <div class="sheet-body" id="depBody"></div>
+</div>
+
+<div class="sheet" id="tresSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="tresSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Trésorerie</h2>
+    <button class="icon-btn" type="button" data-refresh aria-label="Actualiser"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+  </div>
+  <div class="sheet-body" id="tresBody"></div>
 </div>
 
 <div class="sheet" id="achSheet">
@@ -3734,10 +3830,6 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5L5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
         <input id="prosRemise" inputmode="decimal" placeholder="Remise" autocomplete="off">
         <span class="unit">% HT</span>
-      </div>
-      <div class="seg" id="prosFact" style="margin-top:9px">
-        <button type="button" data-pfact="oui" aria-pressed="true">Facturée<span class="sub">TVA 20 %</span></button>
-        <button type="button" data-pfact="non" aria-pressed="false">Sans facture<span class="sub">prix HT</span></button>
       </div>
 
       <div class="prsub"><span>Tissus envisagés</span><b id="prosRefCount">aucun</b></div>
@@ -4051,6 +4143,27 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
   </div>
 </div>
 
+<!-- v14.85 : TVA DU TRIMESTRE -->
+<div class="sheet" id="tvaSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="tvaSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>TVA du trimestre</h2>
+  </div>
+  <div class="sheet-body">
+    <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+    <div class="filters" id="tvaTrim">
+      <button type="button" data-t="1">T1 jan-mar</button>
+      <button type="button" data-t="2">T2 avr-jun</button>
+      <button type="button" data-t="3">T3 jui-sep</button>
+      <button type="button" data-t="4">T4 oct-déc</button>
+    </div>
+    <div class="filters" id="tvaAns"></div>
+    <div class="tvsum" id="tvaSum"></div>
+    <div class="tvwrap" id="tvaTab"></div>
+    <p class="hint" id="tvaHint"></p>
+  </div>
+</div>
+
 <!-- JOURNAL DE FABRICATION -->
 <div class="sheet" id="logSheet">
   <div class="sheet-top">
@@ -4343,7 +4456,7 @@ function blank(){
     refs:[],
     prix: LS.get("mst_prix", ""),
     prixJN: LS.get("mst_prixjn", ""),
-    fact: LS.get("mst_fact", "oui"),
+    fact: "oui",                  /* v14.81 : tout nouveau bon est facturé, TVA au total */
     posePrix: LS.get("mst_poseprix", ""),
     poseMode: LS.get("mst_posemode", "forfait"),
     pose:"Pose",
@@ -4817,8 +4930,13 @@ function renderDecoupe(){
 const TVA = 0.20;
 function ttc(ht){ return ht * (1 + TVA); }
 function tvaDe(ht){ return ht * TVA; }
-/* Un bon facturé porte la TVA ; un bon sans facture reste au prix HT. */
+/* Un bon facturé porte la TVA. v14.81 : on n'en crée plus sans facture ; les anciens gardent leur total HT. */
 function facture(o){ return !o || o.fact !== "non"; }
+/* v14.86 : tous les bons sont facturés. Seul Noureddine peut passer un bon en
+   « sans facture », et lui seul voit cette mention. Les anciens bons sans facture
+   gardent leur prix HT ; pour les autres, ils s'affichent simplement « HT ». */
+function factAllowed(){ return !!USER && String(USER.login || "").toLowerCase() === "noureddine"; }
+function libSansFact(){ return factAllowed() ? "sans facture" : "HT"; }
 function prixClient(o, ht){
   if (!facture(o)) return ht;
   return arrondi(o) ? r2(r2(ht) + r2(r2(ht) * TVA)) : ttc(ht);
@@ -4832,6 +4950,12 @@ function storesTotal(t){
 function renderRecap(){
   const t = totals();
   $("sNb").textContent = t.nb;
+  /* v14.80 : le type de store ; si le bon mélange les deux, le nombre de chacun */
+  const vd = validDims(), nJ = vd.filter(d => d.t === "JN").length, nE = vd.length - nJ;
+  $("sType").textContent = !S.type ? "Type à choisir"
+    : S.type === "JN" ? "Jour et nuit"
+    : S.type !== "MIX" ? "Enrouleur"
+    : vd.length ? nE + " Enrouleur + " + nJ + " Jour et nuit" : "Enrouleur + Jour et nuit";
   $("sM2").textContent = fr(t.m2f);
   $("sMl").textContent = fr(t.ml);
   $("dimCount").textContent = t.nb + (t.nb > 1 ? " stores" : " store");
@@ -4859,6 +4983,8 @@ function renderRecap(){
     $("sRem").textContent = "\u2212 " + fr(rem) + " MAD";
   }
   const avecTva = facture(S);
+  /* v14.86 : le choix Facturée / Sans facture n'est montré qu'à Noureddine */
+  $("segFact").hidden = !factAllowed();
   $("htBar").hidden  = !(montre && avecTva);
   $("tvaBar").hidden = !(montre && avecTva);
   $("totBar").hidden = !montre;
@@ -5313,9 +5439,8 @@ function poseTotal(){
 
 $("segFact").addEventListener("click", e => {
   const b = e.target.closest("button[data-fact]");
-  if (!b) return;
+  if (!b || !factAllowed()) return;
   S.fact = b.dataset.fact;
-  LS.set("mst_fact", S.fact);
   [...$("segFact").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   renderRecap();
 });
@@ -5513,7 +5638,7 @@ function valLisible(k, v){
   const t = String(v === undefined || v === null ? "" : v).trim();
   if (!t) return "vide";
   if (k === "ech" && t.length === 10) return t.split("-").reverse().join("/");
-  if (k === "fact") return t === "non" ? "sans facture" : "facturée";
+  if (k === "fact") return t === "non" ? libSansFact() : "facturée";
   if (k === "poseMode") return t === "fenetre" ? "par fenêtre" : "forfait";
   if (k === "type") return t === "MIX" ? "les deux" : (t === "JN" ? "jour et nuit" : "enrouleur");
   return t;
@@ -5662,12 +5787,13 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
   if (id === "achSheet"){ achRetour(); return; }
   if (id === "mesSheet"){ mesRetour(); return; }
   if (id === "depSheet"){ nav("home"); return; }
+  if (id === "tresSheet"){ nav("home"); return; }
   if (id === "coutSheet" && COUT_RETOUR === "mesSheet"){ nav("mesSheet"); renderMes(); return; }
   if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
       id === "nomSheet"   || id === "coutSheet" || id === "cliSheet" || id === "docSheet" ||
-      id === "logSheet" || id === "paySheet" || id === "triSheet" ||
+      id === "logSheet" || id === "paySheet" || id === "triSheet" || id === "tvaSheet" ||
       id === "atlSheet" || id === "remuSheet" || id === "prosSheet" ||
-      id === "noteSheet" || id === "persoSheet" || id === "invSheet") nav("home");
+      id === "noteSheet" || id === "persoSheet" || id === "invSheet" || id === "rsSheet") nav("home");
   else closeSheet(id);
 }));
 
@@ -6586,9 +6712,13 @@ async function pullBonsVrai(){
     const distants = {};
     ids.forEach(r => { distants[r.id] = true; });
     data.forEach(r => {
-      if ([ATL_ID, PROS_ID, WA_ID, PROMO_ID, INV_ID, PERSO_ID, NOTE_ID, NOM_ID, ACH_ID, EST_ID, DEP_ID, MES_ID].indexOf(r.id) >= 0) CFGUA[r.id] = r.updated_at;
+      if ([ATL_ID, PROS_ID, WA_ID, PROMO_ID, INV_ID, PERSO_ID, NOTE_ID, NOM_ID, ACH_ID, EST_ID, DEP_ID, MES_ID, RS_ID, TRS_ID].indexOf(r.id) >= 0) CFGUA[r.id] = r.updated_at;
       if (r.id === MES_ID){                         /* v14.61 : prises de mesures, pas des bons */
         if (mesFusion(r.data)) try { mesApplique(); if ($("mesSheet").classList.contains("open") && !MES_ED) renderMes(); renderMesTile(); } catch(e){}
+        return;
+      }
+      if (r.id === RS_ID){                          /* v14.83 : rappels SAGE, pas des bons */
+        if (rsAllowed() && rsFusion(r.data)) try { if ($("rsSheet").classList.contains("open")) renderRs(); renderRsTile(); } catch(e){}
         return;
       }
       if (r.id === DEP_ID){                         /* v14.57 : dépenses, pas des bons */
@@ -6623,6 +6753,7 @@ async function pullBonsVrai(){
       }
       if (r.id === ACH_ID){                         /* v14.21 : achats */
         if (achAllowed()) fusionAch(r.data);
+        try { if ($("tvaSheet").classList.contains("open")) renderTva(); } catch(e){}
         return;
       }
       if (r.id === INV_ID){
@@ -6649,6 +6780,12 @@ async function pullBonsVrai(){
         }
         return;
       }
+      if (r.id === TRS_ID){                         /* v14.87 : trésorerie de Noureddine, pas un bon */
+        CFGUA[r.id] = r.updated_at;
+        if (factAllowed() && trsFusion(r.data)) try { if ($("tresSheet").classList.contains("open")) renderTres(); renderTresTile(); } catch(e){}
+        return;
+      }
+      if (String(r.id).indexOf("cfg-") === 0){ CFGUA[r.id] = r.updated_at; return; }   /* v14.87 : une rangée réservée inconnue n'est jamais un bon */
       distants[r.id] = true;
       if (TOMBS.indexOf(r.id) >= 0) return;        /* supprimé ici, pas encore côté base */
       const cur = map[r.id];
@@ -6882,7 +7019,7 @@ function nav(where){
   armBack();
   if (where !== "coutSheet") COUT_RETOUR = null;
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet","noteSheet","persoSheet","promoSheet","invSheet","invRollSheet","achSheet","mesSheet","depSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","tvaSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet","noteSheet","persoSheet","promoSheet","invSheet","invRollSheet","achSheet","mesSheet","depSheet","rsSheet","tresSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -7214,6 +7351,7 @@ $("homeTodo").addEventListener("click", e => {
 });
 
 function renderHome(){
+  try { finAuto(); } catch(e){}
   const all = ORDERS;
   const drafts = all.filter(o => o.status !== "sent").length;
   const dern = lastNum();
@@ -7249,6 +7387,7 @@ function renderHome(){
       (cliDus.length ? "  ·  " + cliDus.length + " avec un reste à payer" : "  ·  tous soldés")
     : "Historique et paiements par client";
   $("tileTri").hidden = !adminAllowed();
+  $("tileTva").hidden = !adminAllowed();
   $("tileRemu").hidden = !adminAllowed();
   $("tileAtl").hidden = !adminAllowed();
   try { renderPersoHome(); } catch(e){}
@@ -7288,6 +7427,13 @@ function renderHome(){
     $("tileTriSub").textContent = t.n
       ? fr(t.banque,0) + " banque  ·  " + fr(t.espece,0) + " espèce  ·  T" + triNo + " " + triAn
       : "Aucun encaissement sur T" + triNo + " " + triAn;
+    try {
+      const tq = Math.floor(new Date().getMonth() / 3) + 1, an = new Date().getFullYear();
+      const tv = tvaTotaux(tvaLignes(an, tq));
+      $("tileTvaSub").textContent = (tv.nV || tv.nA)
+        ? (tv.du >= 0 ? "À payer T" + tq + " : " + fr(tv.du, 0) + " MAD" : "Crédit T" + tq + " : " + fr(-tv.du, 0) + " MAD")
+        : "Rien sur T" + tq + " " + an;
+    } catch(e){}
   }
   if (payAllowed()){
     const bp = bonsPayables();
@@ -7332,6 +7478,8 @@ function renderHome(){
   try { renderJeuTile(); } catch(e){}
   try { renderDepTile(); } catch(e){}
   try { renderMesTile(); } catch(e){}
+  try { renderRsTile(); } catch(e){}
+  try { renderTresTile(); } catch(e){}
   const ti = $("tileInv");
   if (ti){
     ti.hidden = !invAllowed();
@@ -7946,10 +8094,12 @@ function renderTout(){
   essai(renderPerso);
   essai(renderPersoHome);
   essai(renderPromo);
+  essai(renderTresTile);
+  essai(() => { if ($("tresSheet").classList.contains("open")) renderTres(); });
 }
 
 function ecranOuvert(){
-  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","paySheet","refSheet","cutPickSheet","nomPickSheet","shotSheet","atlSheet","remuSheet","docSheet","triSheet","cliSheet","prosSheet","noteSheet","persoSheet","promoSheet","invSheet","invRollSheet"];
+  const ids = ["histSheet","stockSheet","artSheet","cutSheet","nomSheet","coutSheet","logSheet","paySheet","refSheet","cutPickSheet","nomPickSheet","shotSheet","atlSheet","remuSheet","docSheet","triSheet","tvaSheet","cliSheet","prosSheet","noteSheet","persoSheet","promoSheet","invSheet","invRollSheet","rsSheet","tresSheet"];
   for (let i = 0; i < ids.length; i++){
     const el = $(ids[i]);
     if (el && el.classList.contains("open")) return ids[i];
@@ -8091,6 +8241,38 @@ function finRefus(o){
   return "Dossier à " + c.pct + " % : il manque " + liste;
 }
 function estFini(o){ return !!(o && o.fini); }
+/* v14.84 : un dossier qui atteint 100 % se classe terminé tout seul (FIN).
+   Seuls ceux qui ont le droit de classer (Noureddine, Imane) déclenchent
+   l'écriture. Un dossier rouvert à la main n'est pas reclassé tant qu'il reste
+   à 100 % : il le sera la prochaine fois qu'il redescend puis revient à 100 %. */
+let FINAUTO_EN_COURS = false;
+function finAuto(){
+  if (FINAUTO_EN_COURS || !finAllowed()) return 0;
+  FINAUTO_EN_COURS = true;
+  const classes = [];
+  try {
+    ORDERS.forEach(o => {
+      if (!o || o.status !== "sent" || estFini(o)) return;
+      let ok = false;
+      try { ok = finPossible(o); } catch(e){ ok = false; }
+      if (o.finRouvert){
+        if (!ok){ delete o.finRouvert; touche(o); pushBon(o); }   /* repassé sous 100 % : la règle revient */
+        return;
+      }
+      if (!ok) return;
+      o.fini = {at: Date.now(), by: "auto"};
+      touche(o); pushBon(o);
+      classes.push(o.num);
+    });
+    if (classes.length){
+      persistOrders();
+      toast(classes.length === 1
+        ? "Dossier " + classes[0] + " à 100 % : classé terminé (FIN)"
+        : classes.length + " dossiers à 100 % classés terminés (FIN)");
+    }
+  } finally { FINAUTO_EN_COURS = false; }
+  return classes.length;
+}
 function estSage(o){ return !!(o && o.sage); }
 /* Une pièce devis existe t elle déjà dans SAGE pour ce bon ? C'est autre
    chose que la saisie finale : on coche celle ci le jour où l'on prépare le
@@ -8365,7 +8547,7 @@ function histCarte(o, fmt2){
         '<span class="hcmid">' +
           ((t.prix || t.pose)
             ? '<span class="hcamt"><b' + (pp <= 0 && rs > 0.01 && et !== "devis" ? ' style="color:var(--accent)"' : '') + '>' + fmt2(du) + ' <span>MAD</span></b>' +
-              '<small>' + (facture(o) ? "TTC · facturé · " + fmt2(htDe(o)) + " HT" : "HT · sans facture") + (paye ? "  ·  payé" : "") + '</small></span>'
+              '<small>' + (facture(o) ? "TTC · facturé · " + fmt2(htDe(o)) + " HT" : (factAllowed() ? "HT · sans facture" : "HT")) + (paye ? "  ·  payé" : "") + '</small></span>'
             : '<span class="hcamt rien"><b>Prix à saisir</b></span>') +
           (o.ech
             ? '<span class="hcliv">' + (o.pose === "Livraison" ? "Livraison" : "Pose") + '<b>' + jourCourtLiv(o.ech) + '</b>' +
@@ -8402,6 +8584,7 @@ function histCarte(o, fmt2){
           ? '<button class="hchk sagedev' + (estSageDev(o) ? " on" : "") + '" type="button" data-sagedev="' + o.id + '" title="Devis déjà créé dans SAGE">' + (estSageDev(o) ? "✓ DEV" : "DEV") + '</button>' +
             '<button class="hchk sage' + (estSage(o) ? " on" : "") + '" type="button" data-sage="' + o.id + '" title="Commande saisie dans SAGE">' + (estSage(o) ? "✓ SAGE" : "SAGE") + '</button>'
           : '') +
+        (et === "devis" && factAllowed() ? devTempBtn(o) : '') +
         '<span class="sp"></span>' +
         (finAllowed()
           ? '<button class="hcib wa" type="button" data-resume="' + o.id + '" title="Résumé pour le groupe">' +
@@ -8548,6 +8731,12 @@ $("histBody").addEventListener("click", e => {
   const sage = e.target.closest("button[data-sage]");
   const sdev = e.target.closest("button[data-sagedev]");
   const res  = e.target.closest("button[data-resume]");
+  const devt = e.target.closest("button[data-devt]");
+
+  if (devt){
+    if (factAllowed()){ devTempCycle(devt.dataset.devt); renderHist(); }
+    return;
+  }
 
   if (res){
     const o = ORDERS.find(x => x.id === res.dataset.resume);
@@ -8559,7 +8748,8 @@ $("histBody").addEventListener("click", e => {
     const o = ORDERS.find(x => x.id === fin.dataset.fini);
     if (!o || !finAllowed()) return;
     if (!estFini(o) && !finPossible(o)){ toast(finRefus(o)); return; }
-    if (estFini(o)) delete o.fini; else o.fini = {at: Date.now(), by: (USER && USER.login) || ""};
+    if (estFini(o)){ delete o.fini; o.finRouvert = {at: Date.now(), by: (USER && USER.login) || ""}; }
+    else { o.fini = {at: Date.now(), by: (USER && USER.login) || ""}; delete o.finRouvert; }
     touche(o); persistOrders(); pushBon(o);
     renderHist(); renderHome();
     toast(estFini(o) ? "Dossier " + o.num + " classé terminé" : "Dossier " + o.num + " rouvert");
@@ -8720,7 +8910,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.79";
+const APP_VERSION = "14.87";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -9809,6 +9999,73 @@ function ordDims(o){
   return dims;
 }
 
+/* v14.82 : une bande de tissu, la même dans le Plan de coupe et dans l'Estimation. */
+function bandeCarte(b){
+  const parts = b.items.map(x => ({len:fabW(x)}));
+  if (b.restLaize > 0.5) parts.push({len:b.restLaize, rest:true});
+  let h = '<div class="pcard' + (b.src === "chute" ? " stockcard" : "") + '">' +
+    '<div class="pcard-head"><b>' + (b.src === "chute" ? b.label : "Bande " + b.n) + '</b><span class="badge">' +
+      (b.src === "chute" ? "chute du stock" : "dérouler " + fr(b.unroll,0) + " cm") + '</span></div>' +
+    strip(parts, b.width);
+  b.items.forEach(x => {
+    h += '<div class="cutline">' +
+      '<span class="cm"><b>Fenêtre ' + x.n + '</b>  <span>' + fr(x.l,0) + ' × ' + fr(x.h,0) + ' cm</span></span>' +
+      '<span class="cv">' + cm(fabW(x)) + ' × ' + fr((x.t === "JN" ? 2*x.h : x.h) + surplusDe(x.t),0) + ' cm</span>' +
+    '</div>';
+  });
+  return h + '<div class="fate ' + (b.latFate === "keep" ? "keep" : (b.chuteLat > 0.01 ? "drop" : "full")) + '">' +
+    (b.src === "chute"
+      ? "Pris dans une chute du stock, dérouler " + fr(b.unroll,0) + " cm sur ce morceau." +
+        (b.restLaize >= 0.5 ? " Il reste " + fr(b.restLaize,0) + " cm de large sur le côté." : "")
+      : b.restLaize < 0.5
+        ? "Toute la largeur du rouleau est utilisée."
+        : "Bande de " + fr(b.restLaize,0) + " cm de large qui reste sur le côté, " +
+          (b.latFate === "keep" ? "à garder." : "à jeter.")) +
+  '</div></div>';
+}
+/* Ce que cette bande laisse derrière elle, pour le bilan des chutes. */
+function bandeBilan(b, ref, bilan){
+  if (b.restLaize >= 0.5){
+    const line = {t: ref + "  ·  " + (b.src === "chute" ? b.label : "bande " + b.n) + "  ·  côté",
+                  v: fr(b.restLaize,0) + " × " + fr(b.unroll,0) + " cm", q: b.chuteLat};
+    (b.latFate === "keep" ? bilan.keep : bilan.drop).push(line);
+  }
+  if (b.chuteLong > 0.005){
+    bilan.drop.push({t: ref + "  ·  " + (b.src === "chute" ? b.label : "bande " + b.n) + "  ·  bout de longueur",
+                     v: fr(b.chuteLong) + " m²", q: b.chuteLong});
+  }
+}
+function bilanChutes(bilan, note){
+  if (!bilan.keep.length && !bilan.drop.length) return "";
+  let h = '<div class="bilan"><h3>Bilan des chutes de cette commande</h3>' +
+    '<p class="bnote">' + (note || "À traiter une fois la coupe terminée. Cette liste ne sert pas à couper.") + '</p>';
+  if (bilan.keep.length){
+    h += '<div class="bsubt">À garder en stock (' + bilan.keep.length + ')</div>';
+    bilan.keep.forEach(l => {
+      h += '<div class="bline"><span class="bdot keep"></span><span class="bl">' + l.t + '</span><span class="bv">' + l.v + '</span></div>';
+    });
+  }
+  if (bilan.drop.length){
+    h += '<div class="bsubt">À jeter (' + bilan.drop.length + ')</div>';
+    bilan.drop.forEach(l => {
+      h += '<div class="bline"><span class="bdot"></span><span class="bl">' + l.t + '</span><span class="bv">' + l.v + '</span></div>';
+    });
+  }
+  const sum = a => a.reduce((t,l) => t + (l.q || 0), 0);
+  const u = cutMode === "tube" ? " m" : " m²";
+  const tk = sum(bilan.keep), td = sum(bilan.drop);
+  h += '<div class="btots">' +
+    '<div class="btr"><span>Total à garder  ·  ' + bilan.keep.length + ' morceau' + (bilan.keep.length > 1 ? 'x' : '') + '</span><b>' + fr(tk) + u + '</b></div>' +
+    '<div class="btr"><span>Total à jeter  ·  ' + bilan.drop.length + ' morceau' + (bilan.drop.length > 1 ? 'x' : '') + '</span><b>' + fr(td) + u + '</b></div>' +
+    '<div class="btr grand"><span>Total des chutes</span><b>' + fr(tk + td) + u + '</b></div>' +
+  '</div>';
+  h += '<div class="btot"><span>' + (cutMode === "tube"
+      ? "Seuil de réutilisation : " + CUT.seuilBarre + " cm. Les longueurs sont des mètres de barre."
+      : "Seuil de réutilisation : " + CUT.seuilLaize + " cm de large sur " + CUT.seuilLong + " cm de long.") +
+    '</span></div>';
+  return h + '</div>';
+}
+
 function renderPlan(){
   const out = $("cutOut");
   const all = ORDERS;
@@ -9948,36 +10205,8 @@ function renderPlan(){
          ([...new Set(byRef[ref].map(x => x.t))].map(t => FABDROP[t] + " cm" + (fams.length > 1 ? " (" + (t === "JN" ? "jour et nuit" : "enrouleur") + ")" : "")).join(" et ")) +
          '.</p>';
     T.bands.forEach(b => {
-      const parts = b.items.map(x => ({len:fabW(x)}));
-      if (b.restLaize > 0.5) parts.push({len:b.restLaize, rest:true});
-      h += '<div class="pcard' + (b.src === "chute" ? " stockcard" : "") + '">' +
-        '<div class="pcard-head"><b>' + (b.src === "chute" ? b.label : "Bande " + b.n) + '</b><span class="badge">' +
-          (b.src === "chute" ? "chute du stock" : "dérouler " + fr(b.unroll,0) + " cm") + '</span></div>' +
-        strip(parts, b.width);
-      b.items.forEach(x => {
-        h += '<div class="cutline">' +
-          '<span class="cm"><b>Fenêtre ' + x.n + '</b>  <span>' + fr(x.l,0) + ' × ' + fr(x.h,0) + ' cm</span></span>' +
-          '<span class="cv">' + cm(fabW(x)) + ' × ' + fr((x.t === "JN" ? 2*x.h : x.h) + surplusDe(x.t),0) + ' cm</span>' +
-        '</div>';
-      });
-      if (b.restLaize >= 0.5){
-        const line = {t: ref + "  ·  " + (b.src === "chute" ? b.label : "bande " + b.n) + "  ·  côté",
-                      v: fr(b.restLaize,0) + " × " + fr(b.unroll,0) + " cm", q: b.chuteLat};
-        (b.latFate === "keep" ? bilan.keep : bilan.drop).push(line);
-      }
-      if (b.chuteLong > 0.005){
-        bilan.drop.push({t: ref + "  ·  " + (b.src === "chute" ? b.label : "bande " + b.n) + "  ·  bout de longueur",
-                         v: fr(b.chuteLong) + " m²", q: b.chuteLong});
-      }
-      h += '<div class="fate ' + (b.latFate === "keep" ? "keep" : (b.chuteLat > 0.01 ? "drop" : "full")) + '">' +
-        (b.src === "chute"
-          ? "Pris dans une chute du stock, dérouler " + fr(b.unroll,0) + " cm sur ce morceau." +
-            (b.restLaize >= 0.5 ? " Il reste " + fr(b.restLaize,0) + " cm de large sur le côté." : "")
-          : b.restLaize < 0.5
-            ? "Toute la largeur du rouleau est utilisée."
-            : "Bande de " + fr(b.restLaize,0) + " cm de large qui reste sur le côté, " +
-              (b.latFate === "keep" ? "à garder." : "à jeter.")) +
-      '</div></div>';
+      h += bandeCarte(b);
+      bandeBilan(b, ref, bilan);
     });
     if (T.impossible.length){
       h += '<div class="pcard"><div class="fate drop">' + T.impossible.length +
@@ -10000,35 +10229,7 @@ function renderPlan(){
          (fams.indexOf("JN") >= 0 ? ', et 2 × hauteur + ' + CUT.surJN + ' cm pour le jour et nuit, le tissu faisant une boucle autour du rail' : '') + '.') +
        '</p>';
   /* bilan des chutes, après le plan, dans un bloc volontairement discret */
-  if (bilan.keep.length || bilan.drop.length){
-    h += '<div class="bilan"><h3>Bilan des chutes de cette commande</h3>' +
-      '<p class="bnote">À traiter une fois la coupe terminée. Cette liste ne sert pas à couper.</p>';
-    if (bilan.keep.length){
-      h += '<div class="bsubt">À garder en stock (' + bilan.keep.length + ')</div>';
-      bilan.keep.forEach(l => {
-        h += '<div class="bline"><span class="bdot keep"></span><span class="bl">' + l.t + '</span><span class="bv">' + l.v + '</span></div>';
-      });
-    }
-    if (bilan.drop.length){
-      h += '<div class="bsubt">À jeter (' + bilan.drop.length + ')</div>';
-      bilan.drop.forEach(l => {
-        h += '<div class="bline"><span class="bdot"></span><span class="bl">' + l.t + '</span><span class="bv">' + l.v + '</span></div>';
-      });
-    }
-    const sum = a => a.reduce((t,l) => t + (l.q || 0), 0);
-    const u = cutMode === "tube" ? " m" : " m²";
-    const tk = sum(bilan.keep), td = sum(bilan.drop);
-    h += '<div class="btots">' +
-      '<div class="btr"><span>Total à garder  ·  ' + bilan.keep.length + ' morceau' + (bilan.keep.length > 1 ? 'x' : '') + '</span><b>' + fr(tk) + u + '</b></div>' +
-      '<div class="btr"><span>Total à jeter  ·  ' + bilan.drop.length + ' morceau' + (bilan.drop.length > 1 ? 'x' : '') + '</span><b>' + fr(td) + u + '</b></div>' +
-      '<div class="btr grand"><span>Total des chutes</span><b>' + fr(tk + td) + u + '</b></div>' +
-    '</div>';
-    h += '<div class="btot"><span>' + (cutMode === "tube"
-        ? "Seuil de réutilisation : " + CUT.seuilBarre + " cm. Les longueurs sont des mètres de barre."
-        : "Seuil de réutilisation : " + CUT.seuilLaize + " cm de large sur " + CUT.seuilLong + " cm de long.") +
-      '</span></div>';
-    h += '</div>';
-  }
+  h += bilanChutes(bilan);
 
   out.innerHTML = h;
 }
@@ -10280,6 +10481,14 @@ function dessinePick(){
     const t = orderTotals(o);
     const d = new Date(o.date);
     const et = pickEtat(o);
+    /* v14.80 : Noureddine voit où en sont Ahmed et Soufiane, bon par bon (pas sur un devis ni un brouillon) */
+    let suivi = "";
+    if (adminAllowed() && o.status === "sent" && etatDe(o) !== "devis"){
+      const av = avancement(o);
+      const puce = (lab, x) => x.tot ? '<span class="pkav' + (x.fait >= x.tot ? " fini" : x.fait ? " part" : " zero") + '">' + lab + ' <b>' + x.fait + '/' + x.tot + '</b></span>' : "";
+      const h = puce("Tubes", av.tube) + puce("Fenêtres", av.fen);
+      if (h) suivi = '<span class="pkavs">' + h + '</span>';
+    }
     const btn = document.createElement("button");
     btn.className = "hrow" + (et ? (et.ok ? " pkok" : " pkatt") : "");
     btn.style.width = "100%";
@@ -10301,7 +10510,7 @@ function dessinePick(){
                (o.pose === "Livraison" ? "Livraison" : "Pose") + " le " +
                esc(String(o.ech).split("-").reverse().join("/")) +
                (echRetard(o) ? "  ·  en retard" : "") + '</span>' : '') +
-      (et ? '<br>' + et.sous : '') + '</small></span></span>';
+      (et ? '<br>' + et.sous : '') + '</small>' + suivi + '</span></span>';
     body.appendChild(btn);
   });
 }
@@ -10990,7 +11199,7 @@ function renderPayBon(o){
       '<div class="big">' + frm(solde ? d : r) + ' MAD</div>' + payBarre(d, payConfDe(o), payAttDe(o)) +
       '<div class="l"><span>Payé <b class="ok">' + frm(p) + '</b></span><span>Total <b>' + frm(d) + '</b> ' + (facture(o) ? "TTC" : "HT") + '</span></div>' +
       '<div class="sm">' + etatLabel(et) + '  ·  ' + esc(typeLabel(o)) + '  ·  ' + t.nb + (t.nb > 1 ? " fenêtres" : " fenêtre") + '  ·  ' +
-        fr(t.m2 || 0, 2) + ' m²  ·  ' + (facture(o) ? "facturé" : "sans facture") + (payDateBon(o) ? '  ·  bon du ' + payDateBon(o) : '') + '</div></div>' +
+        fr(t.m2 || 0, 2) + ' m²  ·  ' + (facture(o) ? "facturé" : libSansFact()) + (payDateBon(o) ? '  ·  bon du ' + payDateBon(o) : '') + '</div></div>' +
     '<div class="pylbl">Paiements reçus</div>' +
     '<div class="pybox">' + (L.length ? L.map(x => {
       const md = payModeDe(x);
@@ -11172,7 +11381,7 @@ $("payList").addEventListener("click", e => {
     const p = paiements(o).find(x => x.id === pid);
     if (!p) return;
     if (p.recu) delete p.recu;
-    else { p.recu = {at: Date.now(), by: (USER && USER.login) || ""}; if (!p.credit && !payEspece(p) && (p.at || 0) >= PAY3_DEPUIS) p.credit = {at: p.recu.at, by: p.recu.by}; }
+    else { p.recu = {at: Date.now(), by: (USER && USER.login) || "", date: jourISO(new Date())}; if (!p.credit && !payEspece(p) && (p.at || 0) >= PAY3_DEPUIS) p.credit = {at: p.recu.at, by: p.recu.by}; }
     touche(o); persistOrders(); pushBon(o); payPush(o);
     renderPay();
     toast(p.recu ? "Encaissement confirmé" : "Confirmation retirée");
@@ -12192,7 +12401,7 @@ function docCarte(o){
       '<span class="dkmid">' +
         '<span class="dkamt"><b' + (rouge ? ' class="acc"' : '') + '>' + frm(du, 2) +
           ' <i>MAD</i></b><small>' +
-          (facture(o) ? "TTC  ·  facturée" : "HT  ·  sans facture") +
+          (facture(o) ? "TTC  ·  facturée" : (factAllowed() ? "HT  ·  sans facture" : "HT")) +
           (puTxt ? "  ·  " + puTxt : "  ·  prix au m² manquant") + '</small></span>' +
         liv +
       '</span>' +
@@ -12494,6 +12703,7 @@ function docUrgent(o){
 
 function renderDoc(){
   if (!docAllowed()) return;
+  try { finAuto(); } catch(e){}
   Array.prototype.forEach.call($("docPer").querySelectorAll("button"),
     b => b.setAttribute("aria-pressed", String(b.dataset.p === docFiltre)));
   $("docPeriode").hidden = docFiltre !== "periode";
@@ -12616,7 +12826,7 @@ function montantsConnus(){
     if (etatDe(o) === "devis") return;
     const du = duDe(o);
     const dBon = String(o.date || "").slice(0, 10);
-    if (du > 0) out.push({o:o, v:du, quoi:facture(o) ? "Total TTC du bon" : "Total du bon (sans facture)", client:client, cls:"inf", d:dBon});
+    if (du > 0) out.push({o:o, v:du, quoi:facture(o) ? "Total TTC du bon" : (factAllowed() ? "Total du bon (sans facture)" : "Total HT du bon"), client:client, cls:"inf", d:dBon});
     const ht = htDe(o);
     if (facture(o) && ht > 0 && Math.abs(ht - du) > 0.01)
       out.push({o:o, v:ht, quoi:"Total HT du bon", client:client, cls:"", d:dBon});
@@ -12779,7 +12989,7 @@ $("docList").addEventListener("click", e => {
     const p = paiements(o).find(x => x.id === pid);
     if (!p) return;
     /* v14.68 : Noureddine confirme ; Imane marque seulement « crédité » */
-    if (payConfirmAllowed()){ if (p.recu) delete p.recu; else { p.recu = {at: Date.now(), by: (USER && USER.login) || ""}; if (!p.credit && !payEspece(p) && (p.at || 0) >= PAY3_DEPUIS) p.credit = {at: p.recu.at, by: p.recu.by}; } }
+    if (payConfirmAllowed()){ if (p.recu) delete p.recu; else { p.recu = {at: Date.now(), by: (USER && USER.login) || "", date: jourISO(new Date())}; if (!p.credit && !payEspece(p) && (p.at || 0) >= PAY3_DEPUIS) p.credit = {at: p.recu.at, by: p.recu.by}; } }
     else if (payAllowed()){ if (!payCreditBascule(p)){ toast("Déjà confirmé par Noureddine"); return; } }
     else return;
     touche(o); persistOrders(); pushBon(o); payPush(o);
@@ -12820,7 +13030,8 @@ $("docList").addEventListener("click", e => {
     const o = ORDERS.find(x => x.id === fn.dataset.docfin);
     if (!o) return;
     if (!estFini(o) && !finPossible(o)){ toast(finRefus(o)); return; }
-    if (estFini(o)) delete o.fini; else o.fini = {at: Date.now(), by: (USER && USER.login) || ""};
+    if (estFini(o)){ delete o.fini; o.finRouvert = {at: Date.now(), by: (USER && USER.login) || ""}; }
+    else { o.fini = {at: Date.now(), by: (USER && USER.login) || ""}; delete o.finRouvert; }
     touche(o); persistOrders(); pushBon(o);
     renderDoc(); renderHist(); renderHome();
     toast(estFini(o) ? "Dossier " + o.num + " classé terminé" : "Dossier " + o.num + " rouvert");
@@ -13134,6 +13345,7 @@ function triAnnees(){
 }
 
 function renderTri(){
+  try { if ($("tvaSheet").classList.contains("open")) renderTva(); } catch(e){}
   if (!adminAllowed()) return;
   Array.prototype.forEach.call($("triTrim").querySelectorAll("button"),
     b => b.setAttribute("aria-pressed", String(+b.dataset.t === triNo)));
@@ -13155,7 +13367,7 @@ function renderTri(){
               '<small>' + esc(x.o.nom || "Client sans nom") +
                 (x.n > 1 ? '  ·  ' + x.n + ' paiements' : '') + '</small>' +
               (att ? '<span class="trtag att">' + etatLabel(et) + '</span>' : '') +
-              (facture(x.o) ? '' : '<span class="trtag nof">sans facture</span>') +
+              (facture(x.o) || !factAllowed() ? '' : '<span class="trtag nof">sans facture</span>') +
             '</span>' +
             '<b' + zero(x.banque) + '>' + fr(x.banque, 2) + '</b>' +
             '<b' + zero(x.espece) + '>' + fr(x.espece, 2) + '</b>' +
@@ -13193,6 +13405,145 @@ $("tileTri").addEventListener("click", () => {
   renderTri();
   nav("triSheet");
   pullBons().then(() => renderTri());
+});
+
+/* ============ v14.85 : TVA du trimestre ============ */
+/* Une ligne par paiement daté dans le trimestre (date du paiement, pas du bon).
+   Ventes : TVA comptée si payé par virement ou chèque, ou si le bon est une
+   facture (nom qui commence par F20), même payée en espèce. TVA = TTC x 20/120.
+   Achats : TVA comptée si payé par chèque ou virement, au taux du bon d'achat.
+   Les espèces hors facture F20 restent affichées en gris, non comptées. */
+let tvaAn = new Date().getFullYear();
+let tvaNo = Math.floor(new Date().getMonth() / 3) + 1;
+/* v14.87 : un chèque client saisi depuis le 08/11/2026 ne compte (banque et TVA) que le jour où
+   Noureddine confirme qu'il est encaissé. Les anciens chèques comptent à la date du paiement. */
+function chqCut(){ return "2026-11-08"; }
+function estChequeMode(m){ return /^ch/i.test(String(m || "").trim()); }
+function chqSuivi(p){ return !!p && estChequeMode(p.mode) && String(p.date || "").slice(0, 10) >= chqCut(); }
+function chqEncDate(p){ return p && p.recu ? String(p.recu.date || jourISO(new Date(p.recu.at || Date.now()))).slice(0, 10) : ""; }
+function payJourCompte(p){ return chqSuivi(p) ? chqEncDate(p) : String((p && p.date) || "").slice(0, 10); }
+function chqAVerser(){
+  const L = [];
+  (ORDERS || []).forEach(o => { if (!o || o.sup) return; paiements(o).forEach(p => { if (chqSuivi(p) && !p.recu) L.push({o:o, p:p}); }); });
+  return L.sort((a, b) => String(a.p.date).localeCompare(String(b.p.date)));
+}
+function chqEncaissesRecents(){
+  const lim = jourISO(new Date(Date.now() - 30 * 864e5)), L = [];
+  (ORDERS || []).forEach(o => { if (!o || o.sup) return; paiements(o).forEach(p => { if (chqSuivi(p) && p.recu && chqEncDate(p) >= lim) L.push({o:o, p:p}); }); });
+  return L.sort((a, b) => chqEncDate(b.p).localeCompare(chqEncDate(a.p)));
+}
+function estFactureF20(o){ return /^F20/i.test(String((o && o.num) || "").trim()); }
+function tvaMode(m){
+  const s = String(m || "").trim(), l = s.toLowerCase();
+  if (l.indexOf("vir") === 0) return "Virement";
+  if (l.indexOf("ch") === 0) return "Chèque";
+  if (l.indexOf("esp") === 0) return "Espèce";
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : "—";
+}
+function tvaLignes(an, t){
+  const L = [];
+  (ORDERS || []).forEach(o => {
+    if (!o || o.sup) return;
+    const f20 = estFactureF20(o);
+    paiements(o).forEach(p => {
+      if (!p) return;
+      /* v14.87 : chèque récent = jour de l'encaissement ; pas encore versé = ligne grise, non comptée */
+      const att = chqSuivi(p) && !p.recu, jour = att ? String(p.date || "").slice(0, 10) : payJourCompte(p);
+      if (!dansTrimestre(jour, an, t)) return;
+      const ttc = parseFloat(p.montant) || 0, bq = estBanque(p.mode), ok = (bq || f20) && !att;
+      L.push({cote:"v", date:jour, num:o.num || "sans numéro", qui:o.nom || "Client sans nom",
+              mode:tvaMode(p.mode), f20:f20 && !bq, chq:att ? "att" : (chqSuivi(p) ? "enc" : ""), ok:ok, ttc:ttc, tva:ok ? ttc * TVA / (1 + TVA) : 0});
+    });
+  });
+  if (achAllowed()) (ACH.bas || []).forEach(b => {
+    if (!b || b.sup) return;
+    const taux = parseFloat(b.tva) || 0, fo = achFour(b.four);
+    (b.paies || []).forEach(p => {
+      if (!p || !dansTrimestre(p.date, an, t)) return;
+      const ttc = parseFloat(p.montant) || 0, ok = estBanque(p.mode);
+      L.push({cote:"a", date:String(p.date).slice(0, 10), num:b.num || "Bon d'achat", qui:fo ? fo.nom : "Fournisseur ?",
+              mode:tvaMode(p.mode), taux:taux, ok:ok, ttc:ttc, tva:ok ? ttc * taux / (100 + taux) : 0});
+    });
+  });
+  L.sort((x, y) => x.date.localeCompare(y.date) || (x.cote === y.cote ? 0 : (x.cote === "v" ? -1 : 1)));
+  let solde = 0;
+  L.forEach(x => { solde += x.cote === "v" ? x.tva : -x.tva; x.solde = solde; });
+  return L;
+}
+function tvaTotaux(L){
+  const V = L.filter(x => x.cote === "v" && x.ok), A = L.filter(x => x.cote === "a" && x.ok);
+  const s = (A0, k) => A0.reduce((a, x) => a + x[k], 0);
+  const col = s(V, "tva"), ded = s(A, "tva");
+  return {nV:V.length, nA:A.length, ttcV:s(V, "ttc"), ttcA:s(A, "ttc"), col:col, ded:ded, du:col - ded};
+}
+function tvaAnnees(){
+  const ans = {};
+  triAnnees().forEach(y => { ans[y] = true; });
+  (ACH.bas || []).forEach(b => (b && b.paies || []).forEach(p => {
+    const y = String((p && p.date) || "").slice(0, 4);
+    if (y.length === 4) ans[+y] = true;
+  }));
+  return Object.keys(ans).map(Number).sort((a, b) => b - a);
+}
+function renderTva(){
+  if (!adminAllowed()) return;
+  Array.prototype.forEach.call($("tvaTrim").querySelectorAll("button"),
+    b => b.setAttribute("aria-pressed", String(+b.dataset.t === tvaNo)));
+  $("tvaAns").innerHTML = tvaAnnees().map(y =>
+    '<button type="button" data-y="' + y + '" aria-pressed="' + (y === tvaAn) + '">' + y + '</button>').join("");
+
+  const L = tvaLignes(tvaAn, tvaNo), S = tvaTotaux(L);
+  const limite = new Date(tvaAn, MOIS_T[tvaNo][1] + 2, 0).toLocaleDateString("fr-FR");
+  $("tvaSum").innerHTML =
+    '<div><small>TVA facturée (ventes)</small><b>' + fr(S.col, 2) + '</b></div>' +
+    '<div><small>TVA récupérable (achats)</small><b>− ' + fr(S.ded, 2) + '</b></div>' +
+    '<div class="du"><small>' + (S.du >= 0 ? 'TVA à payer T' : 'Crédit de TVA T') + tvaNo + ' · avant le ' + limite + '</small><b>' + fr(Math.abs(S.du), 2) + ' MAD</b></div>';
+
+  const jm = d => d.slice(8, 10) + "/" + d.slice(5, 7);
+  const vide = '<td></td><td></td><td></td><td></td>';
+  const cote = x => '<td' + (x.cote === "a" ? ' class="sep"' : '') + '><u>' + esc(x.num) + '</u><small>' + esc(x.qui) + '</small></td>' +
+    '<td>' + esc(x.mode) + (x.f20 ? '<small class="f20">facture F20</small>' : '') +
+      (x.chq === "att" ? '<small class="f20">chèque à verser</small>' : x.chq === "enc" ? '<small>encaissé</small>' : '') +
+      (x.cote === "a" && x.ok && x.taux !== 20 ? '<small>taux ' + fr(x.taux, 0) + ' %</small>' : '') + '</td>' +
+    '<td class="r">' + fr(x.ttc, 2) + '</td>' +
+    '<td class="r">' + (x.ok ? fr(x.tva, 2) : '—<small>non comptée</small>') + '</td>';
+  const lignes = L.map(x => '<tr' + (x.ok ? '' : ' class="off"') + '><td>' + jm(x.date) + '</td>' +
+    (x.cote === "v" ? cote(x) + vide.replace('<td>', '<td class="sep">') : vide + cote(x)) +
+    '<td class="r">' + fr(x.solde, 2) + '</td></tr>').join("");
+
+  $("tvaTab").innerHTML = '<table class="tvt"><colgroup>' +
+      '<col style="width:7%"><col style="width:16%"><col style="width:9%"><col style="width:10%"><col style="width:9%">' +
+      '<col style="width:16%"><col style="width:9%"><col style="width:10%"><col style="width:9%"><col style="width:9%"></colgroup>' +
+    '<thead><tr><th></th><th colspan="4" class="gv">Ventes · TVA facturée</th><th colspan="4" class="ga sep">Achats · TVA récupérable</th><th></th></tr>' +
+    '<tr><th>Date</th><th>Bon · client</th><th>Mode</th><th class="r">TTC</th><th class="r">TVA</th>' +
+    '<th class="sep">Bon d\'achat · fourn.</th><th>Mode</th><th class="r">TTC</th><th class="r">TVA</th><th class="r">Solde</th></tr></thead>' +
+    '<tbody>' + (lignes || '<tr class="vide"><td colspan="10">Aucun paiement de vente ni d\'achat sur T' + tvaNo + ' ' + tvaAn + '.</td></tr>') + '</tbody>' +
+    '<tfoot><tr><td>Total</td><td colspan="2">' + S.nV + ' vente' + (S.nV > 1 ? 's' : '') + ' comptée' + (S.nV > 1 ? 's' : '') + '</td>' +
+      '<td class="r">' + fr(S.ttcV, 2) + '</td><td class="r tvcv">' + fr(S.col, 2) + '</td>' +
+      '<td class="sep" colspan="2">' + S.nA + ' achat' + (S.nA > 1 ? 's' : '') + ' compté' + (S.nA > 1 ? 's' : '') + '</td>' +
+      '<td class="r">' + fr(S.ttcA, 2) + '</td><td class="r tvca">' + fr(S.ded, 2) + '</td>' +
+      '<td class="r tvcd">' + fr(S.du, 2) + '</td></tr></tfoot></table>';
+
+  $("tvaHint").textContent =
+    "Date = jour du paiement ; chèque saisi depuis le 08/11/2026 : jour de l'encaissement confirmé par Noureddine (gris tant qu'il n'est pas versé). Ventes : virement et chèque, plus tout paiement d'une facture F20 (même en espèce), TVA = TTC × 20/120. " +
+    "Achats : chèque et virement, au taux du bon d'achat. Lignes grises : espèces hors facture F20, non comptées. " +
+    "Solde = TVA due cumulée à cette date. Les dépenses (loyer, électricité…) ne sont pas comptées.";
+}
+$("tvaTrim").addEventListener("click", e => {
+  const b = e.target.closest("button[data-t]");
+  if (!b) return;
+  tvaNo = +b.dataset.t; renderTva();
+});
+$("tvaAns").addEventListener("click", e => {
+  const b = e.target.closest("button[data-y]");
+  if (!b) return;
+  tvaAn = +b.dataset.y; renderTva();
+});
+$("tileTva").addEventListener("click", () => {
+  if (!adminAllowed()) return;
+  renderTva();
+  nav("tvaSheet");
+  Promise.all([pullBons(), pullAch()]).then(() => renderTva(), () => renderTva());
 });
 
 /* ============ Atelier : capacité, jours ouvrés, échéance proposée ============ */
@@ -15281,7 +15632,6 @@ function renderProsPrix(){
   if (!$("prosPxE")) return;
   $("prosPxEL").hidden = prosD.type === "JN";
   $("prosPxJL").hidden = prosD.type === "ENR";
-  [...$("prosFact").children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.pfact === (prosD.fact || "oui"))));
   [...$("prosPoseMode").children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.ppm === (prosD.poseMode || "forfait"))));
   const e = prosEstim(prosFormPrix());
   const r = prosResume(prosD);
@@ -15297,13 +15647,9 @@ function renderProsPrix(){
     h += L("Stores HT", fr(e.tot, 2));
     if (e.pose) h += L((prosD.pose === "Livraison" ? "Livraison" : "Pose") + (prosD.poseMode === "fenetre" ? " · " + e.nb + " × " + fr(parseFloat($("prosPoseP").value.replace(",", ".")) || 0, 2) : ""), fr(e.pose, 2));
     if (e.rem) h += L("Remise " + fr(e.rp, 0) + " %", "\u2212 " + fr(e.rem, 2));
-    if (e.fact){
-      h += L("Total HT", fr(e.ht, 2));
-      h += L("TVA 20 %", fr(e.tva, 2));
-      h += L("Total TTC", fr(e.ttc, 2) + " MAD", "gros");
-    } else {
-      h += L("Total sans facture", fr(e.ht, 2) + " MAD", "gros");
-    }
+    h += L("Total HT", fr(e.ht, 2));
+    h += L("TVA 20 %", fr(e.tva, 2));
+    h += L("Total TTC", fr(e.ttc, 2) + " MAD", "gros");
     h += '<small>Estimation donnée sur WhatsApp, pas un devis officiel.' + (e.manque ? " Prix manquant pour une famille." : "") + '</small>';
   }
   $("prosRecap").innerHTML = h;
@@ -15383,10 +15729,9 @@ function prosEstim(p){
   const rp = Math.min(100, Math.max(0, parseFloat(String(p.remise || "").replace(",", ".")) || 0));
   const rem = r2(brut * rp / 100);
   const ht = r2(brut - rem);
-  const fact = p.fact !== "non";
-  const tva = fact ? r2(ht * TVA) : 0;
+  const tva = r2(ht * TVA);
   return {pe:pe, pj:pj, m2:m2, tot:tot, manque:manque, nb:nb, pose:pose, rp:rp, rem:rem,
-          ht:ht, tva:tva, ttc:ht + tva, fact:fact};
+          ht:ht, tva:tva, ttc:ht + tva};
 }
 function prosEstimTexte(p){
   const e = prosEstim(p);
@@ -15398,7 +15743,7 @@ function prosEstimTexte(p){
     (e.m2 ? "  ·  " + fr(e.m2, 2) + " m²" +
       (e.pose ? "  ·  pose " + fr(e.pose, 2) : "") +
       (e.rem ? "  ·  remise " + fr(e.rp, 0) + " %" : "") +
-      "  ·  ≈ " + fr(e.fact ? e.ttc : e.ht, 2) + (e.fact ? " MAD TTC" : " MAD HT sans facture") : "") +
+      "  ·  ≈ " + fr(e.ttc, 2) + " MAD TTC" : "") +
     (e.manque ? "  (prix manquant pour une famille)" : "");
 }
 
@@ -15601,7 +15946,7 @@ function prosCharge(p){
   $("prosRemise").value = p.remise || ""; $("prosPoseP").value = p.poseP || "";
   prosD = {adresse: p.adresse || "", pose: p.pose || "Pose", type: p.type || "ENR",
            rappel: !!p.rappel, rappelLe: p.rappelLe || "", interet: p.interet || "", promoMan: p.promoMan || 0, promoDer: p.promoDer || 0,
-           promoPrem: p.promoPrem || 0, fact: p.fact === "non" ? "non" : "oui",
+           promoPrem: p.promoPrem || 0, fact: "oui",
            promos: promosDe(p).map(x => Object.assign({}, x)),
            poseMode: p.poseMode === "fenetre" ? "fenetre" : "forfait",
            refs: (p.refs || []).slice(),
@@ -15632,7 +15977,7 @@ function prosApplique(p){
   p.pxJ = $("prosPxJ").value.replace(",", ".").trim();
   p.remise = $("prosRemise").value.replace(",", ".").trim();
   p.poseP = $("prosPoseP").value.replace(",", ".").trim();
-  p.fact = prosD.fact === "non" ? "non" : "oui";
+  p.fact = "oui";
   p.poseMode = prosD.poseMode === "fenetre" ? "fenetre" : "forfait";
   p.promoMan = prosD.promoMan || 0;
   p.promoDer = prosD.promoDer || 0;
@@ -15689,10 +16034,6 @@ function renderProsFicheAct(){
     '<button class="prbtn" type="button" data-prdel="' + p.id + '" style="color:var(--accent)">Supprimer</button>' +
     '</span>';
 }
-$("prosFact").addEventListener("click", e => {
-  const b = e.target.closest("[data-pfact]"); if (!b) return;
-  prosD.fact = b.dataset.pfact; renderProsPrix();
-});
 $("prosPoseMode").addEventListener("click", e => {
   const b = e.target.closest("[data-ppm]"); if (!b) return;
   prosD.poseMode = b.dataset.ppm; renderProsPrix();
@@ -15953,8 +16294,7 @@ function prosVersBon(p, etat){
     }));
   }
   if (parseFloat(p.remise) > 0){ S.remise = String(p.remise); $("remise").value = S.remise; }
-  S.fact = p.fact === "non" ? "non" : "oui";
-  [...$("segFact").children].forEach(x => x.setAttribute("aria-pressed", String(x.dataset.fact === S.fact)));
+  S.fact = "oui";
   if (parseFloat(p.poseP) > 0){ S.posePrix = String(p.poseP); $("posePrix").value = S.posePrix; }
   if (p.poseMode) S.poseMode = p.poseMode === "fenetre" ? "fenetre" : "forfait";
   try { renderPoseMode(); } catch(e){}
@@ -16384,7 +16724,7 @@ function waValeurs(p, lang){
     : pm(px.e));
   let total = "";
   if (o){ total = frm(Math.round(duDe(o)), 0) + (ar ? " درهم" : " DH") + (facture(o) ? " TTC" : " HT"); }
-  else if (e && e.m2){ total = frm(Math.round(e.fact ? e.ttc : e.ht), 0) + (ar ? " درهم" : " DH") + (e.fact ? " TTC" : " HT"); }
+  else if (e && e.m2){ total = frm(Math.round(e.ttc), 0) + (ar ? " درهم" : " DH") + " TTC"; }
   /* « Ayoub/houssani/ad » : on salue « Ayoub », pas tout le nom noté par Imane */
   const nom = String(p.nom || "").split("/")[0].trim();
   return {
@@ -16946,7 +17286,7 @@ function waValChamp(k, v){
   if (k === "type") return {ENR:"enrouleur", JN:"jour et nuit", MIX:"les deux"}[v] || v;
   if (k === "lang") return v === "ar" ? "darija" : "français";
   if (k === "interet") return {int:"Intéressé", pas:"Pas intéressé", nrp:"Ne répond pas", nc:"Nouveau client"}[v] || v;
-  if (k === "fact") return v === "non" ? "sans facture" : "facturée";
+  if (k === "fact") return v === "non" ? libSansFact() : "facturée";
   const t = String(v); return t.length > 60 ? t.slice(0, 60) + "…" : t;
 }
 function waDiffFiche(av, p){
@@ -19569,7 +19909,7 @@ function renderCout(){
     (facture(o)
       ? li("TVA 20 %", "", fr(tvaDe(C.vente + C.posePrix),2)) +
         li("Total TTC facturé au client", "ce que le client paie", fr(ttc(C.vente + C.posePrix),2), "tot")
-      : li("Total facturé au client", "bon sans facture, pas de TVA", fr(C.vente + C.posePrix,2), "tot")) +
+      : li("Total facturé au client", factAllowed() ? "bon sans facture, pas de TVA" : "total HT", fr(C.vente + C.posePrix,2), "tot")) +
   '</div>';
 
   h += '<p class="hint">Bénéfice et marge se calculent sur le <b>hors taxe</b> : la TVA n\'est pas un revenu, elle est reversée à l\'État. Le tissu est compté sur les m² réellement déroulés par le plan de coupe, chutes du stock déduites, pas sur la surface de la fenêtre. Chaque profilé a sa ligne, sur sa propre longueur de coupe. La ligne « plan de coupe réel » donne, en regard, ce que ce bon a vraiment sorti du stock.</p>';
@@ -19693,7 +20033,6 @@ function estNeuve(p){
     if (parseFloat(p.poseP) > 0) e.posePrix = String(p.poseP);
     if (p.poseMode) e.poseMode = p.poseMode === "fenetre" ? "fenetre" : "forfait";
     if (p.pose === "Livraison") e.pose = "Livraison";
-    e.fact = p.fact === "non" ? "non" : "oui";
   }
   EST.items.push(e); estSave();
   return e;
@@ -19706,7 +20045,7 @@ function estBon(e){
   return {id:e.id, num:"ESTIMATION", date:new Date(e.at || Date.now()).toISOString(),
     nom:e.nom || "", tel:e.tel || "", adresse:"", gps:"", ech:"", remise:"", ice:"",
     etat:"devis", arr:1, type:e.type || "ENR", multi:true, dims:dims, refs:refs,
-    prix:e.prix || "", prixJN:e.prixJN || "", fact:e.fact || "oui",
+    prix:e.prix || "", prixJN:e.prixJN || "", fact:"oui",
     posePrix:e.posePrix || "", poseMode:e.poseMode || "forfait", pose:e.pose || "Pose",
     notes:"", photos:[], pieces:{}, modeles:{}, status:"draft"};
 }
@@ -19742,6 +20081,8 @@ function renderEst(){
   const z = $("estBody");
   const e = EST_ED && EST.items.find(x => x.id === EST_ED && !x.sup);
   if (!e){ EST_ED = null; z.innerHTML = estListeHTML(); return; }
+  const dp = z.querySelector("#estPlan details");
+  if (dp) EST_PLAN_OUV = dp.open;
   z.innerHTML = estFormHTML(e);
   estMajRes(e);
 }
@@ -19764,7 +20105,7 @@ function estFormHTML(e){
   const mix = e.type === "MIX";
   const contacts = (typeof PROS !== "undefined" ? PROS : []).filter(p => p && !p.sup && (p.nom || p.tel));
   const tissus = t => CATALOGUE.filter(f => f.type === t).map(f => f.ref);
-  const optT = (t, v) => '<option value="">Tissu (pour le coût)</option>' +
+  const optT = (t, v) => '<option value="">Tissu (coût et plan de coupe)</option>' +
     tissus(t).map(r => '<option' + (r === v ? ' selected' : '') + '>' + esc(r) + '</option>').join("");
   let h = '<button type="button" class="pcreset" data-estback style="padding-left:2px">‹ Toutes les estimations</button>' +
     (e.mesAt ? '<div class="mesnet" style="background:#e3f5ea;color:#12833F">📏 Mesures de Soufiane du ' + pad(new Date(e.mesAt).getDate()) + '/' + pad(new Date(e.mesAt).getMonth() + 1) + ' : les fenêtres sont exactes.</div>' : '');
@@ -19795,10 +20136,9 @@ function estFormHTML(e){
       '<option value="forfait"' + (e.poseMode !== "fenetre" ? ' selected' : '') + '>Forfait</option>' +
       '<option value="fenetre"' + (e.poseMode === "fenetre" ? ' selected' : '') + '>Par fenêtre</option></select></label>' +
     '<label>Prix de la pose (DH, vide = sans)<input inputmode="decimal" data-estf="posePrix" value="' + esc(String(e.posePrix || "")) + '"></label>' +
-    '<label>Facture<select data-estf="fact"><option value="oui"' + (e.fact !== "non" ? ' selected' : '') + '>Avec facture (TTC)</option>' +
-      '<option value="non"' + (e.fact === "non" ? ' selected' : '') + '>Sans facture</option></select></label>' +
   '</div>';
   h += '<div class="estres" id="estRes"></div>';
+  h += '<div class="estres estplan" id="estPlan" hidden></div>';
   h += e.devis
     ? '<div class="estfait">✓ Devenue devis ' + esc(e.devis) + '</div>'
     : '<div class="estbtns"><button type="button" data-estcopie>Copier le prix pour WhatsApp</button>' +
@@ -19821,6 +20161,59 @@ function estMajRes(e){
   }
   h += delaiBloc(T.o, false);
   z.innerHTML = h;
+  estMajPlan(T.o);
+}
+/* v14.82 : le plan de coupe du tissu avant que le bon existe. Mêmes calculs que le
+   Plan de coupe, sans chute du stock : tout sort du rouleau. Sans tissu choisi, la
+   laize par défaut donne le calcul, et chaque famille reste sur son propre rouleau. */
+let EST_PLAN_OUV = false;
+function estPlanHTML(o){
+  const byRef = {};
+  ordDims(o).forEach(x => {
+    const f = fab(x.ref);
+    const k = f && f.type === x.t ? x.ref : "?" + x.t;
+    (byRef[k] = byRef[k] || []).push(x);
+  });
+  const cles = Object.keys(byRef);
+  if (!cles.length) return "";
+  const L = (a, b, c) => '<div class="l' + (c ? " " + c : "") + '"><span>' + a + '</span><b>' + b + '</b></div>';
+  const bilan = {keep:[], drop:[]};
+  let ml = 0, conso = 0, chute = 0, garde = 0, nb = 0, par = "", det = "", alerte = "";
+  cles.forEach(k => {
+    const f = k[0] === "?" ? null : fab(k);
+    const nom = f ? k : "Tissu à choisir, " + (k === "?JN" ? "jour et nuit" : "enrouleur");
+    const lz = f && f.laize > 0 ? f.laize : CUT_DEF.laize;
+    const T = planTissu(byRef[k], lz, CUT.seuilLaize, CUT.seuilLong, []);
+    ml += T.ml; conso += T.conso; chute += T.chute; nb += T.nbRoll;
+    T.bands.forEach(b => { if (b.latFate === "keep") garde += b.chuteLat; });
+    par += L(esc(nom), fr(T.ml) + " ml · chute " + fr(T.chute) + " m²");
+    if (!f) alerte += '<small>' + esc(nom) + ' : calcul sur un rouleau de ' + fr(lz, 0) + ' cm.</small>';
+    if (T.impossible.length) alerte += '<small class="ko">' + T.impossible.length + ' fenêtre(s) trop large(s) pour le rouleau de ' + fr(lz, 0) + ' cm, non comptée(s).</small>';
+    det += '<div class="banner"><b>' + (f ? "TISSU " : "") + esc(nom) + '</b><span>rouleau de ' + fr(lz, 0) + ' cm de large</span></div>' +
+      '<p class="bsum"><b>' + T.nbRoll + '</b> bande' + (T.nbRoll > 1 ? 's' : '') + ' à dérouler  ·  ' + fr(T.ml) + ' ml  ·  ' +
+        fr(T.conso) + ' m² de tissu  ·  ' + fr(T.chute) + ' m² de chute (' + fr(T.taux * 100, 0) + ' %)</p>';
+    T.bands.forEach(b => { det += bandeCarte(b); bandeBilan(b, esc(f ? k : nom), bilan); });
+  });
+  if (!(conso > 0)) return alerte;
+  return L("Tissu à dérouler", fr(ml) + " ml", "tot") +
+    L("Sorti du rouleau", fr(conso) + " m²") +
+    L("Coupé pour les fenêtres", fr(conso - chute) + " m²") +
+    L("Chutes", fr(chute) + " m² · " + fr(chute / conso * 100, 0) + " %") +
+    L("· à garder", fr(garde) + " m²") +
+    L("· à jeter", fr(chute - garde) + " m²") +
+    (cles.length > 1 ? '<div class="estpar">' + par + '</div>' : '') +
+    alerte +
+    '<details' + (EST_PLAN_OUV ? ' open' : '') + '><summary>Voir le plan de coupe (' + nb + ' bande' + (nb > 1 ? 's' : '') + ')</summary>' +
+      det + bilanChutes(bilan, "Ce qui restera une fois les fenêtres coupées, sans utiliser les chutes du stock.") +
+      '<p class="hint" style="margin-top:12px">Longueur à dérouler = hauteur + ' + CUT.surENR + ' cm pour l\'enrouleur, 2 × hauteur + ' + CUT.surJN + ' cm pour le jour et nuit.</p>' +
+    '</details>';
+}
+function estMajPlan(o){
+  const z = $("estPlan"); if (!z) return;
+  const d = z.querySelector("details");
+  if (d) EST_PLAN_OUV = d.open;
+  z.innerHTML = estPlanHTML(o);
+  z.hidden = !z.innerHTML;
 }
 function estTexteWa(e){
   const T = estTotaux(e);
@@ -20633,6 +21026,8 @@ function backOneStep(){
   if ($("mesSheet").classList.contains("open")){ mesRetour(); return true; }
   if ($("coutSheet").classList.contains("open") && COUT_RETOUR === "mesSheet"){ nav("mesSheet"); renderMes(); return true; }
   if ($("depSheet").classList.contains("open")){ nav("home"); return true; }
+  if ($("tresSheet").classList.contains("open")){ nav("home"); return true; }
+  if ($("rsSheet").classList.contains("open")){ nav("home"); return true; }
   if ($("promoSheet").classList.contains("open")){ nav("prosSheet"); renderPros(); return true; }
   if ($("paySheet").classList.contains("open") && payBon){ payFermeBon(); return true; }
   if ($("prosSheet").classList.contains("open") && $("prosSheet").classList.contains("fiche")){ prosFicheFerme(); return true; }
@@ -20644,6 +21039,7 @@ function backOneStep(){
       $("coutSheet").classList.contains("open") ||
       $("logSheet").classList.contains("open") ||
       $("triSheet").classList.contains("open") ||
+      $("tvaSheet").classList.contains("open") ||
       $("cliSheet").classList.contains("open") ||
       $("docSheet").classList.contains("open") ||
       $("atlSheet").classList.contains("open") ||
@@ -20660,6 +21056,253 @@ function armBack(){ try { history.pushState({mst:1}, ""); } catch(e){} }
 
 window.addEventListener("popstate", () => {
   if (backOneStep()) armBack();
+});
+
+/* ============ v14.83 : Rappels SAGE ============ */
+/* Dans SAGE, Noureddine voit un chiffre qui ne colle pas (on a coupé 14 ml, SAGE n'en
+   avait que 6). Il note ici l'article et ce que SAGE affiche. À l'atelier il écrit ce
+   qu'il a compté, l'app donne la correction à faire dans SAGE, puis « Corrigé dans SAGE ».
+   Rien ici ne touche au stock. Rangée réservée cfg-rapsage, fusionnée élément par élément.
+   Le jeu montre les rappels ouverts sur le bureau de Noureddine et dans le briefing. */
+const RS_ID = "cfg-rapsage";
+let RS = Object.assign({v:1, items:[]}, LS.get("mst_rs", {}));
+if (!Array.isArray(RS.items)) RS.items = [];
+let RSF = null;                                    /* rappel en cours de saisie */
+const RS_U = {ml:"ml", m2:"m²", m:"m", u:"pièce(s)"};
+function rsAllowed(){ return invAllowed(); }      /* Noureddine */
+function rsUid(){ return "rs" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function rsOuverts(){ return RS.items.filter(x => x && !x.sup && !x.fait).sort((a, b) => (a.at || 0) - (b.at || 0)); }
+function rsFaits(){ return RS.items.filter(x => x && !x.sup && x.fait).sort((a, b) => (b.fait || 0) - (a.fait || 0)); }
+function rsNum(v){
+  const t = String(v === undefined || v === null ? "" : v).replace(/[\s ]/g, "").replace(",", ".");
+  if (t === "" || t === "-") return null;
+  const n = Number(t);
+  return isFinite(n) ? n : null;
+}
+function rsQ(v){ return frm(v, 2).replace(/,00$/, "").replace(/(,\d)0$/, "$1"); }
+function rsJour(t){ const d = new Date(t || Date.now()); return pad(d.getDate()) + "/" + pad(d.getMonth() + 1); }
+function rsFusion(d){
+  if (!d || !Array.isArray(d.items)) return false;
+  const par = {}; let bouge = false;
+  RS.items.forEach(x => { if (x && x.id) par[x.id] = x; });
+  d.items.forEach(x => { if (!x || !x.id) return; const l = par[x.id]; if (!l || (x.maj || 0) > (l.maj || 0)){ par[x.id] = x; bouge = true; } });
+  RS.items = Object.keys(par).map(i => par[i]);
+  if (bouge) LS.set("mst_rs", RS);
+  return bouge;
+}
+async function rsPull(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", RS_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data;
+    return d ? rsFusion(d) : false;
+  } catch(e){ return false; }
+}
+/* hors réseau : gardé ici, renvoyé dès que possible */
+let RS_T = null;
+function rsSave(){
+  LS.set("mst_rs", RS); LS.set("mst_rs_pend", 1);
+  clearTimeout(RS_T);
+  RS_T = setTimeout(rsEnvoi, 600);
+  try { renderRsTile(); } catch(e){}
+}
+async function rsEnvoi(){
+  if (!SB || !USER || navigator.onLine === false) return;
+  try {
+    await rsPull();
+    const {error} = await SB.from("bons").upsert({id:RS_ID, num:"__RAPSAGE__", author:USER.login, data:RS, updated_at:new Date().toISOString()});
+    if (error) throw error;
+    LS.set("mst_rs_pend", 0);
+  } catch(e){}
+}
+window.addEventListener("online", () => { if (LS.get("mst_rs_pend", 0)) rsEnvoi(); });
+setInterval(() => { if (USER && LS.get("mst_rs_pend", 0) && navigator.onLine !== false) rsEnvoi(); }, 60000);
+
+/* --- l'article choisi : un tissu, une pièce de la feuille de stock, ou autre chose --- */
+function rsNeuf(){ return {art:"", nom:"", u:"ml", sage:"", note:"", err:""}; }
+function rsArt(art){
+  const k = String(art || "");
+  if (k.indexOf("t:") === 0){ const f = fab(k.slice(2)); return f ? {kind:"tissu", ref:f.ref, nom:"", f:f} : null; }
+  if (k.indexOf("p:") === 0){
+    const r = k.slice(2), p = (PSTOCK || []).find(a => a.ref === r);
+    return {kind:"piece", ref:r, nom:p ? p.nom || "" : "", p:p || null};
+  }
+  if (k === "autre") return {kind:"autre", ref:"", nom:""};
+  return null;
+}
+/* ce que la feuille de stock (copie de SAGE) donne pour cet article, dans cette unité */
+function rsFeuille(a, u){
+  if (!a) return null;
+  if (a.kind === "tissu") return u === "m2" ? stockM2(a.f) : stockMl(a.f);
+  if (a.kind === "piece" && a.p) return Number(a.p.dispo) || 0;
+  return null;
+}
+function rsUnites(a){ return a && a.kind === "tissu" ? ["ml", "m2"] : ["u", "m"]; }
+/* l'autre unité d'un tissu, pour aider à lire SAGE */
+function rsAutre(x, v){
+  const f = x.kind === "tissu" ? fab(x.ref) : null;
+  if (!f || !(f.laize > 0) || v === null) return "";
+  const lz = f.laize / 100;
+  return x.u === "ml" ? "≈ " + rsQ(v * lz) + " m²" : x.u === "m2" ? "≈ " + rsQ(v / lz) + " ml" : "";
+}
+function rsCorTxt(x, compte){
+  const c = rsNum(compte), u = RS_U[x.u] || "";
+  if (c === null) return '<span>À corriger dans SAGE</span><b>écris le chiffre compté</b>';
+  const d = c - (Number(x.sage) || 0);
+  if (Math.abs(d) < 0.005) return '<span>SAGE est juste</span><b>rien à corriger</b>';
+  const o = rsAutre(x, Math.abs(d));
+  return '<span>À corriger dans SAGE</span><b class="' + (d > 0 ? "up" : "dn") + '">' + (d > 0 ? "+" : "−") + rsQ(Math.abs(d)) + ' ' + u +
+    (o ? ' <small>(' + o + ')</small>' : '') + '</b>';
+}
+function rsNomDe(x){ return x.ref || x.nom || "Article"; }
+function rsCarte(x){
+  const u = RS_U[x.u] || "", o = rsAutre(x, Number(x.sage));
+  return '<div class="rscard">' +
+    '<div class="rsh"><b>' + esc(rsNomDe(x)) + '</b><span>' + rsJour(x.at) + '</span></div>' +
+    (x.ref && x.nom ? '<small class="rsmut">' + esc(x.nom) + '</small>' : '') +
+    '<div class="rsl"><span>SAGE dit</span><b>' + rsQ(Number(x.sage) || 0) + ' ' + u + (o ? ' <small>(' + o + ')</small>' : '') + '</b></div>' +
+    (x.note ? '<div class="rsl"><span>Note</span><span class="rsnote">' + esc(x.note) + '</span></div>' : '') +
+    '<label class="rslab">Compté à l\'atelier (' + u + ')<input inputmode="decimal" data-rsc="' + esc(x.id) + '" value="' + esc(x.compte || "") + '" placeholder="Ce que tu comptes" autocomplete="off"></label>' +
+    '<div class="rsl rscor" data-rscor="' + esc(x.id) + '">' + rsCorTxt(x, x.compte) + '</div>' +
+    '<div class="rsbtn"><button type="button" class="depsave" data-rsok="' + esc(x.id) + '">Corrigé dans SAGE</button>' +
+      '<button type="button" class="depdel" data-rssup="' + esc(x.id) + '">Supprimer</button></div>' +
+  '</div>';
+}
+function renderRs(force){
+  const z = $("rsBody"); if (!z) return;
+  const act = document.activeElement;
+  if (!force && act && z.contains(act) && act.matches && act.matches("input")) return;   /* on ne coupe pas la saisie */
+  if (!RSF) RSF = rsNeuf();
+  const F = RSF, a = rsArt(F.art), Us = rsUnites(a);
+  if (Us.indexOf(F.u) < 0) F.u = Us[0];
+  const tri = (x, y) => String(x.ref).localeCompare(String(y.ref));
+  const tis = CATALOGUE.slice().sort(tri), pie = (PSTOCK || []).slice().sort(tri);
+  const opt = (v, t) => '<option value="' + esc(v) + '"' + (v === F.art ? ' selected' : '') + '>' + esc(t) + '</option>';
+  const tisOpt = f => opt("t:" + f.ref, f.ref + (f.laize > 0 ? " · " + fr(f.laize, 0) + " cm" : "") + " · stock " + rsQ(stockMl(f)) + " ml");
+  const ouv = rsOuverts(), faits = rsFaits();
+  let h = '<div class="invnote"><b>Rien n\'est modifié dans le stock.</b>Note ici un chiffre de SAGE qui te paraît faux. Tu le vérifies à l\'atelier, puis tu corriges SAGE.</div>';
+  /* la saisie */
+  const fe = rsFeuille(a, F.u);
+  h += '<div class="depcard"><h4>Nouveau rappel SAGE</h4><div class="depf">' +
+    '<label>Article ou tissu<select data-rsf="art"><option value="">Choisir…</option>' +
+      '<optgroup label="Tissus enrouleur">' + tis.filter(f => f.type !== "JN").map(tisOpt).join("") + '</optgroup>' +
+      '<optgroup label="Tissus jour et nuit">' + tis.filter(f => f.type === "JN").map(tisOpt).join("") + '</optgroup>' +
+      (pie.length ? '<optgroup label="Pièces">' + pie.map(p => opt("p:" + p.ref, p.ref + (p.nom ? " · " + p.nom : ""))).join("") + '</optgroup>' : '') +
+      opt("autre", "Autre (écrire le nom)") + '</select></label>' +
+    (F.art === "autre" ? '<label>Nom de l\'article<input data-rsf="nom" value="' + esc(F.nom || "") + '" placeholder="Ex : chaînette blanche" autocomplete="off"></label>' : '') +
+    '<label>SAGE dit<input inputmode="decimal" data-rsf="sage" value="' + esc(F.sage || "") + '" placeholder="Ex : 6" autocomplete="off"></label>' +
+    (a ? '<div class="depseg">' + Us.map(u => '<button type="button" data-rsu="' + u + '" aria-pressed="' + (F.u === u) + '">' + RS_U[u] + '</button>').join("") + '</div>' : '') +
+    (fe !== null ? '<p class="depcut">Feuille de stock : ' + rsQ(fe) + ' ' + RS_U[F.u] + '. Corrige si SAGE affiche autre chose.</p>' : '') +
+    '<label>Note (facultatif)<input data-rsf="note" value="' + esc(F.note || "") + '" placeholder="Ex : bon 1234, on a coupé 14 ml" autocomplete="off"></label>' +
+    (F.err ? '<div class="depwarn">' + esc(F.err) + '</div>' : '') +
+    '<button type="button" class="depsave" data-rssave>Enregistrer le rappel</button>' +
+  '</div></div>';
+  /* la liste à vérifier */
+  h += '<div class="depcard"><h4>À vérifier à l\'atelier · ' + ouv.length + '</h4>' +
+    (ouv.length ? ouv.map(rsCarte).join("") : '<p class="hint" style="margin:0">Rien à vérifier pour le moment.</p>') + '</div>';
+  /* l'historique : ce qui a été corrigé, et les articles qui se trompent souvent */
+  if (faits.length){
+    const nb = {};
+    RS.items.filter(x => x && !x.sup).forEach(x => { const k = rsNomDe(x); nb[k] = (nb[k] || 0) + 1; });
+    const souvent = Object.keys(nb).filter(k => nb[k] >= 2).sort((p, q) => nb[q] - nb[p]).slice(0, 6);
+    h += '<details class="depcard rshist"><summary>Corrigés · ' + faits.length + '</summary>' +
+      (souvent.length ? '<p class="depcut" style="margin:6px 0">Souvent faux : ' + souvent.map(k => esc(k) + ' (' + nb[k] + ')').join(", ") + '</p>' : '') +
+      faits.slice(0, 60).map(x => {
+        const u = RS_U[x.u] || "", c = rsNum(x.compte), d = c === null ? null : c - (Number(x.sage) || 0);
+        return '<div class="deprow" style="cursor:default"><span class="dl">' + rsJour(x.fait) + ' · ' + esc(rsNomDe(x)) +
+          '<small>SAGE ' + rsQ(Number(x.sage) || 0) + ' → compté ' + (c === null ? "?" : rsQ(c)) + ' ' + u + (x.note ? ' · ' + esc(x.note) : '') + '</small></span>' +
+          '<span class="dm">' + (d === null || Math.abs(d) < 0.005 ? "juste" : (d > 0 ? "+" : "−") + rsQ(Math.abs(d)) + ' ' + u) + '</span></div>';
+      }).join("") + '</details>';
+  }
+  z.innerHTML = h;
+}
+function renderRsTile(){
+  const t = $("tileRs"); if (!t) return;
+  t.hidden = !rsAllowed(); if (t.hidden) return;
+  const n = rsOuverts().length;
+  $("tileRsSub").textContent = n ? n + " à vérifier à l'atelier" : "Noter un chiffre faux vu dans SAGE";
+  try { homeBadge("tileRs", n); } catch(e){}
+}
+$("tileRs").addEventListener("click", () => {
+  if (!rsAllowed()) return;
+  RSF = RSF || rsNeuf();
+  renderRs();
+  nav("rsSheet");
+  rsPull().then(ch => { if (ch){ renderRs(); renderRsTile(); } }).catch(() => {});
+});
+$("rsBody").addEventListener("change", e => {
+  const s = e.target.closest("[data-rsf='art']");
+  if (s){
+    RSF.art = s.value; RSF.err = "";
+    const a = rsArt(RSF.art), Us = rsUnites(a);
+    if (Us.indexOf(RSF.u) < 0) RSF.u = Us[0];
+    const fe = rsFeuille(a, RSF.u);
+    RSF.sage = fe === null ? "" : rsQ(fe).replace(/\s/g, "");
+    s.blur(); renderRs(true);
+    return;
+  }
+  const c = e.target.closest("[data-rsc]");
+  if (c){
+    const x = RS.items.find(y => y.id === c.dataset.rsc); if (!x) return;
+    if (String(x.compte || "") === c.value.trim()) return;
+    x.compte = c.value.trim(); x.maj = Date.now();
+    rsSave();
+  }
+});
+$("rsBody").addEventListener("input", e => {
+  const f = e.target.closest("[data-rsf]");
+  if (f && f.dataset.rsf !== "art"){ RSF[f.dataset.rsf] = f.value; return; }
+  const c = e.target.closest("[data-rsc]");
+  if (c){
+    const x = RS.items.find(y => y.id === c.dataset.rsc), z = $("rsBody").querySelector('[data-rscor="' + c.dataset.rsc + '"]');
+    if (x && z) z.innerHTML = rsCorTxt(x, c.value);
+  }
+});
+$("rsBody").addEventListener("click", e => {
+  const ub = e.target.closest("[data-rsu]");
+  if (ub){
+    const a = rsArt(RSF.art), nu = ub.dataset.rsu, v = rsNum(RSF.sage), f = a && a.kind === "tissu" ? a.f : null;
+    if (f && f.laize > 0 && v !== null && nu !== RSF.u){                  /* même quantité, autre unité */
+      const lz = f.laize / 100;
+      RSF.sage = rsQ(nu === "m2" ? v * lz : v / lz).replace(/\s/g, "");
+    }
+    RSF.u = nu; renderRs(true);
+    return;
+  }
+  if (e.target.closest("[data-rssave]")){
+    const a = rsArt(RSF.art), v = rsNum(RSF.sage), nom = String(RSF.nom || "").trim();
+    RSF.err = !a ? "Choisis l'article ou le tissu." : (a.kind === "autre" && !nom) ? "Écris le nom de l'article." :
+      v === null ? "Écris le chiffre que SAGE affiche." : "";
+    if (RSF.err){ renderRs(true); return; }
+    const now = Date.now();
+    RS.items.push({id:rsUid(), kind:a.kind, ref:a.ref, nom:a.kind === "autre" ? nom : a.nom, u:RSF.u, sage:v,
+      note:String(RSF.note || "").trim(), compte:"", at:now, by:moiLogin(), maj:now, fait:0, sup:0});
+    const u = RSF.u;
+    RSF = rsNeuf(); RSF.u = u;
+    rsSave(); renderRs(true);
+    toast("Rappel enregistré, à vérifier à l'atelier");
+    return;
+  }
+  const ok = e.target.closest("[data-rsok]");
+  if (ok){
+    const x = RS.items.find(y => y.id === ok.dataset.rsok); if (!x) return;
+    const inp = $("rsBody").querySelector('[data-rsc="' + x.id + '"]');
+    if (inp && inp.value.trim() !== String(x.compte || "")) x.compte = inp.value.trim();
+    if (rsNum(x.compte) === null){ toast("Écris d'abord ce que tu as compté"); if (inp) inp.focus(); return; }
+    x.fait = Date.now(); x.faitBy = moiLogin(); x.maj = Date.now();
+    if (inp) inp.blur();
+    rsSave(); renderRs(true);
+    toast("Rappel fermé : corrigé dans SAGE");
+    return;
+  }
+  const sp = e.target.closest("[data-rssup]");
+  if (sp){
+    const x = RS.items.find(y => y.id === sp.dataset.rssup); if (!x) return;
+    if (!confirm("Supprimer ce rappel ?")) return;
+    x.sup = Date.now(); x.maj = Date.now();
+    rsSave(); renderRs(true);
+  }
 });
 
 /* ============ v14.21 : Achats, bons de commande fournisseur ============ */
@@ -21516,6 +22159,390 @@ $("tileAch").addEventListener("click", () => {
   nav("achSheet");
   pullAch().then(ch => { if (ch) renderAch(); });
   if (!(ARTICLES || []).length && artAllowed()) try { syncStock(true).then(() => { if (ACH_VUE !== "ba") renderAch(); }); } catch(e){}
+});
+
+/* ============ v14.87 : Trésorerie, chèques à verser, devis (Noureddine seul) ============ */
+/* Noureddine saisit ce qu'il y a en caisse et en banque. L'app part de la dernière saisie et
+   applique tout ce qui bouge depuis : paiements clients (espèces en caisse, virements en banque,
+   chèques seulement quand il confirme l'encaissement), paiements fournisseurs, dépenses,
+   versements et retraits. À chaque nouvelle saisie, l'écart avec l'estimé est gardé.
+   Rangée réservée cfg-tresor, fusionnée élément par élément. Seul Noureddine la voit.
+   Les devis y gardent aussi leur température (chaud, tiède, froid), privée. */
+const TRS_ID = "cfg-tresor";
+function trsVide(){ return {v:1, saisies:[], mvts:[], imports:[], regl:{reserve:0, is:{annee:0, montant:0, ac:[null,null,null,null]}, maj:0}, devis:{}, dec:{}}; }
+function trsNorme(d){
+  const x = Object.assign(trsVide(), d && typeof d === "object" ? d : {});
+  ["saisies","mvts","imports"].forEach(k => { if (!Array.isArray(x[k])) x[k] = []; });
+  if (!x.regl || typeof x.regl !== "object") x.regl = trsVide().regl;
+  if (!x.regl.is || typeof x.regl.is !== "object") x.regl.is = {annee:0, montant:0, ac:[null,null,null,null]};
+  if (!Array.isArray(x.regl.is.ac)) x.regl.is.ac = [null,null,null,null];
+  ["devis","dec"].forEach(k => { if (!x[k] || typeof x[k] !== "object" || Array.isArray(x[k])) x[k] = {}; });
+  return x;
+}
+var TRS = trsNorme(LS.get("mst_trs", null));
+var TRSF = null, TRSM = null, TRSI = null, TRSR = null, CHQD = {}, TRS_DET = false, TRS_T = null;
+function trsFusion(d){
+  if (!d || typeof d !== "object") return false;
+  d = trsNorme(JSON.parse(JSON.stringify(d)));
+  let bouge = false;
+  ["saisies","mvts","imports"].forEach(k => {
+    const par = {};
+    TRS[k].forEach(x => { if (x && x.id) par[x.id] = x; });
+    d[k].forEach(x => {
+      if (!x || !x.id) return;
+      const l = par[x.id];
+      if (!l || (x.maj || 0) > (l.maj || 0)){ par[x.id] = x; bouge = true; }
+    });
+    TRS[k] = Object.keys(par).map(i => par[i]);
+  });
+  if ((d.regl.maj || 0) > (TRS.regl.maj || 0)){ TRS.regl = d.regl; bouge = true; }
+  ["devis","dec"].forEach(k => Object.keys(d[k]).forEach(i => {
+    const x = d[k][i], l = TRS[k][i];
+    if (x && (!l || (x.maj || 0) > (l.maj || 0))){ TRS[k][i] = x; bouge = true; }
+  }));
+  if (bouge) LS.set("mst_trs", TRS);
+  return bouge;
+}
+async function trsPull(){
+  if (!SB || !USER || !factAllowed()) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", TRS_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data;
+    return d ? trsFusion(d) : false;
+  } catch(e){ return false; }
+}
+function trsSave(){
+  LS.set("mst_trs", TRS);
+  clearTimeout(TRS_T);
+  TRS_T = setTimeout(async () => {
+    if (!SB || !USER || !factAllowed()) return;
+    await trsPull();                          /* d'abord ce qu'un autre téléphone a écrit */
+    try {
+      await SB.from("bons").upsert({id:TRS_ID, num:"__TRESOR__", author:USER.login,
+        data:TRS, updated_at:new Date().toISOString()});
+    } catch(e){}
+  }, 700);
+}
+function trsNum(v){ return parseFloat(String(v == null ? "" : v).replace(/\s/g, "").replace(",", ".")) || 0; }
+function trsSigne(n){ return (n >= 0 ? "+" : "−") + frm(Math.abs(n), 0); }
+function trsVivantes(k){ return TRS ? TRS[k].filter(x => x && !x.sup) : []; }
+function trsDerniere(jusqua){
+  return trsVivantes("saisies").filter(x => !jusqua || String(x.date) <= jusqua)
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)) || (b.at || 0) - (a.at || 0))[0] || null;
+}
+/* tout ce qui a bougé après la saisie s : date plus tard, ou même jour mais noté après la saisie */
+function trsMouvements(s, jusqua){
+  const L = [];
+  const add = (d, at, cpt, mt, lib, src) => {
+    d = String(d || "").slice(0, 10);
+    if (!mt || !d || (jusqua && d > jusqua)) return;
+    if (s && !(d > s.date || (d === s.date && (at || 0) > (s.at || 0)))) return;
+    L.push({date:d, at:at || 0, cpt:cpt, mt:mt, lib:lib, src:src});
+  };
+  (ORDERS || []).forEach(o => {
+    if (!o || o.sup) return;
+    const qui = (o.nom || "Client") + (o.num ? " · " + o.num : "");
+    paiements(o).forEach(p => {
+      if (!p) return;
+      const m = parseFloat(p.montant) || 0;
+      if (estEspece(p.mode)) add(p.date, p.at, "caisse", m, qui, "Vente espèces");
+      else if (chqSuivi(p)){ if (p.recu) add(chqEncDate(p), p.recu.at, "banque", m, qui, "Chèque encaissé"); }
+      else add(p.date, p.at, "banque", m, qui, estChequeMode(p.mode) ? "Chèque" : "Virement");
+    });
+  });
+  (ACH.bas || []).forEach(b => {
+    if (!b || b.sup) return;
+    const fo = achFour(b.four), qui = (fo ? fo.nom : "Fournisseur") + (b.num ? " · " + b.num : "");
+    (b.paies || []).forEach(p => { if (p) add(p.date, p.at, estEspece(p.mode) ? "caisse" : "banque", -(parseFloat(p.montant) || 0), qui, "Achat"); });
+  });
+  depVivantes().forEach(x => {
+    const lib = (x.cat || "Dépense") + (x.lib ? " · " + x.lib : "");
+    add(x.date, x.at, "banque", -(parseFloat(x.banque) || 0), lib, "Dépense");
+    add(x.date, x.at, "caisse", -(parseFloat(x.caisse) || 0), lib, "Dépense");
+  });
+  trsVivantes("mvts").forEach(x => {
+    const m = parseFloat(x.mt) || 0;
+    if (x.type === "versement"){
+      add(x.date, x.at, "caisse", -m, x.lib || "Versement en banque", "Versement");
+      add(x.date, x.at, "banque", m, x.lib || "Versement en banque", "Versement");
+    } else add(x.date, x.at, x.de === "banque" ? "banque" : "caisse", -m, x.lib || "Retrait associé", "Retrait");
+  });
+  return L.sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.at - a.at);
+}
+/* caisse et banque estimées (aujourd'hui, ou à la fin du jour « jusqua ») */
+function trsEstime(jusqua){
+  if (!TRS) return null;
+  const s = trsDerniere(jusqua);
+  if (!s) return null;
+  const M = trsMouvements(s, jusqua);
+  const sc = c => M.filter(x => x.cpt === c).reduce((t, x) => t + x.mt, 0);
+  const c = (parseFloat(s.caisse) || 0) + sc("caisse"), b = (parseFloat(s.banque) || 0) + sc("banque");
+  const age = Math.round((new Date(jourISO(new Date()) + "T12:00:00") - new Date(s.date + "T12:00:00")) / 864e5);
+  return {s:s, M:M, caisse:c, banque:b, tot:c + b, age:Math.max(0, age)};
+}
+/* charges moyennes d'un mois (dépenses des 3 derniers mois) : proposition pour la réserve */
+function trsChargesMois(){
+  const lim = jourISO(new Date(Date.now() - 90 * 864e5));
+  return depVivantes().filter(x => String(x.date || "") >= lim).reduce((t, x) => t + depMt(x), 0) / 3;
+}
+
+/* ---- devis : chaud, tiède, froid ---- */
+const DEV_T = {tiede:"🌤 tiède", chaud:"🔥 chaud", froid:"❄️ froid"};
+function devTemp(o){ const x = o && TRS && TRS.devis[o.id]; return x && DEV_T[x.t] ? x.t : "tiede"; }
+function devAge(o){ const t = new Date(o && o.date).getTime(); return isNaN(t) ? 0 : Math.max(0, Math.floor((Date.now() - t) / 864e5)); }
+/* chances qu'il devienne une commande : 35 devis suivis depuis le 03/09, 60 % commandés, tous en moins de 8 jours */
+function devProba(o){ const t = devTemp(o); return t === "chaud" ? 0.9 : t === "froid" ? 0 : devAge(o) <= 10 ? 0.6 : 0.05; }
+function devTempBtn(o){
+  const t = devTemp(o);
+  return '<button class="hchk devt ' + t + '" type="button" data-devt="' + o.id + '" title="Chance de commande ' +
+    Math.round(devProba(o) * 100) + ' % · devis de ' + devAge(o) + ' j · appuie pour changer">' + DEV_T[t] + '</button>';
+}
+function devTempCycle(id){
+  const o = ORDERS.find(x => x.id === id);
+  if (!o || !TRS) return;
+  const t = devTemp(o), n = t === "tiede" ? "chaud" : t === "chaud" ? "froid" : "tiede";
+  TRS.devis[id] = {t:n, maj:Date.now()};
+  trsSave();
+  toast("Devis " + DEV_T[n] + " · chance de commande " + Math.round(devProba(o) * 100) + " %");
+}
+
+/* ---- chèques ---- */
+function chqTrouve(k){
+  const i = String(k).indexOf(":"), oid = String(k).slice(0, i), pid = String(k).slice(i + 1);
+  const o = ORDERS.find(x => x.id === oid), p = o ? paiements(o).find(x => x.id === pid) : null;
+  return o && p ? {o:o, p:p} : null;
+}
+function chqPousse(o){ touche(o); persistOrders(); pushBon(o); payPush(o); }
+function chqEncaisse(k){
+  const r = chqTrouve(k);
+  if (!r) return;
+  const d = CHQD[k] || jourISO(new Date());
+  if (d < String(r.p.date || "").slice(0, 10)){ toast("Date d'encaissement avant la réception du chèque"); return; }
+  const by = (USER && USER.login) || "";
+  r.p.recu = {at:Date.now(), by:by, date:d};
+  if (!r.p.credit && (r.p.at || 0) >= PAY3_DEPUIS) r.p.credit = {at:r.p.recu.at, by:by};
+  chqPousse(r.o);
+  delete CHQD[k];
+  renderTres(); renderTresTile();
+  toast("Chèque encaissé le " + depDateFr(d) + " · compté en banque et en TVA");
+}
+
+/* ---- saisies, mouvements, réglages ---- */
+function trsFormNeuf(){
+  const j = jourISO(new Date());
+  TRSF = {date:j, caisse:"", banque:""};
+  TRSM = {type:(TRSM && TRSM.type) || "versement", de:(TRSM && TRSM.de) || "caisse", mt:"", date:j, lib:""};
+  TRSI = {date:"", mt:"", tva:"", lib:""};
+}
+function trsEnregistre(){
+  const d = TRSF.date || jourISO(new Date());
+  if (String(TRSF.caisse).trim() === "" || String(TRSF.banque).trim() === ""){ toast("Saisis la caisse et la banque"); return; }
+  const c = trsNum(TRSF.caisse), b = trsNum(TRSF.banque), E = trsEstime(d), now = Date.now();
+  const r2 = n => Math.round(n * 100) / 100;
+  TRS.saisies.push({id:depUid("ts"), date:d, at:now, caisse:c, banque:b, by:(USER && USER.login) || "",
+    estC:E ? r2(E.caisse) : null, estB:E ? r2(E.banque) : null, maj:now});
+  trsSave(); trsFormNeuf(); renderTres(); renderTresTile();
+  toast(E ? "Saisie enregistrée · écart caisse " + trsSigne(c - E.caisse) + ", banque " + trsSigne(b - E.banque) : "Première saisie enregistrée");
+}
+function trsMvtAjoute(){
+  const m = trsNum(TRSM.mt);
+  if (!(m > 0)){ toast("Montant manquant"); return; }
+  const now = Date.now();
+  TRS.mvts.push({id:depUid("tm"), date:TRSM.date || jourISO(new Date()), at:now, type:TRSM.type,
+    de:TRSM.type === "versement" ? "caisse" : TRSM.de, mt:m, lib:String(TRSM.lib || "").trim(), by:(USER && USER.login) || "", maj:now});
+  trsSave();
+  TRSM.mt = ""; TRSM.lib = "";
+  renderTres(); renderTresTile();
+  toast(TRSM.type === "versement" ? "Versement noté : caisse −, banque +" : "Retrait noté");
+}
+function trsImportAjoute(){
+  const m = trsNum(TRSI.mt);
+  if (!TRSI.date || !(m > 0)){ toast("Date et montant de l'import"); return; }
+  TRS.imports.push({id:depUid("ti"), date:TRSI.date, mt:m, tva:trsNum(TRSI.tva), lib:String(TRSI.lib || "").trim(), maj:Date.now()});
+  trsSave();
+  TRSI = {date:"", mt:"", tva:"", lib:""};
+  renderTres(); toast("Import ajouté");
+}
+function trsReglSave(){
+  const R = TRSR;
+  TRS.regl = {reserve:trsNum(R.reserve), is:{annee:parseInt(R.is.annee, 10) || 0, montant:trsNum(R.is.montant),
+    ac:[0,1,2,3].map(i => R.is.ac[i] == null || String(R.is.ac[i]).trim() === "" ? null : trsNum(R.is.ac[i]))}, maj:Date.now()};
+  TRSR = JSON.parse(JSON.stringify(TRS.regl));
+  trsSave(); renderTres(); toast("Réglages enregistrés");
+}
+
+function renderTresTile(){
+  const t = $("tileTres");
+  if (!t) return;
+  t.hidden = !factAllowed();
+  if (t.hidden || !TRS) return;
+  const E = trsEstime(), n = chqAVerser().length;
+  $("tileTresSub").textContent = (E ? (E.age > 7 ? "À mettre à jour (" + E.age + " j)" : "Estimé " + frm(E.tot, 0) + " DH") : "Saisir caisse et banque") +
+    (n ? "  ·  " + n + " chèque" + (n > 1 ? "s" : "") + " à verser" : "");
+}
+function renderTres(){
+  if (!factAllowed() || !TRS) return;
+  if (!TRSF) trsFormNeuf();
+  if (!TRSR) TRSR = JSON.parse(JSON.stringify(TRS.regl));
+  const E = trsEstime(), today = jourISO(new Date());
+  const CH = chqAVerser(), chT = CH.reduce((t, x) => t + (parseFloat(x.p.montant) || 0), 0), RC = chqEncaissesRecents();
+  const pl = n => n > 1 ? "s" : "";
+  let h = "";
+
+  /* 1. l'estimé du jour */
+  if (E){
+    h += '<div class="deptot"><small>Estimé aujourd\'hui · caisse + banque</small><b>' + frm(E.tot, 0) + ' DH</b>' +
+      '<small style="display:block;margin-top:3px">Caisse ' + frm(E.caisse, 0) + ' · Banque ' + frm(E.banque, 0) + ' · depuis la saisie du ' + depDateFr(E.s.date) +
+      (E.age ? ' (' + E.age + ' j)' : ' (aujourd\'hui)') + '</small>' +
+      (CH.length ? '<small style="display:block;margin-top:3px">En plus : ' + CH.length + ' chèque' + pl(CH.length) + ' à verser, ' + frm(chT, 0) + ' DH, pas encore compté' + pl(CH.length) + '</small>' : '') + '</div>';
+    if (E.age > 7) h += '<div class="depwarn" style="margin-bottom:10px">Dernière saisie il y a ' + E.age + ' jours : compte la caisse, regarde le solde de la banque et saisis-les ci-dessous.</div>';
+  } else {
+    h += '<div class="depwarn" style="margin-bottom:10px">Aucune saisie pour l\'instant. Compte la caisse, regarde le solde de la banque et saisis-les ci-dessous : ensuite l\'app suit tout ce qui bouge.</div>';
+  }
+
+  /* 2. nouvelle saisie */
+  h += '<div class="depcard"><h4>Nouvelle saisie</h4><div class="depf">' +
+    '<div><label>Date</label><input type="date" data-trsf="date" value="' + esc(TRSF.date) + '" max="' + today + '"></div>' +
+    '<div class="trs2"><div><label>Caisse (DH)</label><input inputmode="decimal" data-trsf="caisse" value="' + esc(TRSF.caisse) + '" placeholder="' + (E ? "estimé " + frm(E.caisse, 0) : "0") + '"></div>' +
+    '<div><label>Banque (DH)</label><input inputmode="decimal" data-trsf="banque" value="' + esc(TRSF.banque) + '" placeholder="' + (E ? "estimé " + frm(E.banque, 0) : "0") + '"></div></div>' +
+    '<button class="depsave" type="button" data-trssave>Enregistrer la saisie</button></div></div>';
+
+  /* 3. chèques */
+  h += '<div class="depcard"><h4>Chèques à verser' + (CH.length ? ' · ' + CH.length + ' · ' + frm(chT, 0) + ' DH' : '') + '</h4>' +
+    (CH.length ? CH.map(x => {
+      const k = x.o.id + ":" + x.p.id, j = Math.max(0, Math.round((new Date(today + "T12:00:00") - new Date(String(x.p.date).slice(0, 10) + "T12:00:00")) / 864e5));
+      return '<div class="deprow"><div class="dl">' + esc(x.o.nom || "Client") + '<small>' + esc(x.o.num || "") + ' · reçu le ' + depDateFr(String(x.p.date).slice(0, 10)) +
+          (j ? ' · il y a ' + j + ' j' : '') + (x.p.by ? ' · saisi par ' + esc(x.p.by) : '') + '</small></div><span class="dm">' + frm(parseFloat(x.p.montant) || 0, 0) + '</span></div>' +
+        '<div class="trschq"><label>Encaissé le</label><input type="date" data-chqd="' + k + '" value="' + esc(CHQD[k] || today) + '" max="' + today + '">' +
+        '<button class="ok" type="button" data-chqok="' + k + '">Encaissé</button></div>';
+    }).join("")
+    : '<div class="depcut">Aucun chèque en attente. Quand Imane saisit un paiement par chèque, il reste ici jusqu\'à ce que tu confirmes l\'encaissement : il compte alors en banque et en TVA à cette date.</div>') +
+    (RC.length ? '<div class="depcut" style="margin:10px 2px 4px">Encaissés ces 30 derniers jours, date modifiable :</div>' + RC.map(x => {
+      const k = x.o.id + ":" + x.p.id;
+      return '<div class="trschq"><label>' + esc(x.o.nom || "Client") + ' · ' + frm(parseFloat(x.p.montant) || 0, 0) + '</label>' +
+        '<input type="date" data-chqfix="' + k + '" value="' + esc(chqEncDate(x.p)) + '" max="' + today + '">' +
+        '<button class="depdel" type="button" data-chqann="' + k + '">Annuler</button></div>';
+    }).join("") : '') + '</div>';
+
+  /* 4. ce qui a bougé depuis la dernière saisie */
+  if (E){
+    const sc = c => E.M.filter(x => x.cpt === c).reduce((t, x) => t + x.mt, 0);
+    h += '<div class="depcard"><h4>Depuis la saisie du ' + depDateFr(E.s.date) + '</h4>' +
+      '<div class="depcut">Caisse ' + trsSigne(sc("caisse")) + ' · Banque ' + trsSigne(sc("banque")) + ' · ' + E.M.length + ' mouvement' + pl(E.M.length) + '</div>' +
+      (E.M.length && TRS_DET ? E.M.slice(0, 120).map(x =>
+        '<div class="deprow"><div class="dl">' + esc(x.src) + ' · ' + x.cpt + '<small>' + depDateFr(x.date) + ' · ' + esc(x.lib) + '</small></div>' +
+        '<span class="dm ' + (x.mt >= 0 ? 'trsp' : 'trsn') + '">' + trsSigne(x.mt) + '</span></div>').join("") : '') +
+      (E.M.length ? '<button class="deplink" type="button" data-trsdet>' + (TRS_DET ? "Masquer le détail" : "Voir le détail") + '</button>' : '') + '</div>';
+  }
+
+  /* 5. versements et retraits */
+  const MV = trsVivantes("mvts").sort((a, b) => String(b.date).localeCompare(String(a.date)) || (b.at || 0) - (a.at || 0)).slice(0, 6);
+  h += '<div class="depcard"><h4>Versement ou retrait</h4><div class="depf">' +
+    '<div class="depseg"><button type="button" data-trsmt="versement" aria-pressed="' + (TRSM.type === "versement") + '">Caisse → banque</button>' +
+    '<button type="button" data-trsmt="retrait" aria-pressed="' + (TRSM.type === "retrait") + '">Retrait associé</button></div>' +
+    (TRSM.type === "retrait" ? '<div class="depseg"><button type="button" data-trsde="caisse" aria-pressed="' + (TRSM.de !== "banque") + '">De la caisse</button>' +
+      '<button type="button" data-trsde="banque" aria-pressed="' + (TRSM.de === "banque") + '">De la banque</button></div>' : '') +
+    '<div class="trs2"><div><label>Montant (DH)</label><input inputmode="decimal" data-trsm="mt" value="' + esc(TRSM.mt) + '"></div>' +
+    '<div><label>Date</label><input type="date" data-trsm="date" value="' + esc(TRSM.date) + '"></div></div>' +
+    '<div><label>Note (facultatif)</label><input data-trsm="lib" value="' + esc(TRSM.lib) + '" placeholder="' + (TRSM.type === "versement" ? "Versement espèces" : "Retrait Noureddine") + '"></div>' +
+    '<button class="depsave" type="button" data-trsmadd>Ajouter</button></div>' +
+    MV.map(x => '<div class="deprow"><div class="dl">' + (x.type === "versement" ? "Caisse → banque" : "Retrait " + (x.de === "banque" ? "banque" : "caisse")) +
+      '<small>' + depDateFr(x.date) + (x.lib ? ' · ' + esc(x.lib) : '') + '</small></div><span class="dm">' + frm(x.mt, 0) + '</span>' +
+      '<button class="depdel" type="button" data-trsmsup="' + x.id + '" aria-label="Supprimer">✕</button></div>').join("") + '</div>';
+
+  /* 6. historique des saisies, avec l'écart */
+  const SA = trsVivantes("saisies").sort((a, b) => String(b.date).localeCompare(String(a.date)) || (b.at || 0) - (a.at || 0)).slice(0, 12);
+  const ec = (v, est) => est == null ? '' : ' <span class="trsec ' + (Math.abs(v - est) < 1 ? 'z' : v > est ? 'p' : 'n') + '">(' + trsSigne(v - est) + ')</span>';
+  if (SA.length) h += '<div class="depcard"><h4>Saisies · écart avec l\'estimé</h4>' +
+    SA.map(x => '<div class="deprow"><div class="dl">' + depDateFr(x.date) + ' · ' + frm((parseFloat(x.caisse) || 0) + (parseFloat(x.banque) || 0), 0) + ' DH' +
+      '<small>Caisse ' + frm(x.caisse, 0) + ec(x.caisse, x.estC) + ' · Banque ' + frm(x.banque, 0) + ec(x.banque, x.estB) +
+      (x.estC == null ? ' · première saisie' : '') + '</small></div>' +
+      '<button class="depdel" type="button" data-trssup="' + x.id + '" aria-label="Supprimer">✕</button></div>').join("") +
+    '<div class="depcut">Écart = ce que tu as compté moins ce que l\'app avait estimé. Un écart qui revient = un mouvement oublié (dépense, retrait, frais bancaires).</div></div>';
+
+  /* 7. réglages */
+  const R = TRSR, an = new Date().getFullYear(), base = trsNum(R.is.montant) / 4, ECH = ["31/03", "30/06", "30/09", "31/12"], cm = trsChargesMois();
+  const IM = trsVivantes("imports").sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  h += '<div class="depcard"><h4>Réglages</h4><div class="depf">' +
+    '<div><label>Réserve de sécurité (DH), le seuil à ne jamais franchir</label><input inputmode="decimal" data-trsr="reserve" value="' + esc(R.reserve || "") + '" placeholder="' + (cm ? "1 mois de charges ≈ " + frm(cm, 0) : "") + '"></div>' +
+    '<div class="trs2"><div><label>IS de l\'année</label><input inputmode="numeric" data-trsr="isan" value="' + esc(R.is.annee || "") + '" placeholder="' + (an - 1) + '"></div>' +
+    '<div><label>Montant de l\'IS (DH)</label><input inputmode="decimal" data-trsr="ismt" value="' + esc(R.is.montant || "") + '"></div></div>' +
+    '<label>Acomptes ' + an + ' (vide = IS ÷ 4)</label><div class="trs4">' + ECH.map((d, i) =>
+      '<div><label>' + d + '</label><input inputmode="decimal" data-trsr="ac' + i + '" value="' + (R.is.ac[i] == null ? "" : esc(R.is.ac[i])) + '" placeholder="' + (base ? frm(base, 0) : "0") + '"></div>').join("") + '</div>' +
+    '<button class="depsave" type="button" data-trsrsave>Enregistrer les réglages</button></div>' +
+    '<h4 style="margin-top:14px">Prochains imports</h4>' +
+    IM.map(x => '<div class="deprow"><div class="dl">' + depDateFr(x.date) + (x.lib ? ' · ' + esc(x.lib) : '') +
+      '<small>TVA douane récupérable ' + frm(x.tva || 0, 0) + ' DH</small></div><span class="dm">' + frm(x.mt, 0) + '</span>' +
+      '<button class="depdel" type="button" data-trsisup="' + x.id + '" aria-label="Supprimer">✕</button></div>').join("") +
+    '<div class="depf" style="margin-top:6px"><div class="trs2"><div><label>Date prévue</label><input type="date" data-trsi="date" value="' + esc(TRSI.date) + '"></div>' +
+    '<div><label>Montant total (DH)</label><input inputmode="decimal" data-trsi="mt" value="' + esc(TRSI.mt) + '"></div></div>' +
+    '<div class="trs2"><div><label>TVA douane (DH)</label><input inputmode="decimal" data-trsi="tva" value="' + esc(TRSI.tva) + '"></div>' +
+    '<div><label>Note</label><input data-trsi="lib" value="' + esc(TRSI.lib) + '" placeholder="Tissus Turquie"></div></div>' +
+    '<button class="deplink" type="button" data-trsiadd>+ Ajouter l\'import</button></div></div>';
+
+  $("tresBody").innerHTML = h;
+}
+$("tresBody").addEventListener("input", e => {
+  const t = e.target, ds = t.dataset || {};
+  if (ds.trsf) TRSF[ds.trsf] = t.value;
+  else if (ds.trsm) TRSM[ds.trsm] = t.value;
+  else if (ds.trsi) TRSI[ds.trsi] = t.value;
+  else if (ds.chqd) CHQD[ds.chqd] = t.value;
+  else if (ds.trsr && TRSR){
+    if (ds.trsr === "reserve") TRSR.reserve = t.value;
+    else if (ds.trsr === "isan") TRSR.is.annee = t.value;
+    else if (ds.trsr === "ismt") TRSR.is.montant = t.value;
+    else if (/^ac\d$/.test(ds.trsr)) TRSR.is.ac[+ds.trsr.slice(2)] = t.value;
+  }
+});
+$("tresBody").addEventListener("change", e => {
+  const k = e.target.dataset && e.target.dataset.chqfix;
+  if (!k || !factAllowed()) return;
+  const r = chqTrouve(k), d = e.target.value;
+  if (!r || !r.p.recu || !d) return;
+  if (d < String(r.p.date || "").slice(0, 10)){ toast("Date d'encaissement avant la réception du chèque"); renderTres(); return; }
+  r.p.recu.date = d; chqPousse(r.o);
+  renderTres(); renderTresTile(); toast("Encaissé le " + depDateFr(d));
+});
+$("tresBody").addEventListener("click", e => {
+  if (!factAllowed()) return;
+  const g = q => e.target.closest(q);
+  let x;
+  if (g("[data-trssave]")){ trsEnregistre(); return; }
+  if ((x = g("[data-chqok]"))){ chqEncaisse(x.dataset.chqok); return; }
+  if ((x = g("[data-chqann]"))){
+    const r = chqTrouve(x.dataset.chqann);
+    if (r) ask("Annuler l'encaissement ?", (r.o.nom || "Ce chèque") + " · " + frm(parseFloat(r.p.montant) || 0, 0) + " DH redevient « à verser ».", () => {
+      delete r.p.recu; chqPousse(r.o); renderTres(); renderTresTile(); toast("Chèque de nouveau à verser");
+    });
+    return;
+  }
+  if ((x = g("[data-trsmt]"))){ TRSM.type = x.dataset.trsmt; renderTres(); return; }
+  if ((x = g("[data-trsde]"))){ TRSM.de = x.dataset.trsde; renderTres(); return; }
+  if (g("[data-trsmadd]")){ trsMvtAjoute(); return; }
+  if (g("[data-trsdet]")){ TRS_DET = !TRS_DET; renderTres(); return; }
+  if (g("[data-trsrsave]")){ trsReglSave(); return; }
+  if (g("[data-trsiadd]")){ trsImportAjoute(); return; }
+  const sup = (k, attr, quoi) => {
+    const it = TRS[k].find(y => y.id === x.dataset[attr]);
+    if (it) ask("Supprimer " + quoi + " ?", depDateFr(it.date) + " · " + frm(k === "saisies" ? (parseFloat(it.caisse) || 0) + (parseFloat(it.banque) || 0) : it.mt, 0) + " DH", () => {
+      it.sup = true; it.maj = Date.now(); trsSave(); renderTres(); renderTresTile();
+    });
+  };
+  if ((x = g("[data-trsmsup]"))){ sup("mvts", "trsmsup", "ce mouvement"); return; }
+  if ((x = g("[data-trssup]"))){ sup("saisies", "trssup", "cette saisie"); return; }
+  if ((x = g("[data-trsisup]"))){ sup("imports", "trsisup", "cet import"); return; }
+});
+$("tileTres").addEventListener("click", () => {
+  if (!factAllowed()) return;
+  trsFormNeuf(); TRSR = null; CHQD = {};
+  renderTres(); nav("tresSheet");
+  const libre = () => { const a = document.activeElement; return !(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)); };
+  Promise.all([trsPull(), pullAch(), depPull()]).then(() => {
+    if ($("tresSheet").classList.contains("open") && libre()){ TRSR = null; renderTres(); }
+    renderTresTile();
+  }, () => {});
 });
 
 
