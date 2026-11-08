@@ -126,6 +126,11 @@
   .albar .wabtn:disabled { opacity:.45; cursor:default; }
   input[data-alsel], #alTout { width:14px; height:14px; cursor:pointer; }
   h3.wag { font-size:8px; color:#384868; margin:12px 0 4px; font-weight:normal; }
+  .noud { display:flex; gap:8px; padding:8px 0; border-top:2px solid var(--soft); line-height:1.8; }
+  .noud:first-child { border-top:0; } .noud .ni { font-size:14px; line-height:1.2; }
+  .noud b { display:block; font-weight:normal; color:var(--ink); } .noud.p1 b { color:#c03030; }
+  .noud small { display:block; color:var(--muted); font-size:7px; }
+  .noud .row { margin-top:4px; } .nouch { width:100%; height:auto; display:block; margin:4px 0 8px; }
 </style>
 </head>
 <body>
@@ -147,6 +152,7 @@
     <div id="loggedBox" class="row" style="display:none">
       <button id="manqueBtn" type="button">Ce que j'ai manqué</button>
       <button id="chiffresBtn" type="button">📊 Chiffres</button>
+      <button id="nouBtn" type="button">🧠 Décisions</button>
       <button id="logsBtn" type="button">📜 Logs</button>
       <button id="refreshBtn" type="button">Actualiser</button>
       <button id="logoutBtn" type="button">Retour à l'app</button>
@@ -284,6 +290,7 @@ let CATALOGUE=[], ARTICLES=[], ATL={}, ORDERS=[], NOTES=[], PROS=[], ACH={bas:[]
 /* mentions du groupe WhatsApp, à utiliser partout où l'on écrit à un agent (règle de Noureddine, 19/10/2026) */
 const WA_TAG={imane:'@imane sis4',soufiane:'@Soufiane%',ahmed:'@Papa',noureddine:'@Noureddine'};
 let LIVE=false, DEMO=false, SB=null, USER=null, lastStock=0, lastBons=0, dataErr='';
+let NOUJ=null, NOUDEC={};   /* v14.88 : le dernier calcul de Noureddine (cfg-tresor), pour Noureddine seul */
 
 function parseCSV(t){ const rows=[]; let cur=[],val='',q=false; for(let i=0;i<t.length;i++){ const c=t[i];
   if(q){ if(c==='"'){ if(t[i+1]==='"'){val+='"';i++;} else q=false; } else val+=c; }
@@ -321,10 +328,11 @@ async function loadBons(){
     if(error) throw error; all=all.concat(data||[]); if(!data||data.length<1000) break;
   }
   ORDERS=all.filter(o=>o.num&&!String(o.num).startsWith('__'));
-  const c=await SB.from('bons').select('id,data').in('id',['cfg-atelier','cfg-notes','cfg-prospects','cfg-achats','cfg-wamsg','cfg-depenses','cfg-mesures','cfg-rapsage']);
+  const c=await SB.from('bons').select('id,data').in('id',['cfg-atelier','cfg-notes','cfg-prospects','cfg-achats','cfg-wamsg','cfg-depenses','cfg-mesures','cfg-rapsage','cfg-tresor']);
   if(!c.error) (c.data||[]).forEach(r=>{ const d=r.data||{};
     if(r.id==='cfg-atelier') ATL=d; if(r.id==='cfg-notes') NOTES=Array.isArray(d.liste)?d.liste:[];
-    if(r.id==='cfg-prospects') PROS=Array.isArray(d.liste)?d.liste:[]; if(r.id==='cfg-achats') ACH={bas:d.bas||[],fours:d.fours||[]}; if(r.id==='cfg-mesures') MESJ=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-rapsage') RSJ=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-depenses') DEPAPP=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-wamsg') WA={reg:d.reg||{},camp:Array.isArray(d.camp)?d.camp:[]}; });
+    if(r.id==='cfg-prospects') PROS=Array.isArray(d.liste)?d.liste:[]; if(r.id==='cfg-achats') ACH={bas:d.bas||[],fours:d.fours||[]}; if(r.id==='cfg-mesures') MESJ=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-rapsage') RSJ=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-depenses') DEPAPP=Array.isArray(d.items)?d.items:[]; if(r.id==='cfg-wamsg') WA={reg:d.reg||{},camp:Array.isArray(d.camp)?d.camp:[]};
+    if(r.id==='cfg-tresor'&&String(USER||'').toLowerCase()==='noureddine'){ NOUJ=d.nou&&typeof d.nou==='object'?d.nou:null; NOUDEC=d.dec&&typeof d.dec==='object'?d.dec:{}; } });
   lastBons=Date.now();
 }
 
@@ -508,6 +516,7 @@ PROPS.forEach(p=>{ if(!p.noBlock) block(p.tx,p.ty,p.w,p.h); p.sortY=p.front?(p.t
 
 /* zones cliquables -> écrans */
 const SPOTS=[
+ {key:'nou',x:6*T+1,y:4*T+1,w:15,h:23,si:()=>LIVE&&!!NOUJ},
  {key:'rapsage',x:T+2,y:4*T,w:13,h:16},
  {key:'agenda',x:8*T,y:T+1,w:16,h:18},
  {key:'scie',tab:'À couper',badge:'tubes',x:8.6*T-7,y:9.1*T-7,w:14,h:14},
@@ -1242,7 +1251,7 @@ function render(){
   HITS=[]; TAGS=[]; ctx=g; g.drawImage(bg,0,0);
   const ents=[...PROPS.map(p=>({y:p.sortY,draw:()=>p.draw(p)})),...agents.map(a=>({y:a.y*T+T-.5,draw:()=>drawAgent(a)}))];
   ents.sort((a,b)=>a.y-b.y).forEach(e=>e.draw()); drawLumiere(); agents.forEach(drawBubble); drawNotesWall(); drawAgendaMur();
-  ctx=g; drawChiffresIcon(); drawLogsIcon();
+  ctx=g; drawChiffresIcon(); drawLogsIcon(); drawNouBoard();
   const sp=hoverSpot(); if(sp&&!hoverAgent()&&Math.floor(time*3)%2){ ctx=g; R(sp.x-1,sp.y-1,sp.w+2,1,'#fff'); R(sp.x-1,sp.y+sp.h,sp.w+2,1,'#fff'); R(sp.x-1,sp.y,1,sp.h,'#fff'); R(sp.x+sp.w,sp.y,1,sp.h,'#fff'); }
   v.imageSmoothingEnabled=false; v.fillStyle='#101820'; v.fillRect(0,0,view.width,view.height);
   v.drawImage(world,SX(0),SY(0),Math.round(W*T*Z),Math.round(H*T*Z));
@@ -1250,10 +1259,13 @@ function render(){
     vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(10,12,30,.30)'); v.fillStyle=vg; v.fillRect(0,0,view.width,view.height); }
   drawKpiBoard();
   badgeNum(TO_CUT.length,8.6*T,9.1*T); badgeNum(FABQ.length,18.2*T,9*T);
+  if(LIVE&&NOUJ) badgeNum(nouDecJ().length,6*T+15,4*T+1);
   if(LIVE&&MANQUE_N&&!MANQUE_LU){ badgeNum(MANQUE_N,3*T+53,4*T-9); if(Math.floor(time*2)%2) chip("Pendant votre absence",SX(3*T+53),SY(4*T-20),FS(),'rgba(192,48,48,.9)'); }
   if(TABLE.piece){ const p=TABLE.piece; frbox([`${fr(p.w)} x ${fr(p.len)} cm`,`${p.ref} · ${p.num}`],SX(16*T),SY(12.1*T),'c','#c03030'); }
   TAGS.forEach(t=>chip(t.text,SX(t.x),SY(t.y),FS(),'rgba(40,48,72,.8)'));
   const ha=hoverAgent(); agents.forEach(a=>{ if(overview()||a===ha||a===follow) chip(a.name,SX(a.x*T+8),SY(a.y*T-(a.icon&&!a.path.length?20:9)),FS(),a.P.T); });
+  if(LIVE&&NOUJ){ const na=agents.find(z=>z.id==='noureddine'), L=nouDecJ(); if(na&&L.length){ let t='1. '+L[0].t; if(t.length>34) t=t.slice(0,33)+'...';
+    chip(t,SX(na.x*T+8),SY(na.y*T+T+7),FS(),'rgba(48,88,192,.92)'); } }
   banner();
   if(!LIVE) frbox(['CONNECTEZ-VOUS',"avec votre compte de l'app (a droite)"],view.width/2,view.height/2,'c','#c03030');
   if(mouse&&!pop.classList.contains('open')&&!(drag&&drag.moved)){ const h=[...HITS].reverse().find(h=>mouse.x>=h.x-1&&mouse.x<=h.x+h.w+1&&mouse.y>=h.y-1&&mouse.y<=h.y+h.h+1); if(h) tooltip(h.lines); }
@@ -1440,6 +1452,7 @@ const SCREENS={
  tubes:{title:'Tubes reçus à l\'atelier',tabs:['Reçus','À couper']},
  prets:{title:'Prêt à livrer',tabs:['Prêts']},
  rapsage:{title:'📋 Rappels SAGE',tabs:['À vérifier','Corrigés']},
+ nou:{title:'🧠 Noureddine',tabs:['Décisions','Prévision','Analyse']},
 };
 let LOGJ=jourISO(new Date());
 document.getElementById('logsBtn').addEventListener('click',()=>{ LOGJ=jourISO(new Date()); openPop('logs'); });
@@ -1509,6 +1522,26 @@ document.getElementById('popBody').addEventListener('click',e=>{ if(e.target.clo
 
 document.getElementById('manqueBtn').onclick=()=>openPop('manque');
 document.getElementById('chiffresBtn').onclick=()=>openPop('chiffres');
+/* ---------- v14.88 : Noureddine SMART AI (lecture du calcul de l'app, Fait / Ignorer partagés) ---------- */
+function nouDecJ(){ if(!NOUJ||!Array.isArray(NOUJ.dec)) return [];
+  return NOUJ.dec.filter(x=>{ const s=NOUDEC[x.k]; if(!s||!s.s) return true; if(s.s==='fait') return false; return Date.now()-(s.at||0)>14*864e5; }); }
+function drawNouBoard(){ if(!LIVE||!NOUJ) return; const x=6*T+1,y=4*T+1;   /* le chevalet des décisions, à droite du bureau */
+  R(x+2,y+14,2,9,'#6b4428'); R(x+11,y+14,2,9,'#6b4428'); R(x,y,15,15,'#6b4428'); R(x+1,y+1,13,13,'#f4f4f4');
+  R(x+3,y+3,9,2,'#c03030'); R(x+3,y+6,7,1,'#3058c0'); R(x+3,y+8,8,1,'#3058c0'); R(x+3,y+10,5,1,'#38b764'); R(x+3,y+12,6,1,'#38b764');
+  const L=nouDecJ(); hit(x,y,15,23,['Décisions de Noureddine',...(L.length?L.slice(0,3).map((d,i)=>(i+1)+'. '+d.t):['Rien à faire'])]); }
+async function nouMarque(k,st){
+  if(!SB||!LIVE) throw new Error('pas connecté');
+  const {data,error}=await SB.from('bons').select('data').eq('id','cfg-tresor').limit(1); if(error) throw error;
+  const d=data&&data[0]&&data[0].data; if(!d) throw new Error('ouvre d’abord la Trésorerie dans l’app (pas encore enregistrée)');
+  if(!d.dec||typeof d.dec!=='object'||Array.isArray(d.dec)) d.dec={};
+  const x=((NOUJ&&NOUJ.dec)||[]).find(y=>y.k===k), now=Date.now();
+  d.dec[k]={s:st,at:now,t:x?x.t:'',by:USER||'noureddine',maj:now};
+  const r=await SB.from('bons').upsert({id:'cfg-tresor',num:'__TRESOR__',author:USER||'noureddine',data:d,updated_at:new Date().toISOString()}); if(r.error) throw r.error;
+  NOUDEC=d.dec; if(d.nou) NOUJ=d.nou; if(popKey) renderPop(); }
+document.getElementById('popBody').addEventListener('click',async e=>{ const b=e.target.closest('[data-noufk],[data-nouik]'); if(!b) return; b.disabled=true;
+  try{ await nouMarque(b.dataset.noufk||b.dataset.nouik,b.dataset.noufk?'fait':'ign'); }catch(err){ b.disabled=false; alert('Pas enregistré : '+(err.message||err)); } });
+document.getElementById('nouBtn').onclick=()=>openPop('nou');
+
 function notifLab(){ const b=document.getElementById('notifBtn'); if(b) b.textContent='Notifications : '+(NOTIF_ON&&'Notification' in window&&Notification.permission==='granted'?'OUI':'NON'); }
 document.getElementById('notifBtn').onclick=async()=>{
   if(!('Notification' in window)){ alert('Ce navigateur ne gère pas les notifications.'); return; }
@@ -1699,6 +1732,34 @@ function renderPop(){ try{ notesRegle(); }catch(e){}
         '<div class="muted" style="padding:6px 0">À l\'atelier : compter le vrai stock, corriger SAGE, puis dans l\'app : Rappels SAGE › Corrigé dans SAGE.</div>'; }
     else { const L=RSJ.filter(x=>x&&!x.sup&&x.fait).sort((a,b)=>(b.fait||0)-(a.fait||0)).slice(0,40); s=sum([['Corrigés',L.length]]);
       b=L.length?tbl(['Article','>SAGE disait','>Compté','Corrigé le','Par'],L.map(x=>[art(x),qu(x.sage,x.u),x.compte!==''&&x.compte!=null?qu(String(x.compte).replace(',','.'),x.u):'—',dd(x.fait),esc(cap(x.faitBy||'—'))])):'<div class="empty">Aucun rappel corrigé pour le moment.</div>'; }
+  } else if(popKey==='nou'){ /* v14.88 : Noureddine SMART AI, calculé par l'app et rangé dans cfg-tresor (champ nou) */
+    const J=NOUJ, L=nouDecJ(), quand=J&&J.at?new Date(J.at).toLocaleString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    if(!J){ b=needLogin()||'<div class="empty">Pas encore de calcul. Ouvrez une fois l\'app (Trésorerie) : Noureddine calcule et range ses décisions ici.</div>'; }
+    else if(popTab==='Décisions'){
+      s=sum([['Décisions',L.length],['Calculé le',quand]]);
+      b=(L.length?L.map((x,i)=>`<div class="noud p${x.p}"><span class="ni">${esc(x.ico||'')}</span><div><b>${i+1}. ${esc(x.t)}</b><small>${esc(x.d||'')}</small>`+
+          `<div class="row"><button type="button" data-noufk="${esc(x.k)}">✓ Fait</button><button type="button" data-nouik="${esc(x.k)}">Ignorer</button></div></div></div>`).join('')
+        :'<div class="empty">Rien à faire pour l\'instant.</div>')+
+        '<div class="muted" style="padding:6px 0">L\'app recalcule à chaque changement quand elle est ouverte. Fait et Ignorer (14 jours) sont partagés avec l\'app.</div>';
+    } else if(popTab==='Prévision'){
+      const P=J.prev||{}, SC=P.sc||{}, C={prudent:['Prudent','#c62828'],normal:['Normal','#1F5FD1'],opt:['Optimiste','#12833F']}, K=Object.keys(C).filter(k=>SC[k]&&Array.isArray(SC[k].w));
+      s=sum([['Aujourd\'hui',frm(P.start)+' DH'],...K.map(k=>[C[k][0]+' · au plus bas',frm(SC[k].low)+' DH'])]);
+      const all=[P.res||0]; K.forEach(k=>SC[k].w.forEach(v=>all.push(v)));
+      let mn=Math.min(...all), mx=Math.max(...all); if(mx-mn<1) mx=mn+1; const m0=(mx-mn)*.06; mn-=m0; mx+=m0;
+      const Wd=600,Hd=170,top=8,bas=16, X=i=>(4+i*(Wd-8)/90).toFixed(1), Y=v=>(top+(mx-v)*(Hd-top-bas)/(mx-mn)).toFixed(1), jour=(i,n)=>i===n-1?90:i*7;
+      let svg=`<svg viewBox="0 0 ${Wd} ${Hd}" class="nouch"><rect x="0" y="0" width="${Wd}" height="${Hd}" fill="#f8f8fc"/>`+
+        `<line x1="4" y1="${Y(P.res||0)}" x2="${Wd-4}" y2="${Y(P.res||0)}" stroke="#c62828" stroke-dasharray="6 4"/><text x="${Wd-6}" y="${Y(P.res||0)-3}" text-anchor="end" font-size="7" fill="#c62828">réserve ${frm(P.res||0)}</text>`;
+      ['opt','prudent','normal'].filter(k=>K.indexOf(k)>=0).forEach(k=>{ const w=SC[k].w; svg+=`<polyline fill="none" stroke="${C[k][1]}" stroke-width="${k==='normal'?3:2}" points="${w.map((v,i)=>X(jour(i,w.length))+','+Y(v)).join(' ')}"/>`; });
+      svg+=`<text x="4" y="${Hd-4}" font-size="7" fill="#606878">aujourd'hui</text><text x="${Wd-4}" y="${Hd-4}" text-anchor="end" font-size="7" fill="#606878">+90 jours</text></svg>`;
+      b=(P.sans?'<div class="empty">Pas encore de saisie de caisse et banque : la courbe part de 0.</div>':'')+svg+
+        tbl(['Scénario','>Au plus bas','Le','>Dans 90 j'],K.map(k=>[`<span style="color:${C[k][1]}">■</span> ${C[k][0]}`,frm(SC[k].low)+' DH',dateFr(SC[k].lowD||''),frm(SC[k].fin)+' DH']))+
+        '<h3 class="wag" style="margin-top:10px">Sur quoi c\'est basé (scénario normal, 90 jours)</h3>'+
+        tbl(['Poste','>Montant'],[['Trésorerie aujourd\'hui',frm(P.start)+' DH'],...(P.cat||[]).map(c=>[esc(c[0]),(c[1]>=0?'+':'')+frm(c[1])+' DH'])])+
+        `<div class="muted" style="padding:6px 0">Calculé le ${quand}. Le détail des hypothèses est dans l'app, Trésorerie › Noureddine › Prévision.</div>`;
+    } else {
+      s=sum([['Calculé le',quand]]);
+      b=tbl(['Indicateur','>Valeur','Détail'],((J.an&&J.an.lignes)||[]).map(l=>[esc(l[0]),esc(l[1]),`<small class="muted">${esc(l[2]||'')}</small>`]));
+    }
   }
   document.getElementById('popSum').innerHTML=s; document.getElementById('popBody').innerHTML=b;
 }

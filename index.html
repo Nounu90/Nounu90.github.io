@@ -355,6 +355,20 @@ select{appearance:none; -webkit-appearance:none}
 .trsec{font-size:11px; font-weight:700} .trsec.p{color:var(--ok)} .trsec.n{color:#c62828} .trsec.z{color:var(--muted)}
 .trschq{display:flex; gap:8px; align-items:center; padding:0 0 9px}
 .trschq label{font-size:12px; color:var(--muted); white-space:nowrap}
+.nou h4 small{font-weight:500; color:var(--muted); font-size:11.5px; margin-left:4px}
+.nou .depseg{margin-bottom:10px; flex-wrap:wrap} .nou .depseg button{padding:8px 4px; font-size:12.5px}
+.noud{display:flex; gap:10px; padding:10px 0; border-top:1px solid var(--line)} .noud:first-of-type{border-top:0}
+.noud .ni{font-size:20px; line-height:1.2} .noud .nt{flex:1; min-width:0}
+.noud b{display:block; font-size:14px; line-height:1.3} .noud small{display:block; color:var(--muted); font-size:12.5px; line-height:1.45; margin-top:3px}
+.noud.p1 b{color:#c62828}
+.noub{display:flex; gap:6px; margin-top:7px; flex-wrap:wrap}
+.noub button{padding:6px 11px; border:1px solid var(--line); border-radius:8px; background:var(--card2); color:var(--ink); font-size:12.5px; font-weight:600; cursor:pointer}
+.noub button.f{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.noucb{width:100%; height:auto; display:block; margin:2px 0 8px}
+.nou3{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:8px}
+.nou3 > div{background:var(--card2); border-radius:9px; padding:7px 8px; font-size:11.5px; color:var(--muted); line-height:1.35}
+.nou3 i{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; vertical-align:0}
+.nou3 b{display:block; color:var(--ink); font-size:14px}
 .trschq input{flex:1; min-width:0; padding:7px 8px; border:1px solid var(--line); border-radius:8px; background:var(--card2); color:var(--ink); font-size:13.5px}
 .trschq .ok{border:0; background:var(--accent); color:#fff; border-radius:8px; padding:8px 12px; font-weight:700; cursor:pointer}
 .hchk.devt.chaud{border-style:solid; border-color:#e8590c; background:#ffe8dc; color:#c2410c}
@@ -8910,7 +8924,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.87";
+const APP_VERSION = "14.88";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -22169,14 +22183,15 @@ $("tileAch").addEventListener("click", () => {
    Rangée réservée cfg-tresor, fusionnée élément par élément. Seul Noureddine la voit.
    Les devis y gardent aussi leur température (chaud, tiède, froid), privée. */
 const TRS_ID = "cfg-tresor";
-function trsVide(){ return {v:1, saisies:[], mvts:[], imports:[], regl:{reserve:0, is:{annee:0, montant:0, ac:[null,null,null,null]}, maj:0}, devis:{}, dec:{}}; }
+function trsVide(){ return {v:1, saisies:[], mvts:[], imports:[], regl:{reserve:0, is:{annee:0, montant:0, ac:[null,null,null,null]}, maj:0}, devis:{}, dec:{}, snap:{}, nou:null}; }
 function trsNorme(d){
   const x = Object.assign(trsVide(), d && typeof d === "object" ? d : {});
   ["saisies","mvts","imports"].forEach(k => { if (!Array.isArray(x[k])) x[k] = []; });
   if (!x.regl || typeof x.regl !== "object") x.regl = trsVide().regl;
   if (!x.regl.is || typeof x.regl.is !== "object") x.regl.is = {annee:0, montant:0, ac:[null,null,null,null]};
   if (!Array.isArray(x.regl.is.ac)) x.regl.is.ac = [null,null,null,null];
-  ["devis","dec"].forEach(k => { if (!x[k] || typeof x[k] !== "object" || Array.isArray(x[k])) x[k] = {}; });
+  ["devis","dec","snap"].forEach(k => { if (!x[k] || typeof x[k] !== "object" || Array.isArray(x[k])) x[k] = {}; });
+  if (!x.nou || typeof x.nou !== "object") x.nou = null;
   return x;
 }
 var TRS = trsNorme(LS.get("mst_trs", null));
@@ -22196,10 +22211,11 @@ function trsFusion(d){
     TRS[k] = Object.keys(par).map(i => par[i]);
   });
   if ((d.regl.maj || 0) > (TRS.regl.maj || 0)){ TRS.regl = d.regl; bouge = true; }
-  ["devis","dec"].forEach(k => Object.keys(d[k]).forEach(i => {
+  ["devis","dec","snap"].forEach(k => Object.keys(d[k]).forEach(i => {
     const x = d[k][i], l = TRS[k][i];
     if (x && (!l || (x.maj || 0) > (l.maj || 0))){ TRS[k][i] = x; bouge = true; }
   }));
+  if (d.nou && (!TRS.nou || (d.nou.at || 0) > (TRS.nou.at || 0))){ TRS.nou = d.nou; bouge = true; }
   if (bouge) LS.set("mst_trs", TRS);
   return bouge;
 }
@@ -22219,11 +22235,14 @@ function trsSave(){
     if (!SB || !USER || !factAllowed()) return;
     await trsPull();                          /* d'abord ce qu'un autre téléphone a écrit */
     try {
-      await SB.from("bons").upsert({id:TRS_ID, num:"__TRESOR__", author:USER.login,
+      const {error} = await SB.from("bons").upsert({id:TRS_ID, num:"__TRESOR__", author:USER.login,
         data:TRS, updated_at:new Date().toISOString()});
-    } catch(e){}
+      if (error) throw error;
+      LS.set("mst_trs_pend", 0);
+    } catch(e){ LS.set("mst_trs_pend", 1); }   /* v14.88 : réessayé toutes les minutes, rien ne se perd */
   }, 700);
 }
+setInterval(() => { if (USER && TRS && LS.get("mst_trs_pend", 0) && navigator.onLine !== false) trsSave(); }, 60000);
 function trsNum(v){ return parseFloat(String(v == null ? "" : v).replace(/\s/g, "").replace(",", ".")) || 0; }
 function trsSigne(n){ return (n >= 0 ? "+" : "−") + frm(Math.abs(n), 0); }
 function trsVivantes(k){ return TRS ? TRS[k].filter(x => x && !x.sup) : []; }
@@ -22380,6 +22399,12 @@ function renderTresTile(){
   const E = trsEstime(), n = chqAVerser().length;
   $("tileTresSub").textContent = (E ? (E.age > 7 ? "À mettre à jour (" + E.age + " j)" : "Estimé " + frm(E.tot, 0) + " DH") : "Saisir caisse et banque") +
     (n ? "  ·  " + n + " chèque" + (n > 1 ? "s" : "") + " à verser" : "");
+  /* v14.88 : Noureddine recalcule à chaque changement et affiche sa décision n° 1 */
+  try {
+    const N = nouObtenir();
+    if (N && N.dec.length) $("tileTresSub").textContent = "🧠 " + N.dec[0].t;
+    nouPublie(N);
+  } catch(e){}
 }
 function renderTres(){
   if (!factAllowed() || !TRS) return;
@@ -22401,15 +22426,18 @@ function renderTres(){
     h += '<div class="depwarn" style="margin-bottom:10px">Aucune saisie pour l\'instant. Compte la caisse, regarde le solde de la banque et saisis-les ci-dessous : ensuite l\'app suit tout ce qui bouge.</div>';
   }
 
+  /* v14.88 : Noureddine, analyse, prévision et décisions */
+  h += nouCarte();
+
   /* 2. nouvelle saisie */
-  h += '<div class="depcard"><h4>Nouvelle saisie</h4><div class="depf">' +
+  h += '<div class="depcard" id="trsSaisie"><h4>Nouvelle saisie</h4><div class="depf">' +
     '<div><label>Date</label><input type="date" data-trsf="date" value="' + esc(TRSF.date) + '" max="' + today + '"></div>' +
     '<div class="trs2"><div><label>Caisse (DH)</label><input inputmode="decimal" data-trsf="caisse" value="' + esc(TRSF.caisse) + '" placeholder="' + (E ? "estimé " + frm(E.caisse, 0) : "0") + '"></div>' +
     '<div><label>Banque (DH)</label><input inputmode="decimal" data-trsf="banque" value="' + esc(TRSF.banque) + '" placeholder="' + (E ? "estimé " + frm(E.banque, 0) : "0") + '"></div></div>' +
     '<button class="depsave" type="button" data-trssave>Enregistrer la saisie</button></div></div>';
 
   /* 3. chèques */
-  h += '<div class="depcard"><h4>Chèques à verser' + (CH.length ? ' · ' + CH.length + ' · ' + frm(chT, 0) + ' DH' : '') + '</h4>' +
+  h += '<div class="depcard" id="trsChq"><h4>Chèques à verser' + (CH.length ? ' · ' + CH.length + ' · ' + frm(chT, 0) + ' DH' : '') + '</h4>' +
     (CH.length ? CH.map(x => {
       const k = x.o.id + ":" + x.p.id, j = Math.max(0, Math.round((new Date(today + "T12:00:00") - new Date(String(x.p.date).slice(0, 10) + "T12:00:00")) / 864e5));
       return '<div class="deprow"><div class="dl">' + esc(x.o.nom || "Client") + '<small>' + esc(x.o.num || "") + ' · reçu le ' + depDateFr(String(x.p.date).slice(0, 10)) +
@@ -22464,7 +22492,7 @@ function renderTres(){
   /* 7. réglages */
   const R = TRSR, an = new Date().getFullYear(), base = trsNum(R.is.montant) / 4, ECH = ["31/03", "30/06", "30/09", "31/12"], cm = trsChargesMois();
   const IM = trsVivantes("imports").sort((a, b) => String(a.date).localeCompare(String(b.date)));
-  h += '<div class="depcard"><h4>Réglages</h4><div class="depf">' +
+  h += '<div class="depcard" id="trsRegl"><h4>Réglages</h4><div class="depf">' +
     '<div><label>Réserve de sécurité (DH), le seuil à ne jamais franchir</label><input inputmode="decimal" data-trsr="reserve" value="' + esc(R.reserve || "") + '" placeholder="' + (cm ? "1 mois de charges ≈ " + frm(cm, 0) : "") + '"></div>' +
     '<div class="trs2"><div><label>IS de l\'année</label><input inputmode="numeric" data-trsr="isan" value="' + esc(R.is.annee || "") + '" placeholder="' + (an - 1) + '"></div>' +
     '<div><label>Montant de l\'IS (DH)</label><input inputmode="decimal" data-trsr="ismt" value="' + esc(R.is.montant || "") + '"></div></div>' +
@@ -22543,6 +22571,478 @@ $("tileTres").addEventListener("click", () => {
     if ($("tresSheet").classList.contains("open") && libre()){ TRSR = null; renderTres(); }
     renderTresTile();
   }, () => {});
+});
+
+
+/* ============ v14.88 : Noureddine SMART AI · analyse, prévision 90 j, décisions (Noureddine seul) ============ */
+/* Un agent à règles, sans IA externe. À chaque changement dans l'app il relit tout : trésorerie,
+   ventes (feuille historique + bons), coût des bons, dépenses, achats, devis, chèques, TVA, IS,
+   imports. Il refait :
+   1. l'analyse : ventes, bénéfice brut et net, comparaison avec l'an dernier, fin d'année ;
+   2. la prévision de trésorerie jour par jour sur 90 jours, en 3 scénarios ;
+   3. les décisions, par priorité, avec Fait / Ignorer et un journal.
+   Le dernier calcul est rangé dans cfg-tresor (champ nou) pour le jeu, la prévision du jour
+   dans snap (pour mesurer la précision 30 jours plus tard).
+   Jamais d'astuce fiscale : seulement des achats utiles et le bon moment pour payer. */
+var NOU = null, NOU_AT = 0, NOU_TAB = "dec", NOU_HIST = false, NOU_SAVE = 0, NOU_RT = null;
+var NOU_SCN = {prudent:{lab:"Prudent", c:"#c62828"}, normal:{lab:"Normal", c:"#1F5FD1"}, opt:{lab:"Optimiste", c:"#12833F"}};
+var NOU_CAT = {chq:"Chèques à verser", reste:"Reste à encaisser (bons)", devis:"Devis (selon leurs chances)",
+  ventes:"Nouvelles ventes prévues", achat:"Achats matière", four:"Fournisseurs à payer", charges:"Charges et salaires",
+  retraits:"Retraits", tva:"TVA", is:"Acomptes IS", import:"Imports"};
+function nouPlus(iso, n){ const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return jourISO(d); }
+function nouEntre(a, b){ return Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 864e5); }
+function nouFinMois(ym){ const a = ym.split("-").map(Number); return jourISO(new Date(a[0], a[1], 0)); }
+function nouMoisLab(ym){ return MOIS_L[+ym.slice(5, 7) - 1] + " " + ym.slice(0, 4); }
+function nouMed(L){ const x = L.slice().sort((a, b) => a - b), n = x.length; return n ? (n % 2 ? x[(n - 1) / 2] : (x[n / 2 - 1] + x[n / 2]) / 2) : 0; }
+function nouPl(n, s){ return n > 1 ? (s || "s") : ""; }
+/* le jour de la vente d'un bon : le plus tôt entre la commande, la création du bon et le 1er paiement */
+function nouVenteJour(o){
+  const c = [], i = waBonInfo(o), d = String(o.date || "");
+  if (i.cmdAt) c.push(jourISO(new Date(i.cmdAt)));
+  if (d.length >= 10){ const t = new Date(d.length === 10 ? d + "T12:00:00" : d); if (!isNaN(t.getTime())) c.push(jourISO(t)); }
+  paiements(o).forEach(p => { const x = String((p && p.date) || "").slice(0, 10); if (x.length === 10) c.push(x); });
+  return c.sort()[0] || "";
+}
+function nouVendus(){ return (ORDERS || []).filter(o => o && !o.sup && etatDe(o) !== "devis"); }
+function nouCout(o){ try { const C = calcCout(o); return C && C.vente > 0 ? C : null; } catch(e){ return null; } }
+/* ventes HT par mois : la feuille historique avant le 13/08/2026, les bons de l'app après */
+function nouVentesMois(){
+  const M = {};
+  ((HIST && HIST.ventes) || []).forEach(v => { if (v.date && v.date < HIST_CUT.ventes){ const k = v.date.slice(0, 7); M[k] = (M[k] || 0) + (v.ht || v.ttc || 0); } });
+  nouVendus().forEach(o => { const j = nouVenteJour(o); if (j && j >= HIST_CUT.ventes){ const k = j.slice(0, 7); M[k] = (M[k] || 0) + htDe(o); } });
+  return M;
+}
+/* charges et salaires par mois, sans les impôts (TVA, IS) ni l'épargne */
+function nouChargesMois(){
+  const T = {}, S = {}, add = (d, cat, mt) => {
+    d = String(d || "");
+    if (d.length < 7 || !mt || DEP_IMPOTS.indexOf(cat) >= 0 || cat === "Epargne") return;
+    const k = d.slice(0, 7); T[k] = (T[k] || 0) + mt; if (cat === "Salaire") S[k] = (S[k] || 0) + mt;
+  };
+  ((HIST && HIST.dep) || []).forEach(x => { if (x.date < DEP_CUT[x.t]) add(x.date, x.cat, x.mt || 0); });
+  depVivantes().forEach(x => add(x.date, x.cat, depMt(x)));
+  return {T:T, S:S};
+}
+/* saison : pour chaque mois, ventes du mois ÷ moyenne mensuelle de l'année, moyenne des années complètes */
+function nouSaison(V, an){
+  const I = [0,0,0,0,0,0,0,0,0,0,0,0], n = [0,0,0,0,0,0,0,0,0,0,0,0], ans = {};
+  Object.keys(V).forEach(k => { const y = +k.slice(0, 4); if (y < an) (ans[y] = ans[y] || []).push(k); });
+  Object.keys(ans).forEach(y => {
+    if (ans[y].length < 10) return;
+    let t = 0; for (let m = 1; m <= 12; m++) t += V[y + "-" + pad(m)] || 0;
+    if (!(t > 0)) return;
+    for (let m = 1; m <= 12; m++){ I[m - 1] += (V[y + "-" + pad(m)] || 0) / (t / 12); n[m - 1]++; }
+  });
+  return I.map((x, i) => n[i] ? Math.min(1.5, Math.max(0.65, x / n[i])) : 1);
+}
+
+function nouCalc(){
+  if (!HIST && !NOU_HIST && adminAllowed()){
+    NOU_HIST = true;
+    histCharge().then(ok => { if (ok){ NOU_AT = 0; try { renderTresTile(); if ($("tresSheet").classList.contains("open")) renderTres(); } catch(e){} } });
+  }
+  const now = new Date(), auj = jourISO(now), an = now.getFullYear(), ym = auj.slice(0, 7), H = 90;
+  const E = trsEstime(), V = nouVentesMois(), CH = nouChargesMois(), SA = nouSaison(V, an);
+  const mp = n => depDecale(ym, -n), idx = k => SA[+k.slice(5, 7) - 1];
+
+  /* ventes de base : 3 derniers mois complets, corrigés de la saison */
+  let sv = 0, si = 0;
+  for (let n = 1; n <= 3; n++){ const k = mp(n); sv += V[k] || 0; si += idx(k); }
+  const med12 = nouMed([1,2,3,4,5,6,7,8,9,10,11,12].map(n => V[mp(n)] || 0).filter(x => x > 0));
+  let base = si ? sv / si : 0;
+  if (med12 && base > 2 * med12) base = 2 * med12;
+  if (!(base > 0)) base = med12;
+  const attendu = k => base * idx(k);
+
+  /* les 4 derniers mois de bons : coût matière, encaissé / HT, marge par produit */
+  const lim120 = nouPlus(auj, -120), TY = {}, VL = [];
+  let hv = 0, hc = 0, hd = 0, hh = 0;
+  nouVendus().forEach(o => {
+    const j = nouVenteJour(o), ht = htDe(o);
+    if (!j || j < lim120 || !(ht > 0)) return;
+    hd += duDe(o); hh += ht;
+    const C = nouCout(o);
+    if (!C) return;
+    hv += ht; hc += C.cout;
+    const t = o.type === "JN" ? "JN" : o.type === "MIX" ? "MIX" : "ENR";
+    TY[t] = TY[t] || {v:0, c:0, n:0}; TY[t].v += ht; TY[t].c += C.cout; TY[t].n++;
+    VL.push({o:o, j:j, ht:ht, marge:(ht - C.cout) / ht});
+  });
+  const rc = hv > 0 ? Math.min(0.75, Math.max(0.25, hc / hv)) : 0.45;
+  const rt = hh > 0 ? Math.min(1.2, Math.max(1, hd / hh)) : 1.15;
+
+  /* charges de base : 3 derniers mois complets bien saisis (un mois à moins de la moitié d'habitude = incomplet) */
+  const chRef = nouMed([1,2,3,4,5,6,7,8,9,10,11,12].map(n => CH.T[mp(n)] || 0).filter(x => x > 0));
+  const ok3 = [], inc = [];
+  for (let n = 1; n <= 4; n++){
+    const k = mp(n), v = CH.T[k] || 0;
+    if (chRef && v < 0.5 * chRef){ if (k >= DEP_CUT.charge.slice(0, 7)) inc.push({k:k, v:v}); }
+    else if (ok3.length < 3) ok3.push(k);
+  }
+  const chBase = ok3.length >= 2 ? ok3.reduce((t, k) => t + CH.T[k], 0) / ok3.length : (chRef || trsChargesMois() || 0);
+  const salM = Math.min(chBase, ok3.length ? ok3.reduce((t, k) => t + (CH.S[k] || 0), 0) / ok3.length : 0);
+  const resU = trsNum(TRS.regl.reserve), reserve = resU > 0 ? resU : Math.round(chBase / 100) * 100;
+
+  /* achats moyens par mois (3 derniers mois) : sert à proposer un montant d'achats utiles */
+  const lim90 = nouPlus(auj, -90);
+  let achM = 0;
+  (ACH.bas || []).forEach(b => { if (b && !b.sup && b.etat && b.etat !== "brouillon" && String(jourISO(new Date(b.date || 0))) >= lim90) achM += achTot(b).ttc; });
+  ((HIST && HIST.achats) || []).forEach(a => { if (a.date >= lim90) achM += a.ttc || 0; });
+  achM = achM / 3;
+
+  /* --- les mouvements prévus, par scénario --- */
+  const SC = {prudent:{dv:0.5, vt:0.75, ch:1.1, dl:2, re:0.85}, normal:{dv:1, vt:1, ch:1, dl:1, re:1}, opt:{dv:1.15, vt:1.15, ch:0.95, dl:0.6, re:1}};
+  const K = Object.keys(SC), ev = {prudent:[], normal:[], opt:[]};
+  const put = (k, d, mt, cat) => { const i = Math.max(0, nouEntre(auj, d)); if (i > H || !mt || !isFinite(mt)) return; ev[k].push({i:i, mt:mt, cat:cat}); };
+  const tous = f => K.forEach(k => f(k, SC[k]));
+
+  const CQ = chqAVerser(), cqTot = CQ.reduce((t, x) => t + (parseFloat(x.p.montant) || 0), 0);
+  tous((k, s) => CQ.forEach(x => put(k, nouPlus(auj, Math.round(2 * s.dl)), parseFloat(x.p.montant) || 0, "chq")));
+
+  const RE = nouVendus().map(o => ({o:o, r:soldeDe(o)})).filter(x => x.r > 0.5), reTot = RE.reduce((t, x) => t + x.r, 0);
+  tous((k, s) => RE.forEach(x => {
+    const ech = String(x.o.ech || "").slice(0, 10), livre = etatDe(x.o) === "livre";
+    put(k, !livre && ech >= auj ? nouPlus(ech, Math.round(2 * s.dl)) : nouPlus(auj, Math.round(7 * s.dl)), x.r * s.re, "reste");
+  }));
+
+  const DV = (ORDERS || []).filter(o => o && !o.sup && etatDe(o) === "devis");
+  tous((k, s) => DV.forEach(o => {
+    const p = Math.min(0.95, devProba(o) * s.dv), ht = htDe(o);
+    if (!(p > 0) || !(ht > 0)) return;
+    const conv = nouPlus(auj, Math.max(1, Math.round(4 * s.dl)));
+    put(k, nouPlus(conv, Math.round(6 * s.dl)), duDe(o) * p, "devis");
+    put(k, nouPlus(conv, 2), -ht * rc * 1.2 * p, "achat");
+  }));
+
+  /* nouvelles ventes, à partir du 8e jour (avant, ce sont les devis en cours qui se commandent) */
+  tous((k, s) => {
+    for (let i = 8; i <= H; i++){
+      const d = nouPlus(auj, i), m = d.slice(0, 7), ht = attendu(m) / +nouFinMois(m).slice(8, 10) * s.vt;
+      put(k, nouPlus(d, Math.round(6 * s.dl)), ht * rt, "ventes");
+      put(k, nouPlus(d, 2), -ht * rc * 1.2, "achat");
+    }
+  });
+
+  const FD = (ACH.bas || []).filter(b => b && !b.sup && b.etat && b.etat !== "brouillon").map(b => ({b:b, r:achTot(b).reste})).filter(x => x.r > 0.5);
+  tous(k => FD.forEach(x => { const e = String(x.b.ech || "").slice(0, 10); put(k, e >= auj ? e : nouPlus(auj, 3), -x.r, "four"); }));
+
+  const salPaye = CH.S[ym] || 0;
+  tous((k, s) => {
+    const jour = (chBase - salM) / 30.4 * s.ch;
+    for (let i = 1; i <= H; i++) put(k, nouPlus(auj, i), -jour, "charges");
+    for (let m = 0; m <= 3; m++) put(k, nouFinMois(depDecale(ym, m)), -(m ? salM : Math.max(0, salM - salPaye)) * s.ch, "charges");
+  });
+
+  const ret = trsVivantes("mvts").filter(x => x.type === "retrait" && String(x.date) >= lim90).reduce((t, x) => t + (parseFloat(x.mt) || 0), 0) / 3;
+  if (ret > 0) tous(k => { for (let i = 1; i <= H; i++) put(k, nouPlus(auj, i), -ret / 30.4, "retraits"); });
+
+  /* TVA : trimestre passé s'il n'est pas encore payé, trimestre en cours = déjà dû + ce qui est prévu d'ici la fin */
+  const tNow = Math.floor(now.getMonth() / 3) + 1, tP = tNow > 1 ? [an, tNow - 1] : [an - 1, 4];
+  const limT = (y, t) => jourISO(new Date(y, MOIS_T[t][1] + 2, 0)), finT = (y, t) => jourISO(new Date(y, MOIS_T[t][1] + 1, 0));
+  const tl = (y, t) => { try { return tvaLignes(y, t); } catch(e){ return []; } };
+  const LP = tl(tP[0], tP[1]), SP = tvaTotaux(LP), limP = limT(tP[0], tP[1]), debN = nouPlus(finT(tP[0], tP[1]), 1);
+  const tvaPayee = (a, b) => depVivantes().some(x => x.cat === "TVA" && String(x.date) >= a && String(x.date) <= b);
+  const tvaPrev = limP >= auj && SP.du > 0 && !tvaPayee(debN, limP) ? SP.du : 0;
+  if (tvaPrev) tous(k => put(k, limP, -tvaPrev, "tva"));
+  const L0 = tl(an, tNow), S0 = tvaTotaux(L0), fq = finT(an, tNow), limQ = limT(an, tNow), iq = nouEntre(auj, fq);
+  const vt = L0.concat(LP).filter(x => x.cote === "v"), vtT = vt.reduce((t, x) => t + x.ttc, 0);
+  const part = vtT > 0 ? vt.filter(x => x.ok).reduce((t, x) => t + x.ttc, 0) / vtT : 0.6;
+  const impTva = trsVivantes("imports").filter(x => String(x.date) >= auj && String(x.date) <= fq).reduce((t, x) => t + trsNum(x.tva), 0);
+  const tvaQ = {};
+  K.forEach(k => {
+    let c = 0, d = 0;
+    ev[k].forEach(e => { if (e.i > iq) return; if (/^(chq|reste|devis|ventes)$/.test(e.cat)) c += e.mt; else if (/^(achat|four)$/.test(e.cat)) d -= e.mt; });
+    tvaQ[k] = Math.max(0, S0.du + c * part / 6 - d / 6 - impTva);
+    put(k, limQ, -tvaQ[k], "tva");
+  });
+
+  /* IS : acomptes du 31/03, 30/06, 30/09, 31/12 (réglages), sauf s'ils sont déjà notés dans Dépenses */
+  const IS = TRS.regl.is || {}, ism = trsNum(IS.montant), isEch = [], fin = nouPlus(auj, H);
+  [an, an + 1].forEach(y => ["03-31","06-30","09-30","12-31"].forEach((md, i) => {
+    const d = y + "-" + md;
+    if (d < auj || d > fin) return;
+    const v = IS.ac && IS.ac[i] != null && String(IS.ac[i]).trim() !== "" ? trsNum(IS.ac[i]) : ism / 4;
+    if (!(v > 0)) return;
+    if (depVivantes().some(x => /acompte is/i.test(x.cat || "") && Math.abs(nouEntre(d, String(x.date || d))) <= 25)) return;
+    isEch.push({d:d, v:v}); tous(k => put(k, d, -v, "is"));
+  }));
+
+  trsVivantes("imports").forEach(x => {
+    if (String(x.date) < auj) return;
+    tous(k => put(k, k === "prudent" ? nouPlus(String(x.date), -7) : String(x.date), -(parseFloat(x.mt) || 0), "import"));
+  });
+
+  /* --- les 3 courbes --- */
+  const start = E ? E.tot : 0, R = {};
+  K.forEach(k => {
+    const jour = new Array(H + 1).fill(0), cat = {};
+    ev[k].forEach(e => { jour[e.i] += e.mt; cat[e.cat] = (cat[e.cat] || 0) + e.mt; });
+    const pts = []; let b = start, lo = {v:Infinity, i:0};
+    for (let i = 0; i <= H; i++){ b += jour[i]; pts.push(b); if (b < lo.v) lo = {v:b, i:i}; }
+    R[k] = {pts:pts, low:{v:lo.v, i:lo.i, d:nouPlus(auj, lo.i)}, fin:pts[H], cat:cat};
+  });
+
+  /* --- analyse --- */
+  const jM = now.getDate(), nM = +nouFinMois(ym).slice(8, 10), mN = now.getMonth() + 1;
+  const vMois = V[ym] || 0, attM = attendu(ym), rythme = attM > 0 ? vMois / (attM * jM / nM) : 1;
+  let vAn = 0, vN1 = 0, chAn = 0, vReste = attM * (1 - jM / nM);
+  for (let m = 1; m <= mN; m++){
+    vAn += V[an + "-" + pad(m)] || 0; chAn += CH.T[an + "-" + pad(m)] || 0;
+    vN1 += (V[(an - 1) + "-" + pad(m)] || 0) * (m === mN ? jM / nM : 1);
+  }
+  for (let m = mN + 1; m <= 12; m++) vReste += attendu(an + "-" + pad(m));
+  const brutAn = vAn * (1 - rc), netAn = brutAn - chAn;
+  const finAn = netAn + vReste * (1 - rc) - chBase * ((1 - jM / nM) + (12 - mN));
+  let brutM = 0;
+  nouVendus().forEach(o => {
+    const j = nouVenteJour(o);
+    if (j.slice(0, 7) !== ym || j < HIST_CUT.ventes) return;
+    const C = nouCout(o), ht = htDe(o); brutM += C ? ht - C.cout : ht * (1 - rc);
+  });
+  const dvTot = DV.reduce((t, o) => t + htDe(o), 0), dvPond = DV.reduce((t, o) => t + htDe(o) * devProba(o), 0);
+
+  return {auj:auj, an:an, ym:ym, H:H, E:E, start:start, R:R, reserve:reserve, resU:resU, base:base, saison:idx(ym), rc:rc, rt:rt,
+    chBase:chBase, chRef:chRef, salM:salM, inc:inc, achM:achM, part:part, CQ:CQ, cqTot:cqTot, RE:RE, reTot:reTot, DV:DV, FD:FD,
+    tvaPrev:tvaPrev, limP:limP, S0:S0, tvaQ:tvaQ, fq:fq, limQ:limQ, tNow:tNow, isEch:isEch, ism:ism,
+    jM:jM, nM:nM, vMois:vMois, attM:attM, rythme:rythme, brutM:brutM, chM:CH.T[ym] || 0,
+    vAn:vAn, vN1:vN1, chAn:chAn, brutAn:brutAn, netAn:netAn, finAn:finAn, TY:TY, VL:VL, dvTot:dvTot, dvPond:dvPond};
+}
+
+/* --- les décisions, par ordre de priorité --- */
+function nouDecisions(N){
+  const D = [], dd = depDateFr, auj = N.auj, E = N.E, P = N.R.prudent, Nm = N.R.normal;
+  const add = (p, k, ico, t, d, act) => D.push({p:p, k:k, ico:ico, t:t, d:d, act:act || ""});
+  /* 1. sécurité */
+  if (!E) add(1, "saisie:0", "🧮", "Saisis la caisse et la banque", "Sans point de départ, pas de prévision. Compte la caisse, regarde le solde de la banque et saisis-les plus bas.", "saisie");
+  else if (E.age > 7) add(1, "saisie:" + E.s.id, "🧮", "Compte la caisse et la banque (dernière saisie il y a " + E.age + " j)", "Plus la saisie est ancienne, plus la prévision dérive. Une saisie par semaine suffit.", "saisie");
+  if (E && Nm.low.v < 0) add(1, "decouv:" + Nm.low.d.slice(0, 7), "🚨", "Risque de découvert le " + dd(Nm.low.d) + " : " + frm(Nm.low.v, 0) + " DH",
+    "Même dans le scénario normal. Relance les impayés, verse les chèques, décale les achats et les retraits qui peuvent attendre.", "prev");
+  else if (E && P.low.v < N.reserve) add(1, "secu:" + P.low.d.slice(0, 7), "⚠️", "Trésorerie sous la réserve vers le " + dd(P.low.d),
+    "Scénario prudent : " + frm(P.low.v, 0) + " DH au plus bas, pour une réserve de " + frm(N.reserve, 0) + " DH. Relance les impayés et garde les achats non urgents pour après.", "prev");
+  /* 2. argent à faire rentrer ou à préparer */
+  if (N.CQ.length) add(2, "chq:" + N.CQ.length + ":" + Math.round(N.cqTot), "🏦", "Verse " + N.CQ.length + " chèque" + nouPl(N.CQ.length) + " à la banque : " + frm(N.cqTot, 0) + " DH",
+    "Ils ne comptent en banque et en TVA qu'au jour où tu confirmes l'encaissement.", "chq");
+  if (N.tvaPrev && nouEntre(auj, N.limP) <= 30) add(2, "tvap:" + N.limP, "🧾", "TVA du trimestre passé : " + frm(N.tvaPrev, 0) + " DH avant le " + dd(N.limP),
+    "Pas encore notée dans Dépenses. Une fois payée, note-la (catégorie TVA).", "tva");
+  if (nouEntre(auj, N.limQ) <= 30 && N.tvaQ.normal > 0) add(2, "tvaq:" + N.limQ, "🧾", "Prépare environ " + frm(N.tvaQ.normal, 0) + " DH de TVA pour le " + dd(N.limQ),
+    "TVA déjà due ce trimestre : " + frm(N.S0.du, 0) + " DH, plus les ventes prévues d'ici le " + dd(N.fq) + ".", "tva");
+  N.isEch.forEach(x => { if (nouEntre(auj, x.d) <= 30) add(2, "isac:" + x.d, "🏛️", "Acompte IS de " + frm(x.v, 0) + " DH avant le " + dd(x.d), "Une fois payé, note-le dans Dépenses (catégorie Acompte IS).", "dep"); });
+  /* 3. impayés */
+  N.RE.map(x => {
+    const ech = String(x.o.ech || "").slice(0, 10), liv = livreLe(x.o);
+    return {o:x.o, r:x.r, ech:ech, j:liv ? nouEntre(jourISO(new Date(liv)), auj) : (ech ? nouEntre(ech, auj) : 0)};
+  }).filter(x => etatDe(x.o) === "livre" ? x.j >= 2 : (x.ech && x.j >= 3))
+    .sort((a, b) => b.r - a.r).slice(0, 4)
+    .forEach(x => add(3, "rel:" + x.o.id + ":" + Math.round(x.r), "📞", "Relance " + (x.o.nom || "le client") + " : " + frm(x.r, 0) + " DH",
+      (x.o.num || "Bon") + (etatDe(x.o) === "livre" ? " · livré il y a " + x.j + " j" : " · pose prévue le " + dd(x.ech)) + ". Imane peut envoyer le rappel WhatsApp.", "pay"));
+  /* 4. devis */
+  N.DV.filter(o => devTemp(o) === "chaud" && devAge(o) > 10).forEach(o => add(4, "devc:" + o.id, "🔥",
+    "Devis chaud " + (o.nom || "") + " (" + frm(htDe(o), 0) + " DH) pas encore commandé", "Devis de " + devAge(o) + " j. Appelle aujourd'hui, ou repasse-le en tiède.", "hist"));
+  N.DV.filter(o => devTemp(o) === "tiede" && devAge(o) > 10 && devAge(o) <= 60 && htDe(o) >= 3000)
+    .sort((a, b) => htDe(b) - htDe(a)).slice(0, 4)
+    .forEach(o => add(4, "dev:" + o.id + ":" + (devAge(o) <= 30 ? 1 : 2), "💤", "Relance le devis " + (o.nom || "") + " : " + frm(htDe(o), 0) + " DH HT",
+      "Devis de " + devAge(o) + " j : sans relance, 5 % de chances. S'il répond, passe-le 🔥 chaud (90 %), sinon ❄️ froid.", "hist"));
+  /* 5. fournisseurs avant la fin du trimestre */
+  const jq = nouEntre(auj, N.fq);
+  if (jq <= 25) N.FD.forEach(x => {
+    if (P.low.v - x.r < N.reserve) return;
+    const tx = parseFloat(x.b.tva) || 0, fo = achFour(x.b.four);
+    add(5, "four:" + x.b.id + ":" + N.fq, "🚚", "Paie " + (fo ? fo.nom : "le fournisseur") + " (" + frm(x.r, 0) + " DH) par virement avant le " + dd(N.fq),
+      "Ta trésorerie reste au-dessus de la réserve, et la TVA de " + frm(x.r * tx / (100 + tx), 0) + " DH se déduit dès ce trimestre.", "ach");
+  });
+  /* 6. achats utiles, réglages et données */
+  const libre = P.low.v - N.reserve;
+  if (N.E && jq <= 30 && N.tvaQ.normal > 1000 && libre > 5000 && N.achM > 0){
+    const mt = Math.round(Math.min(libre * 0.5, N.achM) / 100) * 100;
+    if (mt >= 1000) add(6, "achtva:" + N.fq, "🧵", "Achats utiles avant le " + dd(N.fq) + " : jusqu'à " + frm(mt, 0) + " DH",
+      "Seulement ce que tu utiliseras dans les 2 prochains mois (tissus qui tournent, accessoires), payé par virement ou chèque avant la fin du trimestre : " +
+      "la TVA (≈ " + frm(mt / 6, 0) + " DH) se déduit ce trimestre au lieu du suivant. Ta trésorerie reste au-dessus de la réserve.", "ach");
+  }
+  if (!(N.resU > 0)) add(6, "reserve:0", "🛟", "Fixe ta réserve de sécurité", "En attendant, Noureddine prend 1 mois de charges ≈ " + frm(N.reserve, 0) + " DH. Réglages en bas de la Trésorerie.", "regl");
+  const isAc = (TRS.regl.is && TRS.regl.is.ac || []).some(v => v != null && String(v).trim() !== "");
+  if (!(N.ism > 0) && !isAc) add(6, "is:" + N.an, "🏛️", "Saisis l'IS de l'année", "Pour prévoir les acomptes du 31/03, 30/06, 30/09 et 31/12. Réglages en bas de la Trésorerie.", "regl");
+  if (N.inc.length){
+    const I = N.inc.slice().sort((a, b) => a.k.localeCompare(b.k));
+    add(6, "depinc:" + I.map(x => x.k).join(","), "📒", "Dépenses incomplètes : " + I.map(x => MOIS_L[+x.k.slice(5, 7) - 1]).join(", "),
+      I.map(x => MOIS_L[+x.k.slice(5, 7) - 1] + " " + frm(x.v, 0) + " DH").join(" · ") + " saisis, pour ≈ " + frm(N.chRef, 0) +
+      " DH par mois d'habitude. Ajoute les charges et salaires manquants dans Dépenses : sinon le bénéfice et la prévision sont faux.", "dep");
+  }
+  /* 7. ventes et marges */
+  const mois = MOIS_L[+N.ym.slice(5, 7) - 1];
+  if (N.jM >= 10 && N.attM > 0 && N.rythme < 0.7) add(7, "rythme:" + N.ym, "📉", "Ventes de " + mois + " en retard : " + frm(N.vMois, 0) + " DH HT",
+    "Au rythme habituel de la saison, tu serais à " + frm(N.attM * N.jM / N.nM, 0) + " DH à cette date. Relance les devis, publie, recontacte les anciens clients.", "hist");
+  if (N.jM >= 10 && N.attM > 0 && N.rythme > 1.3) add(7, "bonmois:" + N.ym, "📈", "Bon mois : ventes " + Math.round((N.rythme - 1) * 100) + " % au-dessus du rythme habituel",
+    "Vérifie le stock de tissu pour suivre la cadence.", "");
+  Object.keys(N.TY).forEach(t => {
+    const x = N.TY[t], m = (x.v - x.c) / x.v;
+    if (x.n >= 3 && m < 0.4) add(7, "marge:" + t + ":" + N.ym, "💰", "Marge " + mesTypeLab(t).toLowerCase() + " à " + Math.round(m * 100) + " % sur 4 mois",
+      x.n + " bons. Ta moyenne est de " + Math.round((1 - N.rc) * 100) + " % : revois les prix ou les remises de ce produit.", "");
+  });
+  N.VL.filter(x => x.marge < 0.3 && nouEntre(x.j, auj) <= 30).sort((a, b) => a.marge - b.marge).slice(0, 2)
+    .forEach(x => add(7, "mbas:" + x.o.id, "💰", "Bon " + (x.o.num || "") + " vendu à " + Math.round(x.marge * 100) + " % de marge",
+      (x.o.nom || "") + " · " + frm(x.ht, 0) + " DH HT. Vérifie le prix ou la remise.", ""));
+  /* Fait = caché ; Ignoré = caché 14 jours */
+  return D.filter(x => {
+    const s = TRS.dec[x.k];
+    if (!s || !s.s) return true;
+    if (s.s === "fait") return false;
+    return Date.now() - (s.at || 0) > 14 * 864e5;
+  }).sort((a, b) => a.p - b.p);
+}
+
+function nouObtenir(){
+  if (!factAllowed() || !TRS) return null;
+  if (!NOU || Date.now() - NOU_AT > 1500){
+    try { NOU = nouCalc(); NOU.dec = nouDecisions(NOU); NOU.lignes = nouLignes(NOU); }
+    catch(e){ NOU = null; try { console.error("Noureddine", e); } catch(_){} }
+    NOU_AT = Date.now();
+  }
+  return NOU;
+}
+function nouDecMarque(k, s){
+  const x = NOU && NOU.dec.find(y => y.k === k), l = TRS.dec[k];
+  TRS.dec[k] = {s:s, at:Date.now(), t:(x && x.t) || (l && l.t) || "", by:(USER && USER.login) || "", maj:Date.now()};
+  NOU_AT = 0; trsSave(); renderTres(); renderTresTile();
+  toast(s === "fait" ? "Noté comme fait" : s === "ign" ? "Ignoré pendant 14 jours" : "Décision remise dans la liste");
+}
+function nouOuvre(a){
+  if (a === "prev"){ NOU_TAB = "prev"; renderTres(); return; }
+  const sec = {saisie:"trsSaisie", chq:"trsChq", regl:"trsRegl"}[a];
+  if (sec){ const el = $(sec); if (el) el.scrollIntoView({behavior:"smooth", block:"start"}); return; }
+  const tile = {pay:"tilePay", hist:"tileHist", ach:"tileAch", tva:"tileTva", dep:"tileDep"}[a];
+  if (tile && $(tile)) $(tile).click();
+}
+/* précision : la prévision à 30 jours faite chaque jour, comparée à l'estimé 30 jours plus tard (avec une saisie entre les deux) */
+function nouPrecision(){
+  const auj = jourISO(new Date()), L = [], S = TRS.snap || {};
+  Object.keys(S).forEach(d => {
+    const x = S[d];
+    if (!x || x.f30 == null) return;
+    const c = nouPlus(d, 30);
+    if (c > auj) return;
+    const E = trsEstime(c);
+    if (!E || E.s.date <= d) return;
+    L.push({e:Math.abs(x.f30 - E.tot), r:Math.abs(x.f30 - E.tot) / Math.max(1000, Math.abs(E.tot))});
+  });
+  return L.length ? {n:L.length, e:L.reduce((t, x) => t + x.e, 0) / L.length, r:L.reduce((t, x) => t + x.r, 0) / L.length} : null;
+}
+function nouLignes(N){
+  const pc = v => (v >= 0 ? "+" : "−") + Math.abs(Math.round(v * 100)) + " %", L = [], mois = MOIS_L[+N.ym.slice(5, 7) - 1];
+  L.push(["Ventes de " + mois + " (HT)", frm(N.vMois, 0) + " DH", N.attM > 0 ? "au " + N.jM + " : " + frm(N.attM * N.jM / N.nM, 0) + " DH attendus, " + Math.round(N.rythme * 100) + " % du rythme habituel" : ""]);
+  L.push(["Bénéfice brut de " + mois, frm(N.brutM, 0) + " DH", "ventes moins coût des bons (tissu, pièces, pose)"]);
+  L.push(["Charges et salaires de " + mois, frm(N.chM, 0) + " DH", "saisis dans Dépenses, hors TVA et IS"]);
+  L.push(["Ventes " + N.an + " (HT)", frm(N.vAn, 0) + " DH", N.vN1 > 0 ? pc(N.vAn / N.vN1 - 1) + " par rapport à " + (N.an - 1) + " à la même date (" + frm(N.vN1, 0) + " DH)" : ""]);
+  L.push(["Bénéfice brut " + N.an, frm(N.brutAn, 0) + " DH", "estimé : coût des bons ≈ " + Math.round(N.rc * 100) + " % des ventes"]);
+  L.push(["Charges et salaires " + N.an, frm(N.chAn, 0) + " DH", "hors TVA et IS"]);
+  const incL = N.inc.length ? " · trop haut : dépenses de " + N.inc.map(x => MOIS_L[+x.k.slice(5, 7) - 1]).reverse().join(", ") + " incomplètes" : "";
+  L.push(["Bénéfice net " + N.an + " à ce jour", frm(N.netAn, 0) + " DH", "avant IS" + incL]);
+  L.push(["Bénéfice net prévu au 31/12", frm(N.finAn, 0) + " DH", "si les ventes suivent le rythme habituel de la saison" + incL]);
+  Object.keys(N.TY).sort().forEach(t => { const x = N.TY[t];
+    L.push(["Marge " + mesTypeLab(t).toLowerCase(), Math.round((x.v - x.c) / x.v * 100) + " %", x.n + " bon" + nouPl(x.n) + " sur 4 mois · " + frm(x.v, 0) + " DH HT"]); });
+  L.push(["Devis en cours", frm(N.dvTot, 0) + " DH HT", N.DV.length + " devis · selon leurs chances : " + frm(N.dvPond, 0) + " DH"]);
+  L.push(["Reste à encaisser", frm(N.reTot, 0) + " DH", N.RE.length + " bon" + nouPl(N.RE.length) + (N.CQ.length ? " · plus " + N.CQ.length + " chèque" + nouPl(N.CQ.length) + " à verser (" + frm(N.cqTot, 0) + " DH)" : "")]);
+  return L;
+}
+/* le dernier calcul, rangé dans cfg-tresor pour le jeu (seulement s'il a changé, ou toutes les 3 h) */
+function nouPublie(N){
+  if (!N || !TRS || !factAllowed()) return;
+  const r = v => Math.round(v), K = ["prudent","normal","opt"];
+  const sig = JSON.stringify([N.dec.map(x => x.k), K.map(k => Math.round(N.R[k].low.v / 500)), Math.round(N.start / 500)]);
+  if (!TRS.snap || typeof TRS.snap !== "object" || Array.isArray(TRS.snap)) TRS.snap = {};
+  let neuf = false;
+  if (N.E && !TRS.snap[N.auj]){ TRS.snap[N.auj] = {e:r(N.start), f7:r(N.R.normal.pts[7]), f30:r(N.R.normal.pts[30]), maj:Date.now()}; neuf = true; }
+  Object.keys(TRS.snap).forEach(d => { if (nouEntre(d, N.auj) > 150) delete TRS.snap[d]; });
+  if (!neuf && TRS.nou && TRS.nou.sig === sig && Date.now() - (TRS.nou.at || 0) < 3 * 3600e3) return;
+  if (!neuf && Date.now() - NOU_SAVE < 60000){
+    clearTimeout(NOU_RT); NOU_RT = setTimeout(() => { NOU_AT = 0; try { nouPublie(nouObtenir()); } catch(e){} }, 61000);
+    return;
+  }
+  NOU_SAVE = Date.now();
+  const sem = pts => pts.filter((v, i) => i % 7 === 0 || i === pts.length - 1).map(r);
+  const cat = Object.keys(NOU_CAT).filter(k => Math.abs(N.R.normal.cat[k] || 0) >= 1).map(k => [NOU_CAT[k], r(N.R.normal.cat[k])]);
+  TRS.nou = {v:1, at:Date.now(), sig:sig,
+    dec:N.dec.slice(0, 12).map(x => ({k:x.k, p:x.p, ico:x.ico, t:x.t, d:x.d})),
+    prev:{au:N.auj, start:r(N.start), res:r(N.reserve), sans:!N.E, cat:cat,
+      sc:K.reduce((o, k) => { o[k] = {low:r(N.R[k].low.v), lowD:N.R[k].low.d, fin:r(N.R[k].fin), w:sem(N.R[k].pts)}; return o; }, {})},
+    an:{lignes:N.lignes}};
+  trsSave();
+}
+
+/* --- l'affichage dans Trésorerie --- */
+function nouCourbe(N){
+  const W = 320, Hh = 150, pl = 4, pt = 8, pb = 18, H = N.H, all = [N.reserve];
+  const MC = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+  Object.keys(NOU_SCN).forEach(k => N.R[k].pts.forEach(v => all.push(v)));
+  let mn = Math.min.apply(null, all), mx = Math.max.apply(null, all);
+  if (mx - mn < 1) mx = mn + 1;
+  const m0 = (mx - mn) * 0.06; mn -= m0; mx += m0;
+  const X = i => (pl + i * (W - 2 * pl) / H).toFixed(1), Y = v => (pt + (mx - v) * (Hh - pt - pb) / (mx - mn)).toFixed(1);
+  let s = '<svg class="noucb" viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="Prévision de trésorerie sur 90 jours">';
+  for (let i = 1; i <= H; i++){
+    const d = nouPlus(N.auj, i);
+    if (d.slice(8) === "01") s += '<line x1="' + X(i) + '" y1="' + pt + '" x2="' + X(i) + '" y2="' + (Hh - pb) + '" style="stroke:var(--line)"/>' +
+      '<text x="' + (+X(i) + 3) + '" y="' + (Hh - 5) + '" font-size="9" style="fill:var(--muted)">' + MC[+d.slice(5, 7) - 1] + '</text>';
+  }
+  if (mn < 0) s += '<line x1="' + pl + '" y1="' + Y(0) + '" x2="' + (W - pl) + '" y2="' + Y(0) + '" style="stroke:var(--muted)" stroke-width=".8"/>';
+  s += '<line x1="' + pl + '" y1="' + Y(N.reserve) + '" x2="' + (W - pl) + '" y2="' + Y(N.reserve) + '" stroke="#c62828" stroke-width="1" stroke-dasharray="4 3"/>' +
+    '<text x="' + (W - pl - 2) + '" y="' + (+Y(N.reserve) - 3) + '" font-size="9" text-anchor="end" fill="#c62828">réserve</text>';
+  ["opt", "prudent", "normal"].forEach(k => {
+    s += '<polyline fill="none" stroke="' + NOU_SCN[k].c + '" stroke-width="' + (k === "normal" ? 2.2 : 1.4) + '" stroke-linejoin="round" points="' +
+      N.R[k].pts.map((v, i) => X(i) + "," + Y(v)).join(" ") + '"/>';
+  });
+  const lo = N.R.prudent.low;
+  s += '<circle cx="' + X(lo.i) + '" cy="' + Y(lo.v) + '" r="3.2" fill="' + NOU_SCN.prudent.c + '"/>';
+  return s + '</svg>';
+}
+function nouCarte(){
+  const N = nouObtenir();
+  if (!N) return "";
+  const tabs = [["dec", "Décisions" + (N.dec.length ? " · " + N.dec.length : "")], ["prev", "Prévision"], ["an", "Analyse"], ["jr", "Journal"]];
+  let h = '<div class="depcard nou"><h4>🧠 Noureddine <small>recalculé à ' + pad(new Date(NOU_AT).getHours()) + ':' + pad(new Date(NOU_AT).getMinutes()) + '</small></h4>' +
+    '<div class="depseg">' + tabs.map(t => '<button type="button" data-noutab="' + t[0] + '" aria-pressed="' + (NOU_TAB === t[0]) + '">' + t[1] + '</button>').join("") + '</div>';
+  if (NOU_TAB === "dec"){
+    h += N.dec.length ? N.dec.map((x, i) => '<div class="noud p' + x.p + '"><span class="ni">' + x.ico + '</span><div class="nt"><b>' + (i + 1) + '. ' + esc(x.t) + '</b><small>' + esc(x.d) + '</small>' +
+      '<div class="noub">' + (x.act ? '<button type="button" data-nououv="' + x.act + '">Ouvrir</button>' : '') +
+      '<button type="button" class="f" data-noufait="' + esc(x.k) + '">✓ Fait</button><button type="button" data-nouign="' + esc(x.k) + '">Ignorer</button></div></div></div>').join("")
+      : '<div class="depcut">Rien à faire pour l\'instant : trésorerie, chèques, impayés et devis sont en ordre.</div>';
+  } else if (NOU_TAB === "prev"){
+    if (!N.E) h += '<div class="depwarn" style="margin-bottom:8px">Pas encore de saisie : la courbe part de 0. Saisis la caisse et la banque plus bas pour une vraie prévision.</div>';
+    h += nouCourbe(N) + '<div class="nou3">' + Object.keys(NOU_SCN).map(k => { const R = N.R[k];
+      return '<div><i style="background:' + NOU_SCN[k].c + '"></i>' + NOU_SCN[k].lab + '<b>' + frm(R.low.v, 0) + '</b>au plus bas le ' + depDateFr(R.low.d).slice(0, 5) + '<b>' + frm(R.fin, 0) + '</b>dans 90 j</div>'; }).join("") + '</div>';
+    h += '<div class="deprow"><div class="dl">Trésorerie aujourd\'hui<small>' + (N.E ? 'caisse + banque estimées' : 'aucune saisie') + '</small></div><span class="dm">' + frm(N.start, 0) + '</span></div>' +
+      Object.keys(NOU_CAT).filter(k => Math.abs(N.R.normal.cat[k] || 0) >= 1).map(k => '<div class="deprow"><div class="dl">' + NOU_CAT[k] + '</div><span class="dm ' + (N.R.normal.cat[k] >= 0 ? 'trsp' : 'trsn') + '">' + trsSigne(N.R.normal.cat[k]) + '</span></div>').join("") +
+      '<div class="deprow"><div class="dl"><b>Dans 90 jours (normal)</b></div><span class="dm">' + frm(N.R.normal.fin, 0) + '</span></div>';
+    const pr = nouPrecision();
+    h += '<div class="depcut" style="margin-top:8px;line-height:1.5"><b>Sur quoi c\'est basé</b><br>' +
+      '• Ventes : ≈ ' + frm(N.base, 0) + ' DH HT par mois (3 derniers mois, corrigés de la saison) × ' + String(N.saison.toFixed(2)).replace(".", ",") + ' pour ' + MOIS_L[+N.ym.slice(5, 7) - 1] + ', encaissées 6 jours après.<br>' +
+      '• Coût des bons : ' + Math.round(N.rc * 100) + ' % du HT, payé 2 jours après la vente.<br>' +
+      '• Charges : ≈ ' + frm(N.chBase, 0) + ' DH par mois, dont ' + frm(N.salM, 0) + ' DH de salaires en fin de mois.<br>' +
+      '• Devis : 🔥 90 %, 🌤 60 % jusqu\'à 10 jours puis 5 %, ❄️ 0 %.<br>' +
+      '• TVA à la fin du mois qui suit le trimestre, acomptes IS des réglages, imports prévus.<br>' +
+      '• Prudent : ventes −25 %, devis à moitié, charges +10 %, clients 2 fois plus lents. Optimiste : ventes +15 %.<br>' +
+      '• Réserve : ' + frm(N.reserve, 0) + ' DH' + (N.resU > 0 ? '' : ' (1 mois de charges, à régler plus bas)') + '.<br>' +
+      (pr ? '• Précision : ' + pr.n + ' prévision' + nouPl(pr.n) + ' à 30 jours vérifiée' + nouPl(pr.n) + ', écart moyen ' + frm(pr.e, 0) + ' DH (' + Math.round(pr.r * 100) + ' %).'
+          : '• Précision : mesurée à partir de 30 jours de prévisions et d\'une nouvelle saisie.') + '</div>';
+  } else if (NOU_TAB === "an"){
+    h += N.lignes.map(l => '<div class="deprow"><div class="dl">' + esc(l[0]) + (l[2] ? '<small>' + esc(l[2]) + '</small>' : '') + '</div><span class="dm">' + esc(l[1]) + '</span></div>').join("") +
+      '<div class="depcut" style="margin-top:6px">Ventes : feuille historique avant le 13/08/2026, bons de l\'app après. Bénéfice net sans les achats de stock (ils sont dans le coût des bons).</div>';
+  } else {
+    const J = Object.keys(TRS.dec).map(k => Object.assign({k:k}, TRS.dec[k])).filter(x => x.s === "fait" || x.s === "ign").sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 25);
+    h += J.length ? J.map(x => '<div class="deprow"><div class="dl">' + (x.s === "fait" ? "✓ " : "· ") + esc(x.t || x.k) + '<small>' + (x.s === "fait" ? "Fait" : "Ignoré") + ' le ' + depDateFr(jourISO(new Date(x.at || 0))) + (x.by ? ' · ' + esc(x.by) : '') + '</small></div>' +
+      '<button class="deplink" type="button" data-nouremet="' + esc(x.k) + '">Remettre</button></div>').join("")
+      : '<div class="depcut">Les décisions marquées Fait ou Ignorer s\'affichent ici.</div>';
+  }
+  return h + '</div>';
+}
+$("tresBody").addEventListener("click", e => {
+  if (!factAllowed()) return;
+  const g = q => e.target.closest(q);
+  let x;
+  if ((x = g("[data-noutab]"))){ NOU_TAB = x.dataset.noutab; renderTres(); return; }
+  if ((x = g("[data-noufait]"))){ nouDecMarque(x.dataset.noufait, "fait"); return; }
+  if ((x = g("[data-nouign]"))){ nouDecMarque(x.dataset.nouign, "ign"); return; }
+  if ((x = g("[data-nouremet]"))){ nouDecMarque(x.dataset.nouremet, ""); return; }
+  if ((x = g("[data-nououv]"))){ nouOuvre(x.dataset.nououv); return; }
 });
 
 
