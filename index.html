@@ -361,9 +361,28 @@ select{appearance:none; -webkit-appearance:none}
 .noud .ni{font-size:20px; line-height:1.2} .noud .nt{flex:1; min-width:0}
 .noud b{display:block; font-size:14px; line-height:1.3} .noud small{display:block; color:var(--muted); font-size:12.5px; line-height:1.45; margin-top:3px}
 .noud.p1 b{color:#c62828}
+.noug{font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin:12px 0 2px}
 .noub{display:flex; gap:6px; margin-top:7px; flex-wrap:wrap}
 .noub button{padding:6px 11px; border:1px solid var(--line); border-radius:8px; background:var(--card2); color:var(--ink); font-size:12.5px; font-weight:600; cursor:pointer}
+.nouchat{display:flex; flex-direction:column; gap:7px; max-height:430px; overflow:auto; margin:8px 0; padding:2px}
+.noum{max-width:92%; padding:8px 11px; border-radius:12px; font-size:13.5px; line-height:1.45; white-space:pre-wrap; overflow-wrap:anywhere}
+.noum.u{align-self:flex-end; background:var(--accent-soft); color:var(--ink)}
+.noum.n{align-self:flex-start; background:var(--card2); border:1px solid var(--line)}
+.noum small{display:block; color:var(--muted); font-size:11px; margin-top:4px; white-space:normal}
+.noum .noub{white-space:normal}
+.nouin{display:flex; gap:6px; align-items:stretch}
+.nouin textarea{flex:1; min-width:0; min-height:46px; padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); font:inherit; font-size:14px; resize:vertical}
+.nouin button{padding:0 14px; border:1px solid var(--accent); border-radius:10px; background:var(--accent-soft); color:var(--accent); font-weight:700; cursor:pointer}
 .noub button.f{background:var(--accent-soft); border-color:var(--accent); color:var(--accent)}
+.nouconvs{display:flex; gap:6px; flex-wrap:wrap; max-height:100px; overflow:auto; margin:8px 0 4px; padding:1px}
+.nouconvs button{padding:5px 10px; border:1px solid var(--line); border-radius:999px; background:var(--card2); color:var(--ink); font-size:12.5px; cursor:pointer; max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.nouconvs button[aria-pressed="true"]{background:var(--accent-soft); border-color:var(--accent); color:var(--accent); font-weight:700}
+.nousuj{padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:var(--card2); font-size:13px; line-height:1.4; margin:4px 0}
+.nousuj small{display:block; color:var(--muted); font-size:12px; margin-top:3px}
+.nouin button.mic{padding:0 10px; font-size:17px; min-width:42px; background:var(--card)}
+.nouin button.mic.on{background:#c62828; border-color:#c62828; color:#fff; font-size:13px; animation:micb 1s ease-in-out infinite}
+@keyframes micb{50%{opacity:.6}}
+.noud .nouin{margin-top:7px} .noud .nouin textarea{min-height:38px; font-size:13.5px} .noud .nouin button{padding:0 11px; font-size:12.5px}
 .noucb{width:100%; height:auto; display:block; margin:2px 0 8px}
 .nou3{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:8px}
 .nou3 > div{background:var(--card2); border-radius:9px; padding:7px 8px; font-size:11.5px; color:var(--muted); line-height:1.35}
@@ -8924,7 +8943,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.88";
+const APP_VERSION = "14.92";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -22408,6 +22427,9 @@ function renderTresTile(){
 }
 function renderTres(){
   if (!factAllowed() || !TRS) return;
+  const nae = document.activeElement;   /* v14.90 / v14.91 : Nou écrit (Parler, ou sous une décision) */
+  if (nae && (nae.id === "nouTxt" || (nae.dataset && nae.dataset.noudtx != null)) && !NOUC_FORCE) return;
+  NOUC_FORCE = false;
   if (!TRSF) trsFormNeuf();
   if (!TRSR) TRSR = JSON.parse(JSON.stringify(TRS.regl));
   const E = trsEstime(), today = jourISO(new Date());
@@ -22804,96 +22826,324 @@ function nouCalc(){
   return {auj:auj, an:an, ym:ym, H:H, E:E, start:start, R:R, reserve:reserve, resU:resU, base:base, saison:idx(ym), rc:rc, rt:rt,
     chBase:chBase, chRef:chRef, salM:salM, inc:inc, achM:achM, part:part, CQ:CQ, cqTot:cqTot, RE:RE, reTot:reTot, DV:DV, FD:FD,
     tvaPrev:tvaPrev, limP:limP, S0:S0, tvaQ:tvaQ, fq:fq, limQ:limQ, tNow:tNow, isEch:isEch, ism:ism,
-    jM:jM, nM:nM, vMois:vMois, attM:attM, rythme:rythme, brutM:brutM, chM:CH.T[ym] || 0,
+    attendu:attendu, jM:jM, nM:nM, vMois:vMois, attM:attM, rythme:rythme, brutM:brutM, chM:CH.T[ym] || 0,
     vAn:vAn, vN1:vN1, chAn:chAn, brutAn:brutAn, netAn:netAn, finAn:finAn, TY:TY, VL:VL, dvTot:dvTot, dvPond:dvPond};
 }
 
-/* --- les décisions, par ordre de priorité --- */
+/* --- v14.89 : les décisions de Noureddine = ce qu'il faut faire pour l'avenir ---
+   🛒 Achats : quoi, combien, quand, et si la trésorerie le permet (pièces, tissus locaux, import Turquie).
+   ✂️ Charges et marges : où part l'argent, ce qui monte plus vite que les ventes, les chutes, les prix.
+   💰 Argent : seulement un vrai risque de trésorerie.
+   Les relances, chèques, devis et saisies restent dans À faire : Noureddine ne les répète plus. */
+var NOU_GRP = {ach:"🛒 Achats", ch:"✂️ Charges et marges", arg:"💰 Argent"};
+var NOU_IMP = {lead:149, secu:45, px:40.29, fixe:22060, porte:0.20, roul:104};  /* import Turquie (import n°1) */
+var NOU_LOC = {lead:7, secu:15, cover:60};                                     /* achats au Maroc */
+function nouTurquie(ref){ return /SOFT/i.test(String(ref || "")); }
+/* ce qu'un bon consomme : pièces (code du stock, ml ou u) et tissu (m²) */
+function nouConsoBon(o){
+  const out = {}, dims = ordDims(o), add = (k, q) => { if (q > 0 && isFinite(q)) out[k] = (out[k] || 0) + q; };
+  ["ENR","JN"].forEach(fam => {
+    const v = dims.filter(d => d.t === fam);
+    if (!v.length) return;
+    const sum = f => v.reduce((t, d) => t + f(d), 0);
+    const d = {nb:v.length, coupeMl:sum(x => x.l - (fam === "JN" ? 0 : 3)) / 100, cacheMl:sum(x => x.l - 0.5) / 100,
+      tube32Ml:sum(x => x.l - 2) / 100, barreMl:sum(x => x.l - 1.5) / 100, chaineMl:sum(x => 2 * x.h + 30) / 100,
+      supports:sum(x => x.l >= 200 ? 3 : 2)};
+    const man = (o.pieces && o.pieces[fam]) || {}, num = v => parseFloat(String(v).replace(",", "."));
+    PIECES_DEF[fam].forEach(def => {
+      if (!def.code) return;
+      let q;
+      if (def.k === "frein") q = man.bouchon != null && man.bouchon !== "" ? num(man.bouchon) : d.nb * 2;
+      else if (!def.fixe && man[def.k] != null && man[def.k] !== "") q = num(man[def.k]);
+      else { try { q = def.auto(d, fam); } catch(e){ q = 0; } }
+      add("p:" + codeDe(o, fam, def.k), q);
+    });
+  });
+  try { const bt = besoinTissu(o); Object.keys(bt).forEach(r => add("t:" + r, bt[r])); } catch(e){}
+  return out;
+}
+/* ce qui est déjà commandé chez un fournisseur et pas encore dans le stock SAGE */
+function nouEnCommande(){
+  const C = {};
+  (ACH.bas || []).forEach(b => {
+    if (!b || b.sup || !b.etat || b.etat === "brouillon") return;
+    if (achRecu(b) === "tout" && b.sage) return;
+    (b.lignes || []).forEach(l => {
+      if (!l || !l.ref) return;
+      const k = (String(l.k || "").startsWith("t:") ? "t:" : "p:") + String(l.ref).toUpperCase();
+      C[k] = (C[k] || 0) + (parseFloat(l.q) || 0);
+    });
+  });
+  return C;
+}
+function nouArrondi(q, it){
+  if (it.t){ const s = it.jn ? 5 : 5; return Math.ceil(q / s) * s; }
+  if (it.u === "ml"){ const s = /CH-|CHAIN/i.test(it.ref) ? 50 : (parseFloat(CUT.bar) || CUT_DEF.bar) / 100; return Math.ceil(q / s) * s; }
+  return Math.ceil(q / 10) * 10;
+}
+function nouAchats(N){
+  const auj = N.auj, J = 730;
+  /* 1. combien chaque article consomme pour 10 000 DH vendus (bons des 6 derniers mois) */
+  const lim = nouPlus(auj, -180), tot = {};
+  let ht = 0, n = 0;
+  nouVendus().forEach(o => {
+    const j = nouVenteJour(o), h = htDe(o);
+    if (!j || j < lim || !(h > 0)) return;
+    const c = nouConsoBon(o); if (!Object.keys(c).length) return;
+    ht += h; n++; Object.keys(c).forEach(k => tot[k] = (tot[k] || 0) + c[k]);
+  });
+  if (n < 5 || !(ht > 0)) return {items:[], n:n};
+  /* 2. ventes HT prévues jour par jour (scénario normal), plus les devis selon leurs chances */
+  const vj = [];
+  for (let i = 0; i < J; i++){ const m = nouPlus(auj, i).slice(0, 7); vj.push(i < 8 ? 0 : N.attendu(m) / +nouFinMois(m).slice(8, 10)); }
+  const cum = [0]; vj.forEach((v, i) => cum.push(cum[i] + v));
+  const venteJusqua = t => cum[Math.max(0, Math.min(J, Math.round(t)))];
+  const dv = {};
+  N.DV.forEach(o => { const p = Math.min(0.95, devProba(o)); if (!(p > 0)) return; const c = nouConsoBon(o); Object.keys(c).forEach(k => dv[k] = (dv[k] || 0) + c[k] * p); });
+  /* 3. déjà réservé : bons confirmés pas encore sortis du stock */
+  const res = {};
+  (ORDERS || []).forEach(o => {
+    if (!o || o.sup || o.status !== "sent" || etatDe(o) === "devis" || dejaDeduit(o)) return;
+    const c = nouConsoBon(o); Object.keys(c).forEach(k => res[k] = (res[k] || 0) + c[k]);
+  });
+  const cmd = nouEnCommande(), uDe = {};
+  ["ENR","JN"].forEach(f => PIECES_DEF[f].forEach(d => { if (d.code) uDe[d.code] = d.u; }));
+  /* 4. les articles */
+  const L = [];
+  (ARTICLES || []).filter(a => a && !a.serv).forEach(a => L.push({k:"p:" + a.ref, ref:a.ref, nom:a.nom || a.ref, u:uDe[a.ref] || "u",
+    stock:parseFloat(a.dispo) || 0, px:achDernierPrix({k:"a:" + a.ref, px:a.prix}) || a.prix || 0}));
+  (CATALOGUE || []).forEach(f => {
+    const lz = (f.laize > 0 ? f.laize : CUT_DEF.laize) / 100, jn = f.type === "JN";
+    L.push({k:"t:" + f.ref, ref:f.ref, nom:f.nom || f.ref, t:true, jn:jn, lz:lz, tr:nouTurquie(f.ref), u:jn ? "ml" : "m²",
+      stock:stockM2(f), px:(achDernierPrix({k:"t:" + f.ref, px:f.prix}) || f.prix || 0) / (jn ? lz : 1)});   /* prix ramené au m² */
+  });
+  const out = [];
+  L.forEach(it => {
+    const r = (tot[it.k] || 0) / ht;                 /* par DH vendu */
+    if (!(r > 0)) return;
+    const enCmd = it.t ? (cmd[it.k] || 0) * (it.jn ? it.lz : 1) : (cmd[it.k] || 0);
+    it.r = r; it.res = res[it.k] || 0; it.dv = dv[it.k] || 0; it.cmd = enCmd;
+    it.dispo = it.stock + enCmd - it.res - it.dv;    /* ce qui reste pour les nouvelles ventes */
+    it.mois = r * (N.attendu(N.ym) || N.base);       /* consommation d'un mois normal */
+    const besoin = t => r * venteJusqua(t);
+    let rup = J; for (let t = 0; t <= J; t += 1) if (besoin(t) > it.dispo){ rup = t; break; }
+    it.rup = it.dispo < 0 ? 0 : rup;
+    const P = it.tr ? NOU_IMP : NOU_LOC;
+    it.lead = P.lead; it.cmdAvant = it.rup - P.lead - P.secu;
+    if (!it.tr){
+      const cible = besoin(P.lead + P.cover + P.secu) - it.dispo;
+      it.q = cible > 0 ? nouArrondi(cible, it) : 0;
+    }
+    out.push(it);
+  });
+  return {items:out, n:n, ht:ht, venteJusqua:venteJusqua};
+}
+/* import Turquie : quantité économique (frais fixes ≈ 22 000 DH par envoi contre le coût de garder du stock) */
+function nouImport(A){
+  const T = A.items.filter(x => x.tr && x.t);
+  if (!T.length) return null;
+  const an = T.reduce((t, x) => t + x.r * A.venteJusqua(365) / x.lz, 0);      /* ml par an */
+  if (!(an > 0)) return null;
+  const H = NOU_IMP.px * NOU_IMP.porte, Q = Math.sqrt(2 * an * NOU_IMP.fixe / H);
+  const mois = Math.min(24, Math.max(6, Math.round(Q / an * 12)));
+  const princ = T.filter(x => x.r * A.venteJusqua(365) / x.lz >= an * 0.06);
+  const rup = Math.min.apply(null, (princ.length ? princ : T).map(x => x.rup));
+  const avant = rup - NOU_IMP.lead - NOU_IMP.secu, jours = NOU_IMP.lead + mois * 30.4;
+  const refs = T.map(x => {
+    const ml = (x.r * A.venteJusqua(Math.max(0, rup) + jours) - x.dispo) / x.lz;
+    return {ref:x.ref, nom:x.nom, ml:ml > 0 ? Math.ceil(ml / NOU_IMP.roul) * NOU_IMP.roul : 0, stock:x.stock / x.lz, rup:x.rup};
+  }).filter(x => x.ml > 0).sort((a, b) => b.ml - a.ml);
+  const ml = refs.reduce((t, x) => t + x.ml, 0);
+  return {an:an, mois:mois, rup:rup, avant:avant, refs:refs, ml:ml, ht:ml * NOU_IMP.px, tva:ml * NOU_IMP.px * 0.2};
+}
+/* charges par catégorie et par mois (hors impôts et épargne) */
+function nouChargesCat(){
+  const C = {}, add = (d, cat, lib, mt) => {
+    d = String(d || ""); if (d.length < 7 || !mt || DEP_IMPOTS.indexOf(cat) >= 0 || cat === "Epargne") return;
+    const c = C[cat] = C[cat] || {m:{}, libs:{}}, k = d.slice(0, 7);
+    c.m[k] = (c.m[k] || 0) + mt;
+    const l = String(lib || "").toLowerCase().replace(/[·\-].*$/, "").replace(/\d+/g, "").trim();
+    if (l){ c.libs[l] = c.libs[l] || {}; c.libs[l][k] = (c.libs[l][k] || 0) + mt; }
+  };
+  ((HIST && HIST.dep) || []).forEach(x => { if (x.date < DEP_CUT[x.t]) add(x.date, x.cat, x.lib, x.mt || 0); });
+  depVivantes().forEach(x => add(x.date, x.cat, x.lib, depMt(x)));
+  return C;
+}
+var NOU_IDEE = {
+  "Carburant":"regroupe les poses et les prises de mesures par quartier, le même jour",
+  "Transport":"regroupe les livraisons, compare 2 transporteurs, fais livrer le fournisseur avec la commande",
+  "Gestion automobile":"vérifie assurance et entretien : un seul véhicule pour les petites courses ?",
+  "Facebook ads":"garde seulement les pubs qui ramènent des devis (compare le coût par devis chaque mois)",
+  "Frais bancaires":"demande un forfait pro ou négocie les frais par virement et par chèque",
+  "Frais de communication":"un forfait pro partagé pour l'équipe est souvent moins cher",
+  "Website":"vérifie l'hébergement, les extensions payantes et les abonnements inutiles",
+  "Fournitures de production":"achète les consommables en plus grande quantité chez un seul fournisseur",
+  "Pose":"compare le prix de pose payé avec le prix de pose facturé au client",
+  "Autre":"range ces dépenses dans une vraie catégorie : sans ça, impossible de savoir quoi couper"
+};
+function nouChargesIdees(N){
+  const C = nouChargesCat(), V = nouVentesMois(), mp = n => depDecale(N.ym, -n), out = [];
+  const inc = {}; N.inc.forEach(x => inc[x.k] = 1);
+  const derniers = [1,2,3,4,5,6].map(mp).filter(k => !inc[k]).slice(0, 3);
+  if (derniers.length < 2) return out;
+  const moy = (m, ks) => ks.reduce((t, k) => t + (m[k] || 0), 0) / ks.length;
+  const an1 = derniers.map(k => (+k.slice(0, 4) - 1) + k.slice(4));
+  const vNow = moy(V, derniers), vAv = moy(V, an1), gv = vAv > 0 ? vNow / vAv - 1 : null;
+  let totCh = 0; Object.keys(C).forEach(c => totCh += moy(C[c].m, derniers));
+  Object.keys(C).forEach(cat => {
+    const c = C[cat], m = moy(c.m, derniers), av = moy(c.m, an1);
+    if (m < 300) return;
+    const part = totCh > 0 ? m / totCh : 0;
+    const g = av > 0 ? m / av - 1 : null;
+    const idee = NOU_IDEE[cat] || "regarde chaque dépense de ce poste : laquelle peut baisser ou disparaître ?";
+    if (g != null && g > 0.25 && (gv == null || g - gv > 0.2) && m - av >= 300)
+      out.push({p:2, k:"chm:" + cat + ":" + N.ym, ico:"📈", t:cat + " : +" + Math.round(g * 100) + " % en un an (" + frm(m, 0) + " DH/mois)",
+        d:"Contre " + frm(av, 0) + " DH/mois l'an dernier sur les mêmes mois" + (gv != null ? ", alors que les ventes font " + (gv >= 0 ? "+" : "") + Math.round(gv * 100) + " %" : "") +
+          ". Gain possible ≈ " + frm((m - av) * 12, 0) + " DH par an. Idée : " + idee + ".", g:"ch", mt:(m - av) * 12});
+    else if (part >= 0.12 && cat !== "Salaire" && cat !== "CNSS")
+      out.push({p:3, k:"chp:" + cat + ":" + N.ym, ico:"🔎", t:cat + " : " + frm(m, 0) + " DH/mois, " + Math.round(part * 100) + " % de tes charges",
+        d:"Un des plus gros postes. Baisser de 15 % = " + frm(m * 0.15 * 12, 0) + " DH par an. Idée : " + idee + ".", g:"ch", mt:m * 0.15 * 12});
+    /* abonnements : le même libellé chaque mois */
+    Object.keys(c.libs).forEach(l => {
+      const ks = [1,2,3,4].map(mp), nb = ks.filter(k => c.libs[l][k] > 0).length;
+      const mm = ks.reduce((t, k) => t + (c.libs[l][k] || 0), 0) / 4;
+      if (nb >= 3 && mm >= 100 && mm < 3000 && cat !== "Salaire" && cat !== "CNSS")
+        out.push({p:4, k:"abo:" + cat + ":" + l, ico:"🔁", t:"Abonnement « " + l + " » : ≈ " + frm(mm * 12, 0) + " DH par an",
+          d:"Payé " + nb + " mois sur les 4 derniers (" + cat + "). S'il ne rapporte rien, arrête-le ou négocie-le.", g:"ch", mt:mm * 12});
+    });
+  });
+  /* prix fournisseurs : le même article plus cher qu'avant, ou moins cher ailleurs */
+  const P = {};
+  (ACH.bas || []).filter(b => b && !b.sup && b.etat && b.etat !== "brouillon").sort((a, b) => (a.date || 0) - (b.date || 0)).forEach(b => (b.lignes || []).forEach(l => {
+    if (!l || !l.k || !(parseFloat(l.pu) > 0)) return;
+    (P[l.k] = P[l.k] || []).push({pu:parseFloat(l.pu), four:b.four, q:parseFloat(l.q) || 0, nom:l.nom || l.ref, d:b.date});
+  }));
+  Object.keys(P).forEach(k => {
+    const L = P[k], der = L[L.length - 1], av = L.length > 1 ? L[L.length - 2] : null;
+    if (av && der.pu > av.pu * 1.05){ const fo = achFour(der.four);
+      out.push({p:3, k:"pxup:" + k + ":" + der.pu, ico:"🏷️", t:der.nom + " : +" + Math.round((der.pu / av.pu - 1) * 100) + " % au dernier achat",
+        d:frm(av.pu, 2) + " → " + frm(der.pu, 2) + " DH" + (fo ? " chez " + fo.nom : "") + ". Négocie avant la prochaine commande, ou demande un autre prix.", g:"ch", mt:(der.pu - av.pu) * der.q}); }
+    const best = L.reduce((m, x) => x.pu < m.pu ? x : m, L[0]);
+    if (best.four !== der.four && der.pu > best.pu * 1.05){ const a = achFour(best.four), b = achFour(der.four);
+      out.push({p:3, k:"pxfo:" + k + ":" + der.four, ico:"🏷️", t:der.nom + " moins cher chez " + (a ? a.nom : "un autre fournisseur"),
+        d:frm(best.pu, 2) + " DH contre " + frm(der.pu, 2) + " DH" + (b ? " chez " + b.nom : "") + " au dernier achat.", g:"ch", mt:(der.pu - best.pu) * der.q}); }
+  });
+  /* chutes : tissu et profilés jetés sur les bons des 4 derniers mois */
+  let cT = 0, cB = 0, mT = 0, j0 = "";
+  N.VL.forEach(x => { const C2 = nouCout(x.o); if (!C2) return; if (!j0 || x.j < j0) j0 = x.j;
+    const s0 = C2.stores[0] || {}; cT += (C2.chuteTissu || 0) * (s0.pxTisM2 || 0); cB += (C2.chuteBarre || 0) * (s0.pxBar || 0); mT += C2.m2tissu || 0; });
+  const nbm = j0 ? Math.max(1, nouEntre(j0, N.auj) / 30.4) : 4;
+  if ((cT + cB) / nbm >= 300) out.push({p:3, k:"chute:" + N.ym, ico:"✂️", t:"Chutes ≈ " + frm((cT + cB) / nbm, 0) + " DH par mois",
+    d:"Tissu " + frm(cT / nbm, 0) + " DH, profilés " + frm(cB / nbm, 0) + " DH par mois. Range les chutes dans l'app (Stock) pour que le plan de coupe les réutilise, et regroupe les petites fenêtres sur le même rouleau.", g:"ch", mt:(cT + cB) / nbm * 12});
+  /* marges trop basses */
+  Object.keys(N.TY).forEach(t => { const x = N.TY[t], m = (x.v - x.c) / x.v;
+    if (x.n >= 3 && m < 0.4) out.push({p:2, k:"marge:" + t + ":" + N.ym, ico:"💰", t:"Marge " + mesTypeLab(t).toLowerCase() + " à " + Math.round(m * 100) + " % sur 4 mois",
+      d:x.n + " bons. Ta moyenne est de " + Math.round((1 - N.rc) * 100) + " % : revois les prix ou les remises de ce produit.", g:"ch", mt:x.v * (0.4 - m) * 3}); });
+  return out;
+}
 function nouDecisions(N){
-  const D = [], dd = depDateFr, auj = N.auj, E = N.E, P = N.R.prudent, Nm = N.R.normal;
-  const add = (p, k, ico, t, d, act) => D.push({p:p, k:k, ico:ico, t:t, d:d, act:act || ""});
-  /* 1. sécurité */
-  if (!E) add(1, "saisie:0", "🧮", "Saisis la caisse et la banque", "Sans point de départ, pas de prévision. Compte la caisse, regarde le solde de la banque et saisis-les plus bas.", "saisie");
-  else if (E.age > 7) add(1, "saisie:" + E.s.id, "🧮", "Compte la caisse et la banque (dernière saisie il y a " + E.age + " j)", "Plus la saisie est ancienne, plus la prévision dérive. Une saisie par semaine suffit.", "saisie");
-  if (E && Nm.low.v < 0) add(1, "decouv:" + Nm.low.d.slice(0, 7), "🚨", "Risque de découvert le " + dd(Nm.low.d) + " : " + frm(Nm.low.v, 0) + " DH",
-    "Même dans le scénario normal. Relance les impayés, verse les chèques, décale les achats et les retraits qui peuvent attendre.", "prev");
-  else if (E && P.low.v < N.reserve) add(1, "secu:" + P.low.d.slice(0, 7), "⚠️", "Trésorerie sous la réserve vers le " + dd(P.low.d),
-    "Scénario prudent : " + frm(P.low.v, 0) + " DH au plus bas, pour une réserve de " + frm(N.reserve, 0) + " DH. Relance les impayés et garde les achats non urgents pour après.", "prev");
-  /* 2. argent à faire rentrer ou à préparer */
-  if (N.CQ.length) add(2, "chq:" + N.CQ.length + ":" + Math.round(N.cqTot), "🏦", "Verse " + N.CQ.length + " chèque" + nouPl(N.CQ.length) + " à la banque : " + frm(N.cqTot, 0) + " DH",
-    "Ils ne comptent en banque et en TVA qu'au jour où tu confirmes l'encaissement.", "chq");
-  if (N.tvaPrev && nouEntre(auj, N.limP) <= 30) add(2, "tvap:" + N.limP, "🧾", "TVA du trimestre passé : " + frm(N.tvaPrev, 0) + " DH avant le " + dd(N.limP),
-    "Pas encore notée dans Dépenses. Une fois payée, note-la (catégorie TVA).", "tva");
-  if (nouEntre(auj, N.limQ) <= 30 && N.tvaQ.normal > 0) add(2, "tvaq:" + N.limQ, "🧾", "Prépare environ " + frm(N.tvaQ.normal, 0) + " DH de TVA pour le " + dd(N.limQ),
-    "TVA déjà due ce trimestre : " + frm(N.S0.du, 0) + " DH, plus les ventes prévues d'ici le " + dd(N.fq) + ".", "tva");
-  N.isEch.forEach(x => { if (nouEntre(auj, x.d) <= 30) add(2, "isac:" + x.d, "🏛️", "Acompte IS de " + frm(x.v, 0) + " DH avant le " + dd(x.d), "Une fois payé, note-le dans Dépenses (catégorie Acompte IS).", "dep"); });
-  /* 3. impayés */
-  N.RE.map(x => {
-    const ech = String(x.o.ech || "").slice(0, 10), liv = livreLe(x.o);
-    return {o:x.o, r:x.r, ech:ech, j:liv ? nouEntre(jourISO(new Date(liv)), auj) : (ech ? nouEntre(ech, auj) : 0)};
-  }).filter(x => etatDe(x.o) === "livre" ? x.j >= 2 : (x.ech && x.j >= 3))
-    .sort((a, b) => b.r - a.r).slice(0, 4)
-    .forEach(x => add(3, "rel:" + x.o.id + ":" + Math.round(x.r), "📞", "Relance " + (x.o.nom || "le client") + " : " + frm(x.r, 0) + " DH",
-      (x.o.num || "Bon") + (etatDe(x.o) === "livre" ? " · livré il y a " + x.j + " j" : " · pose prévue le " + dd(x.ech)) + ". Imane peut envoyer le rappel WhatsApp.", "pay"));
-  /* 4. devis */
-  N.DV.filter(o => devTemp(o) === "chaud" && devAge(o) > 10).forEach(o => add(4, "devc:" + o.id, "🔥",
-    "Devis chaud " + (o.nom || "") + " (" + frm(htDe(o), 0) + " DH) pas encore commandé", "Devis de " + devAge(o) + " j. Appelle aujourd'hui, ou repasse-le en tiède.", "hist"));
-  N.DV.filter(o => devTemp(o) === "tiede" && devAge(o) > 10 && devAge(o) <= 60 && htDe(o) >= 3000)
-    .sort((a, b) => htDe(b) - htDe(a)).slice(0, 4)
-    .forEach(o => add(4, "dev:" + o.id + ":" + (devAge(o) <= 30 ? 1 : 2), "💤", "Relance le devis " + (o.nom || "") + " : " + frm(htDe(o), 0) + " DH HT",
-      "Devis de " + devAge(o) + " j : sans relance, 5 % de chances. S'il répond, passe-le 🔥 chaud (90 %), sinon ❄️ froid.", "hist"));
-  /* 5. fournisseurs avant la fin du trimestre */
+  const D = [], dd = depDateFr, auj = N.auj, P = N.R.prudent, Nm = N.R.normal;
+  const add = x => D.push(Object.assign({act:""}, x));
+  /* 💰 argent : seulement un vrai risque */
+  if (N.E && Nm.low.v < 0) add({g:"arg", p:1, k:"decouv:" + Nm.low.d.slice(0, 7), ico:"🚨", t:"Risque de découvert le " + dd(Nm.low.d) + " : " + frm(Nm.low.v, 0) + " DH",
+    d:"Même dans le scénario normal. Décale les achats et les retraits qui peuvent attendre, et encaisse les restes dus.", act:"prev"});
+  else if (N.E && P.low.v < N.reserve) add({g:"arg", p:1, k:"secu:" + P.low.d.slice(0, 7), ico:"⚠️", t:"Trésorerie sous la réserve vers le " + dd(P.low.d),
+    d:"Scénario prudent : " + frm(P.low.v, 0) + " DH au plus bas, pour une réserve de " + frm(N.reserve, 0) + " DH. Les achats ci-dessous sont triés pour passer quand même.", act:"prev"});
+  /* 🛒 achats : les plus urgents d'abord, dans la limite de la trésorerie */
+  const A = N.A, I = N.I;
+  let libre = (N.E ? P.low.v : N.start) - N.reserve;
+  A.items.filter(x => !x.tr && x.q > 0 && x.cmdAvant <= 21).sort((a, b) => a.cmdAvant - b.cmdAvant).forEach(x => {
+    const q = x.t && x.jn ? x.q / x.lz : x.q, u = x.u, ht = x.q * x.px, ttc = ht * 1.2, urg = x.cmdAvant <= 0;
+    const passe = ttc <= libre; if (passe) libre -= ttc;
+    const qAff = x.t && x.jn ? Math.ceil(q / 5) * 5 : q, nom = String(x.nom).replace(/Â/g, "");
+    const bar = (parseFloat(CUT.bar) || CUT_DEF.bar) / 100, enBar = !x.t && u === "ml" && !/CH-|CHAIN/i.test(x.ref);
+    const libre0 = x.stock - x.res, etat = libre0 < 0 ? "pas assez pour les bons confirmés" : x.dispo < 0 ? "les devis probables vont prendre le reste" :
+      "rupture vers le " + dd(nouPlus(auj, x.rup));
+    add({g:"ach", p:urg ? 1 : 2, k:"achat:" + x.ref + ":" + auj.slice(0, 7), ico:x.t ? "🧵" : "🔩", mt:ttc,
+      ach:{k:(x.t ? "t:" : "a:") + x.ref, ref:x.ref, nom:nom, type:x.t ? "tissu" : "piece", u:u, q:qAff, px:x.px},
+      t:"Achète " + frm(qAff, 0) + " " + u + (enBar ? " (" + Math.round(qAff / bar) + " barres)" : "") + " de " + nom + (urg ? " maintenant" : " avant le " + dd(nouPlus(auj, Math.max(0, x.cmdAvant)))),
+      d:"Stock " + frm(x.t && x.jn ? x.stock / x.lz : x.stock, 1) + " " + u + (x.res > 0 ? ", dont " + frm(x.t && x.jn ? x.res / x.lz : x.res, 1) + " pour des bons confirmés" : "") +
+        (x.cmd > 0 ? ", " + frm(x.t && x.jn ? x.cmd / x.lz : x.cmd, 1) + " déjà commandés" : "") +
+        ". Tu en utilises ≈ " + frm(x.t && x.jn ? x.mois / x.lz : x.mois, 1) + " " + u + " par mois : " + etat + (x.dv > 0 ? " (devis en cours comptés selon leurs chances)" : "") +
+        ". Couvre 2 mois ≈ " + frm(ttc, 0) + " DH TTC. " + (passe ? "✅ La trésorerie le permet (scénario prudent, réserve gardée)." :
+        "⏳ Trésorerie juste : achète seulement ce qui bloque des bons confirmés, le reste au plus tard le " + dd(nouPlus(auj, Math.max(0, x.rup - x.lead))) + "."),
+      act:"ach"});
+  });
+  if (I && I.refs.length){
+    const j = I.avant, urg = j <= 30;
+    const quand = j <= 0 ? "maintenant" : "avant le " + dd(nouPlus(auj, j));
+    const tvaTxt = "TVA d'import ≈ " + frm(I.tva, 0) + " DH, déductible le trimestre où tu paies la DUM : paye-la dans un trimestre où tu as de la TVA à payer, tu gardes l'argent plus tôt. L'IS ne baisse pas : le stock non vendu au 31/12 reste dans le bénéfice.";
+    add({g:"ach", p:urg ? 1 : 5, k:"import:" + nouPlus(auj, Math.max(0, j)).slice(0, 7), ico:"🚢", mt:I.ht + I.tva,
+      t:(urg ? "Lance l'import Turquie " : "Prochain import Turquie : commande ") + quand + " · " + frm(I.ml, 0) + " ml",
+      d:"Pour " + I.mois + " mois de ventes (≈ " + frm(I.an, 0) + " ml par an). C'est la quantité la plus économique : les frais fixes (≈ " + frm(NOU_IMP.fixe, 0) +
+        " DH par envoi) contre le coût de garder le stock. Budget ≈ " + frm(I.ht, 0) + " DH HT de tissu + ≈ " + frm(NOU_IMP.fixe, 0) + " DH de frais d'envoi et douane (à prévoir dans la trésorerie le moment venu). Délai mesuré : " + NOU_IMP.lead + " jours. Détail : " +
+        I.refs.slice(0, 8).map(x => x.ref.replace(/^JN_/, "") + " " + frm(x.ml, 0)).join(", ") + " ml. " + tvaTxt, act:"ach"});
+  }
+  /* paiement fournisseur avant la fin du trimestre si la trésorerie le permet : la TVA se déduit plus tôt */
   const jq = nouEntre(auj, N.fq);
   if (jq <= 25) N.FD.forEach(x => {
     if (P.low.v - x.r < N.reserve) return;
     const tx = parseFloat(x.b.tva) || 0, fo = achFour(x.b.four);
-    add(5, "four:" + x.b.id + ":" + N.fq, "🚚", "Paie " + (fo ? fo.nom : "le fournisseur") + " (" + frm(x.r, 0) + " DH) par virement avant le " + dd(N.fq),
-      "Ta trésorerie reste au-dessus de la réserve, et la TVA de " + frm(x.r * tx / (100 + tx), 0) + " DH se déduit dès ce trimestre.", "ach");
+    add({g:"ach", p:3, k:"four:" + x.b.id + ":" + N.fq, ico:"🚚", t:"Paie " + (fo ? fo.nom : "le fournisseur") + " (" + frm(x.r, 0) + " DH) avant le " + dd(N.fq), mt:x.r,
+      d:"Ta trésorerie reste au-dessus de la réserve, et la TVA de " + frm(x.r * tx / (100 + tx), 0) + " DH se déduit dès ce trimestre.", act:"ach"});
   });
-  /* 6. achats utiles, réglages et données */
-  const libre = P.low.v - N.reserve;
-  if (N.E && jq <= 30 && N.tvaQ.normal > 1000 && libre > 5000 && N.achM > 0){
-    const mt = Math.round(Math.min(libre * 0.5, N.achM) / 100) * 100;
-    if (mt >= 1000) add(6, "achtva:" + N.fq, "🧵", "Achats utiles avant le " + dd(N.fq) + " : jusqu'à " + frm(mt, 0) + " DH",
-      "Seulement ce que tu utiliseras dans les 2 prochains mois (tissus qui tournent, accessoires), payé par virement ou chèque avant la fin du trimestre : " +
-      "la TVA (≈ " + frm(mt / 6, 0) + " DH) se déduit ce trimestre au lieu du suivant. Ta trésorerie reste au-dessus de la réserve.", "ach");
-  }
-  if (!(N.resU > 0)) add(6, "reserve:0", "🛟", "Fixe ta réserve de sécurité", "En attendant, Noureddine prend 1 mois de charges ≈ " + frm(N.reserve, 0) + " DH. Réglages en bas de la Trésorerie.", "regl");
-  const isAc = (TRS.regl.is && TRS.regl.is.ac || []).some(v => v != null && String(v).trim() !== "");
-  if (!(N.ism > 0) && !isAc) add(6, "is:" + N.an, "🏛️", "Saisis l'IS de l'année", "Pour prévoir les acomptes du 31/03, 30/06, 30/09 et 31/12. Réglages en bas de la Trésorerie.", "regl");
-  if (N.inc.length){
-    const I = N.inc.slice().sort((a, b) => a.k.localeCompare(b.k));
-    add(6, "depinc:" + I.map(x => x.k).join(","), "📒", "Dépenses incomplètes : " + I.map(x => MOIS_L[+x.k.slice(5, 7) - 1]).join(", "),
-      I.map(x => MOIS_L[+x.k.slice(5, 7) - 1] + " " + frm(x.v, 0) + " DH").join(" · ") + " saisis, pour ≈ " + frm(N.chRef, 0) +
-      " DH par mois d'habitude. Ajoute les charges et salaires manquants dans Dépenses : sinon le bénéfice et la prévision sont faux.", "dep");
-  }
-  /* 7. ventes et marges */
-  const mois = MOIS_L[+N.ym.slice(5, 7) - 1];
-  if (N.jM >= 10 && N.attM > 0 && N.rythme < 0.7) add(7, "rythme:" + N.ym, "📉", "Ventes de " + mois + " en retard : " + frm(N.vMois, 0) + " DH HT",
-    "Au rythme habituel de la saison, tu serais à " + frm(N.attM * N.jM / N.nM, 0) + " DH à cette date. Relance les devis, publie, recontacte les anciens clients.", "hist");
-  if (N.jM >= 10 && N.attM > 0 && N.rythme > 1.3) add(7, "bonmois:" + N.ym, "📈", "Bon mois : ventes " + Math.round((N.rythme - 1) * 100) + " % au-dessus du rythme habituel",
-    "Vérifie le stock de tissu pour suivre la cadence.", "");
-  Object.keys(N.TY).forEach(t => {
-    const x = N.TY[t], m = (x.v - x.c) / x.v;
-    if (x.n >= 3 && m < 0.4) add(7, "marge:" + t + ":" + N.ym, "💰", "Marge " + mesTypeLab(t).toLowerCase() + " à " + Math.round(m * 100) + " % sur 4 mois",
-      x.n + " bons. Ta moyenne est de " + Math.round((1 - N.rc) * 100) + " % : revois les prix ou les remises de ce produit.", "");
-  });
-  N.VL.filter(x => x.marge < 0.3 && nouEntre(x.j, auj) <= 30).sort((a, b) => a.marge - b.marge).slice(0, 2)
-    .forEach(x => add(7, "mbas:" + x.o.id, "💰", "Bon " + (x.o.num || "") + " vendu à " + Math.round(x.marge * 100) + " % de marge",
-      (x.o.nom || "") + " · " + frm(x.ht, 0) + " DH HT. Vérifie le prix ou la remise.", ""));
-  /* Fait = caché ; Ignoré = caché 14 jours */
+  /* ✂️ charges et marges */
+  nouChargesIdees(N).forEach(x => add(x));
+  /* Fait = caché ; Ignoré = caché 14 jours ; v14.91 : En attente = caché tant que la condition de Nou n'est pas remplie */
+  const ord = {arg:0, ach:1, ch:2};
   return D.filter(x => {
+    const w = TRS.dec["w:" + nouBase(x.k)];
+    if (w && w.s === "cond" && w.cond){
+      if (!nouCondOk(w.cond, N)) return false;
+      x.d = "✅ Condition remplie : " + nouCondTxt(w.cond) + nouCondVal(w.cond, N) + ". " + x.d;
+    }
     const s = TRS.dec[x.k];
     if (!s || !s.s) return true;
     if (s.s === "fait") return false;
     return Date.now() - (s.at || 0) > 14 * 864e5;
-  }).sort((a, b) => a.p - b.p);
+  }).sort((a, b) => ord[a.g] - ord[b.g] || a.p - b.p || (b.mt || 0) - (a.mt || 0));
+}
+/* v14.91 : « ignore-la tant que la banque n'a pas 80 000 DH ». La clé de base n'a pas le mois ni le montant
+   (import:2027-12 → import), car le moteur change la clé chaque mois. */
+function nouBase(k){
+  const p = String(k || "").split(":");
+  while (p.length > 1 && /^(\d{4}-\d{2}(-\d{2})?|[\d.,]+)$/.test(p[p.length - 1])) p.pop();
+  return p.join(":");
+}
+const NOU_SUR = {banque:"banque", caisse:"caisse", tresorerie:"trésorerie", date:"date"};
+function nouCondTxt(c){
+  if (!c) return "";
+  return c.sur === "date" ? "à partir du " + depDateFr(c.date) : NOU_SUR[c.sur] + " " + (c.op === "<" ? "<" : ">") + " " + frm(c.v, 0) + " DH";
+}
+function nouCondMt(c, N){
+  const E = N && N.E;
+  if (!E) return null;
+  return c.sur === "banque" ? E.banque : c.sur === "caisse" ? E.caisse : E.tot;
+}
+function nouCondOk(c, N){
+  if (c.sur === "date") return jourISO(new Date()) >= String(c.date || "9999");
+  const v = nouCondMt(c, N);
+  if (v == null) return false;
+  return c.op === "<" ? v < c.v : v > c.v;
+}
+function nouCondVal(c, N){
+  const v = c.sur === "date" ? null : nouCondMt(c, N);
+  return v == null ? "" : " (aujourd'hui " + frm(v, 0) + " DH)";
+}
+/* ce qui rend le calcul moins sûr : affiché au-dessus, ce ne sont pas des décisions */
+function nouManques(N){
+  const M = [];
+  if (!N.E) M.push("Saisis la caisse et la banque : sans point de départ, la prévision part de 0.");
+  else if (N.E.age > 7) M.push("Dernière saisie caisse + banque il y a " + N.E.age + " jours : la prévision dérive.");
+  if (!(N.resU > 0)) M.push("Réserve de sécurité pas fixée : Noureddine prend 1 mois de charges (" + frm(N.reserve, 0) + " DH).");
+  if (N.inc.length) M.push("Dépenses incomplètes : " + N.inc.map(x => MOIS_L[+x.k.slice(5, 7) - 1]).join(", ") + ". Les idées pour baisser les charges sont moins sûres.");
+  return M;
 }
 
 function nouObtenir(){
   if (!factAllowed() || !TRS) return null;
   if (!NOU || Date.now() - NOU_AT > 1500){
-    try { NOU = nouCalc(); NOU.dec = nouDecisions(NOU); NOU.lignes = nouLignes(NOU); }
+    try { NOU = nouCalc(); NOU.A = nouAchats(NOU); NOU.I = nouImport(NOU.A); NOU.dec = nouDecisions(NOU); NOU.manq = nouManques(NOU); NOU.lignes = nouLignes(NOU); }
     catch(e){ NOU = null; try { console.error("Noureddine", e); } catch(_){} }
     NOU_AT = Date.now();
   }
@@ -22960,12 +23210,250 @@ function nouPublie(N){
   NOU_SAVE = Date.now();
   const sem = pts => pts.filter((v, i) => i % 7 === 0 || i === pts.length - 1).map(r);
   const cat = Object.keys(NOU_CAT).filter(k => Math.abs(N.R.normal.cat[k] || 0) >= 1).map(k => [NOU_CAT[k], r(N.R.normal.cat[k])]);
-  TRS.nou = {v:1, at:Date.now(), sig:sig,
-    dec:N.dec.slice(0, 12).map(x => ({k:x.k, p:x.p, ico:x.ico, t:x.t, d:x.d})),
-    prev:{au:N.auj, start:r(N.start), res:r(N.reserve), sans:!N.E, cat:cat,
+  TRS.nou = {v:2, at:Date.now(), sig:sig,          /* v:2 = décisions achats / charges / argent (v14.89+) */
+    dec:N.dec.slice(0, 16).map(x => ({k:x.k, p:x.p, g:x.g, ico:x.ico, t:x.t, d:x.d})), manq:N.manq || [],
+    prev:{au:N.auj, start:r(N.start), res:r(N.reserve), sans:!N.E, cat:cat, caisse:N.E ? r(N.E.caisse) : null, banque:N.E ? r(N.E.banque) : null,
       sc:K.reduce((o, k) => { o[k] = {low:r(N.R[k].low.v), lowD:N.R[k].low.d, fin:r(N.R[k].fin), w:sem(N.R[k].pts)}; return o; }, {})},
     an:{lignes:N.lignes}};
   trsSave();
+}
+
+/* --- v14.90 : parler à Noureddine. Gemini répond par la fonction Supabase « noureddine »,
+   la conversation vit dans la rangée cfg-nouchat (la même dans le jeu). Gemini ne reçoit
+   que des chiffres, des articles et des catégories : jamais de nom ni de téléphone de client. --- */
+const NOUC_ID = "cfg-nouchat";
+var NOUC = null, NOUC_BUSY = false, NOUC_ERR = "", NOUC_TXT = "", NOUC_FORCE = false, NOUC_LU = 0;
+/* v14.91 : une conversation par décision (« d:import »), des conversations libres (« c:… ») et la générale (« g ») */
+var NOUC_CONV = "g", NOUC_DTXT = {};
+function nouConvs(){ if (!NOUC.convs || typeof NOUC.convs !== "object" || Array.isArray(NOUC.convs)) NOUC.convs = {}; return NOUC.convs; }
+function nouConvMsgs(id){ if (!id || id === "g") return NOUC.msgs; const c = nouConvs()[id]; return c && Array.isArray(c.msgs) ? c.msgs : []; }
+/* la décision d'une conversation : d'abord la version du jour dans la liste, sinon celle gardée dans la conversation */
+function nouConvDec(id){
+  if (!/^d:/.test(id || "")) return null;
+  const b = id.slice(2), x = NOU && NOU.dec.find(y => nouBase(y.k) === b), c = nouConvs()[id];
+  if (x) return {k:x.k, t:x.t, d:x.d};
+  return c && c.k ? {k:c.k, t:c.t || "", d:c.d || ""} : null;
+}
+function nouConvEtat(id){
+  const dec = nouConvDec(id);
+  if (!dec) return {ico:"💬", txt:""};
+  const w = TRS.dec["w:" + nouBase(dec.k)], s = TRS.dec[dec.k], dans = NOU && NOU.dec.some(y => y.k === dec.k);
+  if (w && w.s === "cond" && w.cond) return dans ? {ico:"✅", txt:"Condition remplie (" + nouCondTxt(w.cond) + ") : revenue dans les décisions"} : {ico:"⏳", txt:"En attente : " + nouCondTxt(w.cond)};
+  if (s && s.s === "fait") return {ico:"✓", txt:"Faite le " + depDateFr(jourISO(new Date(s.at || 0)))};
+  if (s && s.s === "ign" && !dans) return {ico:"·", txt:"Ignorée 14 jours"};
+  return dans ? {ico:"📌", txt:"Dans les décisions"} : {ico:"·", txt:"Plus dans les décisions"};
+}
+/* parler depuis la carte d'une décision : le message part, et on continue dans Parler */
+function nouDecParle(k){
+  const x = NOU && NOU.dec.find(y => y.k === k);
+  const box = Array.from(document.querySelectorAll("[data-noudtx]")).find(b => b.dataset.noudtx === k);
+  const t = String((box ? box.value : NOUC_DTXT[k]) || "").trim();
+  if (!t || !x || NOUC_BUSY) return;
+  if (box) box.blur();
+  NOUC_DTXT[k] = "";
+  NOUC_CONV = "d:" + nouBase(k);
+  NOUC_TXT = t; NOU_TAB = "chat";
+  nouChatEnvoie("chat", {k:x.k, t:x.t, d:x.d});
+}
+function nouConvOuvre(id){
+  if (id === "new") id = "c:" + Date.now();
+  NOUC_CONV = id; NOU_TAB = "chat"; NOUC_ERR = ""; NOUC_FORCE = true; renderTres();
+}
+async function nouChatCharge(){
+  if (Date.now() - NOUC_LU < 4000) return;
+  NOUC_LU = Date.now();
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", NOUC_ID).limit(1);
+    if (error) throw error;
+    NOUC = (data && data[0] && data[0].data) || {v:1, msgs:[]};
+  } catch(e){ NOUC = NOUC || {v:1, msgs:[]}; NOUC_ERR = "Conversation pas chargée : " + (e.message || e); }
+  if (!Array.isArray(NOUC.msgs)) NOUC.msgs = [];
+  if (NOU_TAB === "chat"){ NOUC_FORCE = true; renderTres(); }
+}
+function nouChatErr(e){
+  const st = e && e.context && e.context.status;
+  if (st === 404) return "Le cerveau Gemini n'est pas encore branché : suis le guide (fonction « noureddine » dans Supabase).";
+  if (st === 401) return "Réservé à Noureddine : reconnecte-toi.";
+  if (e && e.name === "FunctionsFetchError") return "Pas de connexion internet : réessaie.";
+  return "Noureddine n'a pas pu répondre : " + ((e && e.message) || e);
+}
+async function nouChatEnvoie(mode, dec){
+  if (NOUC_BUSY) return;
+  const box = $("nouTxt");
+  if (box) NOUC_TXT = box.value;
+  const t = String(NOUC_TXT || "").trim();
+  if (mode === "chat" && !t) return;
+  NOUC_BUSY = true; NOUC_ERR = "";
+  NOUC = NOUC || {v:1, msgs:[]};
+  if (!Array.isArray(NOUC.msgs)) NOUC.msgs = [];
+  const id = mode === "chat" ? NOUC_CONV || "g" : "g";       /* la revue va dans la conversation générale */
+  if (mode !== "chat") NOUC_CONV = "g";
+  dec = dec || nouConvDec(id);
+  if (mode === "chat"){
+    const tmp = {r:"u", t:t, at:Date.now(), tmp:true};
+    if (id === "g") NOUC.msgs = NOUC.msgs.concat([tmp]);
+    else {
+      const C = nouConvs()[id] || (nouConvs()[id] = {t:dec ? dec.t : t.slice(0, 60), k:dec ? dec.k : undefined, d:dec ? dec.d : undefined, msgs:[], at:Date.now(), tmp:true});
+      if (!Array.isArray(C.msgs)) C.msgs = [];
+      C.msgs = C.msgs.concat([tmp]);
+    }
+    NOUC_TXT = "";
+  }
+  if (box) box.blur();
+  NOUC_FORCE = true; renderTres();
+  try {
+    NOU_AT = 0; nouPublie(nouObtenir());          /* Gemini lit le calcul le plus récent */
+    const body = {mode:mode, texte:t, conv:id};
+    if (dec && /^d:/.test(id)) body.dec = dec;
+    const {data, error} = await SB.functions.invoke("noureddine", {body:body});
+    if (error) throw error;
+    if (data && data.erreur) throw new Error(data.erreur);
+    if (data && data.chat) NOUC = data.chat;
+  } catch(e){
+    NOUC_ERR = nouChatErr(e);
+    if (mode === "chat"){
+      NOUC_TXT = t;
+      if (id === "g") NOUC.msgs = NOUC.msgs.filter(m => !m.tmp);
+      else { const C = nouConvs()[id]; if (C){ C.msgs = (C.msgs || []).filter(m => !m.tmp); if (C.tmp && !C.msgs.length) delete nouConvs()[id]; } }
+    }
+  }
+  NOUC_BUSY = false; NOUC_LU = Date.now(); NOUC_FORCE = true; renderTres();
+}
+function nouProp(v){
+  const i = v.indexOf("|"), ty = v.slice(0, i);
+  let k = v.slice(i + 1);
+  if (ty === "attendre"){
+    /* attendre|clé|sur|op|seuil|date */
+    const P = k.split("|"), date = P.pop(), seuil = P.pop(), op = P.pop(), sur = P.pop();
+    k = P.join("|");
+    const c = sur === "date" ? {sur:"date", date:date} : {sur:sur, op:op === "<" ? "<" : ">", v:Math.round(parseFloat(seuil) || 0)};
+    if (!NOU_SUR[sur] || (sur === "date" ? !/^\d{4}-\d{2}-\d{2}$/.test(date) : !(c.v > 0))){ toast("Condition incomplète : redemande à Noureddine"); return; }
+    const wk = "w:" + nouBase(k), x = NOU && NOU.dec.find(y => y.k === k), cv = nouConvs()["d:" + nouBase(k)];
+    TRS.dec[wk] = {s:"cond", cond:c, k:k, t:(x && x.t) || (cv && cv.t) || k, at:Date.now(), by:(USER && USER.login) || "", maj:Date.now()};
+    NOU_AT = 0; trsSave(); NOUC_FORCE = true; renderTres(); renderTresTile();
+    toast("En attente : " + nouCondTxt(c));
+    return;
+  }
+  if (ty === "fait"){ nouDecMarque(k, "fait"); return; }
+  if (ty === "reporter"){ nouDecMarque(k, "ign"); return; }
+  if (ty !== "brouillon") return;
+  const x = NOU && NOU.dec.find(y => y.k === k);
+  if (!x || !x.ach){ toast("Cet achat n'est plus dans les décisions"); return; }
+  const a = x.ach;
+  nouDecMarque(k, "fait");
+  if ($("tileAch")) $("tileAch").click();
+  achNouveau([{k:a.k, ref:a.ref, nom:a.nom, type:a.type, sous:"proposé par Noureddine · " + frm(a.q, 0) + " " + a.u, u:a.u, q:a.q,
+               pu:achDernierPrix({k:a.k, px:a.px})}]);
+  toast("Brouillon de bon d'achat créé : choisis le fournisseur");
+}
+/* --- v14.92 : le micro. Nou parle (darija, français, anglais), Gemini écrit en français dans la case,
+   Nou relit puis appuie sur Envoyer. L'audio part chez Google par la fonction « noureddine », rien n'est gardé. --- */
+var MIC = {st:"", key:"", rec:null, stream:null, chunks:[], t0:0, iv:0};
+const MIC_MAX = 90;
+function micOk(){ return !!(window.isSecureContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder); }
+function micDuree(){ const t = Math.floor((Date.now() - MIC.t0) / 1000); return Math.floor(t / 60) + ":" + pad(t % 60); }
+function micBtn(key){
+  const moi = MIC.key === key;
+  if (moi && MIC.st === "rec") return '<button type="button" class="mic on" data-mic="' + esc(key) + '" title="Arrêter : le texte s\'écrit dans la case">⏹ ' + micDuree() + '</button>';
+  if (moi && MIC.st === "tr") return '<button type="button" class="mic" disabled title="Noureddine écrit ce que tu as dit">⏳</button>';
+  return '<button type="button" class="mic" data-mic="' + esc(key) + '"' + (MIC.st ? ' disabled' : '') + ' title="Parle en darija, en français ou en anglais : le texte s\'écrit en français">🎤</button>';
+}
+function micRendre(){ NOUC_FORCE = true; renderTres(); }
+async function micClic(key){
+  if (MIC.st === "rec"){ if (MIC.key === key) micStop(); return; }
+  if (MIC.st) return;
+  if (!micOk()){ toast("Micro indisponible ici : ouvre l'app en https (GitHub) ou sur ce PC"); return; }
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e){ toast("Micro refusé : autorise le micro pour ce site"); return; }
+  let rec;
+  try { rec = new MediaRecorder(stream); } catch(e){ stream.getTracks().forEach(t => t.stop()); toast("Ce navigateur ne sait pas enregistrer"); return; }
+  MIC = {st:"rec", key:key, rec:rec, stream:stream, chunks:[], t0:Date.now(), iv:0};
+  rec.ondataavailable = e => { if (e.data && e.data.size) MIC.chunks.push(e.data); };
+  rec.onstop = () => micFin(rec.mimeType);
+  rec.start(1000);
+  MIC.iv = setInterval(() => {
+    document.querySelectorAll("[data-mic]").forEach(b => { if (b.dataset.mic === MIC.key && MIC.st === "rec") b.textContent = "⏹ " + micDuree(); });
+    if (Date.now() - MIC.t0 > MIC_MAX * 1000) micStop();
+  }, 500);
+  micRendre();
+}
+function micStop(){
+  if (MIC.st !== "rec") return;
+  clearInterval(MIC.iv); MIC.st = "tr"; MIC.t1 = Date.now();
+  try { MIC.rec.stop(); } catch(e){ micFin(""); }
+  micRendre();
+}
+/* l'enregistrement du navigateur (webm, mp4…) devient un WAV 16 kHz mono que Gemini lit partout */
+async function micWav(blob){
+  const AC = window.AudioContext || window.webkitAudioContext, ac = new AC();
+  let buf;
+  try { buf = await ac.decodeAudioData(await blob.arrayBuffer()); } finally { try { ac.close(); } catch(e){} }
+  const SR = 16000, off = new OfflineAudioContext(1, Math.max(1, Math.ceil(buf.duration * SR)), SR);
+  const src = off.createBufferSource(); src.buffer = buf; src.connect(off.destination); src.start();
+  const d = (await off.startRendering()).getChannelData(0), n = d.length;
+  const v = new DataView(new ArrayBuffer(44 + n * 2)), w = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, SR, true); v.setUint32(28, SR * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++){ const x = Math.max(-1, Math.min(1, d[i])); v.setInt16(44 + i * 2, x < 0 ? x * 0x8000 : x * 0x7fff, true); }
+  const u = new Uint8Array(v.buffer); let b = "";
+  for (let i = 0; i < u.length; i += 0x8000) b += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+  return btoa(b);
+}
+async function micFin(mime){
+  const key = MIC.key, dur = ((MIC.t1 || Date.now()) - MIC.t0) / 1000, chunks = MIC.chunks;
+  try { MIC.stream.getTracks().forEach(t => t.stop()); } catch(e){}
+  let txt = "", err = "";
+  try {
+    if (dur < 1) throw new Error("trop court : appuie, parle, puis appuie encore");
+    const audio = await micWav(new Blob(chunks, {type:mime || "audio/webm"}));
+    const {data, error} = await SB.functions.invoke("noureddine", {body:{mode:"dicte", audio:audio, mime:"audio/wav"}});
+    if (error) throw error;
+    if (data && data.erreur) throw new Error(data.erreur);
+    txt = String((data && data.texte) || "").trim();
+    if (!txt) throw new Error("rien compris : réessaie plus près du micro");
+  } catch(e){ err = e && e.context && e.context.status === 401 ? "réservé à Noureddine" : e && e.name === "FunctionsFetchError" ? "pas de connexion internet" : (e && e.message) || String(e); }
+  MIC = {st:"", key:"", rec:null, stream:null, chunks:[], t0:0, iv:0};
+  if (err){ toast("Micro : " + err); micRendre(); return; }
+  const aj = a => (String(a || "").trim() ? String(a).trim() + " " : "") + txt;
+  if (key === "chat") NOUC_TXT = aj(NOUC_TXT); else NOUC_DTXT[key] = aj(NOUC_DTXT[key]);
+  micRendre();
+  setTimeout(() => {
+    const b = key === "chat" ? $("nouTxt") : Array.from(document.querySelectorAll("[data-noudtx]")).find(x => x.dataset.noudtx === key);
+    if (b){ b.focus(); b.selectionStart = b.selectionEnd = b.value.length; }
+  }, 0);
+}
+
+function nouChatHtml(N){
+  if (!NOUC){ setTimeout(nouChatCharge, 0); return '<div class="depcut">Chargement de la conversation…</div>'; }
+  if (Date.now() - NOUC_LU > 60000) setTimeout(nouChatCharge, 0);
+  const CV = nouConvs(), id = NOUC_CONV || "g", D = TRS.dec || {};
+  const hm = at => { const d = new Date(at || 0); return depDateFr(jourISO(d)).slice(0, 5) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+  /* v14.91 : les conversations passées, la plus récente d'abord */
+  const ids = Object.keys(CV).filter(c => CV[c] && Array.isArray(CV[c].msgs) && CV[c].msgs.length).sort((a, b) => (CV[b].at || 0) - (CV[a].at || 0));
+  const chip = (c, lab, ico) => '<button type="button" data-nouconv="' + esc(c) + '" aria-pressed="' + (c === id) + '" title="' + esc(lab) + '">' + ico + ' ' + esc(lab) + '</button>';
+  let h = '<div class="nouconvs">' + chip("g", "Général", "💬") +
+    ids.map(c => chip(c, CV[c].t || "Conversation", nouConvEtat(c).ico)).join("") +
+    (id !== "g" && !CV[id] ? chip(id, "Nouvelle conversation", "✏️") : '<button type="button" data-nouconv="new">➕ Nouvelle</button>') + '</div>';
+  const dec = nouConvDec(id), et = nouConvEtat(id);
+  if (dec) h += '<div class="nousuj"><b>' + et.ico + ' ' + esc(dec.t) + '</b><small>' + esc(et.txt) + '</small></div>';
+  const M = nouConvMsgs(id).slice(-40);
+  const lien = p => p.type === "attendre" ? p.type + "|" + p.k + "|" + p.sur + "|" + (p.op || "") + "|" + (p.seuil || "") + "|" + (p.date || "") : p.type + "|" + p.k;
+  const fait = p => { if (p.type !== "attendre") return D[p.k] && D[p.k].s; const w = D["w:" + nouBase(p.k)]; return w && w.s === "cond"; };
+  h += '<div class="nouchat" id="nouChat">' + (M.length ? M.map(m => '<div class="noum ' + (m.r === "u" ? "u" : "n") + '">' + (m.rev ? "🔁 " : "") + esc(m.t) +
+      (m.r !== "u" && (m.props || []).length ? '<div class="noub">' + m.props.map(p => { const ok = fait(p);
+        return '<button type="button"' + (ok ? ' disabled' : ' class="f"') + ' data-nouprop="' + esc(lien(p)) + '">' + (ok ? "✓ " : "") + esc(p.label) + '</button>'; }).join("") + '</div>' : '') +
+      '<small>' + (m.r === "u" ? "Toi" : m.rev ? "Noureddine · revue" : "Noureddine") + ' · ' + hm(m.at) + '</small></div>').join("")
+    : '<div class="depcut">' + (dec ? 'Parle de cette décision : « ignore-la tant que la banque n\'a pas 80 000 DH », « pourquoi cette quantité ? »'
+        : 'Pose une question : « pourquoi 114 ml de triangle ? », « comment baisser le transport ? », « quand acheter le tissu de Turquie ? »') + '</div>') +
+    (NOUC_BUSY ? '<div class="noum n">Noureddine réfléchit…</div>' : '') + '</div>';
+  if (NOUC_ERR) h += '<div class="depwarn" style="margin:6px 0">' + esc(NOUC_ERR) + '</div>';
+  h += '<div class="nouin"><textarea id="nouTxt" rows="2" placeholder="' + (dec ? 'Écris à Noureddine sur cette décision…' : 'Écris à Noureddine…') + '">' + esc(NOUC_TXT) + '</textarea>' +
+      micBtn("chat") + '<button type="button" class="f" data-nouenv' + (NOUC_BUSY ? ' disabled' : '') + '>Envoyer</button></div>' +
+    (id === "g" ? '<div class="noub"><button type="button" data-nourevue' + (NOUC_BUSY ? ' disabled' : '') + '>🔁 Revoir ses décisions maintenant</button></div>' : '') +
+    '<div class="depcut" style="margin-top:8px">Il révise tout seul 3 fois par jour (8 h, 14 h, 20 h). Gemini reçoit seulement les chiffres, les articles et les catégories de charges : jamais de nom ni de téléphone de client. Il propose, tu confirmes. 🎤 : parle en darija, en français ou en anglais, il écrit en français dans la case, tu relis puis Envoyer.</div>';
+  setTimeout(() => { const c = $("nouChat"); if (c) c.scrollTop = c.scrollHeight; }, 0);
+  return h;
 }
 
 /* --- l'affichage dans Trésorerie --- */
@@ -22997,14 +23485,27 @@ function nouCourbe(N){
 function nouCarte(){
   const N = nouObtenir();
   if (!N) return "";
-  const tabs = [["dec", "Décisions" + (N.dec.length ? " · " + N.dec.length : "")], ["prev", "Prévision"], ["an", "Analyse"], ["jr", "Journal"]];
+  const tabs = [["dec", "Décisions" + (N.dec.length ? " · " + N.dec.length : "")], ["chat", "💬 Parler"], ["prev", "Prévision"], ["an", "Analyse"], ["jr", "Journal"]];
   let h = '<div class="depcard nou"><h4>🧠 Noureddine <small>recalculé à ' + pad(new Date(NOU_AT).getHours()) + ':' + pad(new Date(NOU_AT).getMinutes()) + '</small></h4>' +
     '<div class="depseg">' + tabs.map(t => '<button type="button" data-noutab="' + t[0] + '" aria-pressed="' + (NOU_TAB === t[0]) + '">' + t[1] + '</button>').join("") + '</div>';
   if (NOU_TAB === "dec"){
-    h += N.dec.length ? N.dec.map((x, i) => '<div class="noud p' + x.p + '"><span class="ni">' + x.ico + '</span><div class="nt"><b>' + (i + 1) + '. ' + esc(x.t) + '</b><small>' + esc(x.d) + '</small>' +
-      '<div class="noub">' + (x.act ? '<button type="button" data-nououv="' + x.act + '">Ouvrir</button>' : '') +
-      '<button type="button" class="f" data-noufait="' + esc(x.k) + '">✓ Fait</button><button type="button" data-nouign="' + esc(x.k) + '">Ignorer</button></div></div></div>').join("")
-      : '<div class="depcut">Rien à faire pour l\'instant : trésorerie, chèques, impayés et devis sont en ordre.</div>';
+    if (N.manq && N.manq.length) h += '<div class="depwarn" style="margin-bottom:8px;line-height:1.45">' + N.manq.map(esc).join("<br>") + '</div>';
+    if (!NOUC) setTimeout(nouChatCharge, 0);
+    const cvN = c => { const C = NOUC && NOUC.convs && NOUC.convs[c]; return C && Array.isArray(C.msgs) ? C.msgs.length : 0; };
+    const nAtt = Object.keys(TRS.dec).filter(k => /^w:/.test(k) && TRS.dec[k] && TRS.dec[k].s === "cond").length;
+    if (nAtt) h += '<div class="depcut" style="margin-bottom:6px">⏳ ' + nAtt + ' décision' + nouPl(nAtt) + ' en attente d\'une condition : voir Journal.</div>';
+    let gr = "";
+    h += N.dec.length ? N.dec.map((x, i) => (x.g !== gr ? '<div class="noug">' + NOU_GRP[gr = x.g] + '</div>' : '') +
+      '<div class="noud p' + x.p + '"><span class="ni">' + x.ico + '</span><div class="nt"><b>' + (i + 1) + '. ' + esc(x.t) + '</b><small>' + esc(x.d) + '</small>' +
+      '<div class="noub">' + (x.ach ? '<button type="button" class="f" data-nouprop="brouillon|' + esc(x.k) + '">📝 Brouillon d\'achat</button>' : '') +
+      (x.act && !x.ach ? '<button type="button" data-nououv="' + x.act + '">Ouvrir</button>' : '') +
+      '<button type="button" class="f" data-noufait="' + esc(x.k) + '">✓ Fait</button><button type="button" data-nouign="' + esc(x.k) + '">Ignorer</button>' +
+      (cvN("d:" + nouBase(x.k)) ? '<button type="button" data-nouconv="d:' + esc(nouBase(x.k)) + '">💬 Continuer (' + cvN("d:" + nouBase(x.k)) + ')</button>' : '') + '</div>' +
+      '<div class="nouin"><textarea data-noudtx="' + esc(x.k) + '" rows="1" placeholder="💬 Parle de cette décision à Noureddine…">' + esc(NOUC_DTXT[x.k] || "") + '</textarea>' + micBtn(x.k) +
+      '<button type="button" data-noudenv="' + esc(x.k) + '"' + (NOUC_BUSY ? ' disabled' : '') + '>Envoyer</button></div></div></div>').join("")
+      : '<div class="depcut">Rien à décider pour l\'instant : stock suffisant, trésorerie au-dessus de la réserve, aucune charge qui dérape.</div>';
+  } else if (NOU_TAB === "chat"){
+    h += nouChatHtml(N);
   } else if (NOU_TAB === "prev"){
     if (!N.E) h += '<div class="depwarn" style="margin-bottom:8px">Pas encore de saisie : la courbe part de 0. Saisis la caisse et la banque plus bas pour une vraie prévision.</div>';
     h += nouCourbe(N) + '<div class="nou3">' + Object.keys(NOU_SCN).map(k => { const R = N.R[k];
@@ -23027,10 +23528,14 @@ function nouCarte(){
     h += N.lignes.map(l => '<div class="deprow"><div class="dl">' + esc(l[0]) + (l[2] ? '<small>' + esc(l[2]) + '</small>' : '') + '</div><span class="dm">' + esc(l[1]) + '</span></div>').join("") +
       '<div class="depcut" style="margin-top:6px">Ventes : feuille historique avant le 13/08/2026, bons de l\'app après. Bénéfice net sans les achats de stock (ils sont dans le coût des bons).</div>';
   } else {
+    const W = Object.keys(TRS.dec).filter(k => /^w:/.test(k)).map(k => Object.assign({}, TRS.dec[k], {wk:k})).filter(x => x.s === "cond" && x.cond).sort((a, b) => (b.at || 0) - (a.at || 0));
+    h += W.map(x => { const ok = nouCondOk(x.cond, N);
+      return '<div class="deprow"><div class="dl">' + (ok ? "✅ " : "⏳ ") + esc(x.t || x.wk) + '<small>' + (ok ? "Condition remplie : " : "En attente : ") + esc(nouCondTxt(x.cond)) + esc(nouCondVal(x.cond, N)) + ' · depuis le ' + depDateFr(jourISO(new Date(x.at || 0))) + '</small></div>' +
+        '<button class="deplink" type="button" data-nouconv="d:' + esc(x.wk.slice(2)) + '">💬</button><button class="deplink" type="button" data-nouremet="' + esc(x.wk) + '">Remettre</button></div>'; }).join("");
     const J = Object.keys(TRS.dec).map(k => Object.assign({k:k}, TRS.dec[k])).filter(x => x.s === "fait" || x.s === "ign").sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 25);
     h += J.length ? J.map(x => '<div class="deprow"><div class="dl">' + (x.s === "fait" ? "✓ " : "· ") + esc(x.t || x.k) + '<small>' + (x.s === "fait" ? "Fait" : "Ignoré") + ' le ' + depDateFr(jourISO(new Date(x.at || 0))) + (x.by ? ' · ' + esc(x.by) : '') + '</small></div>' +
       '<button class="deplink" type="button" data-nouremet="' + esc(x.k) + '">Remettre</button></div>').join("")
-      : '<div class="depcut">Les décisions marquées Fait ou Ignorer s\'affichent ici.</div>';
+      : (W.length ? '' : '<div class="depcut">Les décisions marquées Fait, Ignorer ou En attente s\'affichent ici.</div>');
   }
   return h + '</div>';
 }
@@ -23043,6 +23548,18 @@ $("tresBody").addEventListener("click", e => {
   if ((x = g("[data-nouign]"))){ nouDecMarque(x.dataset.nouign, "ign"); return; }
   if ((x = g("[data-nouremet]"))){ nouDecMarque(x.dataset.nouremet, ""); return; }
   if ((x = g("[data-nououv]"))){ nouOuvre(x.dataset.nououv); return; }
+  if ((x = g("[data-nouprop]"))){ nouProp(x.dataset.nouprop); return; }
+  if ((x = g("[data-nouconv]"))){ nouConvOuvre(x.dataset.nouconv); return; }
+  if ((x = g("[data-noudenv]"))){ nouDecParle(x.dataset.noudenv); return; }
+  if ((x = g("[data-mic]"))){ micClic(x.dataset.mic); return; }
+  if (g("[data-nouenv]")){ nouChatEnvoie("chat"); return; }
+  if (g("[data-nourevue]")){ nouChatEnvoie("revue"); return; }
+});
+$("tresBody").addEventListener("input", e => { if (e.target.id === "nouTxt") NOUC_TXT = e.target.value; else if (e.target.dataset && e.target.dataset.noudtx != null) NOUC_DTXT[e.target.dataset.noudtx] = e.target.value; });
+$("tresBody").addEventListener("keydown", e => {
+  if (e.key !== "Enter" || !(e.ctrlKey || e.metaKey)) return;
+  if (e.target.id === "nouTxt"){ e.preventDefault(); nouChatEnvoie("chat"); }
+  else if (e.target.dataset && e.target.dataset.noudtx != null){ e.preventDefault(); nouDecParle(e.target.dataset.noudtx); }
 });
 
 

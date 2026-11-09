@@ -130,7 +130,19 @@
   .noud:first-child { border-top:0; } .noud .ni { font-size:14px; line-height:1.2; }
   .noud b { display:block; font-weight:normal; color:var(--ink); } .noud.p1 b { color:#c03030; }
   .noud small { display:block; color:var(--muted); font-size:7px; }
+  .nouchatj { display:flex; flex-direction:column; gap:6px; max-height:330px; overflow:auto; margin:4px 0 8px; }
+  .noum { max-width:92%; padding:6px 8px; border-radius:6px; font-size:7px; line-height:1.9; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .noum.u { align-self:flex-end; background:#dce8fc; color:#1a2a48; } .noum.n { align-self:flex-start; background:#f4f4f8; border:2px solid var(--soft); }
+  .noum small { display:block; color:var(--muted); font-size:6px; white-space:normal; } .noum .row { white-space:normal; margin-top:4px; }
+  .nouinj { display:flex; gap:6px; } .nouinj textarea { flex:1; min-width:0; min-height:44px; padding:6px 8px; font:13px system-ui,sans-serif; border:2px solid var(--soft); border-radius:6px; resize:vertical; }
   .noud .row { margin-top:4px; } .nouch { width:100%; height:auto; display:block; margin:4px 0 8px; }
+  .nouconvsj { display:flex; flex-wrap:wrap; gap:4px; max-height:84px; overflow:auto; margin:2px 0 6px; }
+  .nouconvsj button { max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .nouconvsj button[aria-pressed="true"] { outline:2px solid #3058c0; }
+  .nousujj { padding:6px 8px; border:2px solid var(--soft); border-radius:6px; background:#f4f4f8; margin-bottom:4px; }
+  .nousujj small { display:block; color:var(--muted); font-size:7px; }
+  .nouinj button.micj { min-width:40px; font-size:16px; } .nouinj button.micj.on { background:#c62828; color:#fff; font-size:12px; }
+  .noud .nouinj { margin-top:4px; } .noud .nouinj textarea { min-height:32px; }
 </style>
 </head>
 <body>
@@ -1452,7 +1464,7 @@ const SCREENS={
  tubes:{title:'Tubes reçus à l\'atelier',tabs:['Reçus','À couper']},
  prets:{title:'Prêt à livrer',tabs:['Prêts']},
  rapsage:{title:'📋 Rappels SAGE',tabs:['À vérifier','Corrigés']},
- nou:{title:'🧠 Noureddine',tabs:['Décisions','Prévision','Analyse']},
+ nou:{title:'🧠 Noureddine',tabs:['Décisions','Parler','Prévision','Analyse']},
 };
 let LOGJ=jourISO(new Date());
 document.getElementById('logsBtn').addEventListener('click',()=>{ LOGJ=jourISO(new Date()); openPop('logs'); });
@@ -1524,22 +1536,139 @@ document.getElementById('manqueBtn').onclick=()=>openPop('manque');
 document.getElementById('chiffresBtn').onclick=()=>openPop('chiffres');
 /* ---------- v14.88 : Noureddine SMART AI (lecture du calcul de l'app, Fait / Ignorer partagés) ---------- */
 function nouDecJ(){ if(!NOUJ||!Array.isArray(NOUJ.dec)) return [];
-  return NOUJ.dec.filter(x=>{ const s=NOUDEC[x.k]; if(!s||!s.s) return true; if(s.s==='fait') return false; return Date.now()-(s.at||0)>14*864e5; }); }
+  return NOUJ.dec.filter(x=>{ const w=NOUDEC['w:'+nouBaseJ(x.k)]; if(w&&w.s==='cond'&&(w.at||0)>(NOUJ.at||0)) return false;   /* v14.91 : l'app n'a pas encore recalculé */
+    const s=NOUDEC[x.k]; if(!s||!s.s) return true; if(s.s==='fait') return false; return Date.now()-(s.at||0)>14*864e5; }); }
+/* v14.91 : clé de base (sans le mois ni le montant) et conditions d'attente, comme dans l'app */
+function nouBaseJ(k){ const p=String(k||'').split(':'); while(p.length>1&&/^(\d{4}-\d{2}(-\d{2})?|[\d.,]+)$/.test(p[p.length-1])) p.pop(); return p.join(':'); }
+const NOU_SURJ={banque:'banque',caisse:'caisse',tresorerie:'trésorerie',date:'date'};
+function nouCondTxtJ(c){ if(!c) return ''; return c.sur==='date'?'à partir du '+String(c.date||'').split('-').reverse().join('/'):NOU_SURJ[c.sur]+' '+(c.op==='<'?'<':'>')+' '+frm(c.v)+' DH'; }
 function drawNouBoard(){ if(!LIVE||!NOUJ) return; const x=6*T+1,y=4*T+1;   /* le chevalet des décisions, à droite du bureau */
   R(x+2,y+14,2,9,'#6b4428'); R(x+11,y+14,2,9,'#6b4428'); R(x,y,15,15,'#6b4428'); R(x+1,y+1,13,13,'#f4f4f4');
   R(x+3,y+3,9,2,'#c03030'); R(x+3,y+6,7,1,'#3058c0'); R(x+3,y+8,8,1,'#3058c0'); R(x+3,y+10,5,1,'#38b764'); R(x+3,y+12,6,1,'#38b764');
   const L=nouDecJ(); hit(x,y,15,23,['Décisions de Noureddine',...(L.length?L.slice(0,3).map((d,i)=>(i+1)+'. '+d.t):['Rien à faire'])]); }
-async function nouMarque(k,st){
+async function nouMarque(k,st,cond){
   if(!SB||!LIVE) throw new Error('pas connecté');
   const {data,error}=await SB.from('bons').select('data').eq('id','cfg-tresor').limit(1); if(error) throw error;
   const d=data&&data[0]&&data[0].data; if(!d) throw new Error('ouvre d’abord la Trésorerie dans l’app (pas encore enregistrée)');
   if(!d.dec||typeof d.dec!=='object'||Array.isArray(d.dec)) d.dec={};
-  const x=((NOUJ&&NOUJ.dec)||[]).find(y=>y.k===k), now=Date.now();
-  d.dec[k]={s:st,at:now,t:x?x.t:'',by:USER||'noureddine',maj:now};
+  const x=((NOUJ&&NOUJ.dec)||[]).find(y=>y.k===k), now=Date.now(), l=d.dec[k];
+  if(cond){ const cv=((NOUCJ||{}).convs||{})['d:'+nouBaseJ(k)]; d.dec['w:'+nouBaseJ(k)]={s:'cond',cond,k,t:x?x.t:(cv&&cv.t)||k,at:now,by:USER||'noureddine',maj:now}; }   /* v14.91 : En attente */
+  else d.dec[k]={s:st,at:now,t:x?x.t:(l&&l.t)||'',by:USER||'noureddine',maj:now};
   const r=await SB.from('bons').upsert({id:'cfg-tresor',num:'__TRESOR__',author:USER||'noureddine',data:d,updated_at:new Date().toISOString()}); if(r.error) throw r.error;
   NOUDEC=d.dec; if(d.nou) NOUJ=d.nou; if(popKey) renderPop(); }
-document.getElementById('popBody').addEventListener('click',async e=>{ const b=e.target.closest('[data-noufk],[data-nouik]'); if(!b) return; b.disabled=true;
-  try{ await nouMarque(b.dataset.noufk||b.dataset.nouik,b.dataset.noufk?'fait':'ign'); }catch(err){ b.disabled=false; alert('Pas enregistré : '+(err.message||err)); } });
+document.getElementById('popBody').addEventListener('click',async e=>{ const b=e.target.closest('[data-noufk],[data-nouik],[data-nouattj],[data-nouremj]'); if(!b) return;
+  let k=b.dataset.noufk||b.dataset.nouik||b.dataset.nouremj, st=b.dataset.noufk?'fait':b.dataset.nouik?'ign':'', cond=null;
+  if(b.dataset.nouattj){ const P=b.dataset.nouattj.split('|'), date=P.pop(), seuil=P.pop(), op=P.pop(), sur=P.pop(); k=P.join('|');
+    cond=sur==='date'?{sur:'date',date}:{sur,op:op==='<'?'<':'>',v:Math.round(parseFloat(seuil)||0)};
+    if(!NOU_SURJ[sur]||(sur==='date'?!/^\d{4}-\d{2}-\d{2}$/.test(date):!(cond.v>0))){ alert('Condition incomplète : redemande à Noureddine.'); return; } }
+  b.disabled=true;
+  try{ await nouMarque(k,st,cond); }catch(err){ b.disabled=false; alert('Pas enregistré : '+(err.message||err)); } });
+/* ---------- v14.90 : parler à Noureddine (Gemini par la fonction Supabase « noureddine », même conversation que l'app) ---------- */
+let NOUCJ=null, NOUC_BUSYJ=false, NOUC_ERRJ='', NOUC_TXTJ='', NOUC_LUJ=0;
+/* v14.91 : une conversation par décision (d:…), des conversations libres (c:…) et la générale (g), comme dans l'app */
+let NOUC_CONVJ='g', NOUC_DTXTJ={};
+const nouConvsJ=()=>{ if(!NOUCJ) NOUCJ={msgs:[]}; if(!NOUCJ.convs||typeof NOUCJ.convs!=='object'||Array.isArray(NOUCJ.convs)) NOUCJ.convs={}; return NOUCJ.convs; };
+function nouConvDecJ(id){ if(!/^d:/.test(id||'')) return null; const b=id.slice(2), x=((NOUJ&&NOUJ.dec)||[]).find(y=>nouBaseJ(y.k)===b), c=nouConvsJ()[id];
+  return x?{k:x.k,t:x.t,d:x.d||''}:c&&c.k?{k:c.k,t:c.t||'',d:c.d||''}:null; }
+function nouConvEtatJ(id){ const dec=nouConvDecJ(id); if(!dec) return {ico:'💬',txt:''};
+  const w=NOUDEC['w:'+nouBaseJ(dec.k)], s=NOUDEC[dec.k], dans=nouDecJ().some(y=>y.k===dec.k);
+  if(w&&w.s==='cond'&&w.cond) return dans?{ico:'✅',txt:'Condition remplie ('+nouCondTxtJ(w.cond)+')'}:{ico:'⏳',txt:'En attente : '+nouCondTxtJ(w.cond)};
+  if(s&&s.s==='fait') return {ico:'✓',txt:'Faite'}; return dans?{ico:'📌',txt:'Dans les décisions'}:{ico:'·',txt:'Plus dans les décisions'}; }
+function nouDecParleJ(k){ const x=nouDecJ().find(y=>y.k===k), box=[...document.querySelectorAll('[data-noudtxj]')].find(b=>b.dataset.noudtxj===k);
+  const t=String((box?box.value:NOUC_DTXTJ[k])||'').trim(); if(!t||!x||NOUC_BUSYJ) return; if(box) box.blur();
+  NOUC_DTXTJ[k]=''; NOUC_CONVJ='d:'+nouBaseJ(k); NOUC_TXTJ=t; popTab='Parler'; nouChatEnvJ('chat',{k:x.k,t:x.t,d:x.d||''}); }
+function nouConvOuvreJ(id){ if(id==='new') id='c:'+Date.now(); NOUC_CONVJ=id; NOUC_ERRJ=''; popTab='Parler'; renderPop(); }
+const nouHm=at=>new Date(at||0).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+async function nouChatLitJ(){ if(!SB||!LIVE||Date.now()-NOUC_LUJ<4000) return; NOUC_LUJ=Date.now();
+  try{ const {data,error}=await SB.from('bons').select('data').eq('id','cfg-nouchat').limit(1); if(error) throw error; NOUCJ=(data&&data[0]&&data[0].data)||{msgs:[]}; }
+  catch(e){ NOUCJ=NOUCJ||{msgs:[]}; NOUC_ERRJ='Conversation pas chargée : '+(e.message||e); }
+  if(!Array.isArray(NOUCJ.msgs)) NOUCJ.msgs=[]; if(popKey==='nou'&&popTab==='Parler') renderPop(); }
+async function nouChatEnvJ(mode,dec){ if(NOUC_BUSYJ||!SB||!LIVE) return; const box=document.getElementById('nouTxtJ'); if(box){ NOUC_TXTJ=box.value; box.blur(); }
+  const t=String(NOUC_TXTJ||'').trim(); if(mode==='chat'&&!t) return;
+  NOUC_BUSYJ=true; NOUC_ERRJ=''; NOUCJ=NOUCJ||{msgs:[]}; if(!Array.isArray(NOUCJ.msgs)) NOUCJ.msgs=[];
+  const id=mode==='chat'?NOUC_CONVJ||'g':'g'; if(mode!=='chat') NOUC_CONVJ='g'; dec=dec||nouConvDecJ(id);
+  if(mode==='chat'){ const tmp={r:'u',t,at:Date.now(),tmp:1};
+    if(id==='g') NOUCJ.msgs=NOUCJ.msgs.concat([tmp]);
+    else { const C=nouConvsJ()[id]||(nouConvsJ()[id]={t:dec?dec.t:t.slice(0,60),k:dec?dec.k:undefined,d:dec?dec.d:undefined,msgs:[],at:Date.now(),tmp:1}); C.msgs=(C.msgs||[]).concat([tmp]); }
+    NOUC_TXTJ=''; }
+  renderPop();
+  try{ const body={mode,texte:t,conv:id}; if(dec&&/^d:/.test(id)) body.dec=dec;
+    const {data,error}=await SB.functions.invoke('noureddine',{body}); if(error) throw error; if(data&&data.erreur) throw new Error(data.erreur); if(data&&data.chat) NOUCJ=data.chat; }
+  catch(e){ const st=e&&e.context&&e.context.status;
+    NOUC_ERRJ=st===404?'Le cerveau Gemini n\'est pas encore branché (fonction « noureddine » dans Supabase).':st===401?'Réservé à Noureddine.':'Noureddine n\'a pas pu répondre : '+(e.message||e);
+    if(mode==='chat'){ NOUC_TXTJ=t;
+      if(id==='g') NOUCJ.msgs=NOUCJ.msgs.filter(m=>!m.tmp);
+      else { const C=nouConvsJ()[id]; if(C){ C.msgs=(C.msgs||[]).filter(m=>!m.tmp); if(C.tmp&&!C.msgs.length) delete nouConvsJ()[id]; } } } }
+  NOUC_BUSYJ=false; NOUC_LUJ=Date.now(); if(popKey==='nou') renderPop(); }
+/* v14.92 : le micro, comme dans l'app. Nou parle (darija, français, anglais), Gemini écrit en français dans la case, Nou relit puis Envoyer */
+let MICJ={st:'',key:'',rec:null,stream:null,chunks:[],t0:0,iv:0};
+const micOkJ=()=>!!(window.isSecureContext&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder);
+const micDureeJ=()=>{ const t=Math.floor((Date.now()-MICJ.t0)/1000); return Math.floor(t/60)+':'+String(t%60).padStart(2,'0'); };
+function micBtnJ(key){ const moi=MICJ.key===key;
+  if(moi&&MICJ.st==='rec') return `<button type="button" class="micj on" data-micj="${esc(key)}" title="Arrêter">⏹ ${micDureeJ()}</button>`;
+  if(moi&&MICJ.st==='tr') return '<button type="button" class="micj" disabled title="Noureddine écrit ce que tu as dit">⏳</button>';
+  return `<button type="button" class="micj" data-micj="${esc(key)}" ${MICJ.st?'disabled':''} title="Parle en darija, en français ou en anglais : le texte s'écrit en français">🎤</button>`; }
+const micRendreJ=()=>{ if(popKey==='nou'){ const a=document.activeElement; if(a&&a.blur&&(a.id==='nouTxtJ'||(a.dataset&&a.dataset.noudtxj!=null))) a.blur(); renderPop(); } };
+async function micClicJ(key){
+  if(MICJ.st==='rec'){ if(MICJ.key===key) micStopJ(); return; } if(MICJ.st) return;
+  if(!micOkJ()){ alert('Micro indisponible ici : ouvrez le jeu en https (GitHub) ou sur ce PC.'); return; }
+  if(!SB||!LIVE){ alert('Connectez-vous d\'abord.'); return; }
+  let stream; try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }catch(e){ alert('Micro refusé : autorisez le micro pour ce site.'); return; }
+  let rec; try{ rec=new MediaRecorder(stream); }catch(e){ stream.getTracks().forEach(t=>t.stop()); alert('Ce navigateur ne sait pas enregistrer.'); return; }
+  MICJ={st:'rec',key,rec,stream,chunks:[],t0:Date.now(),iv:0};
+  rec.ondataavailable=e=>{ if(e.data&&e.data.size) MICJ.chunks.push(e.data); }; rec.onstop=()=>micFinJ(rec.mimeType); rec.start(1000);
+  MICJ.iv=setInterval(()=>{ document.querySelectorAll('[data-micj]').forEach(b=>{ if(b.dataset.micj===MICJ.key&&MICJ.st==='rec') b.textContent='⏹ '+micDureeJ(); }); if(Date.now()-MICJ.t0>90000) micStopJ(); },500);
+  micRendreJ(); }
+function micStopJ(){ if(MICJ.st!=='rec') return; clearInterval(MICJ.iv); MICJ.st='tr'; MICJ.t1=Date.now(); try{ MICJ.rec.stop(); }catch(e){ micFinJ(''); } micRendreJ(); }
+async function micWavJ(blob){ const AC=window.AudioContext||window.webkitAudioContext, ac=new AC(); let buf;
+  try{ buf=await ac.decodeAudioData(await blob.arrayBuffer()); } finally { try{ ac.close(); }catch(e){} }
+  const SR=16000, off=new OfflineAudioContext(1,Math.max(1,Math.ceil(buf.duration*SR)),SR), src=off.createBufferSource(); src.buffer=buf; src.connect(off.destination); src.start();
+  const d=(await off.startRendering()).getChannelData(0), n=d.length, v=new DataView(new ArrayBuffer(44+n*2)), w=(o,t)=>{ for(let i=0;i<t.length;i++) v.setUint8(o+i,t.charCodeAt(i)); };
+  w(0,'RIFF'); v.setUint32(4,36+n*2,true); w(8,'WAVE'); w(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true); v.setUint32(24,SR,true); v.setUint32(28,SR*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,'data'); v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){ const x=Math.max(-1,Math.min(1,d[i])); v.setInt16(44+i*2,x<0?x*0x8000:x*0x7fff,true); }
+  const u=new Uint8Array(v.buffer); let b=''; for(let i=0;i<u.length;i+=0x8000) b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000)); return btoa(b); }
+async function micFinJ(mime){ const key=MICJ.key, dur=((MICJ.t1||Date.now())-MICJ.t0)/1000, chunks=MICJ.chunks; try{ MICJ.stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+  let txt='', err='';
+  try{ if(dur<1) throw new Error('trop court : appuyez, parlez, puis appuyez encore');
+    const audio=await micWavJ(new Blob(chunks,{type:mime||'audio/webm'}));
+    const {data,error}=await SB.functions.invoke('noureddine',{body:{mode:'dicte',audio,mime:'audio/wav'}}); if(error) throw error; if(data&&data.erreur) throw new Error(data.erreur);
+    txt=String((data&&data.texte)||'').trim(); if(!txt) throw new Error('rien compris : réessayez plus près du micro'); }
+  catch(e){ err=e&&e.context&&e.context.status===401?'réservé à Noureddine':(e&&e.message)||String(e); }
+  MICJ={st:'',key:'',rec:null,stream:null,chunks:[],t0:0,iv:0};
+  if(err){ micRendreJ(); alert('Micro : '+err); return; }
+  const aj=a=>(String(a||'').trim()?String(a).trim()+' ':'')+txt;
+  if(key==='chat') NOUC_TXTJ=aj(NOUC_TXTJ); else NOUC_DTXTJ[key]=aj(NOUC_DTXTJ[key]);
+  micRendreJ();
+  setTimeout(()=>{ const b=key==='chat'?document.getElementById('nouTxtJ'):[...document.querySelectorAll('[data-noudtxj]')].find(x=>x.dataset.noudtxj===key); if(b){ b.focus(); b.selectionStart=b.selectionEnd=b.value.length; } },0); }
+function nouChatHtmlJ(){
+  if(!NOUCJ||Date.now()-NOUC_LUJ>60000) setTimeout(nouChatLitJ,0);
+  const CV=NOUCJ?nouConvsJ():{}, id=NOUC_CONVJ||'g';
+  const ids=Object.keys(CV).filter(c=>CV[c]&&Array.isArray(CV[c].msgs)&&CV[c].msgs.length).sort((a,b)=>(CV[b].at||0)-(CV[a].at||0));
+  const chip=(c,lab,ico)=>`<button type="button" data-nouconvj="${esc(c)}" aria-pressed="${c===id}" title="${esc(lab)}">${ico} ${esc(lab)}</button>`;
+  const dec=nouConvDecJ(id), et=nouConvEtatJ(id);
+  const M=(id==='g'?((NOUCJ||{}).msgs||[]):((CV[id]||{}).msgs||[])).slice(-30);
+  const lien=p=>[p.k,p.sur,p.op||'',p.seuil||'',p.date||''].join('|');
+  setTimeout(()=>{ const c=document.getElementById('nouChatJ'); if(c) c.scrollTop=c.scrollHeight; },0);
+  return '<div class="nouconvsj">'+chip('g','Général','💬')+ids.map(c=>chip(c,CV[c].t||'Conversation',nouConvEtatJ(c).ico)).join('')+
+      (id!=='g'&&!CV[id]?chip(id,'Nouvelle conversation','✏️'):'<button type="button" data-nouconvj="new">➕ Nouvelle</button>')+'</div>'+
+    (dec?`<div class="nousujj"><b>${et.ico} ${esc(dec.t)}</b><small>${esc(et.txt)}</small></div>`:'')+
+    '<div class="nouchatj" id="nouChatJ">'+(!NOUCJ?'<div class="empty">Chargement…</div>':M.length?M.map(m=>`<div class="noum ${m.r==='u'?'u':'n'}">${m.rev?'🔁 ':''}${esc(m.t)}`+
+      (m.r!=='u'&&(m.props||[]).length?'<div class="row">'+m.props.map(p=>{
+        if(p.type==='attendre'){ const w=NOUDEC['w:'+nouBaseJ(p.k)], ok=w&&w.s==='cond'; return `<button type="button" ${ok?'disabled':''} data-nouattj="${esc(lien(p))}">${ok?'✓ ':''}${esc(p.label)}</button>`; }
+        const ok=NOUDEC[p.k]&&NOUDEC[p.k].s;
+        return p.type==='brouillon'?`<span class="muted">${esc(p.label)} : dans l'app</span>`:`<button type="button" ${ok?'disabled':''} data-${p.type==='fait'?'noufk':'nouik'}="${esc(p.k)}">${ok?'✓ ':''}${esc(p.label)}</button>`; }).join(' ')+'</div>':'')+
+      `<small>${m.r==='u'?'Toi':m.rev?'Noureddine · revue':'Noureddine'} · ${nouHm(m.at)}</small></div>`).join('')
+    :'<div class="empty">'+(dec?'Parle de cette décision : « ignore-la tant que la banque n\'a pas 80 000 DH », « pourquoi cette quantité ? »':'Pose une question à Noureddine : pourquoi cet achat, comment baisser une charge, quand acheter le tissu de Turquie…')+'</div>')+
+    (NOUC_BUSYJ?'<div class="noum n">Noureddine réfléchit…</div>':'')+'</div>'+
+    (NOUC_ERRJ?`<div class="muted" style="color:#c03030;padding:4px 0">${esc(NOUC_ERRJ)}</div>`:'')+
+    `<div class="nouinj"><textarea id="nouTxtJ" rows="2" placeholder="${dec?'Écris à Noureddine sur cette décision…':'Écris à Noureddine…'}">${esc(NOUC_TXTJ)}</textarea>${micBtnJ('chat')}<button type="button" data-nouenvj ${NOUC_BUSYJ?'disabled':''}>Envoyer</button></div>`+
+    (id==='g'?`<div class="row" style="margin-top:6px"><button type="button" data-nourevj ${NOUC_BUSYJ?'disabled':''}>🔁 Revoir ses décisions</button></div>`:'')+
+    '<div class="muted" style="padding:6px 0">Même conversation que dans l\'app (Trésorerie › Noureddine › 💬 Parler). Il révise tout seul à 8 h, 14 h et 20 h. Gemini ne reçoit jamais de nom ni de téléphone de client. 🎤 : parlez en darija, en français ou en anglais, le texte s\'écrit en français dans la case.</div>'; }
+document.getElementById('popBody').addEventListener('click',e=>{ let b; if(e.target.closest('[data-nouenvj]')) nouChatEnvJ('chat'); else if(e.target.closest('[data-nourevj]')) nouChatEnvJ('revue');
+  else if((b=e.target.closest('[data-nouconvj]'))) nouConvOuvreJ(b.dataset.nouconvj); else if((b=e.target.closest('[data-noudenvj]'))) nouDecParleJ(b.dataset.noudenvj); else if((b=e.target.closest('[data-micj]'))) micClicJ(b.dataset.micj); });
+document.getElementById('popBody').addEventListener('input',e=>{ if(e.target.id==='nouTxtJ') NOUC_TXTJ=e.target.value; else if(e.target.dataset&&e.target.dataset.noudtxj!=null) NOUC_DTXTJ[e.target.dataset.noudtxj]=e.target.value; });
+document.getElementById('popBody').addEventListener('keydown',e=>{ if(e.key!=='Enter'||!(e.ctrlKey||e.metaKey)) return;
+  if(e.target.id==='nouTxtJ'){ e.preventDefault(); nouChatEnvJ('chat'); } else if(e.target.dataset&&e.target.dataset.noudtxj!=null){ e.preventDefault(); nouDecParleJ(e.target.dataset.noudtxj); } });
 document.getElementById('nouBtn').onclick=()=>openPop('nou');
 
 function notifLab(){ const b=document.getElementById('notifBtn'); if(b) b.textContent='Notifications : '+(NOTIF_ON&&'Notification' in window&&Notification.permission==='granted'?'OUI':'NON'); }
@@ -1555,7 +1684,8 @@ const tbl=(head,rows)=>rows.length?`<table><thead><tr>${head.map(h=>`<th${h.star
 const sum=cells=>cells.map(c=>`<div>${c[0]}<b>${c[1]}</b></div>`).join('');
 const needLogin=()=>!LIVE?'<div class="empty">Connectez-vous (panneau de droite) pour voir les données de l\'app.</div>':'';
 function byDate(a,b){ return new Date(b.date||0)-new Date(a.date||0); }
-function renderPop(){ try{ notesRegle(); }catch(e){}
+function renderPop(){ const nae=document.activeElement; if(popKey==='nou'&&nae&&(nae.id==='nouTxtJ'||(nae.dataset&&nae.dataset.noudtxj!=null))) return;   /* v14.90 / v14.91 : Nou écrit */
+  try{ notesRegle(); }catch(e){}
   const sc=SCREENS[popKey]; document.getElementById('popTitle').textContent=sc.title;
   document.getElementById('popTabs').innerHTML=sc.tabs.map(t=>`<button type="button" data-t="${t}" aria-pressed="${t===popTab}">${t}</button>`).join('');
   let s='',b='';
@@ -1737,10 +1867,22 @@ function renderPop(){ try{ notesRegle(); }catch(e){}
     if(!J){ b=needLogin()||'<div class="empty">Pas encore de calcul. Ouvrez une fois l\'app (Trésorerie) : Noureddine calcule et range ses décisions ici.</div>'; }
     else if(popTab==='Décisions'){
       s=sum([['Décisions',L.length],['Calculé le',quand]]);
-      b=(L.length?L.map((x,i)=>`<div class="noud p${x.p}"><span class="ni">${esc(x.ico||'')}</span><div><b>${i+1}. ${esc(x.t)}</b><small>${esc(x.d||'')}</small>`+
-          `<div class="row"><button type="button" data-noufk="${esc(x.k)}">✓ Fait</button><button type="button" data-nouik="${esc(x.k)}">Ignorer</button></div></div></div>`).join('')
-        :'<div class="empty">Rien à faire pour l\'instant.</div>')+
-        '<div class="muted" style="padding:6px 0">L\'app recalcule à chaque changement quand elle est ouverte. Fait et Ignorer (14 jours) sont partagés avec l\'app.</div>';
+      const GRP={ach:'🛒 Achats',ch:'✂️ Charges et marges',arg:'💰 Argent'}; let gr='';
+      if(!NOUCJ) setTimeout(nouChatLitJ,0);
+      const cvN=c=>{ const C=NOUCJ&&NOUCJ.convs&&NOUCJ.convs[c]; return C&&Array.isArray(C.msgs)?C.msgs.length:0; };
+      const W=Object.keys(NOUDEC).filter(k=>/^w:/.test(k)&&NOUDEC[k]&&NOUDEC[k].s==='cond'&&NOUDEC[k].cond);
+      b=((J.v||1)<2?'<div class="muted" style="padding:6px 8px;margin-bottom:6px;border:2px solid #c62828;border-radius:6px;color:#c62828">⚠️ Ces décisions viennent de l\'ancienne version de l\'app (relances de devis). Envoyez la nouvelle version sur GitHub puis ouvrez l\'app : Noureddine recalculera les achats, les charges et l\'argent.</div>':'')+
+        (Array.isArray(J.manq)&&J.manq.length?'<div class="muted" style="padding:6px 8px;margin-bottom:6px;border:1px dashed #c08030;border-radius:6px">'+J.manq.map(esc).join('<br>')+'</div>':'')+
+        (L.length?L.map((x,i)=>(x.g&&x.g!==gr?`<div style="font-weight:700;margin:10px 0 2px;opacity:.75">${GRP[gr=x.g]||''}</div>`:'')+`<div class="noud p${x.p}"><span class="ni">${esc(x.ico||'')}</span><div><b>${i+1}. ${esc(x.t)}</b><small>${esc(x.d||'')}</small>`+
+          `<div class="row"><button type="button" data-noufk="${esc(x.k)}">✓ Fait</button><button type="button" data-nouik="${esc(x.k)}">Ignorer</button>`+
+          (cvN('d:'+nouBaseJ(x.k))?`<button type="button" data-nouconvj="d:${esc(nouBaseJ(x.k))}">💬 Continuer (${cvN('d:'+nouBaseJ(x.k))})</button>`:'')+'</div>'+
+          `<div class="nouinj"><textarea data-noudtxj="${esc(x.k)}" rows="1" placeholder="💬 Parle de cette décision à Noureddine…">${esc(NOUC_DTXTJ[x.k]||'')}</textarea>${micBtnJ(x.k)}<button type="button" data-noudenvj="${esc(x.k)}" ${NOUC_BUSYJ?'disabled':''}>Envoyer</button></div></div></div>`).join('')
+        :'<div class="empty">Rien à décider pour l\'instant.</div>')+
+        (W.length?'<div style="font-weight:700;margin:10px 0 2px;opacity:.75">⏳ En attente d\'une condition</div>'+W.map(k=>{ const w=NOUDEC[k];
+          return `<div class="noud"><span class="ni">⏳</span><div><b>${esc(w.t||k)}</b><small>Cachée tant que : ${esc(nouCondTxtJ(w.cond))}</small><div class="row"><button type="button" data-nouconvj="d:${esc(k.slice(2))}">💬</button><button type="button" data-nouremj="${esc(k)}">Remettre</button></div></div></div>`; }).join(''):'')+
+        '<div class="muted" style="padding:6px 0">Noureddine recalcule à chaque changement (le robot du bureau garde l\'app ouverte tant que le PC est allumé). Fait, Ignorer (14 jours) et En attente sont partagés avec l\'app.</div>';
+    } else if(popTab==='Parler'){
+      s=sum([['Messages',((NOUCJ||{}).msgs||[]).length],['Dernière revue',NOUCJ&&NOUCJ.revue&&NOUCJ.revue.at?nouHm(NOUCJ.revue.at):'—']]); b=nouChatHtmlJ();
     } else if(popTab==='Prévision'){
       const P=J.prev||{}, SC=P.sc||{}, C={prudent:['Prudent','#c62828'],normal:['Normal','#1F5FD1'],opt:['Optimiste','#12833F']}, K=Object.keys(C).filter(k=>SC[k]&&Array.isArray(SC[k].w));
       s=sum([['Aujourd\'hui',frm(P.start)+' DH'],...K.map(k=>[C[k][0]+' · au plus bas',frm(SC[k].low)+' DH'])]);
