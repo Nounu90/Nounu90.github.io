@@ -8943,7 +8943,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.92";
+const APP_VERSION = "14.93";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -23041,6 +23041,12 @@ function nouChargesIdees(N){
       d:x.n + " bons. Ta moyenne est de " + Math.round((1 - N.rc) * 100) + " % : revois les prix ou les remises de ce produit.", g:"ch", mt:x.v * (0.4 - m) * 3}); });
   return out;
 }
+/* v14.93 : ce que Nou a fait changer par Noureddine (bouton ✏️). Rangé dans TRS.dec["m:" + clé de base] :
+   nom = comment écrire l'article (gardé les mois suivants), t = titre et q = quantité (cette décision-là seulement, kk),
+   n = note devant le détail (gardée). Les consignes (bouton 📌) sont dans TRS.dec["r:" + heure]. */
+function nouMod(k){ const m = TRS.dec["m:" + nouBase(k)]; return m && m.s === "mod" ? m : null; }
+function nouConsignes(){ return Object.keys(TRS.dec).filter(k => /^r:/.test(k) && TRS.dec[k] && TRS.dec[k].s === "memo" && TRS.dec[k].t).map(k => Object.assign({rk:k}, TRS.dec[k])).sort((a, b) => (a.at || 0) - (b.at || 0)); }
+function nouModTxt(m){ return [m.nom ? "nom : " + m.nom : "", m.t ? "titre : " + m.t : "", m.q ? "quantité : " + frm(m.q, 0) : "", m.n ? "note : " + m.n : ""].filter(Boolean).join(" · "); }
 function nouDecisions(N){
   const D = [], dd = depDateFr, auj = N.auj, P = N.R.prudent, Nm = N.R.normal;
   const add = x => D.push(Object.assign({act:""}, x));
@@ -23053,19 +23059,23 @@ function nouDecisions(N){
   const A = N.A, I = N.I;
   let libre = (N.E ? P.low.v : N.start) - N.reserve;
   A.items.filter(x => !x.tr && x.q > 0 && x.cmdAvant <= 21).sort((a, b) => a.cmdAvant - b.cmdAvant).forEach(x => {
-    const q = x.t && x.jn ? x.q / x.lz : x.q, u = x.u, ht = x.q * x.px, ttc = ht * 1.2, urg = x.cmdAvant <= 0;
+    const cle = "achat:" + x.ref + ":" + auj.slice(0, 7), mo = nouMod(cle);
+    const q = x.t && x.jn ? x.q / x.lz : x.q, u = x.u, urg = x.cmdAvant <= 0;
+    const q0 = x.t && x.jn ? Math.ceil(q / 5) * 5 : q, qAff = mo && mo.q > 0 && mo.kk === cle ? mo.q : q0;   /* v14.93 : la quantité choisie par Nou */
+    const ttc = x.q * x.px * 1.2 * (q0 > 0 ? qAff / q0 : 1);
     const passe = ttc <= libre; if (passe) libre -= ttc;
-    const qAff = x.t && x.jn ? Math.ceil(q / 5) * 5 : q, nom = String(x.nom).replace(/Â/g, "");
+    /* v14.93 : le tissu porte sa référence de stock (S-056-300 · Screen …), ou le nom choisi par Nou */
+    const nom0 = String(x.nom).replace(/Â/g, ""), nom = mo && mo.nom ? mo.nom : x.t && x.ref && nom0.indexOf(x.ref) < 0 ? x.ref + " · " + nom0 : nom0;
     const bar = (parseFloat(CUT.bar) || CUT_DEF.bar) / 100, enBar = !x.t && u === "ml" && !/CH-|CHAIN/i.test(x.ref);
     const libre0 = x.stock - x.res, etat = libre0 < 0 ? "pas assez pour les bons confirmés" : x.dispo < 0 ? "les devis probables vont prendre le reste" :
       "rupture vers le " + dd(nouPlus(auj, x.rup));
-    add({g:"ach", p:urg ? 1 : 2, k:"achat:" + x.ref + ":" + auj.slice(0, 7), ico:x.t ? "🧵" : "🔩", mt:ttc,
-      ach:{k:(x.t ? "t:" : "a:") + x.ref, ref:x.ref, nom:nom, type:x.t ? "tissu" : "piece", u:u, q:qAff, px:x.px},
+    add({g:"ach", p:urg ? 1 : 2, k:cle, ico:x.t ? "🧵" : "🔩", mt:ttc,
+      ach:{k:(x.t ? "t:" : "a:") + x.ref, ref:x.ref, nom:mo && mo.nom ? mo.nom : nom0, type:x.t ? "tissu" : "piece", u:u, q:qAff, px:x.px},
       t:"Achète " + frm(qAff, 0) + " " + u + (enBar ? " (" + Math.round(qAff / bar) + " barres)" : "") + " de " + nom + (urg ? " maintenant" : " avant le " + dd(nouPlus(auj, Math.max(0, x.cmdAvant)))),
       d:"Stock " + frm(x.t && x.jn ? x.stock / x.lz : x.stock, 1) + " " + u + (x.res > 0 ? ", dont " + frm(x.t && x.jn ? x.res / x.lz : x.res, 1) + " pour des bons confirmés" : "") +
         (x.cmd > 0 ? ", " + frm(x.t && x.jn ? x.cmd / x.lz : x.cmd, 1) + " déjà commandés" : "") +
         ". Tu en utilises ≈ " + frm(x.t && x.jn ? x.mois / x.lz : x.mois, 1) + " " + u + " par mois : " + etat + (x.dv > 0 ? " (devis en cours comptés selon leurs chances)" : "") +
-        ". Couvre 2 mois ≈ " + frm(ttc, 0) + " DH TTC. " + (passe ? "✅ La trésorerie le permet (scénario prudent, réserve gardée)." :
+        ". " + (qAff !== q0 ? "Ta quantité (le calcul proposait " + frm(q0, 0) + " " + u + ")" : "Couvre 2 mois") + " ≈ " + frm(ttc, 0) + " DH TTC. " + (passe ? "✅ La trésorerie le permet (scénario prudent, réserve gardée)." :
         "⏳ Trésorerie juste : achète seulement ce qui bloque des bons confirmés, le reste au plus tard le " + dd(nouPlus(auj, Math.max(0, x.rup - x.lead))) + "."),
       act:"ach"});
   });
@@ -23097,6 +23107,8 @@ function nouDecisions(N){
       if (!nouCondOk(w.cond, N)) return false;
       x.d = "✅ Condition remplie : " + nouCondTxt(w.cond) + nouCondVal(w.cond, N) + ". " + x.d;
     }
+    const mo = nouMod(x.k);   /* v14.93 */
+    if (mo){ if (mo.t && mo.kk === x.k) x.t = mo.t; if (mo.n) x.d = "✏️ " + mo.n + " · " + x.d; }
     const s = TRS.dec[x.k];
     if (!s || !s.s) return true;
     if (s.s === "fait") return false;
@@ -23153,7 +23165,7 @@ function nouDecMarque(k, s){
   const x = NOU && NOU.dec.find(y => y.k === k), l = TRS.dec[k];
   TRS.dec[k] = {s:s, at:Date.now(), t:(x && x.t) || (l && l.t) || "", by:(USER && USER.login) || "", maj:Date.now()};
   NOU_AT = 0; trsSave(); renderTres(); renderTresTile();
-  toast(s === "fait" ? "Noté comme fait" : s === "ign" ? "Ignoré pendant 14 jours" : "Décision remise dans la liste");
+  toast(s === "fait" ? "Noté comme fait" : s === "ign" ? "Ignoré pendant 14 jours" : /^r:/.test(k) ? "Consigne oubliée" : /^m:/.test(k) ? "Décision remise comme le calcul la propose" : "Décision remise dans la liste");
 }
 function nouOuvre(a){
   if (a === "prev"){ NOU_TAB = "prev"; renderTres(); return; }
@@ -23197,7 +23209,7 @@ function nouLignes(N){
 function nouPublie(N){
   if (!N || !TRS || !factAllowed()) return;
   const r = v => Math.round(v), K = ["prudent","normal","opt"];
-  const sig = JSON.stringify([N.dec.map(x => x.k), K.map(k => Math.round(N.R[k].low.v / 500)), Math.round(N.start / 500)]);
+  const sig = JSON.stringify([N.dec.map(x => x.k + "|" + x.t + "|" + ((nouMod(x.k) || {}).n || "")), K.map(k => Math.round(N.R[k].low.v / 500)), Math.round(N.start / 500)]);
   if (!TRS.snap || typeof TRS.snap !== "object" || Array.isArray(TRS.snap)) TRS.snap = {};
   let neuf = false;
   if (N.E && !TRS.snap[N.auj]){ TRS.snap[N.auj] = {e:r(N.start), f7:r(N.R.normal.pts[7]), f30:r(N.R.normal.pts[30]), maj:Date.now()}; neuf = true; }
@@ -23225,7 +23237,7 @@ const NOUC_ID = "cfg-nouchat";
 var NOUC = null, NOUC_BUSY = false, NOUC_ERR = "", NOUC_TXT = "", NOUC_FORCE = false, NOUC_LU = 0;
 /* v14.91 : une conversation par décision (« d:import »), des conversations libres (« c:… ») et la générale (« g ») */
 var NOUC_CONV = "g", NOUC_DTXT = {};
-function nouConvs(){ if (!NOUC.convs || typeof NOUC.convs !== "object" || Array.isArray(NOUC.convs)) NOUC.convs = {}; return NOUC.convs; }
+function nouConvs(){ if (!NOUC) return {}; if (!NOUC.convs || typeof NOUC.convs !== "object" || Array.isArray(NOUC.convs)) NOUC.convs = {}; return NOUC.convs; }
 function nouConvMsgs(id){ if (!id || id === "g") return NOUC.msgs; const c = nouConvs()[id]; return c && Array.isArray(c.msgs) ? c.msgs : []; }
 /* la décision d'une conversation : d'abord la version du jour dans la liste, sinon celle gardée dans la conversation */
 function nouConvDec(id){
@@ -23319,9 +23331,33 @@ async function nouChatEnvoie(mode, dec){
   }
   NOUC_BUSY = false; NOUC_LU = Date.now(); NOUC_FORCE = true; renderTres();
 }
+function nouPropSig(p){ return JSON.stringify([p.nom || "", p.titre || "", p.quantite || 0, p.note || ""]); }
 function nouProp(v){
   const i = v.indexOf("|"), ty = v.slice(0, i);
   let k = v.slice(i + 1);
+  if (ty === "modifier" || ty === "retenir"){
+    /* v14.93 : modifier|{json} ou retenir|{json} */
+    let p; try { p = JSON.parse(decodeURIComponent(k)); } catch(e){ toast("Proposition illisible : redemande à Noureddine"); return; }
+    const now = Date.now(), by = (USER && USER.login) || "";
+    if (ty === "retenir"){
+      const t = String(p.consigne || "").trim().slice(0, 200);
+      if (!t) return;
+      TRS.dec["r:" + now] = {s:"memo", t:t, at:now, by:by, maj:now};
+      trsSave(); NOUC_FORCE = true; renderTres();
+      toast("📌 Noureddine retient : " + t);
+      return;
+    }
+    const k2 = String(p.k || ""), x = NOU && NOU.dec.find(y => y.k === k2), cv = nouConvs()["d:" + nouBase(k2)], om = nouMod(k2) || {};
+    const ach = /^achat:/.test(k2), meme = om.kk === k2;
+    TRS.dec["m:" + nouBase(k2)] = {s:"mod", k:k2, kk:k2, at:now, by:by, maj:now, sig:nouPropSig(p), t0:(om.t0 && meme ? om.t0 : (x && x.t) || (cv && cv.t) || k2),
+      nom:ach && p.nom ? String(p.nom).slice(0, 80) : (om.nom || ""),
+      t:p.titre ? String(p.titre).slice(0, 160) : (meme ? om.t || "" : ""),
+      q:ach && +p.quantite > 0 ? Math.round(+p.quantite * 10) / 10 : (meme ? om.q || 0 : 0),
+      n:p.note ? String(p.note).slice(0, 200) : (om.n || "")};
+    NOU_AT = 0; trsSave(); NOUC_FORCE = true; renderTres(); renderTresTile();
+    toast("✏️ Décision modifiée");
+    return;
+  }
   if (ty === "attendre"){
     /* attendre|clé|sur|op|seuil|date */
     const P = k.split("|"), date = P.pop(), seuil = P.pop(), op = P.pop(), sur = P.pop();
@@ -23438,8 +23474,12 @@ function nouChatHtml(N){
   const dec = nouConvDec(id), et = nouConvEtat(id);
   if (dec) h += '<div class="nousuj"><b>' + et.ico + ' ' + esc(dec.t) + '</b><small>' + esc(et.txt) + '</small></div>';
   const M = nouConvMsgs(id).slice(-40);
-  const lien = p => p.type === "attendre" ? p.type + "|" + p.k + "|" + p.sur + "|" + (p.op || "") + "|" + (p.seuil || "") + "|" + (p.date || "") : p.type + "|" + p.k;
-  const fait = p => { if (p.type !== "attendre") return D[p.k] && D[p.k].s; const w = D["w:" + nouBase(p.k)]; return w && w.s === "cond"; };
+  const lien = p => p.type === "attendre" ? p.type + "|" + p.k + "|" + p.sur + "|" + (p.op || "") + "|" + (p.seuil || "") + "|" + (p.date || "")
+    : p.type === "modifier" || p.type === "retenir" ? p.type + "|" + encodeURIComponent(JSON.stringify(p)) : p.type + "|" + p.k;
+  const fait = p => {
+    if (p.type === "retenir") return Object.keys(D).some(k => /^r:/.test(k) && D[k] && D[k].s === "memo" && D[k].t === String(p.consigne || "").trim().slice(0, 200));
+    if (p.type === "modifier"){ const m = D["m:" + nouBase(p.k)]; return m && m.s === "mod" && m.sig === nouPropSig(p); }
+    if (p.type !== "attendre") return D[p.k] && D[p.k].s; const w = D["w:" + nouBase(p.k)]; return w && w.s === "cond"; };
   h += '<div class="nouchat" id="nouChat">' + (M.length ? M.map(m => '<div class="noum ' + (m.r === "u" ? "u" : "n") + '">' + (m.rev ? "🔁 " : "") + esc(m.t) +
       (m.r !== "u" && (m.props || []).length ? '<div class="noub">' + m.props.map(p => { const ok = fait(p);
         return '<button type="button"' + (ok ? ' disabled' : ' class="f"') + ' data-nouprop="' + esc(lien(p)) + '">' + (ok ? "✓ " : "") + esc(p.label) + '</button>'; }).join("") + '</div>' : '') +
@@ -23451,7 +23491,7 @@ function nouChatHtml(N){
   h += '<div class="nouin"><textarea id="nouTxt" rows="2" placeholder="' + (dec ? 'Écris à Noureddine sur cette décision…' : 'Écris à Noureddine…') + '">' + esc(NOUC_TXT) + '</textarea>' +
       micBtn("chat") + '<button type="button" class="f" data-nouenv' + (NOUC_BUSY ? ' disabled' : '') + '>Envoyer</button></div>' +
     (id === "g" ? '<div class="noub"><button type="button" data-nourevue' + (NOUC_BUSY ? ' disabled' : '') + '>🔁 Revoir ses décisions maintenant</button></div>' : '') +
-    '<div class="depcut" style="margin-top:8px">Il révise tout seul 3 fois par jour (8 h, 14 h, 20 h). Gemini reçoit seulement les chiffres, les articles et les catégories de charges : jamais de nom ni de téléphone de client. Il propose, tu confirmes. 🎤 : parle en darija, en français ou en anglais, il écrit en français dans la case, tu relis puis Envoyer.</div>';
+    '<div class="depcut" style="margin-top:8px">Il révise tout seul 3 fois par jour (8 h, 14 h, 20 h). Gemini reçoit seulement les chiffres, les articles et les catégories de charges : jamais de nom ni de téléphone de client. Il propose, tu confirmes. 🎤 : parle en darija, en français ou en anglais, il écrit en français dans la case, tu relis puis Envoyer. Pour changer une décision (nom, quantité, note) ou lui faire retenir une règle, dis-le : il propose un bouton ✏️ ou 📌, le changement se fait quand tu cliques.</div>';
   setTimeout(() => { const c = $("nouChat"); if (c) c.scrollTop = c.scrollHeight; }, 0);
   return h;
 }
@@ -23494,6 +23534,8 @@ function nouCarte(){
     const cvN = c => { const C = NOUC && NOUC.convs && NOUC.convs[c]; return C && Array.isArray(C.msgs) ? C.msgs.length : 0; };
     const nAtt = Object.keys(TRS.dec).filter(k => /^w:/.test(k) && TRS.dec[k] && TRS.dec[k].s === "cond").length;
     if (nAtt) h += '<div class="depcut" style="margin-bottom:6px">⏳ ' + nAtt + ' décision' + nouPl(nAtt) + ' en attente d\'une condition : voir Journal.</div>';
+    const nCo = nouConsignes().length;
+    if (nCo) h += '<div class="depcut" style="margin-bottom:6px">📌 ' + nCo + ' consigne' + nouPl(nCo) + ' retenue' + nouPl(nCo) + ' par Noureddine : voir Journal.</div>';
     let gr = "";
     h += N.dec.length ? N.dec.map((x, i) => (x.g !== gr ? '<div class="noug">' + NOU_GRP[gr = x.g] + '</div>' : '') +
       '<div class="noud p' + x.p + '"><span class="ni">' + x.ico + '</span><div class="nt"><b>' + (i + 1) + '. ' + esc(x.t) + '</b><small>' + esc(x.d) + '</small>' +
@@ -23528,6 +23570,11 @@ function nouCarte(){
     h += N.lignes.map(l => '<div class="deprow"><div class="dl">' + esc(l[0]) + (l[2] ? '<small>' + esc(l[2]) + '</small>' : '') + '</div><span class="dm">' + esc(l[1]) + '</span></div>').join("") +
       '<div class="depcut" style="margin-top:6px">Ventes : feuille historique avant le 13/08/2026, bons de l\'app après. Bénéfice net sans les achats de stock (ils sont dans le coût des bons).</div>';
   } else {
+    const CO = nouConsignes(), MO = Object.keys(TRS.dec).filter(k => /^m:/.test(k) && TRS.dec[k] && TRS.dec[k].s === "mod").map(k => Object.assign({mk:k}, TRS.dec[k])).sort((a, b) => (b.at || 0) - (a.at || 0));
+    h += CO.map(x => '<div class="deprow"><div class="dl">📌 ' + esc(x.t) + '<small>Consigne retenue le ' + depDateFr(jourISO(new Date(x.at || 0))) + '</small></div>' +
+        '<button class="deplink" type="button" data-nouremet="' + esc(x.rk) + '">Oublier</button></div>').join("") +
+      MO.map(x => '<div class="deprow"><div class="dl">✏️ ' + esc(x.t0 || x.k) + '<small>' + esc(nouModTxt(x)) + ' · le ' + depDateFr(jourISO(new Date(x.at || 0))) + '</small></div>' +
+        '<button class="deplink" type="button" data-nouremet="' + esc(x.mk) + '">Remettre</button></div>').join("");
     const W = Object.keys(TRS.dec).filter(k => /^w:/.test(k)).map(k => Object.assign({}, TRS.dec[k], {wk:k})).filter(x => x.s === "cond" && x.cond).sort((a, b) => (b.at || 0) - (a.at || 0));
     h += W.map(x => { const ok = nouCondOk(x.cond, N);
       return '<div class="deprow"><div class="dl">' + (ok ? "✅ " : "⏳ ") + esc(x.t || x.wk) + '<small>' + (ok ? "Condition remplie : " : "En attente : ") + esc(nouCondTxt(x.cond)) + esc(nouCondVal(x.cond, N)) + ' · depuis le ' + depDateFr(jourISO(new Date(x.at || 0))) + '</small></div>' +
@@ -23535,7 +23582,7 @@ function nouCarte(){
     const J = Object.keys(TRS.dec).map(k => Object.assign({k:k}, TRS.dec[k])).filter(x => x.s === "fait" || x.s === "ign").sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 25);
     h += J.length ? J.map(x => '<div class="deprow"><div class="dl">' + (x.s === "fait" ? "✓ " : "· ") + esc(x.t || x.k) + '<small>' + (x.s === "fait" ? "Fait" : "Ignoré") + ' le ' + depDateFr(jourISO(new Date(x.at || 0))) + (x.by ? ' · ' + esc(x.by) : '') + '</small></div>' +
       '<button class="deplink" type="button" data-nouremet="' + esc(x.k) + '">Remettre</button></div>').join("")
-      : (W.length ? '' : '<div class="depcut">Les décisions marquées Fait, Ignorer ou En attente s\'affichent ici.</div>');
+      : (W.length || CO.length || MO.length ? '' : '<div class="depcut">Les décisions marquées Fait, Ignorer ou En attente, les décisions modifiées et les consignes s\'affichent ici.</div>');
   }
   return h + '</div>';
 }
