@@ -8943,7 +8943,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.93";
+const APP_VERSION = "14.97";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -21658,7 +21658,7 @@ function achRendBa(box){
     ((b.lignes || []).length ? b.lignes.map((l, i) => '<div class="achln"><div class="lh"><b>' + esc(l.nom) + '</b><button type="button" data-achdel="' + i + '" aria-label="Retirer">✕</button>' +
         '<small>' + esc(l.sous || l.type || "") + ((l.pour || []).length ? ' · pour ' + esc(l.pour.join(", ")) : '') + '</small></div>' +
         '<label class="achdes">Désignation sur le bon fournisseur<input data-achl="' + i + '" data-k="desig" value="' + esc(achDesig(l)) + '" placeholder="Ce que le fournisseur lira"></label>' +
-        '<div class="achli"><label>Qté<input inputmode="decimal" data-achl="' + i + '" data-k="q" value="' + esc(String(l.q == null ? "" : l.q).replace(".", ",")) + '"></label>' +
+        '<div class="achli"><label>' + (l.type === "tissu" ? (l.u === "ml" ? "Qté ml" : "Qté m²") : "Qté") + '<input inputmode="decimal" data-achl="' + i + '" data-k="q" value="' + esc(String(l.q == null ? "" : l.q).replace(".", ",")) + '"></label>' +
         '<label>PU HT<input inputmode="decimal" class="ed" data-achl="' + i + '" data-k="pu" value="' + esc(String(l.pu == null ? "" : l.pu).replace(".", ",")) + '"></label>' +
         '<span data-achlt="' + i + '">' + fr((parseFloat(l.q) || 0) * (parseFloat(l.pu) || 0)) + '</span></div></div>').join("")
       : '<p class="hint" style="margin:0 0 8px">Aucun article. Ajoutez-les ci-dessous.</p>') +
@@ -21893,7 +21893,8 @@ function achPdf(b){
     const des = achDesig(l) || String(l.nom || "");
     txt(46, y, des.slice(0, 52), 10, true);
     if (l.ref && l.ref !== des) txt(46, y - 11, l.ref, 8, false, "0.45 0.42 0.42");
-    txt(380, y, fr(q, q % 1 ? 2 : 0), 10, false, "0 0 0", true);
+    /* v14.96 : le tissu se commande en m² (demande de Link international), les articles en quantité seule */
+    txt(380, y, fr(q, q % 1 ? 2 : 0) + (l.type === "tissu" ? (l.u === "ml" ? " ml" : " m²") : ""), 10, false, "0 0 0", true);
     txt(470, y, fr(pu), 10, false, "0 0 0", true);
     txt(549, y, fr(q * pu), 10, true, "0 0 0", true);
     ligne(40, y - 16, 555, y - 16);
@@ -23044,6 +23045,7 @@ function nouChargesIdees(N){
 /* v14.93 : ce que Nou a fait changer par Noureddine (bouton ✏️). Rangé dans TRS.dec["m:" + clé de base] :
    nom = comment écrire l'article (gardé les mois suivants), t = titre et q = quantité (cette décision-là seulement, kk),
    n = note devant le détail (gardée). Les consignes (bouton 📌) sont dans TRS.dec["r:" + heure]. */
+var NOU_ROULEAU_M2 = 90;   /* v14.97 : un rouleau de tissu = 90 m², on n'achète jamais moins */
 function nouMod(k){ const m = TRS.dec["m:" + nouBase(k)]; return m && m.s === "mod" ? m : null; }
 function nouConsignes(){ return Object.keys(TRS.dec).filter(k => /^r:/.test(k) && TRS.dec[k] && TRS.dec[k].s === "memo" && TRS.dec[k].t).map(k => Object.assign({rk:k}, TRS.dec[k])).sort((a, b) => (a.at || 0) - (b.at || 0)); }
 function nouModTxt(m){ return [m.nom ? "nom : " + m.nom : "", m.t ? "titre : " + m.t : "", m.q ? "quantité : " + frm(m.q, 0) : "", m.n ? "note : " + m.n : ""].filter(Boolean).join(" · "); }
@@ -23060,9 +23062,11 @@ function nouDecisions(N){
   let libre = (N.E ? P.low.v : N.start) - N.reserve;
   A.items.filter(x => !x.tr && x.q > 0 && x.cmdAvant <= 21).sort((a, b) => a.cmdAvant - b.cmdAvant).forEach(x => {
     const cle = "achat:" + x.ref + ":" + auj.slice(0, 7), mo = nouMod(cle);
-    const q = x.t && x.jn ? x.q / x.lz : x.q, u = x.u, urg = x.cmdAvant <= 0;
-    const q0 = x.t && x.jn ? Math.ceil(q / 5) * 5 : q, qAff = mo && mo.q > 0 && mo.kk === cle ? mo.q : q0;   /* v14.93 : la quantité choisie par Nou */
-    const ttc = x.q * x.px * 1.2 * (q0 > 0 ? qAff / q0 : 1);
+    /* v14.97 : le tissu s'achète par rouleau entier de 90 m² (Nou, 10/11/2026) : on arrondit au rouleau supérieur */
+    const qm2 = x.t ? Math.max(1, Math.ceil(x.q / NOU_ROULEAU_M2 - 1e-9)) * NOU_ROULEAU_M2 : x.q, nbRoul = x.t ? qm2 / NOU_ROULEAU_M2 : 0;
+    const q = x.t && x.jn ? qm2 / x.lz : qm2, u = x.u, urg = x.cmdAvant <= 0;
+    const q0 = x.t && x.jn ? Math.ceil(q) : q, qAff = mo && mo.q > 0 && mo.kk === cle ? mo.q : q0;   /* v14.93 : la quantité choisie par Nou */
+    const ttc = qm2 * x.px * 1.2 * (q0 > 0 ? qAff / q0 : 1);
     const passe = ttc <= libre; if (passe) libre -= ttc;
     /* v14.93 : le tissu porte sa référence de stock (S-056-300 · Screen …), ou le nom choisi par Nou */
     const nom0 = String(x.nom).replace(/Â/g, ""), nom = mo && mo.nom ? mo.nom : x.t && x.ref && nom0.indexOf(x.ref) < 0 ? x.ref + " · " + nom0 : nom0;
@@ -23071,11 +23075,12 @@ function nouDecisions(N){
       "rupture vers le " + dd(nouPlus(auj, x.rup));
     add({g:"ach", p:urg ? 1 : 2, k:cle, ico:x.t ? "🧵" : "🔩", mt:ttc,
       ach:{k:(x.t ? "t:" : "a:") + x.ref, ref:x.ref, nom:mo && mo.nom ? mo.nom : nom0, type:x.t ? "tissu" : "piece", u:u, q:qAff, px:x.px},
-      t:"Achète " + frm(qAff, 0) + " " + u + (enBar ? " (" + Math.round(qAff / bar) + " barres)" : "") + " de " + nom + (urg ? " maintenant" : " avant le " + dd(nouPlus(auj, Math.max(0, x.cmdAvant)))),
+      t:"Achète " + frm(qAff, 0) + " " + u + (enBar ? " (" + Math.round(qAff / bar) + " barres)" : "") +
+        (x.t && qAff === q0 ? " (" + nbRoul + " rouleau" + (nbRoul > 1 ? "x" : "") + " de " + NOU_ROULEAU_M2 + " m²)" : "") + " de " + nom + (urg ? " maintenant" : " avant le " + dd(nouPlus(auj, Math.max(0, x.cmdAvant)))),
       d:"Stock " + frm(x.t && x.jn ? x.stock / x.lz : x.stock, 1) + " " + u + (x.res > 0 ? ", dont " + frm(x.t && x.jn ? x.res / x.lz : x.res, 1) + " pour des bons confirmés" : "") +
         (x.cmd > 0 ? ", " + frm(x.t && x.jn ? x.cmd / x.lz : x.cmd, 1) + " déjà commandés" : "") +
         ". Tu en utilises ≈ " + frm(x.t && x.jn ? x.mois / x.lz : x.mois, 1) + " " + u + " par mois : " + etat + (x.dv > 0 ? " (devis en cours comptés selon leurs chances)" : "") +
-        ". " + (qAff !== q0 ? "Ta quantité (le calcul proposait " + frm(q0, 0) + " " + u + ")" : "Couvre 2 mois") + " ≈ " + frm(ttc, 0) + " DH TTC. " + (passe ? "✅ La trésorerie le permet (scénario prudent, réserve gardée)." :
+        ". " + (qAff !== q0 ? "Ta quantité (le calcul proposait " + frm(q0, 0) + " " + u + ")" : x.t ? "Couvre au moins 2 mois, arrondi au rouleau entier de " + NOU_ROULEAU_M2 + " m²" : "Couvre 2 mois") + " ≈ " + frm(ttc, 0) + " DH TTC. " + (passe ? "✅ La trésorerie le permet (scénario prudent, réserve gardée)." :
         "⏳ Trésorerie juste : achète seulement ce qui bloque des bons confirmés, le reste au plus tard le " + dd(nouPlus(auj, Math.max(0, x.rup - x.lead))) + "."),
       act:"ach"});
   });
