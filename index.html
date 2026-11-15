@@ -3082,6 +3082,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
     </div>
     <div class="htodo" id="homeTodo" hidden></div>
     <div class="hk3" id="homeK3" hidden></div>
+    <div class="hk3" id="homeTrs" hidden></div>
     <div class="atban" id="atlBan" hidden></div>
     <button class="persohome" id="persoHome" type="button" hidden>
       <span class="phhead"><b>Mes notes</b><em id="persoHomeN">0</em></span>
@@ -3211,7 +3212,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
         </button>
         <button class="tile" id="tileNom" type="button">
           <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h10M4 12h10M4 19h10"/><path d="M18 4v16M16 6l2-2 2 2"/></svg></span>
-          <span class="tt"><b>Nomen&shy;clature</b><small id="tileNomSub">Articles et prix par type de store</small></span>
+          <span class="tt"><b>Nomen&shy;clature</b><small id="tileNomSub">Articles par type de store</small></span>
           <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
       </div>
@@ -4242,7 +4243,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
 <div class="sheet" id="nomSheet">
   <div class="sheet-top">
     <button class="icon-btn" data-close="nomSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <h2>Nomenclature et prix</h2>
+    <h2>Nomenclature</h2>
   </div>
   <div class="sheet-body">
     <button class="refresh" type="button" data-refresh><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
@@ -4257,7 +4258,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         Ajouter une ligne
       </button>
-      <p class="hint">Touchez le nom de l'article pour le remplacer par un autre de la feuille Google. Le prix se remplit tout seul depuis la colonne Prix Unitaire HT, vous pouvez le corriger.</p>
+      <p class="hint">Touchez une ligne pour choisir son article dans le stock. Le coût de revient prend les prix de la feuille Google : le tissu choisi dans le bon, et les pièces choisies dans « Pièces utilisées » du plan de coupe. L'article d'une ligne ne sert que si le bon n'en a pas choisi.</p>
     </div>
     <div class="card">
       <div class="card-head"><div class="label">Hypothèses de calcul</div></div>
@@ -4699,7 +4700,7 @@ function renderRows(){
       (S.multi
         ? '<button class="rowfab" type="button" data-rowfab="' + i + '">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="7" cy="6" rx="3" ry="3"/><path d="M7 3h10a3 3 0 010 6H7M7 9v12M17 9v9a3 3 0 01-3 3H7"/></svg>' +
-            '<b class="' + (rowRef(i) ? "" : "ph") + '">' + (rowRef(i) ? rowRef(i) + (couleurDe(rowRef(i)) ? ' · ' + esc(couleurDe(rowRef(i))) : '') : "Choisir la couleur") + '</b>' +
+            '<b class="' + (rowRef(i) ? "" : "ph") + '">' + (rowRef(i) ? rowRef(i) + (nomTissu(rowRef(i)) ? ' · ' + esc(nomTissu(rowRef(i))) : '') : "Choisir la couleur") + '</b>' +
             '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>' +
           '</button>' +
           '<div class="fabnote" data-fabnote="' + i + '" hidden></div>'
@@ -4816,7 +4817,7 @@ function renderRefs(){
     const d = document.createElement("div");
     d.className = "chip" + (short ? " short" : "");
     d.innerHTML =
-      '<span class="ci"><span class="cref">' + f.ref + (couleurDe(f.ref) ? ' · ' + esc(couleurDe(f.ref)) : '') + '</span>' +
+      '<span class="ci"><span class="cref">' + f.ref + (nomTissu(f.ref) ? ' · ' + esc(nomTissu(f.ref)) : '') + '</span>' +
         '<span class="csub">laize ' + (f.laize/100).toFixed(2).replace(".",",") + " m  ·  " +
         (ml > 0 ? fr(ml) + " ml / " + fr(dispoMl) + " ml" : stockTxt(f) + " en stock") +
         '</span></span>' +
@@ -4885,7 +4886,7 @@ function renderRefList(){
       b.setAttribute("aria-selected", String(on));
       b.dataset.ref = f.ref;
       b.innerHTML =
-        '<span class="oref">' + f.ref + (couleurDe(f.ref) ? ' · ' + esc(couleurDe(f.ref)) : '') +
+        '<span class="oref">' + f.ref + (nomTissu(f.ref) ? ' · ' + esc(nomTissu(f.ref)) : '') +
           '<span class="osub">laize ' + (f.laize/100).toFixed(2).replace(".",",") + " m" +
           (out ? "  ·  rupture au dépôt" : "  ·  " + stockTxt(f) + " disponibles") + '</span>' +
         '</span>' +
@@ -5103,6 +5104,13 @@ $("ville").addEventListener("change", e => { S.ville = e.target.value; });
 /* v14.50 : adresse complète = adresse + ville */
 function adrDe(o){ return [o && o.adresse, o && o.ville].map(x => String(x || "").trim()).filter(Boolean).join(", "); }
 /* v14.50 : la couleur du tissu, lue dans la désignation de la feuille (« Crème blackout - LINK - P104 » → « Crème blackout ») */
+/* v14.99 : la désignation complète du tissu (« Screen - Beige - LINK - T3002 »), accents réparés : affichée à côté du tissu dans Créer un bon */
+function nomTissu(ref){
+  const f = fab(ref); if (!f || !f.nom) return "";
+  let t = String(f.nom).trim();
+  if (/Ã|Â/.test(t)) try { t = decodeURIComponent(escape(t)); } catch(e){}
+  return t.toUpperCase() === String(ref).toUpperCase() ? "" : t;
+}
 function couleurDe(ref){
   const f = fab(ref); if (!f || !f.nom) return "";
   let t = String(f.nom);
@@ -6810,6 +6818,7 @@ async function pullBonsVrai(){
           if (!NOM.hyp) NOM.hyp = Object.assign({}, HYP_DEF);
           nomHypOk(); nomUnites();
           LS.set("mst_nom", NOM);
+          if (nomClipJN()) pushNom();
         }
         return;
       }
@@ -7181,7 +7190,20 @@ function renderHomeTodo(){
     vus.map(x => '<button type="button" data-hgo="' + x.go + '"><i style="background:' + x.c + '"></i>' +
       '<span>' + esc(x.t) + '</span><em>' + esc(x.lien) + '  ›</em></button>').join("");
 }
+/* v14.98 : caisse et banque sur l'accueil, sous les 3 chiffres (Noureddine seul) ; appuyer ouvre la Trésorerie */
+function renderHomeTrs(){
+  const box = $("homeTrs");
+  if (!box) return;
+  const E = factAllowed() && TRS ? trsEstime() : null;
+  if (!factAllowed()){ box.hidden = true; box.innerHTML = ""; return; }
+  const sous = !E ? "à saisir ›" : E.age > 7 ? "à mettre à jour (" + E.age + " j) ›" : "Trésorerie ›";
+  const cell = (lab, val, cls) => '<button type="button" class="hk3b" data-hktrs="1">' + lab + '<b' + (cls ? ' class="' + cls + '"' : '') + '>' + val + '</b><em>' + sous + '</em></button>';
+  box.innerHTML = E ? cell("Caisse", frm(E.caisse, 0), "") + cell("Banque", frm(E.banque, 0), "") : cell("Caisse et banque", "—", "");
+  box.hidden = false;
+  if (!box.dataset.on){ box.dataset.on = "1"; box.addEventListener("click", e => { if (e.target.closest("[data-hktrs]")) $("tileTres").click(); }); }
+}
 function renderHomeK3(){
+  try { renderHomeTrs(); } catch(e){}
   const box = $("homeK3");
   if (!box) return;
   const cell = (lab, val, cls, go) => (go ? '<button type="button" class="hk3b" data-hkgo="' + go + '">' : '<div>') + lab +
@@ -8943,7 +8965,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "14.97";
+const APP_VERSION = "15.01";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -8981,7 +9003,9 @@ const PIECES_DEF = {
     {k:"embout",     label:"Embout J/N",         code:"EMBOUT_J/N",      u:"u",  auto:d => d.nb},
     {k:"support",    label:"Support",            code:"SUPPORT_J/N",     u:"u",  auto:d => d.supports},
     {k:"bouchonInf", label:"Bouchon inférieur",  code:"BOUCHON_INF_J/N", u:"u",  auto:d => d.nb * 2},
-    {k:"chainette",  label:"Chaînette",          code:"CH-EN",           u:"ml", auto:d => d.chaineMl}
+    {k:"chainette",  label:"Chaînette",          code:"CH-EN",           u:"ml", auto:d => d.chaineMl},
+    /* v15.01 : 2 clips par store, comme l'enrouleur */
+    {k:"clip",       label:"Clip chaînette",     code:"CLIPCHAINETTEVERT", u:"u", auto:d => d.nb * 2}
   ]
 };
 /* Les anciens choix (avant v14.48) étaient des noms : on les ramène à leur code. */
@@ -9075,8 +9099,8 @@ function famData(fam){
     tube32Ml: sum(d => d.l - 2) / 100,
     barreMl:  sum(d => d.l - 1.5) / 100,
     hMl2:     2 * sum(d => d.h) / 100,
-    /* Chaînette : deux fois la hauteur, plus 30 cm de marge, pour chaque store. */
-    chaineMl: sum(d => 2 * d.h + 30) / 100,
+    /* v14.99 : Chaînette = (hauteur × 2) − 20 cm, pour chaque store (règle de Nou, 11/11/2026). */
+    chaineMl: sum(d => Math.max(0, 2 * d.h - 20)) / 100,
     supports: sum(d => d.l >= 200 ? 3 : 2),
     coupeM2: coupeM2,
     tissuMl: tissuMl,
@@ -9854,8 +9878,8 @@ function renderFait(o, dims){
         : '') + '</span>' +
       '<span class="fdim">' + fr(d.l,0) + ' × ' + fr(d.h,0) + ' cm</span>' +
       '<span class="fsub">' + (d.t === "JN" ? "jour et nuit" : "enrouleur") +
-        (d.ref ? "  ·  " + d.ref : "") + (d.note ? "  ·  " + esc(d.note) : "") +
-        (on ? "  ·  fabriquée" + dateCoche(o, ["fab"], d.key) : "") + '</span>' +
+        (d.ref ? "  ·  " + d.ref + (nomTissu(d.ref) ? "  ·  " + esc(nomTissu(d.ref)) : "") : "") + (d.note ? "  ·  " + esc(d.note) : "") +
+        (on ? "<br>fabriquée" + dateCoche(o, ["fab"], d.key) : "") + '</span>' +   /* v15.00 : désignation du tissu, date sur sa ligne */
     '</button>';
   }).join("");
 }
@@ -10229,7 +10253,9 @@ function renderPlan(){
         T.unused.push({w:c.w, len:c.l, swap:false,
                        why:"enregistrée pour le tissu " + c.ref + " : changez sa référence en haut si elle convient ici"});
     });
-    h += '<div class="banner"><b>TISSU ' + ref + '</b><span>rouleau de ' + fr(lz,0) + ' cm de large</span></div>';
+    /* v14.99 : la couleur à côté du tissu, pour Soufiane */
+    const coulT = couleurDe(ref), coulOk = coulT && coulT.toUpperCase() !== String(ref).toUpperCase();
+    h += '<div class="banner"><b>TISSU ' + ref + (coulOk ? ' · ' + esc(coulT).toUpperCase() : '') + '</b><span>rouleau de ' + fr(lz,0) + ' cm de large</span></div>';
     h += '<p class="bsum">' +
          (T.nbStock ? '<b>' + T.nbStock + '</b> chute' + (T.nbStock > 1 ? 's' : '') + ' du stock réutilisée' + (T.nbStock > 1 ? 's' : '') + '  ·  ' : '') +
          '<b>' + T.nbRoll + '</b> bande' + (T.nbRoll > 1 ? 's' : '') + ' à dérouler du rouleau' +
@@ -19274,7 +19300,7 @@ $("tileLog").addEventListener("click", () => {
 
 /* q = règle de quantité par store :
    barre = largeur × coefficient de perte   tissu = m² réellement consommés
-   u1 = 1 pièce   u2 = 2 pièces   h2 = 2 × hauteur   sup = 2 pièces, 3 si largeur ≥ 2 m */
+   u1 = 1 pièce   u2 = 2 pièces   h2 = 2 × hauteur − 20 cm   sup = 2 pièces, 3 si largeur ≥ 2 m */
 const NOM_ROLES = {
   ENR: [
     {k:"tube",      label:"Tube 38",          u:"ml", q:"barre"},
@@ -19294,11 +19320,12 @@ const NOM_ROLES = {
     {k:"support",   label:"Support",          u:"u",  q:"sup"},
     {k:"bouchon",   label:"Bouchon",          u:"u",  q:"u2"},
     {k:"chainette", label:"Chaînette",        u:"ml", q:"h2"},
+    {k:"clip",      label:"Clip chaînette",   u:"u",  q:"u2"},
     {k:"tissu",     label:"Tissu jour/nuit",  u:"ml", q:"tissu"}
   ]
 };
 const Q_TXT = {barre:"largeur × coef.", tissu:"m² consommés", u1:"1 par store",
-               u2:"2 par store", h2:"2 × hauteur + 30 cm", sup:"2, ou 3 si largeur ≥ 2 m"};
+               u2:"2 par store", h2:"2 × hauteur − 20 cm", sup:"2, ou 3 si largeur ≥ 2 m"};
 const U_TXT = {ml:"/ml", u:"/u", m2:"/m²"};
 
 const HYP_DEF = {pose:52, coef:1.0417, barre:6};
@@ -19345,6 +19372,16 @@ function nomUnites(){
   if (chg) LS.set("mst_nom", NOM);
 }
 nomUnites();
+/* v15.01 : le jour et nuit utilise aussi 2 clips chaînette par store */
+function nomClipJN(){
+  if (!NOM.JN || NOM.JN.some(l => l.k === "clip")) return false;
+  const i = NOM.JN.findIndex(l => l.k === "tissu");
+  const l = {id: nomUid(), k:"clip", label:"Clip chaînette", u:"u", q:"u2", ref:"CLIPCHAINETTEVERT", nom:"", prix:0};
+  if (i >= 0) NOM.JN.splice(i, 0, l); else NOM.JN.push(l);
+  LS.set("mst_nom", NOM);
+  return true;
+}
+nomClipJN();
 let nomFam = "ENR";
 let nomCible = null;      /* ligne en cours de choix d'article */
 
@@ -19376,6 +19413,7 @@ async function pullNom(){
       if (!NOM.hyp) NOM.hyp = Object.assign({}, HYP_DEF);
       nomHypOk(); nomUnites();
       LS.set("mst_nom", NOM);
+      if (nomClipJN()) pushNom();
       return true;
     }
   } catch(e){}
@@ -19384,7 +19422,9 @@ async function pullNom(){
 
 /* Tous les articles de la feuille, sauf les services et sauf ceux à zéro. */
 function nomArticles(){
-  return ARTICLES.filter(a => !a.serv && a.dispo > 0);
+  /* v15.01 : tous les articles de la feuille, ceux en stock d'abord */
+  return ARTICLES.filter(a => !a.serv)
+    .sort((a, b) => (b.dispo > 0) - (a.dispo > 0) || String(a.ref).localeCompare(String(b.ref)));
 }
 /* Le tissu se choisit dans le catalogue des tissus, également en stock. */
 function nomTissus(){
@@ -19430,10 +19470,6 @@ function renderNom(){
           (vide ? "Choisir un article" : esc(l.ref) + (l.nom ? "  ·  " + esc(l.nom) : "")) +
         '</span>' +
       '</span>' +
-      '<input class="npx" type="number" inputmode="decimal" step="0.01" data-px="' + l.id + '" ' +
-        'value="' + (l.prix > 0 ? l.prix : "") + '" placeholder="0"' +
-        (l.ref && l.prix > 0 ? ' readonly tabindex="-1" title="Prix repris de la feuille Google"' : '') + '>' +
-      '<span class="nu">' + U_TXT[l.u] + '</span>' +
       '<button class="ndel" type="button" data-del="' + l.id + '" aria-label="Supprimer">' +
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
       '</button>' +
@@ -19531,8 +19567,7 @@ function renderNomPick(q, ligne){
     '<button class="arow" type="button" data-art="' + esc(a.ref) + '" ' +
     'aria-pressed="' + (l && l.ref === a.ref ? "true" : "false") + '">' +
     '<b>' + esc(a.nom || a.ref) + '</b><small>' + esc(a.ref) +
-    (a.prix > 0 ? "  ·  " + fr(a.prix, 2) + " MAD" : "  ·  pas de prix") +
-    (a.dispo > 0 ? "  ·  stock " + fr(a.dispo, 2) : "") + '</small></button>').join("");
+    (a.dispo > 0 ? "  ·  stock " + fr(a.dispo, 2) : "  ·  stock 0") + '</small></button>').join("");
 }
 
 $("nomPickSearch").addEventListener("input", e => renderNomPick(e.target.value));
@@ -19601,24 +19636,25 @@ function prixRole(fam, k, modele){
   return l && l.prix > 0 ? l.prix : 0;
 }
 /* Somme des prix au ml des profilés d'une famille */
-function prixBarres(fam){
+function prixBarres(fam, o){
   return (NOM[fam] || []).filter(l => l.q === "barre")
-    .reduce((t,l) => t + (l.prix > 0 ? l.prix : 0), 0);
+    .reduce((t,l) => t + prixProfil(o, fam, l).prix, 0);
 }
 
 /* Coût des profilés d'un store : chaque profilé est compté sur SA longueur de
    coupe, largeur de la fenêtre moins son retrait, puis majorée du coefficient. */
-function coutProfiles(fam, lcm, coef){
+function coutProfiles(fam, lcm, coef, o){
   const src = (NOM[fam] || []).filter(l => l.q === "barre");
   let cout = 0, ml = 0, px = 0;
   const lignes = src.map(l => {
     const drop = dropDe(l.k);
     const len  = Math.max(0, lcm - drop) / 100;
     const mll  = len * coef;
-    const prix = l.prix > 0 ? l.prix : 0;
+    const P    = prixProfil(o, fam, l);
+    const prix = P.prix;
     const c    = mll * prix;
     cout += c; ml += mll; px += prix;
-    return {k:l.k, label:l.label, nom:l.nom || "", ref:l.ref || "",
+    return {k:l.k, label:l.label, nom:P.nom, ref:P.ref,
             drop:drop, lenCm:lcm - drop, len:len, ml:mll, prix:prix, cout:c};
   });
   return {cout:cout, ml:ml, px:px, n:lignes.length, lignes:lignes};
@@ -19678,7 +19714,23 @@ function barresAchetees(dims, fam){
 }
 
 /* Le modèle choisi par l'atelier dans « Pièces utilisées », s'il y en a un */
-function modeleDe(o, fam, k){ return codeDe(o, fam, k); }
+const NOM2PIECE = {ENR:{}, JN:{rail1:"barre", bouchon:"bouchonInf"}};
+function modeleDe(o, fam, k){
+  const m = NOM2PIECE[fam] && NOM2PIECE[fam][k];
+  return codeDe(o, fam, m || k);
+}
+function articleDe(code){
+  const c = String(code || "").toUpperCase();
+  return c ? ARTICLES.find(a => a.ref === c) || null : null;
+}
+/* v15.01 : le prix d'un profilé vient de la pièce choisie dans le bon
+   (feuille Google) ; la ligne de nomenclature ne sert que s'il n'y en a pas. */
+function prixProfil(o, fam, l){
+  const code = o ? modeleDe(o, fam, l.k) : "";
+  const pf = code ? piecePrix(code) : 0;
+  if (pf > 0){ const a = articleDe(code); return {prix:pf, ref:code, nom:a && a.nom ? a.nom : ""}; }
+  return {prix: l.prix > 0 ? l.prix : 0, ref:l.ref || "", nom:l.nom || ""};
+}
 
 function calcCout(o, puSim){
   const dims = ordDims(o);
@@ -19699,14 +19751,17 @@ function calcCout(o, puSim){
     const m2tissu = TIS.part[x.key] || 0;       /* acheté au rouleau */
     const m2chute = TIS.gratis[x.key] || 0;     /* repris du stock, déjà payé */
     const px = k => prixRole(f, k, modeleDe(o, f, k));
-    const need = (k, lab) => { if (!nomLignes(f, k).length || !px(k)) manque.push(lab + " (" + (f === "JN" ? "jour et nuit" : "enrouleur") + ")"); };
-
-    need("tissu", "Tissu");
+    const need = (k, lab) => { if (!px(k)) manque.push(lab + " (" + (f === "JN" ? "jour et nuit" : "enrouleur") + ")"); };
+    const nomPiece = k => { const a = articleDe(modeleDe(o, f, k)); if (a && a.nom) return {nom:a.nom}; return nomLigne(f, k, modeleDe(o, f, k)); };
     /* Prix du tissu : enrouleur (B-0, S-0) au m², jour et nuit (JN_0) au ml.
        Le prix au ml se ramène au m² en le divisant par la laize du rouleau. */
     const fTis   = fab(x.ref);
     const laizeM = (fTis && fTis.laize > 0 ? fTis.laize : CUT_DEF.laize) / 100;
-    const pxTisB = px("tissu");
+    /* v15.01 : le prix du tissu choisi dans le bon, depuis la feuille Google.
+       La ligne Tissu de la nomenclature ne sert que si ce tissu n'a pas de prix. */
+    const tisFeuille = !!(fTis && fTis.prix > 0);
+    const pxTisB = tisFeuille ? fTis.prix : px("tissu");
+    if (!(pxTisB > 0)) manque.push("Prix du tissu " + (x.ref || "") + " (" + (f === "JN" ? "jour et nuit" : "enrouleur") + ")");
     const pxTisM2 = (f === "JN" && laizeM > 0) ? pxTisB / laizeM : pxTisB;
     const horsLaize = TIS.hors[x.key] || null;
     const bande = TIS.bande[x.key] || null;
@@ -19718,16 +19773,16 @@ function calcCout(o, puSim){
     if (f === "ENR"){
       need("mecanisme", "Mécanisme");
       cPiece = px("mecanisme");
-      pieces.push({n:"Mécanisme", d: nomLigne(f,"mecanisme", modeleDe(o,f,"mecanisme")), q:1, v:cPiece});
+      pieces.push({n:"Mécanisme", d: nomPiece("mecanisme"), q:1, v:cPiece});
     } else {
       need("embout", "Embout");
       cPiece = px("embout");
-      pieces.push({n:"Embout", d: nomLigne(f,"embout",""), q:1, v:cPiece});
+      pieces.push({n:"Embout", d: nomPiece("embout"), q:1, v:cPiece});
     }
 
-    const pxBar = prixBarres(f);
+    const pxBar = prixBarres(f, o);
     if (!pxBar) manque.push("Prix des profilés (" + (f === "JN" ? "jour et nuit" : "enrouleur") + ")");
-    const PR = coutProfiles(f, x.l, coef);
+    const PR = coutProfiles(f, x.l, coef, o);
     const part = dims.filter(d => d.t === f).reduce((t,d) => t + d.l/100, 0);
     const mlRe = part > 0 ? reel[f].ml * (L / part) : 0;      /* part de la longueur vraiment achetée */
     const cBarTh = PR.cout;
@@ -19735,7 +19790,7 @@ function calcCout(o, puSim){
 
     let cAcc = 0, acc = [];
     if (f === "ENR"){
-      const chMl = 2 * H + 0.30;
+      const chMl = Math.max(0, 2 * H - 0.20);   /* v14.99 : hauteur × 2 − 20 cm */
       const ch = chMl * px("chainette"), bo = 2 * px("bouchon"), cl = 2 * px("clip");
       cAcc = ch + bo + cl;
       acc = [{n:"Chaînette", q:fr(chMl,2) + " ml", v:ch},
@@ -19743,12 +19798,13 @@ function calcCout(o, puSim){
              {n:"Clip chaînette", q:"2 u", v:cl}];
     } else {
       const ns = x.l >= 200 ? 3 : 2;
-      const chMl = 2 * H + 0.30;
-      const su = ns * px("support"), bo = 2 * px("bouchon"), ch = chMl * px("chainette");
-      cAcc = su + bo + ch;
+      const chMl = Math.max(0, 2 * H - 0.20);   /* v14.99 : hauteur × 2 − 20 cm */
+      const su = ns * px("support"), bo = 2 * px("bouchon"), ch = chMl * px("chainette"), cl = 2 * px("clip");
+      cAcc = su + bo + ch + cl;
       acc = [{n:"Support", q:ns + " u", v:su},
              {n:"Bouchon", q:"2 u", v:bo},
-             {n:"Chaînette", q:fr(chMl,2) + " ml", v:ch}];
+             {n:"Chaînette", q:fr(chMl,2) + " ml", v:ch},
+             {n:"Clip chaînette", q:"2 u", v:cl}];
     }
 
     const cout = cTissu + cPiece + cBarTh + cAcc + pose;
@@ -19758,7 +19814,7 @@ function calcCout(o, puSim){
     const pu = (puSim && isFinite(puSim[f]) && puSim[f] > 0) ? puSim[f] : puReel;
     const vente = m2 * pu;
     return {x:x, fam:f, m2:m2, m2tissu:m2tissu, hors:horsLaize, pu:pu, vente:vente,
-            pxTisB:pxTisB, pxTisM2:pxTisM2, laizeM:laizeM, bande:bande, m2chute:m2chute,
+            pxTisB:pxTisB, pxTisM2:pxTisM2, laizeM:laizeM, bande:bande, m2chute:m2chute, tisFeuille:tisFeuille,
             cTissu:cTissu, cPiece:cPiece, pieces:pieces, cBarTh:cBarTh, cBarRe:cBarRe,
             cAcc:cAcc, acc:acc, pose:pose, cout:cout, pr:PR, mlRe:mlRe, pxBar:pxBar, L:L,
             benef: vente - cout, marge: vente > 0 ? (vente - cout) / vente : 0};
@@ -19795,6 +19851,8 @@ function ligneTissu(s, li){
   }
   const sous = fr(s.m2tissu,2) + " m² × " + fr(s.pxTisM2,2) + " MAD/m²" +
     (s.fam === "JN" ? "<br>" + fr(s.pxTisB,2) + " MAD/ml ÷ " + fr(s.laizeM,2) + " m de laize" : "") +
+    "<br>" + (s.tisFeuille ? "prix de " + esc(s.x.ref) + " dans la feuille Google"
+                           : "prix de la ligne Tissu de la nomenclature (" + esc(s.x.ref || "?") + " sans prix dans la feuille)") +
     (s.bande
       ? "<br>" + (s.bande.src === "chute" ? "chute du stock" : "bande " + s.bande.n) +
         " : " + fr(s.bande.laize,0) + " × " + fr(s.bande.unroll,0) + " cm = " + fr(s.bande.surf,2) + " m²" +
@@ -22415,6 +22473,7 @@ function renderTresTile(){
   const t = $("tileTres");
   if (!t) return;
   t.hidden = !factAllowed();
+  try { renderHomeTrs(); } catch(e){}
   if (t.hidden || !TRS) return;
   const E = trsEstime(), n = chqAVerser().length;
   $("tileTresSub").textContent = (E ? (E.age > 7 ? "À mettre à jour (" + E.age + " j)" : "Estimé " + frm(E.tot, 0) + " DH") : "Saisir caisse et banque") +
@@ -22848,7 +22907,7 @@ function nouConsoBon(o){
     if (!v.length) return;
     const sum = f => v.reduce((t, d) => t + f(d), 0);
     const d = {nb:v.length, coupeMl:sum(x => x.l - (fam === "JN" ? 0 : 3)) / 100, cacheMl:sum(x => x.l - 0.5) / 100,
-      tube32Ml:sum(x => x.l - 2) / 100, barreMl:sum(x => x.l - 1.5) / 100, chaineMl:sum(x => 2 * x.h + 30) / 100,
+      tube32Ml:sum(x => x.l - 2) / 100, barreMl:sum(x => x.l - 1.5) / 100, chaineMl:sum(x => Math.max(0, 2 * x.h - 20)) / 100,
       supports:sum(x => x.l >= 200 ? 3 : 2)};
     const man = (o.pieces && o.pieces[fam]) || {}, num = v => parseFloat(String(v).replace(",", "."));
     PIECES_DEF[fam].forEach(def => {

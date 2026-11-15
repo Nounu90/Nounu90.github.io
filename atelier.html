@@ -1907,11 +1907,14 @@ function renderPop(){ const nae=document.activeElement; if(popKey==='nou'&&nae&&
       s=sum([['Aujourd\'hui',frm(P.start)+' DH'],...K.map(k=>[C[k][0]+' · au plus bas',frm(SC[k].low)+' DH'])]);
       const all=[P.res||0]; K.forEach(k=>SC[k].w.forEach(v=>all.push(v)));
       let mn=Math.min(...all), mx=Math.max(...all); if(mx-mn<1) mx=mn+1; const m0=(mx-mn)*.06; mn-=m0; mx+=m0;
-      const Wd=600,Hd=170,top=8,bas=16, X=i=>(4+i*(Wd-8)/90).toFixed(1), Y=v=>(top+(mx-v)*(Hd-top-bas)/(mx-mn)).toFixed(1), jour=(i,n)=>i===n-1?90:i*7;
-      let svg=`<svg viewBox="0 0 ${Wd} ${Hd}" class="nouch"><rect x="0" y="0" width="${Wd}" height="${Hd}" fill="#f8f8fc"/>`+
-        `<line x1="4" y1="${Y(P.res||0)}" x2="${Wd-4}" y2="${Y(P.res||0)}" stroke="#c62828" stroke-dasharray="6 4"/><text x="${Wd-6}" y="${Y(P.res||0)-3}" text-anchor="end" font-size="7" fill="#c62828">réserve ${frm(P.res||0)}</text>`;
+      /* axes : dates en bas, montants à gauche */ const Wd=600,Hd=200,top=10,bas=24,gau=76, d0=new Date(J&&J.at?J.at:Date.now()), X=i=>(gau+i*(Wd-gau-8)/90).toFixed(1), Y=v=>(top+(mx-v)*(Hd-top-bas)/(mx-mn)).toFixed(1), jour=(i,n)=>i===n-1?90:i*7;
+      let svg=`<svg viewBox="0 0 ${Wd} ${Hd}" class="nouch"><rect x="0" y="0" width="${Wd}" height="${Hd}" fill="#f8f8fc"/>`;
+      const pas0=(mx-mn)/5, p10=Math.pow(10,Math.floor(Math.log10(pas0))), pas=[1,2,2.5,5,10].map(q=>q*p10).find(q=>q>=pas0); for(let v=Math.ceil(mn/pas)*pas;v<=mx;v+=pas){ const y=Y(v); if(y<top+8) continue; svg+=`<line x1="${gau}" y1="${y}" x2="${Wd-8}" y2="${y}" stroke="#dfe2ea"/><text x="${gau-4}" y="${(+y+3).toFixed(1)}" text-anchor="end" font-size="8" fill="#606878">${frm(v)}</text>`; }
+      for(let j=0;j<=90;j+=15){ const x=X(j), d=new Date(d0.getTime()+j*864e5); svg+=`<line x1="${x}" y1="${top}" x2="${x}" y2="${Hd-bas}" stroke="#e8eaf0"/><text x="${x}" y="${Hd-bas+13}" text-anchor="${j===0?'start':j===90?'end':'middle'}" font-size="10" fill="#606878">${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</text>`; }
+      svg+=`<line x1="${gau}" y1="${top}" x2="${gau}" y2="${Hd-bas}" stroke="#9aa0ae"/><line x1="${gau}" y1="${Hd-bas}" x2="${Wd-8}" y2="${Hd-bas}" stroke="#9aa0ae"/><text x="4" y="${top+2}" font-size="9" fill="#606878">DH</text>`+
+        `<line x1="${gau}" y1="${Y(P.res||0)}" x2="${Wd-8}" y2="${Y(P.res||0)}" stroke="#c62828" stroke-dasharray="6 4"/><text x="${Wd-10}" y="${Y(P.res||0)-3}" text-anchor="end" font-size="10" fill="#c62828">réserve ${frm(P.res||0)}</text>`;
       ['opt','prudent','normal'].filter(k=>K.indexOf(k)>=0).forEach(k=>{ const w=SC[k].w; svg+=`<polyline fill="none" stroke="${C[k][1]}" stroke-width="${k==='normal'?3:2}" points="${w.map((v,i)=>X(jour(i,w.length))+','+Y(v)).join(' ')}"/>`; });
-      svg+=`<text x="4" y="${Hd-4}" font-size="7" fill="#606878">aujourd'hui</text><text x="${Wd-4}" y="${Hd-4}" text-anchor="end" font-size="7" fill="#606878">+90 jours</text></svg>`;
+      svg+=`<text x="${gau}" y="${Hd-2}" font-size="9" fill="#9aa0ae">aujourd'hui</text><text x="${Wd-8}" y="${Hd-2}" text-anchor="end" font-size="9" fill="#9aa0ae">+90 jours</text></svg>`;
       b=(P.sans?'<div class="empty">Pas encore de saisie de caisse et banque : la courbe part de 0.</div>':'')+svg+
         tbl(['Scénario','>Au plus bas','Le','>Dans 90 j'],K.map(k=>[`<span style="color:${C[k][1]}">■</span> ${C[k][0]}`,frm(SC[k].low)+' DH',dateFr(SC[k].lowD||''),frm(SC[k].fin)+' DH']))+
         '<h3 class="wag" style="margin-top:10px">Sur quoi c\'est basé (scénario normal, 90 jours)</h3>'+
