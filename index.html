@@ -2829,6 +2829,51 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
 .horlogebar span{display:block; opacity:.9; margin-top:2px}
 .netbar svg{flex:none}
 @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+/* v15.03 : Espace Hermes */
+:root{ --hm:#534AB7; --hm-soft:#EEEDFE; --hm-ink:#3C3489; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --hm:#AFA9EC; --hm-soft:#26215C; --hm-ink:#CECBF6; } }
+:root[data-theme="dark"]{ --hm:#AFA9EC; --hm-soft:#26215C; --hm-ink:#CECBF6; }
+.tile.hmtile{border:2px solid var(--hm)}
+.tile.hmtile .ti{background:var(--hm-soft); color:var(--hm-ink)}
+.tile.hmtile .tbadge{background:var(--hm); color:#fff}
+.hmbar{position:fixed; top:6px; left:50%; transform:translateX(-50%); z-index:99999; pointer-events:none;
+  background:var(--hm); color:#fff; font:600 11.5px/1.2 "Archivo",sans-serif; letter-spacing:.04em;
+  padding:6px 12px; border-radius:999px; white-space:nowrap; box-shadow:var(--shadow)}
+.hmnote{display:block; width:100%; margin:0 0 8px; min-height:52px; padding:9px 11px; border-radius:12px;
+  border:2px solid var(--hm); background:var(--card); color:var(--ink); font:inherit; font-size:14px; resize:vertical}
+.hprog.hmtag, .grtag.hmtag{background:var(--hm-soft); color:var(--hm-ink); cursor:pointer}
+.hmtabs{display:flex; gap:7px; flex-wrap:wrap; margin:2px 0 12px}
+.hmtabs button{border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:999px; padding:6px 12px; font-size:13px; font-weight:600}
+.hmtabs button[aria-pressed="true"]{background:var(--hm); border-color:var(--hm); color:#fff}
+.hmc{display:block; width:100%; text-align:left; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 13px; margin-bottom:9px; color:var(--ink)}
+.hmc b{font-weight:700}
+.hmc small, .hmmut{display:block; color:var(--muted); font-size:12.5px; margin-top:3px; line-height:1.45}
+.hmk{display:inline-block; font-size:11.5px; font-weight:700; padding:2px 9px; border-radius:999px; margin-right:6px}
+.hmk.dv{background:var(--hm-soft); color:var(--hm-ink)}
+.hmk.nv{background:var(--ok-soft); color:var(--ok)}
+.hmk.ba{background:var(--warn-soft); color:var(--warn)}
+.hmk.st{background:var(--card2); color:var(--muted)}
+.hmt{width:100%; border-collapse:collapse; font-size:13.5px; margin:8px 0}
+.hmt th{font-weight:600; color:var(--muted); text-align:left; padding:5px 4px; font-size:12px}
+.hmt td{padding:7px 4px; border-top:1px solid var(--line); vertical-align:top}
+.hmt td.av{color:var(--muted); text-decoration:line-through}
+.hmt td.ap{color:var(--hm-ink); font-weight:700}
+.hmt tr.tot td{font-weight:700}
+.hmwhy{background:var(--card2); border-radius:12px; padding:10px 12px; font-size:13.5px; margin:10px 0}
+.hmwarn{background:var(--warn-soft); color:var(--warn); border-radius:12px; padding:10px 12px; font-size:13.5px; margin:0 0 10px; font-weight:600}
+.hmbtns{display:flex; gap:8px; margin-top:12px}
+.hmbtns button, .hmcol button{flex:1; border-radius:12px; padding:12px 8px; font-weight:700; font-size:14px; border:1px solid var(--line-strong); background:var(--card); color:var(--ink)}
+#hmBody .hmbtns button.hmok{background:var(--ok); border-color:var(--ok); color:var(--card)}
+.hmcol{display:flex; flex-direction:column; gap:8px; margin-top:12px}
+.hmta{width:100%; min-height:64px; border-radius:12px; border:1px solid var(--line-strong); background:var(--card); color:var(--ink); padding:9px 11px; font:inherit; font-size:14px; margin-top:8px}
+.hmlig{font-size:13px; line-height:1.6; margin:6px 0 0; padding-left:18px}
+.hmrouge{background:var(--accent-soft); color:var(--accent); border-radius:12px; padding:10px 12px; font-size:13.5px; margin:0 0 10px; font-weight:700; line-height:1.5}
+.hmc small.hmrouge2, .hmrouge2{color:var(--accent); font-weight:700}
+.hmcorr{border:2px solid var(--hm); border-radius:14px; padding:11px 12px; margin-top:12px}
+.hmcorr label{display:block; margin-top:8px}
+.hmin{min-height:0; margin-top:4px; padding:9px 11px}
+.hmmsg{border:1px dashed var(--hm); border-radius:12px; padding:10px 12px; margin-top:10px}
+.hmdet summary{cursor:pointer; color:var(--hm-ink); font-weight:600; font-size:13.5px; margin-top:10px}
 </style>
 </head>
 <body>
@@ -3042,6 +3087,8 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
 
   <div class="bottom">
     <div class="bottom-in">
+      <textarea class="hmnote" id="hmNote" hidden placeholder="Pourquoi ce changement ? (pour Noureddine)"></textarea>
+      <textarea class="hmnote" id="hmMsg" hidden placeholder="Message pour le client (le bot Clients l'enverra après la décision de Noureddine)"></textarea>
       <button class="send" id="btnSend" type="button"></button>
     </div>
   </div>
@@ -3092,6 +3139,12 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
       <button class="tile primary" id="tileNew" type="button">
         <span class="ti"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
         <span class="tt"><b>Créer un bon de commande</b><small id="tileNewSub">Nouveau bon</small></span>
+        <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+      </button>
+      <!-- v15.03 : Espace Hermes, Noureddine seulement -->
+      <button class="tile hmtile" id="tileHrm" type="button" hidden>
+        <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9.5 17h5"/><circle cx="12" cy="3.5" r="1"/></svg></span>
+        <span class="tt"><b>Espace Hermes</b><small id="tileHrmSub">Propositions d'Hermes</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
     </div>
@@ -3564,6 +3617,15 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
     <button class="icon-btn" type="button" data-refresh aria-label="Actualiser"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
   </div>
   <div class="sheet-body" id="depBody"></div>
+</div>
+
+<div class="sheet" id="hmSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="hmSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Espace Hermes</h2>
+    <button class="icon-btn" type="button" data-refresh aria-label="Actualiser"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+  </div>
+  <div class="sheet-body" id="hmBody"></div>
 </div>
 
 <div class="sheet" id="tresSheet">
@@ -4469,10 +4531,58 @@ let CATALOGUE = BUILTIN.slice();      /* liste active */
 let SRC = null;                        /* {url, date, n} si feuille Google */
 
 /* ============ State ============ */
+/* ============ v15.03 : mode Hermes ============ */
+/* Hermes (le bot de Noureddine) ouvre l'app avec ?hermes=1, connecté au compte de Noureddine.
+   Il lit tout. Rien de ce qu'il fait n'atteint les vrais bons :
+   - sa mémoire sur l'appareil est à part (clés préfixées hm:) ;
+   - toute écriture vers la base est refusée, sauf dans sa boîte cfg-hermes ;
+   - la feuille Google et la fonction Noureddine ne reçoivent rien ;
+   - un devis ou un bon d'achat qu'il enregistre devient une proposition,
+     que Noureddine confirme ou refuse dans l'Espace Hermes. */
+const HM = (() => {
+  const q = /[?&]hermes=1(&|$)/.test(location.search);
+  try {
+    if (q) sessionStorage.setItem("mst_hm", "1");
+    return q || sessionStorage.getItem("mst_hm") === "1";
+  } catch(e){ return q; }
+})();
+const HM_COMMUN = ["mst_user", "mst_hook", "mst_theme"];
+function lsK(k){ return HM && HM_COMMUN.indexOf(k) < 0 ? "hm:" + k : k; }
+if (HM){
+  const f0 = window.fetch.bind(window);
+  const corps = b => { try { return JSON.parse(typeof b === "string" ? b : ""); } catch(e){ return null; } };
+  window.fetch = (url, opt) => {
+    const u = String((url && url.url) || url || "");
+    const m = String((opt && opt.method) || (url && url.method) || "GET").toUpperCase();
+    if (m === "GET" || m === "HEAD" || u.indexOf("/auth/v1/") >= 0) return f0(url, opt);
+    if (u.indexOf("/rest/v1/bons") >= 0 && m === "POST"){
+      const j = corps(opt && opt.body), L = Array.isArray(j) ? j : (j ? [j] : []);
+      if (L.length && L.every(x => x && x.id === "cfg-hermes")) return f0(url, opt);
+      const bon = L.some(x => x && String(x.id || "").indexOf("cfg-") !== 0 && !/^__/.test(String(x.num || "")));
+      if (bon) setTimeout(() => { try { hmBloque(); } catch(e){} }, 60);
+    } else if (u.indexOf("/rest/v1/bons") >= 0){
+      setTimeout(() => { try { hmBloque(); } catch(e){} }, 60);
+    }
+    const sb = u.indexOf("supabase.co") >= 0;
+    return Promise.resolve(new Response(JSON.stringify(sb ? {message:"Mode Hermes : écriture refusée", code:"HM403"} : {ok:false, hermes:true}),
+      {status: sb ? 403 : 200, headers:{"Content-Type":"application/json"}}));
+  };
+}
+
 const LS = {
-  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
-  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+  get(k, d){ try{ const v = localStorage.getItem(lsK(k)); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(lsK(k), JSON.stringify(v)); return true; }catch(e){ return false; } }
 };
+/* v15.03 : boîte des propositions d'Hermes, déclarée tôt (l'historique la lit dès le démarrage) */
+const HRM_ID = "cfg-hermes";
+let HRM = Object.assign({liste:[]}, LS.get("mst_hrm", {}));
+if (!Array.isArray(HRM.liste)) HRM.liste = [];
+let HRM_SALE = !!LS.get("mst_hrm_sale", false);
+let HRM_TAB = "attente", HRM_OUV = "", HRM_REF = "", HRM_COR = "";
+let HRM_CORV = {}, HRM_MSGTMP = {};    /* v15.04 : correction et message en cours de saisie */
+const HRM_FIGES = ["id", "num", "author", "date", "status", "etat", "ech", "plan", "log", "photos", "nphotos", "pending", "maj", "_ua", "paies"];
+let ACH_SRV = {}, ACH_SRV_OK = false;   /* chaque bon d'achat tel qu'il est dans la base */
+let HM_AVIS = 0, HM_RESET_T = null;
 
 let S = blank();
 
@@ -5729,6 +5839,7 @@ function noteEdit(o, champs){
 }
 
 function saveOrder(status){
+  if (HM) return hmProposeDevis();          /* v15.03 : en mode Hermes, une proposition, jamais le vrai bon */
   /* Dernier rempart : si un bon arrivé entre temps porte déjà ce numéro,
      on en prend un neuf avant d'écrire. */
   if (numPris(S.num, S.id)){
@@ -5829,6 +5940,7 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
   if (id === "mesSheet"){ mesRetour(); return; }
   if (id === "depSheet"){ nav("home"); return; }
   if (id === "tresSheet"){ nav("home"); return; }
+  if (id === "hmSheet"){ if (HRM_OUV){ HRM_OUV = ""; renderHrm(); return; } nav("home"); return; }
   if (id === "coutSheet" && COUT_RETOUR === "mesSheet"){ nav("mesSheet"); renderMes(); return; }
   if (id === "histSheet" || id === "stockSheet" || id === "artSheet" ||
       id === "nomSheet"   || id === "coutSheet" || id === "cliSheet" || id === "docSheet" ||
@@ -6182,6 +6294,10 @@ function shotName(){
   return S.num + "-" + (S.nom || "client").trim().replace(/[^\w]+/g, "-").toLowerCase().replace(/^-|-$/g, "") + ".png";
 }
 $("btnSend").addEventListener("click", async () => {
+  if (HM){                                   /* v15.03 : mode Hermes */
+    if (hmProposeDevis()){ formVenu = ""; nav("home"); toast("Proposition rangée dans l'Espace Hermes : Noureddine doit la confirmer"); }
+    return;
+  }
   const etb = etatDe(S);
   /* Seule une commande lancée part à l'atelier en image. Un devis ou un bon
      déjà fabriqué s'enregistre sans rien à partager. */
@@ -6827,6 +6943,11 @@ async function pullBonsVrai(){
         if (factAllowed() && trsFusion(r.data)) try { if ($("tresSheet").classList.contains("open")) renderTres(); renderTresTile(); } catch(e){}
         return;
       }
+      if (r.id === HRM_ID){                         /* v15.03 : propositions d'Hermes, pas un bon */
+        CFGUA[r.id] = r.updated_at;
+        if (hrmAllowed() && hrmFusion(r.data)) try { renderHrmTile(); if ($("hmSheet").classList.contains("open")) renderHrm(); } catch(e){}
+        return;
+      }
       if (String(r.id).indexOf("cfg-") === 0){ CFGUA[r.id] = r.updated_at; return; }   /* v14.87 : une rangée réservée inconnue n'est jamais un bon */
       distants[r.id] = true;
       if (TOMBS.indexOf(r.id) >= 0) return;        /* supprimé ici, pas encore côté base */
@@ -6883,6 +7004,7 @@ async function syncAll(){
   try { flushProsFeuille(); } catch(e){}
   try { flushPimg(); } catch(e){}
   if (!SB || !USER) return;
+  try { if (HRM_SALE) pushHrm(); } catch(e){}  /* v15.03 */
   await flushTombs();
   await flushPending();
   await pullBons();
@@ -6983,6 +7105,7 @@ function renderNet(){
 let dernierAvis = 0;
 function avertirHorsLigne(){
   renderNet();
+  if (HM){ hmBloque(); return; }
   if (Date.now() - dernierAvis < 8000) return;
   dernierAvis = Date.now();
   toast("Hors ligne : c'est enregistré sur ce téléphone, l'envoi partira dès le retour du réseau");
@@ -7061,7 +7184,7 @@ function nav(where){
   armBack();
   if (where !== "coutSheet") COUT_RETOUR = null;
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","tvaSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet","noteSheet","persoSheet","promoSheet","invSheet","invRollSheet","achSheet","mesSheet","depSheet","rsSheet","tresSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","tvaSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet","noteSheet","persoSheet","promoSheet","invSheet","invRollSheet","achSheet","mesSheet","depSheet","rsSheet","tresSheet","hmSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -7283,7 +7406,7 @@ function grosDetail(){
       const m2 = o ? orderTotals(o).m2 : (r && r.m2) || 0;
       const lien = waLien(x.tel);
       const src = [p ? '<span class="grtag wa">WhatsApp · ' + esc(waEtapeLab(prosEtape(p)) || "") + '</span>' : '',
-                   ...x.devis.map(d => '<span class="grtag dv">Devis ' + esc(d.num || "") + ' · ' + frm(duDe(d), 0) + ' MAD</span>')].join("");
+                   ...x.devis.map(d => '<span class="grtag dv">Devis ' + esc(d.num || "") + ' · ' + frm(duDe(d), 0) + ' MAD</span>' + hrmPuce(d.id, "grtag"))].join("");
       return '<div class="grc"><div class="grh"><b>⭐ ' + esc(x.nom || telAffiche(x.tel) || "Sans nom") + '</b><em>' + x.nb + ' fenêtres</em></div>' +
         '<div class="grtags">' + src + '</div>' +
         '<small>' + [x.tel ? telAffiche(x.tel) : "pas de téléphone", m2 ? fr(m2, 2) + " m²" : "", (p && p.adresse) || (o && o.adresse) || "",
@@ -7295,7 +7418,8 @@ function grosDetail(){
         '<div class="grb">' + (lien ? '<a class="wa" href="' + lien + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
           (x.tel ? '<a href="tel:' + esc(String(x.tel).replace(/\s/g, "")) + '">Appeler</a>' : '') +
           (p ? '<button type="button" data-hkpros="' + p.id + '">Fiche</button>' : '') +
-          (o ? '<button type="button" data-hkbon="' + o.id + '">Devis</button>' : '') + '</div></div>';
+          (o ? '<button type="button" data-hkbon="' + o.id + '">Devis</button>' : '') +
+          (o && coutAllowed() ? '<button type="button" data-hkcout="' + o.id + '">Coût</button>' : '') + '</div></div>';   /* v15.02 : coût de revient du devis */
     }).join("") : '<p class="wahint">Aucun gros client en attente : tous ont commandé, ou aucun ne dépasse ' + GROS_FEN + ' fenêtres.</p>') +
     '<p class="wahint">Contacts WhatsApp et devis de plus de ' + GROS_FEN + ' fenêtres (ou marqués ⭐), sans aucune commande confirmée pour ce numéro. Visible par Noureddine seul.</p>');
 }
@@ -7310,6 +7434,11 @@ function hkModal(html){
       if (e.target === m || e.target.closest("[data-hkclose]")){ m.hidden = true; return; }
       const ob = e.target.closest("[data-hkbon]");
       if (ob){ const o = (ORDERS || []).find(x => x.id === ob.dataset.hkbon); if (o){ m.hidden = true; formVenu = ""; loadOrder(o); toast("Bon " + o.num + " ouvert"); } return; }
+      const oc = e.target.closest("[data-hkcout]");   /* v15.02 : ouvre le coût de revient de ce devis */
+      if (oc){ m.hidden = true; if (!coutAllowed()) return;
+        coutOrderId = oc.dataset.hkcout; coutTab("bons"); renderCout(); nav("coutSheet");
+        $("coutSheet").querySelector(".sheet-body").scrollTop = 0;
+        pullNom().then(ok => { if (ok) renderCout(); }); return; }
       const pr = e.target.closest("[data-hkpros]");
       if (pr){ const p = PROS.find(x => x.id === pr.dataset.hkpros); m.hidden = true;
         if (p && prosAllowed()){ $("tilePros").click(); setTimeout(() => { prosCharge(p); prosFormOuvre(true); renderPros(); }, 150); } return; }
@@ -7535,6 +7664,7 @@ function renderHome(){
   try { renderMesTile(); } catch(e){}
   try { renderRsTile(); } catch(e){}
   try { renderTresTile(); } catch(e){}
+  try { renderHrmTile(); } catch(e){}
   const ti = $("tileInv");
   if (ti){
     ti.hidden = !invAllowed();
@@ -8583,7 +8713,8 @@ function histCarte(o, fmt2){
       (et === "devis" && !o.ech ? pucedelai(o) : '') +
       (!ordDims(o).length ? '<span class="hprog br">aucune mesure exploitable</span>' : '') +
       (t.pose ? '<span class="hprog">' + (t.poseLab === "Livraison" ? "Livraison" : "Pose") + ' + ' + fr(t.pose) + '</span>' : '') +
-      (o.pending ? '<span class="hprog br">à envoyer</span>' : '');
+      (o.pending ? '<span class="hprog br">à envoyer</span>' : '') +
+      hrmPuce(o.id, "hprog");                  /* v15.03 */
     row.innerHTML =
       '<div class="hch">' +
         '<button class="hco" type="button" data-open="' + o.id + '">' +
@@ -8965,7 +9096,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "15.01";
+const APP_VERSION = "15.04";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -21410,6 +21541,12 @@ if (!ACH.seuils || typeof ACH.seuils !== "object") ACH.seuils = {};
 function achAllowed(){ return adminAllowed(); }
 let ACH_T = null;
 function achSave(){
+  if (HM){                                   /* v15.03 : mode Hermes, rien ne part vers la base */
+    LS.set("mst_ach", ACH);
+    clearTimeout(ACH_T);
+    ACH_T = setTimeout(hmProposeAchats, 900);
+    return;
+  }
   ACH.maj = Date.now();
   LS.set("mst_ach", ACH);
   clearTimeout(ACH_T);
@@ -21424,8 +21561,10 @@ async function pushAch(){
     return true;
   } catch(e){ return false; }
 }
+function achSig(b){ return hrmSig(Object.assign({}, b, {maj:0})); }   /* v15.03 */
 function fusionAch(d){
   if (!d || typeof d !== "object") return false;
+  if (Array.isArray(d.bas)){ ACH_SRV_OK = true; d.bas.forEach(x => { if (x && x.id) ACH_SRV[x.id] = achSig(x); }); }
   let bouge = false;
   ["fours", "arts", "bas"].forEach(k => {
     const par = {};
@@ -22241,6 +22380,638 @@ function renderAchTile(){
 }
 /* v14.33 : l'atelier en pixel art (atelier.html), visible pour Noureddine seulement */
 function jeuAllowed(){ return !!USER && String(USER.login || "").toLowerCase() === "noureddine"; }
+
+/* ============ v15.03 : Espace Hermes ============ */
+/* Les propositions d'Hermes vivent dans la rangée réservée cfg-hermes, fusionnée
+   élément par élément. Les écrans des agents ne la lisent jamais. Noureddine seul
+   voit la page ; il confirme (l'original change, l'ancienne version est gardée)
+   ou refuse (avec sa raison, que le Director lit). */
+function hrmAllowed(){ return jeuAllowed(); }
+function hrmClone(o){ return o === undefined ? undefined : JSON.parse(JSON.stringify(o)); }
+function hrmSig(o){
+  const tri = v => Array.isArray(v) ? v.map(tri)
+    : (v && typeof v === "object") ? Object.keys(v).sort().reduce((a, k) => { a[k] = tri(v[k]); return a; }, {}) : v;
+  return JSON.stringify(tri(o === undefined ? null : o));
+}
+function hrmPropre(o){
+  const c = hrmClone(o || {});
+  ["photos", "nphotos", "log", "pending", "maj", "_ua"].forEach(k => delete c[k]);
+  return c;
+}
+function hrmTrouve(id){ return HRM.liste.find(x => x && x.id === id) || null; }
+function hrmAttente(){ return HRM.liste.filter(x => x && x.statut === "attente"); }
+function hrmIl(t){
+  const m = Math.round((Date.now() - (t || 0)) / 60000);
+  if (m < 1) return "à l'instant";
+  if (m < 60) return "il y a " + m + " min";
+  if (m < 24 * 60) return "il y a " + Math.round(m / 60) + " h";
+  const d = new Date(t);
+  return "le " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + " à " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+}
+/* une décision prise ne repasse jamais « en attente » */
+function hrmFusion(d){
+  if (!d || typeof d !== "object") return false;
+  let bouge = false;
+  if (d.reg && typeof d.reg === "object" && (d.reg.maj || 0) > ((HRM.reg && HRM.reg.maj) || 0)){ HRM.reg = d.reg; bouge = true; LS.set("mst_hrm", HRM); }
+  if (!Array.isArray(d.liste)) return bouge;
+  const par = {};
+  HRM.liste.forEach(x => { if (x && x.id) par[x.id] = x; });
+  d.liste.forEach(x => {
+    if (!x || !x.id) return;
+    const l = par[x.id];
+    let prend = !l;
+    if (l){
+      const dl = l.statut !== "attente", dx = x.statut !== "attente";
+      if (dx && !dl) prend = true;
+      else if (dl && !dx) prend = false;
+      else prend = (x.maj || 0) > (l.maj || 0);
+    }
+    if (prend){ par[x.id] = x; bouge = true; }
+  });
+  if (bouge){ HRM.liste = Object.keys(par).map(k => par[k]); LS.set("mst_hrm", HRM); }
+  return bouge;
+}
+async function pullHrm(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", HRM_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data;
+    return d ? hrmFusion(d) : false;
+  } catch(e){ return false; }
+}
+function hrmMenage(){
+  const lim = Date.now() - 120 * 86400000;
+  HRM.liste = HRM.liste.filter(x => x && (x.statut === "attente" || (x.decideAt || x.maj || 0) > lim))
+    .sort((a, b) => (b.maj || 0) - (a.maj || 0)).slice(0, 400);
+}
+async function pushHrm(){
+  if (!SB || !USER) return false;
+  try {
+    await pullHrm();
+    hrmMenage();
+    const {error} = await SB.from("bons").upsert({id:HRM_ID, num:"__HERMES__", author:USER.login,
+      data:{liste:HRM.liste, reg:HRM.reg || null}, updated_at:new Date().toISOString()});
+    if (error) throw error;
+    HRM_SALE = false; LS.set("mst_hrm_sale", false);
+    try { renderHrmTile(); if ($("hmSheet").classList.contains("open")) renderHrm(); } catch(e){}
+    return true;
+  } catch(e){ return false; }
+}
+function hrmSave(){
+  LS.set("mst_hrm", HRM);
+  HRM_SALE = true; LS.set("mst_hrm_sale", true);
+  try { renderHrmTile(); if ($("hmSheet").classList.contains("open")) renderHrm(); } catch(e){}
+  return pushHrm();
+}
+
+/* ---------- mode Hermes : ce qui est refusé, et le ménage ---------- */
+function hmBloque(){
+  if (!HM) return;
+  if (Date.now() - HM_AVIS > 6000){
+    HM_AVIS = Date.now();
+    toast("Mode Hermes : ce changement n'est pas enregistré. Seuls les devis et les bons d'achat deviennent des propositions.");
+  }
+  clearTimeout(HM_RESET_T);
+  HM_RESET_T = setTimeout(hmReset, 1500);
+}
+/* ce qu'Hermes a touché sans passer par une proposition est oublié, la base fait foi */
+function hmReset(){
+  if (!HM) return;
+  ORDERS = (ORDERS || []).filter(o => !(o.pending && !o._ua));
+  ORDERS.forEach(o => { if (o.pending){ delete o.pending; o._ua = ""; o.maj = 0; } });
+  TOMBS = []; LS.set("mst_deleted", []);
+  persistOrders();
+  pullBons();
+}
+if (HM){
+  const b = document.createElement("div");
+  b.className = "hmbar"; b.textContent = "MODE HERMES · rien ne change sans Noureddine";
+  document.body.appendChild(b);
+  document.body.classList.add("hm");
+  const n = $("hmNote"); if (n) n.hidden = false;
+  const n2 = $("hmMsg"); if (n2) n2.hidden = false;
+}
+
+/* ---------- les propositions ---------- */
+function hrmNumH(){
+  const n = HRM.liste.reduce((m, x) => {
+    const k = x && x.nouveau && x.kind === "devis" ? parseInt(String(x.num || "").replace(/^H-/, ""), 10) : 0;
+    return Math.max(m, k || 0);
+  }, 0);
+  return "H-" + (n + 1);
+}
+function hrmCles(p){
+  const a = p.avant || {}, b = p.apres || {}, vu = {};
+  return Object.keys(a).concat(Object.keys(b)).filter(k => {
+    if (vu[k] || HRM_FIGES.indexOf(k) >= 0) return false;
+    vu[k] = true;
+    return hrmSig(a[k]) !== hrmSig(b[k]);
+  });
+}
+function hmProposeDevis(){
+  if (!HM) return false;
+  const orig = (ORDERS || []).find(o => o && o.id === S.id && o.status === "sent");
+  let p = HRM.liste.find(x => x && x.kind === "devis" && x.cible === S.id && x.statut === "attente");
+  const neuve = !p;
+  if (!p) p = {id:achUid("hp"), kind:"devis", cible:S.id, at:Date.now(), statut:"attente", note:""};
+  const rec = hrmPropre(S);
+  rec.status = "sent";
+  p.nouveau = !orig;
+  if (orig){
+    p.num = orig.num; p.avant = hrmPropre(orig);
+  } else {
+    p.num = p.num || hrmNumH(); rec.num = p.num; rec.etat = "devis"; p.avant = null;
+  }
+  p.apres = rec;
+  p.nom = rec.nom || "Client sans nom";
+  if (orig && !hrmCles(p).length){
+    toast("Rien n'a changé par rapport au devis " + orig.num);
+    return false;
+  }
+  const n = $("hmNote");
+  if (n && n.value.trim()){ p.note = n.value.trim(); n.value = ""; }
+  const n2 = $("hmMsg");
+  if (n2 && n2.value.trim()){ p.msg = n2.value.trim(); n2.value = ""; }
+  p.maj = Date.now();
+  if (neuve) HRM.liste.push(p);
+  hrmSave();
+  return true;
+}
+async function hmProposeAchats(){
+  if (!HM) return;
+  if (!ACH_SRV_OK) await pullAch();
+  if (!ACH_SRV_OK){ toast("Mode Hermes : la base n'est pas joignable, réessaie le bon d'achat dans un instant"); return; }
+  let n = 0;
+  (ACH.bas || []).forEach(b => {
+    if (!b || !b.id) return;
+    const srv = ACH_SRV[b.id], sig = achSig(b);
+    if (srv === sig) return;
+    if (!srv && (b.sup || (!b.four && !(b.lignes || []).length))) return;
+    let p = HRM.liste.find(x => x && x.kind === "achat" && x.cible === b.id && x.statut === "attente");
+    if (p && p.apres && achSig(p.apres) === sig) return;
+    if (!p){ p = {id:achUid("hp"), kind:"achat", cible:b.id, at:Date.now(), statut:"attente", note:""}; HRM.liste.push(p); }
+    p.nouveau = !srv; p.avant = srv ? JSON.parse(srv) : null; p.apres = hrmClone(b);
+    const f = achFour(b.four);
+    p.num = b.num || "Bon d'achat"; p.nom = f ? f.nom : "Fournisseur";
+    p.maj = Date.now(); n++;
+  });
+  if (n){ hrmSave(); toast("Bon d'achat rangé dans l'Espace Hermes : Noureddine doit le confirmer"); }
+}
+
+/* ---------- décisions de Noureddine ---------- */
+function hrmDecide(p, statut, raison){
+  p.statut = statut; p.raison = raison || ""; p.decideAt = Date.now();
+  p.par = USER ? USER.login : ""; p.maj = Date.now();
+  return hrmSave();
+}
+function hrmQui(cur, depuis){
+  const L = ((cur && cur.log) || []).filter(x => x && (x.at || 0) > (depuis || 0));
+  const der = L[L.length - 1];
+  return der ? {qui:nomDe(der.by) || "Un agent", at:der.at} : {qui:"Un agent", at:0};
+}
+/* conflit = un agent a vraiment changé quelque chose de visible (lignes suivies ou total) */
+function hrmConflitDevis(p, cur){
+  if (!cur || !p.avant || hrmSig(hrmPropre(cur)) === hrmSig(hrmPropre(p.avant))) return false;
+  return diffBon(p.avant, cur).length > 0 || hrmTot(p.avant) !== hrmTot(cur);
+}
+function hrmConflitAchat(p, cur){
+  if (!p.avant) return false;
+  return !cur || achSig(cur) !== achSig(p.avant);
+}
+function hrmPose(rec, k, v){ if (v === undefined || v === "__absent__") delete rec[k]; else rec[k] = hrmClone(v); }
+async function hrmConfirmer(id){
+  const p = hrmTrouve(id);
+  if (!p || p.statut !== "attente" || HM || !hrmAllowed()) return;
+  if (p.kind === "achat") return hrmConfirmerAchat(p);
+  await pullBons();
+  const qui = USER.login;
+  if (p.nouveau){
+    const rec = hrmClone(p.apres);
+    if (!rec.id || ORDERS.some(o => o.id === rec.id)) rec.id = "d" + Date.now();
+    rec.num = nextNum(); rec.status = "sent"; rec.etat = "devis";
+    delete rec.ech; delete rec.plan; rec.paies = []; rec.photos = [];
+    rec.date = new Date().toISOString(); rec.author = qui; rec.hermes = p.id;
+    rec.log = [{kind:"edit", at:Date.now(), by:qui, on:true, k:"edit:" + Date.now(),
+                champs:[{lab:"Hermes", av:"proposition " + (p.num || ""), ap:"devis confirmé par " + nomDe(qui)}]}];
+    setOrder(rec); persistOrders(); pushBon(rec);
+    try { prosLie(rec); } catch(e){}
+    p.numFinal = rec.num; p.cibleFinale = rec.id;
+    await hrmDecide(p, "confirmee", "");
+    renderTout();
+    toast("Devis " + rec.num + " créé à partir de la proposition d'Hermes");
+    return;
+  }
+  const cur = ORDERS.find(o => o.id === p.cible);
+  if (!cur){ await hrmDecide(p, "refusee", "Le devis original a été supprimé"); toast("Le devis original n'existe plus"); return; }
+  if (hrmConflitDevis(p, cur)){ renderHrm(); toast("Bloqué : le devis a été modifié après la copie d'Hermes"); return; }
+  const cles = hrmCles(p);
+  const rec = hrmClone(cur); delete rec.pending;
+  p.ancienne = {};
+  cles.forEach(k => {
+    p.ancienne[k] = Object.prototype.hasOwnProperty.call(cur, k) ? hrmClone(cur[k]) : "__absent__";
+    hrmPose(rec, k, p.apres[k]);
+  });
+  const ch = diffBon(cur, rec);
+  if (!Array.isArray(rec.log)) rec.log = [];
+  rec.log.push({kind:"edit", at:Date.now(), by:qui, on:true, k:"edit:" + Date.now(),
+                champs:[{lab:"Hermes", av:"proposition", ap:"confirmée par " + nomDe(qui)}].concat(ch)});
+  p.cles = cles;
+  setOrder(rec); persistOrders(); pushBon(rec);
+  await hrmDecide(p, "confirmee", "");
+  renderTout();
+  toast("Devis " + cur.num + " mis à jour avec la proposition d'Hermes");
+}
+async function hrmConfirmerAchat(p){
+  await pullAch();
+  const cur = ACH.bas.find(b => b && b.id === p.cible) || null;
+  if (hrmConflitAchat(p, cur)){ renderHrm(); toast("Bloqué : ce bon d'achat a été modifié après la copie d'Hermes"); return; }
+  const rec = hrmClone(p.apres);
+  if (p.nouveau && ACH.bas.some(b => b && b.id !== rec.id && b.num === rec.num)) rec.num = achNum();
+  rec.maj = Date.now();
+  p.ancienne = cur ? hrmClone(cur) : null;
+  const i = ACH.bas.findIndex(b => b && b.id === rec.id);
+  if (i >= 0) ACH.bas[i] = rec; else ACH.bas.push(rec);
+  p.numFinal = rec.num;
+  achSave();
+  await hrmDecide(p, "confirmee", "");
+  try { renderHome(); } catch(e){}
+  toast("Bon d'achat " + (rec.num || "") + " enregistré à partir de la proposition d'Hermes");
+}
+async function hrmRestaurer(id){
+  const p = hrmTrouve(id);
+  if (!p || p.statut !== "confirmee" || HM || !hrmAllowed() || p.restaure) return;
+  if (!confirm("Remettre la version d'avant la proposition d'Hermes ?")) return;
+  if (p.kind === "achat"){
+    await pullAch();
+    const i = ACH.bas.findIndex(b => b && b.id === p.cible);
+    if (p.ancienne){ const r = hrmClone(p.ancienne); r.maj = Date.now(); if (i >= 0) ACH.bas[i] = r; else ACH.bas.push(r); }
+    else if (i >= 0){ ACH.bas[i].sup = Date.now(); ACH.bas[i].maj = Date.now(); }
+    achSave();
+  } else {
+    if (!p.ancienne || !p.cles){ toast("Pas d'ancienne version pour un nouveau devis"); return; }
+    await pullBons();
+    const cur = ORDERS.find(o => o.id === p.cible);
+    if (!cur){ toast("Le devis n'existe plus"); return; }
+    const rec = hrmClone(cur); delete rec.pending;
+    p.cles.forEach(k => hrmPose(rec, k, p.ancienne[k]));
+    const ch = diffBon(cur, rec);
+    if (!Array.isArray(rec.log)) rec.log = [];
+    rec.log.push({kind:"edit", at:Date.now(), by:USER.login, on:true, k:"edit:" + Date.now(),
+                  champs:[{lab:"Hermes", av:"proposition confirmée", ap:"ancienne version remise"}].concat(ch)});
+    setOrder(rec); persistOrders(); pushBon(rec);
+    renderTout();
+  }
+  p.restaure = Date.now(); p.maj = Date.now();
+  await hrmSave();
+  toast("Ancienne version remise");
+}
+
+/* ---------- l'affichage ---------- */
+function hrmPuce(oid, cls){
+  if (!oid || !hrmAllowed()) return "";
+  const p = hrmAttente().find(x => x.kind === "devis" && x.cible === oid);
+  return p ? '<span class="' + cls + ' hmtag" data-hmgo="' + esc(p.id) + '">🤖 Hermes propose une modif</span>' : "";
+}
+function renderHrmTile(){
+  const t = $("tileHrm");
+  if (!t) return;
+  t.hidden = !hrmAllowed();
+  if (t.hidden) return;
+  const n = hrmAttente().length;
+  homeBadge("tileHrm", n);
+  $("tileHrmSub").textContent = n ? n + " proposition" + (n > 1 ? "s" : "") + " à valider" : "Aucune proposition en attente";
+}
+function hrmTot(o){ try { return frm(duDe(o), 0) + " DH"; } catch(e){ return "?"; } }
+function hrmTotA(b){ try { return frm(achTot(b).ttc, 0) + " DH"; } catch(e){ return "?"; } }
+function hrmKind(p){
+  if (p.kind === "achat") return '<span class="hmk ba">Bon d\'achat' + (p.nouveau ? " nouveau" : " modifié") + '</span>';
+  return p.nouveau ? '<span class="hmk nv">Nouveau devis</span>' : '<span class="hmk dv">Devis modifié</span>';
+}
+function hrmStatut(p){
+  const L = {confirmee:"confirmée", refusee:"refusée", refaire:"à refaire", annulee:"annulée par Hermes"};
+  return p.statut === "attente" ? "" : '<span class="hmk st">' + (L[p.statut] || p.statut) +
+    (p.decideAt ? " " + hrmIl(p.decideAt) : "") + (p.restaure ? " · ancienne version remise" : "") + '</span>';
+}
+function hrmResume(p){
+  if (p.kind === "achat"){
+    const a = p.apres || {}, b = p.avant;
+    return (b ? "Total " + hrmTotA(b) + " → " + hrmTotA(a) : (a.lignes || []).length + " ligne" + ((a.lignes || []).length > 1 ? "s" : "") + " · " + hrmTotA(a));
+  }
+  if (p.nouveau) return ((p.apres && p.apres.dims) || []).length + " fenêtre(s) · total " + hrmTot(p.apres);
+  const ch = diffBon(p.avant || {}, p.apres || {}).slice(0, 2).map(texteChamp);
+  const ta = hrmTot(p.avant), tb = hrmTot(p.apres);
+  if (ta !== tb) ch.push("Total " + ta + " → " + tb);
+  return ch.join(" · ") || "Petits changements";
+}
+function hrmLignes(o){
+  return '<ol class="hmlig">' + ((o && o.dims) || []).map(x =>
+    '<li>' + esc([x.l && x.h ? x.l + " × " + x.h : "", x.type || "", x.ref || "", x.q ? "× " + x.q : "", x.note || ""].filter(Boolean).join(" · ") || "ligne vide") + '</li>').join("") + '</ol>';
+}
+function hrmLignesA(b){
+  return '<ol class="hmlig">' + ((b && b.lignes) || []).map(l =>
+    '<li>' + esc(achDesig(l) || "article") + ' · ' + esc(String(l.q || 0)) + ' × ' + esc(String(l.pu || 0)) + ' DH</li>').join("") + '</ol>';
+}
+function hrmTable(rows, t1, t2){
+  return '<table class="hmt"><tr><th>Ligne</th><th>' + t1 + '</th><th>' + t2 + '</th></tr>' +
+    rows.map(r => '<tr' + (r.tot ? ' class="tot"' : '') + '><td>' + esc(r.lab) + '</td><td class="' + (r.av === r.ap ? "" : "av") + '">' + esc(r.av) + '</td><td class="' + (r.av === r.ap ? "" : "ap") + '">' + esc(r.ap) + '</td></tr>').join("") + '</table>';
+}
+function hrmRowsDevis(a, b){
+  const rows = diffBon(a || {}, b || {}).map(c => ({lab:c.lab, av:c.av, ap:c.ap}));
+  const ta = hrmTot(a), tb = hrmTot(b);
+  rows.push({lab:"Total", av:ta, ap:tb, tot:true});
+  const ma = hrmMarge(a), mb = hrmMarge(b);
+  if (coutAllowed()) rows.push({lab:"Marge estimée", av:a ? hrmPct(ma) : "", ap:hrmPct(mb), tot:true});
+  return rows;
+}
+function hrmRowsAchat(a, b){
+  a = a || {}; b = b || {};
+  const f = x => { const o = achFour(x.four); return o ? o.nom : "aucun"; };
+  const lig = x => (x.lignes || []).map(l => (achDesig(l) || "article") + " " + (l.q || 0) + "×" + (l.pu || 0)).join(", ") || "aucune";
+  const liv = x => x.livr ? String(x.livr).split("-").reverse().join("/") : "vide";
+  const rows = [];
+  if (f(a) !== f(b)) rows.push({lab:"fournisseur", av:f(a), ap:f(b)});
+  if (lig(a) !== lig(b)) rows.push({lab:"lignes", av:lig(a), ap:lig(b)});
+  if (liv(a) !== liv(b)) rows.push({lab:"livraison", av:liv(a), ap:liv(b)});
+  if (!!a.sup !== !!b.sup) rows.push({lab:"supprimé", av:a.sup ? "oui" : "non", ap:b.sup ? "oui" : "non"});
+  rows.push({lab:"Total TTC", av:hrmTotA(a), ap:hrmTotA(b), tot:true});
+  return rows;
+}
+/* ---------- v15.04 : marge, alertes, message au client, correction ---------- */
+function hrmReg(){
+  const R = HRM.reg || {}, m = parseFloat(R.margeMin), r = parseFloat(R.remiseMax);
+  return {mm: isFinite(m) ? m : 25, rm: isFinite(r) ? r : 10};
+}
+/* marge estimée comme la page Coût, remise déduite (pose non comptée) */
+function hrmMarge(o){
+  if (!o || !coutAllowed()) return null;
+  try {
+    const C = calcCout(o);
+    if (!C || !(C.vente > 0) || (C.manque && C.manque.length)) return null;
+    const net = C.vente * (1 - remisePct(o) / 100);
+    return net > 0 ? (net - C.cout) / net : null;
+  } catch(e){ return null; }
+}
+function hrmN(n){ return String(n).replace(".", ","); }
+function hrmPct(m){ return m === null || m === undefined ? "inconnue" : fr(m * 100, 0) + " %"; }
+/* prix réel au m², remise déduite, sans la pose */
+function hrmPm2(o){ try { const t = orderTotals(o); return t.m2 > 0 ? t.prix * (1 - remisePct(o) / 100) / t.m2 : 0; } catch(e){ return 0; } }
+function hrmAlertes(o, avant){
+  const r = hrmReg(), A = [];
+  if (!o) return A;
+  const m = hrmMarge(o);
+  if (m !== null && m * 100 < r.mm) A.push("Marge " + hrmPct(m) + " : sous ton seuil de " + hrmN(r.mm) + " %");
+  let baisse = 0;
+  if (avant){ const a = hrmPm2(avant), b = hrmPm2(o); if (a > 0 && b > 0) baisse = (1 - b / a) * 100; }
+  if (baisse > r.rm + 0.05) A.push("Prix au m² baissé de " + fr(baisse, 0) + " % : au-dessus de ta limite de " + hrmN(r.rm) + " %");
+  else if (remisePct(o) > r.rm && (!avant || remisePct(o) > remisePct(avant))) A.push("Remise " + fr(remisePct(o), 0) + " % : au-dessus de ta limite de " + hrmN(r.rm) + " %");
+  return A;
+}
+function hrmCarteAlerte(x){
+  if (!x || x.kind !== "devis" || x.statut !== "attente") return "";
+  const al = hrmAlertes(x.apres, x.nouveau ? null : x.avant);
+  return al.length ? '<small class="hmrouge2">⚠ ' + esc(al[0]) + (al.length > 1 ? " (+" + (al.length - 1) + ")" : "") + '</small>' : "";
+}
+function hrmCorrTxt(x){ return (x.corr || []).map(c => c.lab + " " + c.h + " → " + c.n).join(" · "); }
+function hrmSeuilsHtml(){
+  const r = hrmReg();
+  if (HM) return '<p class="hmmut">Seuils de Noureddine : marge au moins ' + hrmN(r.mm) + ' %, remise ou baisse du prix au m² au plus ' + hrmN(r.rm) + ' %. Au-delà, ta proposition arrive en rouge.</p>';
+  return '<details class="hmdet"><summary>⚙ Mes seuils d\'alerte (marge ' + hrmN(r.mm) + ' % · remise ' + hrmN(r.rm) + ' %)</summary><div class="hmwhy">' +
+    '<label class="hmmut">Marge minimum (%)<input class="hmta hmin" inputmode="decimal" id="hmRegM" value="' + r.mm + '"></label>' +
+    '<label class="hmmut">Remise ou baisse du prix au m² maximum (%)<input class="hmta hmin" inputmode="decimal" id="hmRegR" value="' + r.rm + '"></label>' +
+    '<div class="hmbtns"><button type="button" class="hmok" data-hmreg="1">Enregistrer les seuils</button></div></div></details>';
+}
+/* le message que le bot Clients enverra : Noureddine peut le corriger avant de décider */
+function hrmMsgBox(p){
+  const v = HRM_MSGTMP[p.id] !== undefined ? HRM_MSGTMP[p.id] : (p.msg || "");
+  return '<div class="hmmsg"><label class="hmmut" for="hmMsgN">📩 Message que le bot Clients enverra' + (p.msg ? ' (tu peux le corriger)' : '') + '</label>' +
+    '<textarea class="hmta" id="hmMsgN" data-hmmsgn="' + esc(p.id) + '" placeholder="Hermes n\'a pas écrit de message. Écris-le ici si tu veux.">' + esc(v) + '</textarea></div>';
+}
+function hrmMsgPrend(p, confirme){
+  if (!p || p.kind !== "devis") return;
+  const v = HRM_MSGTMP[p.id] !== undefined ? String(HRM_MSGTMP[p.id]).trim() : (p.msg || "");
+  if (confirme && v) p.msgFinal = v;
+  else if (!confirme && v && v !== (p.msg || "")) p.msgFinal = v;
+  else delete p.msgFinal;
+}
+const HRM_CORLAB = {prix:"prix au m²", prixJN:"prix au m² jour et nuit", remise:"remise %", posePrix:"pose"};
+function hrmCorApres(p){
+  const o = hrmClone(p.apres || {});
+  Object.keys(HRM_CORV).forEach(k => { o[k] = String(HRM_CORV[k]).replace(",", ".").trim(); });
+  return o;
+}
+function hrmCorRes(p){
+  const o = hrmCorApres(p), al = hrmAlertes(o, p.nouveau ? null : p.avant);
+  return 'Total : <b>' + hrmTot(o) + '</b> · marge estimée : <b>' + hrmPct(hrmMarge(o)) + '</b>' +
+    (al.length ? '<br><span class="hmrouge2">⚠ ' + al.map(esc).join('<br>⚠ ') + '</span>' : '');
+}
+function hrmCorrHtml(p){
+  const a = p.apres || {}, mix = a.type === "MIX";
+  const champ = (k, lab) => '<label class="hmmut">' + lab + '<input class="hmta hmin" inputmode="decimal" data-hmcv="' + k + '" value="' +
+    esc(HRM_CORV[k] !== undefined ? HRM_CORV[k] : (a[k] === undefined || a[k] === null ? "" : String(a[k]))) + '"></label>';
+  return '<div class="hmcorr"><b>✏️ Ta correction</b><span class="hmmut">Change les chiffres, le total et la marge se recalculent.</span>' +
+    champ("prix", mix ? "Prix au m² enrouleur" : "Prix au m²") + (mix ? champ("prixJN", "Prix au m² jour et nuit") : "") +
+    champ("remise", "Remise %") + champ("posePrix", "Prix de la pose ou livraison") +
+    '<div class="hmmut" id="hmCorRes" style="margin-top:8px">' + hrmCorRes(p) + '</div></div>' +
+    '<div class="hmbtns"><button type="button" class="hmok" data-hmcorok="' + esc(p.id) + '">✅ Confirmer avec ma correction</button><button type="button" data-hmcorback="1">Retour</button></div>';
+}
+async function hrmConfirmerCorrige(id){
+  const p = hrmTrouve(id);
+  if (!p || p.statut !== "attente" || p.kind !== "devis") return;
+  const orig = p.apres, neu = hrmCorApres(p), corr = [];
+  Object.keys(HRM_CORV).forEach(k => {
+    const h = String(orig[k] === undefined || orig[k] === null ? "" : orig[k]), n = String(neu[k]);
+    if (h !== n) corr.push({k:k, lab:HRM_CORLAB[k] || k, h:h || "vide", n:n || "vide"});
+  });
+  hrmMsgPrend(p, true);
+  if (corr.length){ p.apresHermes = orig; p.apres = neu; p.corr = corr; }
+  await hrmConfirmer(id);
+  if (p.statut === "attente"){
+    if (corr.length){ p.apres = orig; delete p.apresHermes; delete p.corr; }
+    delete p.msgFinal;
+  } else { HRM_COR = ""; HRM_CORV = {}; delete HRM_MSGTMP[id]; }
+}
+function renderHrm(){
+  const body = $("hmBody");
+  if (!body) return;
+  if (!hrmAllowed()){ body.innerHTML = '<div class="empty">Page réservée à Noureddine.</div>'; return; }
+  const p = HRM_OUV ? hrmTrouve(HRM_OUV) : null;
+  if (p){ body.innerHTML = hrmDetail(p); return; }
+  HRM_OUV = "";
+  const att = hrmAttente(), conf = HRM.liste.filter(x => x && x.statut === "confirmee"),
+        ref = HRM.liste.filter(x => x && x.statut !== "attente" && x.statut !== "confirmee");
+  const L = (HRM_TAB === "confirmee" ? conf : HRM_TAB === "refusee" ? ref : att)
+    .slice().sort((a, b) => (b.maj || 0) - (a.maj || 0));
+  const tab = (k, lab, n) => '<button type="button" data-hmtab="' + k + '" aria-pressed="' + (HRM_TAB === k) + '">' + lab + ' ' + n + '</button>';
+  body.innerHTML = (HM ? '<div class="hmwarn">Mode Hermes : tu vois tes propositions et les décisions de Noureddine. Tu ne peux rien confirmer.</div>' : '') +
+    '<div class="hmtabs">' + tab("attente", "À valider", att.length) + tab("confirmee", "Confirmées", conf.length) + tab("refusee", "Refusées", ref.length) + '</div>' +
+    (L.length ? L.map(x => '<button type="button" class="hmc" data-hmopen="' + esc(x.id) + '">' + hrmKind(x) + hrmStatut(x) +
+        '<small style="display:inline">' + hrmIl(x.at) + '</small><br>' +
+        '<b>' + esc((x.numFinal || x.num || "") + " · " + (x.nom || "")) + '</b>' +
+        '<small>' + esc(hrmResume(x)) + '</small>' + hrmCarteAlerte(x) +
+        (x.note ? '<small>💬 ' + esc(String(x.note).slice(0, 140)) + '</small>' : '') +
+        (x.raison ? '<small>Raison de Noureddine : ' + esc(String(x.raison).slice(0, 140)) + '</small>' : '') +
+        (x.corr && x.corr.length ? '<small>✏️ Corrigé par Noureddine : ' + esc(hrmCorrTxt(x)) + '</small>' : '') +
+        (x.msgFinal && x.statut !== "attente" ? '<small>📩 ' + esc(String(x.msgFinal).slice(0, 140)) + '</small>' : '') + '</button>').join("")
+      : '<div class="empty">' + (HRM_TAB === "attente" ? "Aucune proposition en attente." : "Rien ici pour le moment.") + '</div>') +
+    '<p class="hmmut">Hermes lit toute l\'app mais ne change jamais un vrai bon : chaque devis ou bon d\'achat qu\'il enregistre arrive ici. Rien ne bouge avant ta confirmation.</p>' + hrmSeuilsHtml();
+}
+function hrmDetail(p){
+  let h = '<div style="margin-bottom:8px">' + hrmKind(p) + hrmStatut(p) + '<small class="hmmut" style="display:inline">' + hrmIl(p.at) + '</small></div>' +
+    '<h3 style="margin:4px 0 6px">' + esc((p.numFinal || p.num || "") + " · " + (p.nom || "")) + '</h3>';
+  if (p.kind === "devis" && p.statut === "attente"){
+    const al = hrmAlertes(p.apres, p.nouveau ? null : p.avant);
+    if (al.length) h += '<div class="hmrouge">⚠ ' + al.map(esc).join('<br>⚠ ') + '</div>';
+  }
+  let conflit = false;
+  if (p.kind === "achat"){
+    const cur = ACH.bas.find(b => b && b.id === p.cible) || null;
+    conflit = p.statut === "attente" && !HM && hrmConflitAchat(p, cur);
+    if (conflit) h += '<div class="hmwarn">⚠ Ce bon d\'achat a été modifié après la copie d\'Hermes. Confirmer effacerait ce changement.</div>' + hrmTable(hrmRowsAchat(cur, p.apres), "Actuel", "Hermes");
+    else h += p.avant ? hrmTable(hrmRowsAchat(p.avant, p.apres), "Avant", "Hermes")
+                      : '<div class="hmwhy">Fournisseur : <b>' + esc(p.nom || "") + '</b> · total ' + hrmTotA(p.apres) + hrmLignesA(p.apres) + '</div>';
+  } else if (p.nouveau){
+    const a = p.apres || {};
+    h += '<div class="hmwhy"><b>' + esc(a.nom || "Client sans nom") + '</b>' + (a.tel ? ' · ' + esc(a.tel) : '') + (a.adresse ? '<br>' + esc(a.adresse) : '') +
+      '<br>Total : <b>' + hrmTot(a) + '</b>' + (coutAllowed() ? ' · marge estimée : <b>' + hrmPct(hrmMarge(a)) + '</b>' : '') + hrmLignes(a) + '</div>';
+  } else {
+    const cur = ORDERS.find(o => o.id === p.cible) || null;
+    conflit = p.statut === "attente" && !HM && !!cur && hrmConflitDevis(p, cur);
+    if (conflit){
+      const q = hrmQui(cur, p.at);
+      h += '<div class="hmwarn">⚠ ' + esc(q.qui) + ' a modifié ce devis' + (q.at ? ' ' + hrmIl(q.at) : '') + ', après la copie d\'Hermes (' + hrmIl(p.at) + '). Confirmer effacerait son travail.</div>' +
+        '<p class="hmmut">Ce que ' + esc(q.qui) + ' a changé :</p>' + hrmTable(hrmRowsDevis(p.avant, cur), "Avant", q.qui) +
+        '<p class="hmmut">Ce que propose Hermes :</p>' + hrmTable(hrmRowsDevis(cur, p.apres), "Actuel", "Hermes");
+    } else if (p.statut === "confirmee" && p.ancienne){
+      h += hrmTable(hrmRowsDevis(Object.assign({}, p.apres, (() => { const o = {}; Object.keys(p.ancienne).forEach(k => { if (p.ancienne[k] !== "__absent__") o[k] = p.ancienne[k]; }); return o; })()), p.apres), "Avant", "Hermes");
+    } else {
+      h += hrmTable(hrmRowsDevis(p.avant, p.apres), "Avant", "Hermes");
+    }
+    h += '<details class="hmdet"><summary>Voir le devis complet (version Hermes)</summary><div class="hmwhy">' +
+      esc(p.apres && p.apres.nom || "") + ' · total ' + hrmTot(p.apres) + hrmLignes(p.apres) + '</div></details>';
+  }
+  if (HM && p.statut === "attente"){
+    h += '<label class="hmmut" for="hmPourquoi" style="margin-top:10px">Pourquoi (pour Noureddine)</label>' +
+      '<textarea class="hmta" id="hmPourquoi" data-hmwhy="' + esc(p.id) + '">' + esc(p.note || "") + '</textarea>' +
+      (p.kind === "devis" ? '<label class="hmmut" for="hmMsgP" style="margin-top:10px">Message pour le client (le bot Clients l\'enverra après la décision)</label>' +
+        '<textarea class="hmta" id="hmMsgP" data-hmmsg="' + esc(p.id) + '">' + esc(p.msg || "") + '</textarea>' : '') +
+      '<div class="hmcol"><button type="button" data-hmcancel="' + esc(p.id) + '">Annuler ma proposition</button></div>';
+  } else if (p.note){
+    h += '<div class="hmwhy">💬 Pourquoi : ' + esc(p.note) + '</div>';
+  }
+  if (p.raison) h += '<div class="hmwhy">Raison de Noureddine : ' + esc(p.raison) + '</div>';
+  if (p.corr && p.corr.length) h += '<div class="hmwhy">✏️ Corrigé par Noureddine : ' + esc(hrmCorrTxt(p)) + '</div>';
+  if (p.statut !== "attente" && p.msgFinal)
+    h += '<div class="hmwhy">📩 ' + (p.statut === "confirmee" ? "Message validé par Noureddine, à envoyer tel quel" : "Message de Noureddine pour le client") + ' :<br><b>' + esc(p.msgFinal) + '</b></div>';
+  else if (p.statut !== "attente" && p.msg && HM)
+    h += '<div class="hmwhy">📩 Ton message (pas validé) : ' + esc(p.msg) + '</div>';
+  if (!HM && p.statut === "attente" && p.kind === "devis") h += hrmMsgBox(p);
+  if (!HM && p.statut === "attente"){
+    if (conflit){
+      h += '<div class="hmcol"><button type="button" data-hmredo="' + esc(p.id) + '">🔄 Demander à Hermes de refaire</button>' +
+        '<button type="button" data-hmkeep="' + esc(p.id) + '">Garder la version actuelle</button></div>';
+    } else if (HRM_REF === p.id){
+      h += '<textarea class="hmta" id="hmRaison" placeholder="Pourquoi tu refuses ? (Hermes la lira)"></textarea>' +
+        '<div class="hmbtns"><button type="button" data-hmnogo="' + esc(p.id) + '">❌ Refuser la proposition</button><button type="button" data-hmnoback="1">Retour</button></div>';
+    } else if (HRM_COR === p.id){
+      h += hrmCorrHtml(p);
+    } else {
+      h += '<div class="hmbtns"><button type="button" class="hmok" data-hmok="' + esc(p.id) + '">✅ Confirmer</button>' +
+        '<button type="button" data-hmno="' + esc(p.id) + '">❌ Refuser</button></div>' +
+        (p.kind === "devis" ? '<div class="hmcol"><button type="button" data-hmcor="' + esc(p.id) + '">✏️ Corriger puis confirmer</button></div>' : '');
+    }
+  }
+  if (!HM && p.statut === "confirmee" && !p.restaure && (p.kind === "achat" || p.ancienne))
+    h += '<div class="hmcol"><button type="button" data-hmback="' + esc(p.id) + '">↩ Remettre l\'ancienne version</button></div>';
+  return h;
+}
+function hrmOuvrir(id){
+  const p = hrmTrouve(id);
+  if (!p || !hrmAllowed()) return;
+  const m = $("hkModal"); if (m) m.hidden = true;
+  HRM_OUV = id; HRM_REF = ""; HRM_COR = ""; HRM_CORV = {};
+  HRM_TAB = p.statut === "attente" ? "attente" : p.statut === "confirmee" ? "confirmee" : "refusee";
+  nav("hmSheet"); renderHrm();
+  $("hmSheet").querySelector(".sheet-body").scrollTop = 0;
+}
+$("tileHrm").addEventListener("click", () => {
+  if (!hrmAllowed()) return;
+  HRM_OUV = ""; HRM_REF = "";
+  nav("hmSheet"); renderHrm();
+  pullHrm().then(b => { if (b){ renderHrm(); renderHrmTile(); } });
+  try { if (coutAllowed()) pullNom().then(ok => { if (ok) renderHrm(); }); } catch(e){}   /* v15.04 : prix d'achat pour la marge */
+});
+document.addEventListener("click", e => {
+  const g = e.target.closest ? e.target.closest("[data-hmgo]") : null;
+  if (!g) return;
+  e.preventDefault(); e.stopPropagation();
+  hrmOuvrir(g.dataset.hmgo);
+}, true);
+$("hmBody").addEventListener("click", e => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  const ds = t.dataset;
+  if (ds.hmtab){ HRM_TAB = ds.hmtab; renderHrm(); return; }
+  if (ds.hmopen){ hrmOuvrir(ds.hmopen); return; }
+  if (HM){
+    if (ds.hmcancel){
+      const p = hrmTrouve(ds.hmcancel);
+      if (p && p.statut === "attente" && confirm("Annuler cette proposition ?")){ p.statut = "annulee"; p.decideAt = Date.now(); p.maj = Date.now(); HRM_OUV = ""; hrmSave(); }
+    }
+    return;
+  }
+  if (ds.hmok){
+    const p = hrmTrouve(ds.hmok); hrmMsgPrend(p, true); t.disabled = true;
+    hrmConfirmer(ds.hmok).finally(() => { if (p && p.statut === "attente") delete p.msgFinal; else delete HRM_MSGTMP[ds.hmok]; renderHrm(); });
+    return;
+  }
+  if (ds.hmcor){ HRM_COR = ds.hmcor; HRM_CORV = {}; HRM_REF = ""; renderHrm(); const i = document.querySelector("[data-hmcv]"); if (i) i.focus(); return; }
+  if (ds.hmcorback){ HRM_COR = ""; HRM_CORV = {}; renderHrm(); return; }
+  if (ds.hmcorok){ t.disabled = true; hrmConfirmerCorrige(ds.hmcorok).finally(() => { renderHrm(); }); return; }
+  if (ds.hmreg){
+    const m = parseFloat(String($("hmRegM").value).replace(",", ".")), r = parseFloat(String($("hmRegR").value).replace(",", "."));
+    if (!(m >= 0 && m < 100) || !(r >= 0 && r <= 100)){ toast("Seuils invalides : un nombre entre 0 et 100"); return; }
+    HRM.reg = {margeMin:m, remiseMax:r, maj:Date.now()}; hrmSave(); toast("Seuils enregistrés");
+    return;
+  }
+  if (ds.hmno){ HRM_REF = ds.hmno; renderHrm(); const r = $("hmRaison"); if (r) r.focus(); return; }
+  if (ds.hmnoback){ HRM_REF = ""; renderHrm(); return; }
+  if (ds.hmnogo){
+    const p = hrmTrouve(ds.hmnogo), r = $("hmRaison");
+    const txt = r ? r.value.trim() : "";
+    if (!txt){ toast("Écris la raison en une phrase : Hermes en a besoin"); if (r) r.focus(); return; }
+    if (p && p.statut === "attente"){ HRM_REF = ""; hrmMsgPrend(p, false); delete HRM_MSGTMP[p.id]; hrmDecide(p, "refusee", txt); toast("Proposition refusée"); }
+    return;
+  }
+  if (ds.hmredo){
+    const p = hrmTrouve(ds.hmredo);
+    if (p && p.statut === "attente"){ hrmDecide(p, "refaire", "L'original a été modifié entre-temps : refais ta proposition sur la nouvelle version."); toast("Hermes devra refaire sa proposition"); }
+    return;
+  }
+  if (ds.hmkeep){
+    const p = hrmTrouve(ds.hmkeep);
+    if (p && p.statut === "attente"){ hrmDecide(p, "refusee", "L'original a été modifié entre-temps : la version actuelle est gardée."); toast("Version actuelle gardée"); }
+    return;
+  }
+  if (ds.hmback){ hrmRestaurer(ds.hmback); return; }
+});
+$("hmBody").addEventListener("input", e => {   /* v15.04 : garde la saisie entre deux affichages */
+  const t = e.target;
+  if (t.dataset.hmmsgn) HRM_MSGTMP[t.dataset.hmmsgn] = t.value;
+  if (t.dataset.hmcv){ HRM_CORV[t.dataset.hmcv] = t.value; const p = hrmTrouve(HRM_COR), r = $("hmCorRes"); if (p && r) r.innerHTML = hrmCorRes(p); }
+});
+$("hmBody").addEventListener("change", e => {   /* v15.04 : Hermes corrige son message */
+  const w = e.target.closest("[data-hmmsg]");
+  if (!w || !HM) return;
+  const p = hrmTrouve(w.dataset.hmmsg);
+  if (p && p.statut === "attente"){ p.msg = w.value.trim(); p.maj = Date.now(); hrmSave(); toast("Message enregistré"); }
+});
+$("hmBody").addEventListener("change", e => {
+  const w = e.target.closest("[data-hmwhy]");
+  if (!w || !HM) return;
+  const p = hrmTrouve(w.dataset.hmwhy);
+  if (p && p.statut === "attente"){ p.note = w.value.trim(); p.maj = Date.now(); hrmSave(); toast("Raison enregistrée"); }
+});
 function renderJeuTile(){ const t = $("tileJeu"); if (t) t.hidden = !jeuAllowed(); }
 $("tileJeu").addEventListener("click", () => { if (jeuAllowed()) location.href = "atelier.html"; });
 
