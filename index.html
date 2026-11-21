@@ -2873,6 +2873,31 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
 .hmcorr label{display:block; margin-top:8px}
 .hmin{min-height:0; margin-top:4px; padding:9px 11px}
 .hmmsg{border:1px dashed var(--hm); border-radius:12px; padding:10px 12px; margin-top:10px}
+.hmk.dc{background:var(--hm); color:#fff}
+.hmk.avo{background:var(--ok-soft); color:var(--ok)}
+.hmk.avn{background:var(--accent-soft); color:var(--accent)}
+.hmk.ava{background:var(--warn-soft); color:var(--warn)}
+.hmk.urg{background:var(--accent); color:#fff}
+.hmk.ver{background:var(--card2); color:var(--hm-ink)}
+.hmrap{border:2px solid var(--hm); border-radius:16px; padding:12px 13px; margin:0 0 12px; background:var(--card)}
+.hmrap h3{margin:0 0 4px; font-size:15.5px}
+.hmrap .hms{margin-top:8px; font-size:13.5px; line-height:1.5; white-space:pre-line}
+.hmrap .hms b{display:block; color:var(--hm-ink); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em}
+.hmgrid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; margin:0 0 12px}
+.hmgrid button{border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:14px; padding:10px 6px; font-size:12.5px; font-weight:600; line-height:1.3; text-align:center; min-width:0}
+.hmgrid button b{display:block; font-size:19px; color:var(--hm-ink)}
+.hmgrid button[aria-pressed="true"]{border:2px solid var(--hm); background:var(--hm-soft)}
+.hmadd{display:flex; flex-wrap:wrap; gap:7px; margin:0 0 12px}
+.hmadd button{border:1px dashed var(--hm); background:var(--card); color:var(--hm-ink); border-radius:999px; padding:7px 11px; font-size:12.5px; font-weight:700}
+.hmform{border:2px solid var(--hm); border-radius:16px; padding:12px 13px; margin:0 0 12px; background:var(--card)}
+.hmform label{display:block; margin-top:8px}
+.hmform select{width:100%; margin-top:4px; padding:9px 11px; border-radius:12px; border:1px solid var(--line-strong); background:var(--card); color:var(--ink); font:inherit; font-size:14px}
+.hmfiche{border:1px solid var(--line); border-radius:14px; margin-bottom:9px; background:var(--card)}
+.hmfiche summary{cursor:pointer; padding:11px 12px; list-style:none}
+.hmfiche summary::-webkit-details-marker{display:none}
+.hmfiche .hmfb{padding:0 12px 12px}
+.hmfl{border-top:1px solid var(--line); padding:8px 0; font-size:13.5px; line-height:1.5}
+.hmpre{white-space:pre-line}
 .hmdet summary{cursor:pointer; color:var(--hm-ink); font-weight:600; font-size:13.5px; margin-top:10px}
 </style>
 </head>
@@ -3144,7 +3169,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
       <!-- v15.03 : Espace Hermes, Noureddine seulement -->
       <button class="tile hmtile" id="tileHrm" type="button" hidden>
         <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01M9.5 17h5"/><circle cx="12" cy="3.5" r="1"/></svg></span>
-        <span class="tt"><b>Espace Hermes</b><small id="tileHrmSub">Propositions d'Hermes</small></span>
+        <span class="tt"><b id="tileHrmT">Espace Hermes</b><small id="tileHrmSub">Propositions d'Hermes</small></span>
         <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
       </button>
     </div>
@@ -4557,7 +4582,7 @@ if (HM){
     if (m === "GET" || m === "HEAD" || u.indexOf("/auth/v1/") >= 0) return f0(url, opt);
     if (u.indexOf("/rest/v1/bons") >= 0 && m === "POST"){
       const j = corps(opt && opt.body), L = Array.isArray(j) ? j : (j ? [j] : []);
-      if (L.length && L.every(x => x && x.id === "cfg-hermes")) return f0(url, opt);
+      if (L.length && L.every(x => x && (x.id === "cfg-hermes" || x.id === "cfg-hermes-cli"))) return f0(url, opt);   /* v15.05 : + journal clients */
       const bon = L.some(x => x && String(x.id || "").indexOf("cfg-") !== 0 && !/^__/.test(String(x.num || "")));
       if (bon) setTimeout(() => { try { hmBloque(); } catch(e){} }, 60);
     } else if (u.indexOf("/rest/v1/bons") >= 0){
@@ -4580,6 +4605,13 @@ if (!Array.isArray(HRM.liste)) HRM.liste = [];
 let HRM_SALE = !!LS.get("mst_hrm_sale", false);
 let HRM_TAB = "attente", HRM_OUV = "", HRM_REF = "", HRM_COR = "";
 let HRM_CORV = {}, HRM_MSGTMP = {};    /* v15.04 : correction et message en cours de saisie */
+if (!Array.isArray(HRM.rapports)) HRM.rapports = [];   /* v15.05 : rapports du directeur */
+let HRM_CAT = "", HRM_VUE = "cartes", HRM_FORM = "", HRM_FORM_ID = "", HRM_FV = {}, HRM_LOTRES = "";
+let HRM_MOD = "", HRM_MODTXT = "", HRM_CORN = "", HRM_CORNTXT = "";
+const HCL_ID = "cfg-hermes-cli";       /* v15.05 : journal clients, lu aussi par Imane */
+let HCL = Object.assign({clients:[]}, LS.get("mst_hcl", {}));
+if (!Array.isArray(HCL.clients)) HCL.clients = [];
+let HCL_TEMP = "";
 const HRM_FIGES = ["id", "num", "author", "date", "status", "etat", "ech", "plan", "log", "photos", "nphotos", "pending", "maj", "_ua", "paies"];
 let ACH_SRV = {}, ACH_SRV_OK = false;   /* chaque bon d'achat tel qu'il est dans la base */
 let HM_AVIS = 0, HM_RESET_T = null;
@@ -6943,6 +6975,11 @@ async function pullBonsVrai(){
         if (factAllowed() && trsFusion(r.data)) try { if ($("tresSheet").classList.contains("open")) renderTres(); renderTresTile(); } catch(e){}
         return;
       }
+      if (r.id === HCL_ID){                         /* v15.05 : journal clients d'Hermes, pas un bon */
+        CFGUA[r.id] = r.updated_at;
+        if (hclAllowed() && hclFusion(r.data)) try { renderHrmTile(); if ($("hmSheet").classList.contains("open")) renderHrm(); } catch(e){}
+        return;
+      }
       if (r.id === HRM_ID){                         /* v15.03 : propositions d'Hermes, pas un bon */
         CFGUA[r.id] = r.updated_at;
         if (hrmAllowed() && hrmFusion(r.data)) try { renderHrmTile(); if ($("hmSheet").classList.contains("open")) renderHrm(); } catch(e){}
@@ -9096,7 +9133,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "15.04";
+const APP_VERSION = "15.05";
 
 /* Onglets du tableau de production */
 const SHEET_GIDS = {ENR:1041232300, JN:1319480646};
@@ -22413,6 +22450,12 @@ function hrmFusion(d){
   if (!d || typeof d !== "object") return false;
   let bouge = false;
   if (d.reg && typeof d.reg === "object" && (d.reg.maj || 0) > ((HRM.reg && HRM.reg.maj) || 0)){ HRM.reg = d.reg; bouge = true; LS.set("mst_hrm", HRM); }
+  if (Array.isArray(d.rapports)){            /* v15.05 */
+    const pr = {}; let br = false;
+    (HRM.rapports || []).forEach(r => { if (r && r.id) pr[r.id] = r; });
+    d.rapports.forEach(r => { if (!r || !r.id) return; const l = pr[r.id]; if (!l || (r.maj || 0) > (l.maj || 0)){ pr[r.id] = r; br = true; } });
+    if (br){ HRM.rapports = Object.keys(pr).map(k => pr[k]); bouge = true; LS.set("mst_hrm", HRM); }
+  }
   if (!Array.isArray(d.liste)) return bouge;
   const par = {};
   HRM.liste.forEach(x => { if (x && x.id) par[x.id] = x; });
@@ -22420,7 +22463,8 @@ function hrmFusion(d){
     if (!x || !x.id) return;
     const l = par[x.id];
     let prend = !l;
-    if (l){
+    if (l && (x.v || 1) !== (l.v || 1)) prend = (x.v || 1) > (l.v || 1);   /* v15.05 : Hermes a refait la carte */
+    else if (l){
       const dl = l.statut !== "attente", dx = x.statut !== "attente";
       if (dx && !dl) prend = true;
       else if (dl && !dx) prend = false;
@@ -22442,16 +22486,19 @@ async function pullHrm(){
 }
 function hrmMenage(){
   const lim = Date.now() - 120 * 86400000;
-  HRM.liste = HRM.liste.filter(x => x && (x.statut === "attente" || (x.decideAt || x.maj || 0) > lim))
+  HRM.liste = HRM.liste.filter(x => x && (x.statut === "attente" || x.statut === "refaire" || hrmAFaire(x) || (x.decideAt || x.maj || 0) > lim))
     .sort((a, b) => (b.maj || 0) - (a.maj || 0)).slice(0, 400);
+  const lr = jourISO(new Date(Date.now() - 30 * 86400000));   /* v15.05 : 30 jours de rapports */
+  HRM.rapports = (HRM.rapports || []).filter(r => r && String(r.date || "") >= lr).sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 31);
 }
+function hrmAFaire(x){ return !!(x && x.statut === "confirmee" && x.afaire && !x.fait); }
 async function pushHrm(){
   if (!SB || !USER) return false;
   try {
     await pullHrm();
     hrmMenage();
     const {error} = await SB.from("bons").upsert({id:HRM_ID, num:"__HERMES__", author:USER.login,
-      data:{liste:HRM.liste, reg:HRM.reg || null}, updated_at:new Date().toISOString()});
+      data:{liste:HRM.liste, reg:HRM.reg || null, rapports:HRM.rapports || []}, updated_at:new Date().toISOString()});
     if (error) throw error;
     HRM_SALE = false; LS.set("mst_hrm_sale", false);
     try { renderHrmTile(); if ($("hmSheet").classList.contains("open")) renderHrm(); } catch(e){}
@@ -22465,12 +22512,59 @@ function hrmSave(){
   return pushHrm();
 }
 
+/* ---------- v15.05 : journal clients (rangée cfg-hermes-cli, lue par Noureddine et Imane) ---------- */
+function hclAllowed(){ const u = String((USER && USER.login) || "").toLowerCase(); return u === "noureddine" || u === "imane"; }
+function hclK(t){ let n = String(t || "").replace(/\D/g, ""); if (/^212/.test(n)) n = n.slice(3); return n.length >= 9 ? n.slice(-9) : ""; }
+function hclFusion(d){
+  if (!d || !Array.isArray(d.clients)) return false;
+  const par = {}; let bouge = false;
+  HCL.clients.forEach(c => { if (c && c.id) par[c.id] = c; });
+  d.clients.forEach(c => {
+    if (!c || !c.id) return;
+    const l = par[c.id];
+    if (!l){ par[c.id] = c; bouge = true; return; }
+    if ((c.maj || 0) === (l.maj || 0)) return;
+    const base = hrmClone((c.maj || 0) > (l.maj || 0) ? c : l), vu = {};
+    base.lignes = (l.lignes || []).concat(c.lignes || []).filter(x => { const k = (x && x.at) + "|" + (x && x.demande); if (!x || vu[k]) return false; vu[k] = true; return true; })
+      .sort((a, b) => (a.at || 0) - (b.at || 0));
+    par[c.id] = base; bouge = true;
+  });
+  if (bouge){ HCL.clients = Object.keys(par).map(k => par[k]); LS.set("mst_hcl", HCL); }
+  return bouge;
+}
+async function pullHcl(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", HCL_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data;
+    return d ? hclFusion(d) : false;
+  } catch(e){ return false; }
+}
+async function pushHcl(){
+  if (!SB || !USER) return false;
+  try {
+    await pullHcl();
+    HCL.clients = HCL.clients.filter(Boolean).sort((a, b) => (b.maj || 0) - (a.maj || 0)).slice(0, 600);
+    HCL.clients.forEach(c => { if ((c.lignes || []).length > 80) c.lignes = c.lignes.slice(-80); });
+    const {error} = await SB.from("bons").upsert({id:HCL_ID, num:"__HERMES_CLI__", author:USER.login,
+      data:{clients:HCL.clients}, updated_at:new Date().toISOString()});
+    if (error) throw error;
+    return true;
+  } catch(e){ return false; }
+}
+function hclSave(){
+  LS.set("mst_hcl", HCL);
+  try { renderHrmTile(); if ($("hmSheet").classList.contains("open")) renderHrm(); } catch(e){}
+  return pushHcl();
+}
+
 /* ---------- mode Hermes : ce qui est refusé, et le ménage ---------- */
 function hmBloque(){
   if (!HM) return;
   if (Date.now() - HM_AVIS > 6000){
     HM_AVIS = Date.now();
-    toast("Mode Hermes : ce changement n'est pas enregistré. Seuls les devis et les bons d'achat deviennent des propositions.");
+    toast("Mode Hermes : ce changement n'est pas enregistré. Seuls les devis, les bons d'achat et les cartes de l'Espace Hermes deviennent des propositions.");
   }
   clearTimeout(HM_RESET_T);
   HM_RESET_T = setTimeout(hmReset, 1500);
@@ -22512,8 +22606,10 @@ function hrmCles(p){
 function hmProposeDevis(){
   if (!HM) return false;
   const orig = (ORDERS || []).find(o => o && o.id === S.id && o.status === "sent");
-  let p = HRM.liste.find(x => x && x.kind === "devis" && x.cible === S.id && x.statut === "attente");
+  let p = HRM.liste.find(x => x && x.kind === "devis" && x.cible === S.id && x.statut === "attente") ||
+          HRM.liste.find(x => x && x.kind === "devis" && x.cible === S.id && x.statut === "refaire");
   const neuve = !p;
+  if (p && p.statut === "refaire") hrmRouvre(p);
   if (!p) p = {id:achUid("hp"), kind:"devis", cible:S.id, at:Date.now(), statut:"attente", note:""};
   const rec = hrmPropre(S);
   rec.status = "sent";
@@ -22550,6 +22646,7 @@ async function hmProposeAchats(){
     if (!srv && (b.sup || (!b.four && !(b.lignes || []).length))) return;
     let p = HRM.liste.find(x => x && x.kind === "achat" && x.cible === b.id && x.statut === "attente");
     if (p && p.apres && achSig(p.apres) === sig) return;
+    if (!p){ p = HRM.liste.find(x => x && x.kind === "achat" && x.cible === b.id && x.statut === "refaire") || null; if (p) hrmRouvre(p); }   /* v15.05 */
     if (!p){ p = {id:achUid("hp"), kind:"achat", cible:b.id, at:Date.now(), statut:"attente", note:""}; HRM.liste.push(p); }
     p.nouveau = !srv; p.avant = srv ? JSON.parse(srv) : null; p.apres = hrmClone(b);
     const f = achFour(b.four);
@@ -22557,6 +22654,14 @@ async function hmProposeAchats(){
     p.maj = Date.now(); n++;
   });
   if (n){ hrmSave(); toast("Bon d'achat rangé dans l'Espace Hermes : Noureddine doit le confirmer"); }
+}
+
+/* v15.05 : Hermes refait une carte demandée « à refaire » : même carte, version + 1 */
+function hrmRouvre(p){
+  if (p.raison) p.consigne = p.raison;
+  p.statut = "attente"; p.v = (p.v || 1) + 1;
+  delete p.raison; delete p.decideAt; delete p.par; delete p.msgFinal;
+  p.maj = Date.now();
 }
 
 /* ---------- décisions de Noureddine ---------- */
@@ -22638,6 +22743,36 @@ async function hrmConfirmerAchat(p){
   try { renderHome(); } catch(e){}
   toast("Bon d'achat " + (rec.num || "") + " enregistré à partir de la proposition d'Hermes");
 }
+/* v15.05 : cartes Décision et Avis. Rien ne change dans les vrais bons :
+   un avis sur une décision de Noureddine SMART AI la marque Fait ou Ignorer dans la Trésorerie,
+   le reste devient « À faire ». */
+function hrmMemo(t){
+  const now = Date.now();
+  let k = "r:" + now; while (TRS.dec[k]) k = "r:" + (parseInt(k.slice(2), 10) + 1);
+  TRS.dec[k] = {s:"memo", t:String(t).slice(0, 200), at:now, by:(USER && USER.login) || "", maj:now};
+}
+async function hrmConfirmerNote(id, version){
+  const p = hrmTrouve(id);
+  if (!p || p.statut !== "attente" || HM || !hrmAllowed()) return;
+  if (version) p.actionFinale = version;
+  const act = p.actionFinale || p.action || "";
+  if (p.kind === "avis" && p.cible){
+    if (!factAllowed() || !TRS){ toast("Trésorerie pas chargée : réessaie"); return; }
+    try { await trsPull(); } catch(e){}
+    if (!TRS.dec) TRS.dec = {};
+    const now = Date.now(), by = (USER && USER.login) || "";
+    const marque = s => { TRS.dec[p.cible] = {s:s, at:now, t:p.ref || p.titre || "", by:by, maj:now, hermes:p.id}; };
+    if (p.verdict === "non"){ marque("ign"); hrmMemo("Hermes : " + (p.ref ? p.ref + " → " : "") + (p.note || "ça ne vaut pas le coup")); }
+    else if (p.verdict === "autre"){ hrmMemo("Hermes : " + (p.ref ? p.ref + " → " : "") + act); marque("fait"); }
+    else marque("fait");
+    NOU_AT = 0; trsSave();
+    try { renderTresTile(); if ($("tresSheet").classList.contains("open")) renderTres(); } catch(e){}
+    p.trs = p.verdict === "non" ? "ign" : "fait";
+  }
+  p.afaire = !(p.kind === "avis" && p.verdict === "non");
+  await hrmDecide(p, "confirmee", "");
+  toast(p.kind === "avis" && p.cible ? (p.trs === "ign" ? "Décision ignorée dans la Trésorerie, avec la raison d'Hermes" : "Décision notée Fait dans la Trésorerie") : "Confirmé : rangé dans « À faire »");
+}
 async function hrmRestaurer(id){
   const p = hrmTrouve(id);
   if (!p || p.statut !== "confirmee" || HM || !hrmAllowed() || p.restaure) return;
@@ -22676,24 +22811,46 @@ function hrmPuce(oid, cls){
 function renderHrmTile(){
   const t = $("tileHrm");
   if (!t) return;
-  t.hidden = !hrmAllowed();
+  t.hidden = !hclAllowed();
   if (t.hidden) return;
-  const n = hrmAttente().length;
+  if (!hrmAllowed()){             /* v15.05 : Imane voit seulement le journal clients */
+    const c = HCL.clients.filter(x => x && x.temp === "chaud").length;
+    $("tileHrmT").textContent = "Journal clients (Hermes)";
+    homeBadge("tileHrm", c);
+    $("tileHrmSub").textContent = HCL.clients.length + " client" + (HCL.clients.length > 1 ? "s" : "") + (c ? " · " + c + " chaud" + (c > 1 ? "s" : "") : "");
+    return;
+  }
+  $("tileHrmT").textContent = "Espace Hermes";
+  const n = hrmAttente().length, f = HRM.liste.filter(hrmAFaire).length;
   homeBadge("tileHrm", n);
-  $("tileHrmSub").textContent = n ? n + " proposition" + (n > 1 ? "s" : "") + " à valider" : "Aucune proposition en attente";
+  $("tileHrmSub").textContent = (n ? n + " à valider" : "Rien à valider") + (f ? " · " + f + " à faire" : "");
 }
 function hrmTot(o){ try { return frm(duDe(o), 0) + " DH"; } catch(e){ return "?"; } }
 function hrmTotA(b){ try { return frm(achTot(b).ttc, 0) + " DH"; } catch(e){ return "?"; } }
+const HRM_VERD = {oui:"✅ Ça vaut le coup", non:"❌ Ça ne vaut pas", autre:"✏️ Oui mais autrement"};
+const HRM_URG = {auj:"aujourd'hui", sem:"cette semaine", tard:"plus tard"};
+const HRM_CONF = {sur:"sûr", probable:"probable", verifier:"à vérifier"};
 function hrmKind(p){
+  if (p.kind === "decision") return '<span class="hmk dc">Décision d\'Hermes</span>' + hrmVer(p);
+  if (p.kind === "avis") return '<span class="hmk ' + ({oui:"avo", non:"avn"}[p.verdict] || "ava") + '">Avis · ' + (HRM_VERD[p.verdict] || "") + '</span>' + hrmVer(p);
   if (p.kind === "achat") return '<span class="hmk ba">Bon d\'achat' + (p.nouveau ? " nouveau" : " modifié") + '</span>';
-  return p.nouveau ? '<span class="hmk nv">Nouveau devis</span>' : '<span class="hmk dv">Devis modifié</span>';
+  return (p.nouveau ? '<span class="hmk nv">Nouveau devis</span>' : '<span class="hmk dv">Devis modifié</span>') + hrmVer(p);
 }
+function hrmVer(p){ return (p.v || 1) > 1 ? '<span class="hmk ver">modifiée ' + ((p.v || 1) - 1) + ' fois</span>' : ''; }
+function hrmImpact(v){ const n = typeof v === "number" ? v : NaN; return isFinite(n) ? frm(n, 0) + " DH" : String(v || ""); }
+function hrmTitre(x){ return x.kind === "decision" || x.kind === "avis" ? (x.titre || x.ref || "") : (x.numFinal || x.num || "") + " · " + (x.nom || ""); }
 function hrmStatut(p){
   const L = {confirmee:"confirmée", refusee:"refusée", refaire:"à refaire", annulee:"annulée par Hermes"};
+  if (hrmAFaire(p)) return '<span class="hmk avo">à faire</span>';
+  if (p.statut === "confirmee" && p.fait) return '<span class="hmk st">fait ' + hrmIl(p.fait) + '</span>';
   return p.statut === "attente" ? "" : '<span class="hmk st">' + (L[p.statut] || p.statut) +
     (p.decideAt ? " " + hrmIl(p.decideAt) : "") + (p.restaure ? " · ancienne version remise" : "") + '</span>';
 }
 function hrmResume(p){
+  if (p.kind === "decision" || p.kind === "avis")
+    return [p.kind === "avis" ? (p.cible ? "Sur Noureddine SMART AI" : "Sur l'Atelier en direct") + (p.titre && p.ref && p.titre !== p.ref ? " : " + p.ref : "") : "",
+            p.impact !== undefined && p.impact !== "" ? "Impact " + hrmImpact(p.impact) : "",
+            p.urgence ? HRM_URG[p.urgence] : "", p.conf ? HRM_CONF[p.conf] : ""].filter(Boolean).join(" · ");
   if (p.kind === "achat"){
     const a = p.apres || {}, b = p.avant;
     return (b ? "Total " + hrmTotA(b) + " → " + hrmTotA(a) : (a.lignes || []).length + " ligne" + ((a.lignes || []).length > 1 ? "s" : "") + " · " + hrmTotA(a));
@@ -22834,29 +22991,335 @@ async function hrmConfirmerCorrige(id){
 function renderHrm(){
   const body = $("hmBody");
   if (!body) return;
-  if (!hrmAllowed()){ body.innerHTML = '<div class="empty">Page réservée à Noureddine.</div>'; return; }
+  if (!hrmAllowed()){
+    if (hclAllowed()){ body.innerHTML = hclVue(true); return; }   /* v15.05 : Imane, lecture du journal seulement */
+    body.innerHTML = '<div class="empty">Page réservée à Noureddine.</div>'; return;
+  }
   const p = HRM_OUV ? hrmTrouve(HRM_OUV) : null;
   if (p){ body.innerHTML = hrmDetail(p); return; }
   HRM_OUV = "";
-  const att = hrmAttente(), conf = HRM.liste.filter(x => x && x.statut === "confirmee"),
-        ref = HRM.liste.filter(x => x && x.statut !== "attente" && x.statut !== "confirmee");
-  const L = (HRM_TAB === "confirmee" ? conf : HRM_TAB === "refusee" ? ref : att)
+  let h = (HM ? '<div class="hmwarn">Mode Hermes : tu écris tes cartes et tes propositions ici. Noureddine seul confirme.</div>' : '') +
+    hrmRapportHtml() + hrmGrille() + (HM ? hrmAjouts() : '') + (HM && HRM_FORM ? hrmFormHtml() : '');
+  if (HRM_VUE === "clients"){ body.innerHTML = h + hclVue(false); return; }
+  if (HRM_VUE === "rapports"){ body.innerHTML = h + hrmRapportsHtml(); return; }
+  const cat = x => x && (!HRM_CAT || x.kind === HRM_CAT);
+  const att = hrmAttente().filter(cat), afa = HRM.liste.filter(x => cat(x) && hrmAFaire(x)),
+        rfa = HRM.liste.filter(x => cat(x) && x.statut === "refaire"),
+        conf = HRM.liste.filter(x => cat(x) && x.statut === "confirmee"),
+        ref = HRM.liste.filter(x => cat(x) && (x.statut === "refusee" || x.statut === "annulee"));
+  const L = (HRM_TAB === "confirmee" ? conf : HRM_TAB === "refusee" ? ref : HRM_TAB === "refaire" ? rfa : HRM_TAB === "afaire" ? afa : att)
     .slice().sort((a, b) => (b.maj || 0) - (a.maj || 0));
   const tab = (k, lab, n) => '<button type="button" data-hmtab="' + k + '" aria-pressed="' + (HRM_TAB === k) + '">' + lab + ' ' + n + '</button>';
-  body.innerHTML = (HM ? '<div class="hmwarn">Mode Hermes : tu vois tes propositions et les décisions de Noureddine. Tu ne peux rien confirmer.</div>' : '') +
-    '<div class="hmtabs">' + tab("attente", "À valider", att.length) + tab("confirmee", "Confirmées", conf.length) + tab("refusee", "Refusées", ref.length) + '</div>' +
+  body.innerHTML = h +
+    '<div class="hmtabs">' + tab("attente", "À valider", att.length) + tab("refaire", "À refaire", rfa.length) + tab("afaire", "À faire", afa.length) +
+      tab("confirmee", "Confirmées", conf.length) + tab("refusee", "Refusées", ref.length) + '</div>' +
     (L.length ? L.map(x => '<button type="button" class="hmc" data-hmopen="' + esc(x.id) + '">' + hrmKind(x) + hrmStatut(x) +
+        (x.urgence === "auj" && x.statut === "attente" ? '<span class="hmk urg">urgent</span>' : '') +
         '<small style="display:inline">' + hrmIl(x.at) + '</small><br>' +
-        '<b>' + esc((x.numFinal || x.num || "") + " · " + (x.nom || "")) + '</b>' +
+        '<b>' + esc(hrmTitre(x)) + '</b>' +
         '<small>' + esc(hrmResume(x)) + '</small>' + hrmCarteAlerte(x) +
         (x.note ? '<small>💬 ' + esc(String(x.note).slice(0, 140)) + '</small>' : '') +
         (x.raison ? '<small>Raison de Noureddine : ' + esc(String(x.raison).slice(0, 140)) + '</small>' : '') +
         (x.corr && x.corr.length ? '<small>✏️ Corrigé par Noureddine : ' + esc(hrmCorrTxt(x)) + '</small>' : '') +
         (x.msgFinal && x.statut !== "attente" ? '<small>📩 ' + esc(String(x.msgFinal).slice(0, 140)) + '</small>' : '') + '</button>').join("")
       : '<div class="empty">' + (HRM_TAB === "attente" ? "Aucune proposition en attente." : "Rien ici pour le moment.") + '</div>') +
-    '<p class="hmmut">Hermes lit toute l\'app mais ne change jamais un vrai bon : chaque devis ou bon d\'achat qu\'il enregistre arrive ici. Rien ne bouge avant ta confirmation.</p>' + hrmSeuilsHtml();
+    '<p class="hmmut">Hermes lit toute l\'app mais ne change jamais un vrai bon : ses devis, bons d\'achat, décisions et avis arrivent ici. Rien ne bouge avant ta confirmation.</p>' + hrmSeuilsHtml();
+}
+/* ---------- v15.05 : rapport du directeur, tuiles, ajouts d'Hermes ---------- */
+function hrmJour(iso){ const a = jourISO(new Date()); return iso === a ? "aujourd'hui" : iso === jourISO(new Date(Date.now() - 86400000)) ? "hier" : "le " + depDateFr(iso); }
+function hrmRapportCorps(r){
+  const sec = (t, v) => v ? '<div class="hms"><b>' + t + '</b>' + esc(v) + '</div>' : '';
+  return sec("Situation", r.situation) + sec("Mes 3 décisions clés", r.decisions) + sec("Risques", r.risques) + sec("Ce que j'attends de toi", r.attentes);
+}
+function hrmRapportHtml(){
+  const R = (HRM.rapports || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const r = R[0];
+  if (!r) return '<div class="hmrap"><h3>📋 Rapport du directeur</h3><span class="hmmut">Pas encore de rapport. Hermes l\'écrit chaque matin à 10 h.</span></div>';
+  const vieux = r.date !== jourISO(new Date());
+  return '<div class="hmrap"><h3>📋 Rapport du directeur · ' + hrmJour(r.date) + '</h3>' +
+    (vieux ? '<span class="hmrouge2" style="font-size:12.5px">Pas de rapport aujourd\'hui : voici le dernier.</span>' : '<span class="hmmut">écrit ' + hrmIl(r.at || r.maj) + '</span>') +
+    hrmRapportCorps(r) + '</div>';
+}
+function hrmRapportsHtml(){
+  const R = (HRM.rapports || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(1);
+  return '<h3 style="margin:4px 0 8px">Rapports précédents (30 jours)</h3>' + (R.length ? R.map(r =>
+    '<details class="hmfiche"><summary><b>' + esc(hrmJour(r.date)) + '</b><small class="hmmut">' + esc(String(r.situation || "").slice(0, 90)) + '</small></summary><div class="hmfb">' + hrmRapportCorps(r) + '</div></details>').join("")
+    : '<div class="empty">Pas encore d\'anciens rapports.</div>');
+}
+function hrmGrille(){
+  const n = k => HRM.liste.filter(x => x && x.kind === k && x.statut === "attente").length;
+  const chauds = HCL.clients.filter(x => x && x.temp === "chaud").length;
+  const R = (HRM.rapports || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const b = (k, v, lab, on) => '<button type="button" ' + k + ' aria-pressed="' + on + '"><b>' + v + '</b>' + lab + '</button>';
+  const c = (k, lab) => b('data-hmcat="' + k + '"', n(k), lab, HRM_VUE === "cartes" && HRM_CAT === k);
+  return '<div class="hmgrid">' + c("devis", "Devis") + c("achat", "Achats") + c("decision", "Décisions") + c("avis", "Avis") +
+    b('data-hmvue="clients"', chauds ? "🔥" + chauds : HCL.clients.length, "Journal clients", HRM_VUE === "clients") +
+    b('data-hmvue="rapports"', R.length, "Rapports", HRM_VUE === "rapports") + '</div>' +
+    (HRM_VUE !== "cartes" || HRM_CAT ? '<div class="hmadd"><button type="button" data-hmcat="">← Toutes les cartes</button></div>' : '');
+}
+function hrmAjouts(){
+  const b = (k, lab) => '<button type="button" ' + k + '>' + lab + '</button>';
+  return '<div class="hmadd">' + b('data-hmnewdv="1"', "➕ Nouveau devis") + b('data-hmnewba="1"', "➕ Nouveau bon d'achat") +
+    b('data-hmform="decision"', "➕ Décision") + b('data-hmform="avis"', "➕ Avis") + b('data-hmform="rapport"', "➕ Rapport") +
+    b('data-hmform="client"', "➕ Fiche client") + b('data-hmform="lot"', "📥 Coller un lot") + '</div>';
+}
+/* ---------- v15.05 : formulaires d'Hermes ---------- */
+function hrmFv(k, d){ return HRM_FV[k] !== undefined ? HRM_FV[k] : (d === undefined ? "" : d); }
+function hrmChamp(k, lab, opt){
+  opt = opt || {};
+  const v = hrmFv(k);
+  if (opt.sel) return '<label class="hmmut">' + lab + '<select data-hf="' + k + '">' + opt.sel.map(o => '<option value="' + esc(o[0]) + '"' + (String(v) === String(o[0]) ? " selected" : "") + '>' + esc(o[1]) + '</option>').join("") + '</select></label>';
+  if (opt.ligne) return '<label class="hmmut">' + lab + '<input class="hmta hmin" data-hf="' + k + '" value="' + esc(v) + '"' + (opt.ph ? ' placeholder="' + esc(opt.ph) + '"' : '') + '></label>';
+  return '<label class="hmmut">' + lab + '<textarea class="hmta" data-hf="' + k + '"' + (opt.ph ? ' placeholder="' + esc(opt.ph) + '"' : '') + '>' + esc(v) + '</textarea></label>';
+}
+function hrmDecListe(){
+  let N = null;
+  try { N = nouObtenir(); } catch(e){}
+  return ((N && N.dec) || []).map(x => [x.k, ((x.ico || "") + " " + x.t).trim(), x.t]);
+}
+function hrmFormHtml(){
+  const f = HRM_FORM, urg = [["auj", "aujourd'hui"], ["sem", "cette semaine"], ["tard", "plus tard"]],
+        conf = [["sur", "sûr"], ["probable", "probable"], ["verifier", "à vérifier"]];
+  let h = '<div class="hmform">';
+  if (f === "decision" || f === "avis"){
+    h += '<b>' + (HRM_FORM_ID ? "✏️ Modifier la carte" : f === "decision" ? "➕ Ma décision" : "➕ Mon avis") + '</b>';
+    if (f === "avis"){
+      const D = hrmDecListe();
+      h += hrmChamp("cible", "Sur quoi", {sel:[["", "— choisis —"]].concat(D).concat([["atelier", "Une remarque de l'Atelier en direct"]])}) +
+        hrmChamp("ref", "La décision ou la remarque (texte)", {ligne:true}) +
+        hrmChamp("verdict", "Mon verdict", {sel:[["oui", HRM_VERD.oui], ["non", HRM_VERD.non], ["autre", HRM_VERD.autre]]}) +
+        hrmChamp("note", "Mon raisonnement", {ph:"Pourquoi, avec les chiffres"});
+    } else {
+      h += hrmChamp("titre", "Titre", {ligne:true}) + hrmChamp("note", "Pourquoi", {ph:"Les chiffres qui te font décider"});
+    }
+    h += hrmChamp("impact", "Impact en DH", {ligne:true, ph:"ex. 4500 ou −1200"}) + hrmChamp("urgence", "Urgence", {sel:urg}) +
+      hrmChamp("conf", "Confiance", {sel:conf}) + hrmChamp("sources", "Sources", {ph:"Trésorerie, ventes d'octobre, prix fournisseur…"}) +
+      hrmChamp("action", f === "avis" ? "Ce qu'il faut faire (pour « Oui mais autrement » : ta version)" : "Action concrète");
+  } else if (f === "rapport"){
+    h += '<b>📋 Rapport du jour</b>' + hrmChamp("situation", "Situation (caisse, banque, ventes d'hier, devis chauds)") +
+      hrmChamp("decisions", "Mes 3 décisions clés") + hrmChamp("risques", "Risques (TVA, fournisseurs, retards atelier)") + hrmChamp("attentes", "Ce que j'attends de Noureddine");
+  } else if (f === "client"){
+    h += '<b>👤 Fiche client</b>' + hrmChamp("tel", "Téléphone", {ligne:true}) + hrmChamp("nom", "Nom", {ligne:true}) +
+      hrmChamp("langue", "Langue", {sel:[["fr", "français"], ["darija", "darija"], ["ar", "arabe"]]}) +
+      hrmChamp("temp", "Température", {sel:[["chaud", "🔥 chaud"], ["tiede", "tiède"], ["froid", "froid"], ["gagne", "gagné"], ["perdu", "perdu"]]}) +
+      hrmChamp("demande", "Ce qu'il demande") + hrmChamp("reponse", "Ce que le bot a répondu") + hrmChamp("prix", "Prix donnés", {ligne:true}) + hrmChamp("suite", "Prochaine étape", {ligne:true});
+  } else if (f === "lot"){
+    h += '<b>📥 Coller un lot (JSON)</b><span class="hmmut">Un objet avec « rapport », « cartes » et « clients ». Chaque élément est vérifié : les mauvais sont refusés, les bons ajoutés.</span>' +
+      '<textarea class="hmta" style="min-height:160px; font-family:monospace; font-size:12.5px" data-hf="lot" placeholder=\'{"rapport":{...}, "cartes":[...], "clients":[...]}\'>' + esc(hrmFv("lot")) + '</textarea>' +
+      (HRM_LOTRES ? '<div class="hmwhy hmpre">' + esc(HRM_LOTRES) + '</div>' : '') +
+      '<div class="hmbtns"><button type="button" class="hmok" data-hmlot="1">Vérifier et ajouter</button><button type="button" data-hmfback="1">Fermer</button></div></div>';
+    return h;
+  }
+  return h + '<div class="hmbtns"><button type="button" class="hmok" data-hmfsave="1">Enregistrer</button><button type="button" data-hmfback="1">Annuler</button></div></div>';
+}
+function hrmSans(t){ return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim(); }
+function hrmSlug(t){ return hrmSans(t).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60); }
+function hrmNormUrg(v){ const t = hrmSans(v); return /^auj|today|urgent/.test(t) ? "auj" : /^tard|plus tard|later/.test(t) ? "tard" : /^sem|cette semaine|week/.test(t) ? "sem" : ""; }
+function hrmNormConf(v){ const t = hrmSans(v); return /^sur|^certain/.test(t) ? "sur" : /^prob/.test(t) ? "probable" : /verif/.test(t) ? "verifier" : ""; }
+function hrmNormVerd(v){ const t = hrmSans(v); return /^(oui mais|autre|✏)/.test(t) ? "autre" : /^(oui|vaut|✅)/.test(t) ? "oui" : /^(non|❌|ne vaut)/.test(t) ? "non" : ""; }
+function hrmTxt(v, n){ return v === undefined || v === null ? "" : String(v).trim().slice(0, n || 1500); }
+/* vérifie une carte écrite par Hermes ; renvoie {c} ou {err} */
+function hrmValide(raw){
+  if (!raw || typeof raw !== "object") return {err:"ce n'est pas un objet"};
+  const type = hrmSans(raw.type || raw.kind);
+  if (type !== "decision" && type !== "avis") return {err:"type doit être « decision » ou « avis »"};
+  const c = {kind:type, note:hrmTxt(raw.pourquoi !== undefined ? raw.pourquoi : raw.raisonnement !== undefined ? raw.raisonnement : raw.note),
+             sources:hrmTxt(raw.sources, 600), action:hrmTxt(raw.action), titre:hrmTxt(raw.titre, 160)};
+  const imp = raw.impact;
+  if (typeof imp === "number" && isFinite(imp)) c.impact = imp;
+  else if (imp !== undefined && imp !== null && String(imp).trim() !== ""){
+    const n = parseFloat(String(imp).replace(/\s/g, "").replace(",", ".").replace(/[^\d.\-−]/g, "").replace("−", "-"));
+    c.impact = /^[\s\d.,\-−]+(dh|mad)?\s*$/i.test(String(imp).trim()) && isFinite(n) ? n : hrmTxt(imp, 120);
+  }
+  c.urgence = hrmNormUrg(raw.urgence) || "sem";
+  c.conf = hrmNormConf(raw.confiance !== undefined ? raw.confiance : raw.conf) || "probable";
+  if (!c.note) return {err:"il manque « pourquoi »"};
+  if (type === "decision"){
+    if (!c.titre) return {err:"il manque « titre »"};
+    if (!c.action) return {err:"il manque « action »"};
+  } else {
+    c.verdict = hrmNormVerd(raw.verdict);
+    if (!c.verdict) return {err:"verdict doit être oui, non ou autre"};
+    const cible = hrmTxt(raw.cible, 200), src = hrmSans(raw.src || raw.source || "");
+    c.ref = hrmTxt(raw.ref || raw.remarque || "", 200);
+    if (cible && cible !== "atelier"){
+      let D = [];
+      try { const N = nouObtenir(); D = (N && N.dec) || []; } catch(e){}
+      const x = D.find(y => y.k === cible) || D.find(y => nouBase(y.k) === nouBase(cible));
+      if (!x) return {err:"décision « " + cible + " » introuvable dans Noureddine SMART AI (prends la clé dans ➕ Avis)"};
+      c.cible = x.k; c.ref = c.ref || x.t;
+    } else if (cible === "atelier" || /atelier/.test(src)){
+      if (!c.ref) return {err:"il manque « ref » : le texte de la remarque de l'atelier"};
+      c.src = "atelier";
+    } else return {err:"il manque « cible » (clé de la décision) ou src « atelier »"};
+    if (c.verdict === "autre" && !c.action) return {err:"« Oui mais autrement » : écris ta version dans « action »"};
+    c.titre = c.titre || c.ref;
+  }
+  c.sujet = hrmTxt(raw.sujet, 120) || (type === "avis" ? "avis:" + (c.cible ? nouBase(c.cible) : "atelier:" + hrmSlug(c.ref)) : "dec:" + hrmSlug(c.titre));
+  return {c:c};
+}
+/* une carte par sujet : Hermes met à jour la même carte (version + 1 si elle était « à refaire ») */
+function hrmAjouteCarte(c, id){
+  let p = id ? hrmTrouve(id) : null;
+  if (p && !(p.statut === "attente" || p.statut === "refaire")) p = null;
+  if (!p) p = HRM.liste.find(x => x && x.kind === c.kind && x.sujet === c.sujet && x.statut === "attente") ||
+              HRM.liste.find(x => x && x.kind === c.kind && x.sujet === c.sujet && x.statut === "refaire") || null;
+  const neuve = !p;
+  if (neuve) p = {id:achUid("hp"), at:Date.now(), statut:"attente", v:1};
+  else if (p.statut === "refaire") hrmRouvre(p);
+  ["cible", "src", "verdict", "ref", "impact", "actionFinale"].forEach(k => delete p[k]);
+  Object.assign(p, c);
+  p.maj = Date.now();
+  if (neuve) HRM.liste.push(p);
+  return {p:p, neuve:neuve};
+}
+function hrmAjouteRapport(raw){
+  if (!raw || typeof raw !== "object") return {err:"rapport illisible"};
+  const r = {situation:hrmTxt(raw.situation, 3000), decisions:hrmTxt(raw.decisions, 3000), risques:hrmTxt(raw.risques, 3000), attentes:hrmTxt(raw.attentes, 3000)};
+  if (!r.situation && !r.decisions) return {err:"rapport : il manque « situation » ou « decisions »"};
+  r.date = /^\d{4}-\d{2}-\d{2}$/.test(String(raw.date || "")) ? raw.date : jourISO(new Date());
+  r.id = "rap" + r.date; r.at = Date.now(); r.maj = Date.now();
+  HRM.rapports = (HRM.rapports || []).filter(x => x && x.id !== r.id).concat([r]);
+  return {r:r};
+}
+function hclAjoute(raw){
+  if (!raw || typeof raw !== "object") return {err:"fiche illisible"};
+  const k = hclK(raw.tel || raw.telephone);
+  if (!k) return {err:"téléphone manquant ou trop court"};
+  const temp = {chaud:"chaud", tiede:"tiede", froid:"froid", gagne:"gagne", perdu:"perdu"}[hrmSans(raw.temp || raw.temperature).replace(/[^a-z]/g, "")] || "";
+  const l = {at:Date.now(), demande:hrmTxt(raw.demande, 800), reponse:hrmTxt(raw.reponse, 800), prix:hrmTxt(raw.prix, 300), suite:hrmTxt(raw.suite, 300)};
+  if (!l.demande && !l.reponse && !l.suite) return {err:"fiche " + k + " : il manque « demande » ou « reponse »"};
+  const id = "c" + k;
+  let c = HCL.clients.find(x => x && x.id === id);
+  if (!c){ c = {id:id, tel:hrmTxt(raw.tel || raw.telephone, 30), lignes:[]}; HCL.clients.push(c); }
+  if (hrmTxt(raw.nom)) c.nom = hrmTxt(raw.nom, 80);
+  const lg = hrmSans(raw.langue || raw.lang);
+  if (lg) c.langue = /dar/.test(lg) ? "darija" : /^ar/.test(lg) ? "ar" : "fr";
+  if (temp) c.temp = temp; else if (!c.temp) c.temp = "tiede";
+  if (!Array.isArray(c.lignes)) c.lignes = [];
+  c.lignes.push(l);
+  c.maj = Date.now();
+  return {c:c};
+}
+function hrmLot(txt){
+  let j;
+  try { j = JSON.parse(String(txt || "").trim()); } catch(e){ return "❌ JSON illisible : " + e.message; }
+  if (Array.isArray(j)) j = {cartes:j};
+  if (!j || typeof j !== "object") return "❌ Il faut un objet {\"rapport\", \"cartes\", \"clients\"}";
+  const ok = [], ko = [];
+  let hrm = false, hcl = false;
+  if (j.rapport){ const r = hrmAjouteRapport(j.rapport); if (r.err) ko.push(r.err); else { ok.push("rapport du " + depDateFr(r.r.date)); hrm = true; } }
+  (Array.isArray(j.cartes) ? j.cartes : []).forEach((x, i) => {
+    const v = hrmValide(x);
+    if (v.err){ ko.push("carte " + (i + 1) + " : " + v.err); return; }
+    const a = hrmAjouteCarte(v.c); hrm = true;
+    ok.push((a.neuve ? (v.c.kind === "avis" ? "nouvel " : "nouvelle ") : "mise à jour ") + (v.c.kind === "avis" ? "avis" : "décision") + " « " + (v.c.titre || "").slice(0, 50) + " »");
+  });
+  (Array.isArray(j.clients) ? j.clients : []).forEach((x, i) => {
+    const v = hclAjoute(x);
+    if (v.err){ ko.push("client " + (i + 1) + " : " + v.err); return; }
+    hcl = true; ok.push("fiche " + (v.c.nom || v.c.tel));
+  });
+  if (hrm) hrmSave();
+  if (hcl) hclSave();
+  return (ok.length ? "✅ " + ok.length + " ajouté(s) : " + ok.join(" · ") : "Rien ajouté.") + (ko.length ? "\n❌ " + ko.length + " refusé(s) :\n" + ko.join("\n") : "");
+}
+function hrmFormSave(){
+  const f = HRM_FORM, v = Object.assign({}, HRM_FV);
+  if (f === "decision" || f === "avis"){
+    const raw = Object.assign({type:f}, v);
+    if (f === "avis" && v.cible === "atelier"){ raw.cible = ""; raw.src = "atelier"; }
+    if (HRM_FORM_ID){ const o = hrmTrouve(HRM_FORM_ID); if (o && o.sujet) raw.sujet = o.sujet; }
+    const r = hrmValide(raw);
+    if (r.err){ toast("Pas enregistré : " + r.err); return; }
+    const a = hrmAjouteCarte(r.c, HRM_FORM_ID);
+    hrmSave(); toast(a.neuve ? "Carte ajoutée : Noureddine doit la valider" : "Carte mise à jour");
+  } else if (f === "rapport"){
+    const r = hrmAjouteRapport(v);
+    if (r.err){ toast(r.err); return; }
+    hrmSave(); toast("Rapport enregistré");
+  } else if (f === "client"){
+    const r = hclAjoute(v);
+    if (r.err){ toast(r.err); return; }
+    hclSave(); toast("Fiche client enregistrée");
+  }
+  HRM_FORM = ""; HRM_FORM_ID = ""; HRM_FV = {};
+  renderHrm();
+}
+/* ---------- v15.05 : le journal clients ---------- */
+const HCL_TEMP_L = {chaud:"🔥 chaud", tiede:"tiède", froid:"froid", gagne:"✅ gagné", perdu:"perdu"};
+const HCL_LANG_L = {fr:"français", darija:"darija", ar:"arabe"};
+function hclVue(lecture){
+  const T = ["", "chaud", "tiede", "froid", "gagne", "perdu"];
+  const L = HCL.clients.filter(c => c && (!HCL_TEMP || c.temp === HCL_TEMP))
+    .sort((a, b) => (b.maj || 0) - (a.maj || 0));
+  const ord = (ORDERS || []);
+  return (lecture ? '<p class="hmmut" style="margin-top:0">Ce que le bot Clients a fait avec chaque client, écrit par Hermes. Lecture seule.</p>' : '<h3 style="margin:4px 0 8px">Journal clients</h3>') +
+    '<div class="hmtabs">' + T.map(t => '<button type="button" data-hmtemp="' + t + '" aria-pressed="' + (HCL_TEMP === t) + '">' +
+      (t ? HCL_TEMP_L[t] : "Tous") + ' ' + HCL.clients.filter(c => c && (!t || c.temp === t)).length + '</button>').join("") + '</div>' +
+    (L.length ? L.map(c => {
+      const k = hclK(c.tel), lig = (c.lignes || []).slice().reverse(), der = lig[0];
+      const dv = k ? ord.filter(o => o && o.num && o.tel && hclK(o.tel) === k) : [];
+      const pr = k && typeof PROS !== "undefined" ? (PROS || []).find(x => x && x.tel && hclK(x.tel) === k) : null;
+      return '<details class="hmfiche"><summary><span class="hmk ' + ({chaud:"avn", gagne:"avo", perdu:"st"}[c.temp] || "dv") + '">' + (HCL_TEMP_L[c.temp] || "tiède") + '</span>' +
+        '<b>' + esc(c.nom || "Client sans nom") + '</b> <small class="hmmut" style="display:inline">' + esc(c.tel || "") + (c.langue ? " · " + (HCL_LANG_L[c.langue] || c.langue) : "") + '</small>' +
+        (der ? '<small class="hmmut">' + hrmIl(der.at) + (der.suite ? " · ➡ " + esc(der.suite) : der.demande ? " · " + esc(String(der.demande).slice(0, 90)) : "") + '</small>' : '') + '</summary>' +
+        '<div class="hmfb">' +
+        '<div class="hmmut">' + (dv.length ? "📄 Devis : " + dv.map(o => esc(o.num) + " (" + hrmTot(o) + ")").join(", ") : "Pas encore de devis à ce numéro") +
+          ' · ' + (pr ? "👤 Contact : " + esc(pr.nom || pr.tel) : "pas encore dans les contacts") + '</div>' +
+        lig.map(l => '<div class="hmfl"><small class="hmmut">' + esc(hrmIl(l.at)) + '</small>' +
+          (l.demande ? '<div>🗣 ' + esc(l.demande) + '</div>' : '') + (l.reponse ? '<div>🤖 ' + esc(l.reponse) + '</div>' : '') +
+          (l.prix ? '<div>💰 ' + esc(l.prix) + '</div>' : '') + (l.suite ? '<div>➡ ' + esc(l.suite) + '</div>' : '') + '</div>').join("") +
+        '</div></details>';
+    }).join("") : '<div class="empty">' + (HCL.clients.length ? "Aucun client dans ce filtre." : "Le journal est vide : Hermes l'écrit à partir des rapports du bot Clients.") + '</div>');
+}
+function hrmDetailNote(p){
+  let h = '<div style="margin-bottom:8px">' + hrmKind(p) + hrmStatut(p) + (p.urgence === "auj" ? '<span class="hmk urg">urgent</span>' : '') +
+    '<small class="hmmut" style="display:inline">' + hrmIl(p.at) + '</small></div>' +
+    '<h3 style="margin:4px 0 6px">' + esc(p.titre || p.ref || "") + '</h3>';
+  if (p.kind === "avis") h += '<div class="hmwhy">' + (p.cible ? "🧠 Décision de Noureddine SMART AI" : "🏭 Remarque de l'Atelier en direct") + ' :<br><b>' + esc(p.ref || "") + '</b>' +
+    (p.cible && HM ? '<br><small class="hmmut">clé : ' + esc(p.cible) + '</small>' : '') + '</div>';
+  const ligne = (t, v) => v ? '<div class="hmwhy hmpre"><b>' + t + '</b><br>' + esc(v) + '</div>' : '';
+  h += ligne(p.kind === "avis" ? "Raisonnement" : "Pourquoi", p.note);
+  h += '<div class="hmwhy">' + [p.impact !== undefined && p.impact !== "" ? "💰 Impact : <b>" + esc(hrmImpact(p.impact)) + "</b>" : "",
+        "⏱ Urgence : <b>" + esc(HRM_URG[p.urgence] || "cette semaine") + "</b>", "🎯 Confiance : <b>" + esc(HRM_CONF[p.conf] || "probable") + "</b>"].filter(Boolean).join("<br>") + '</div>';
+  h += ligne("Sources", p.sources);
+  h += ligne(p.kind === "avis" && p.verdict === "autre" ? "Sa version" : "Action", p.action);
+  if (p.actionFinale) h += ligne("✏️ Ta version (corrigée)", p.actionFinale);
+  if (p.consigne) h += ligne("Ta dernière demande de modif", p.consigne);
+  if (p.raison) h += ligne(p.statut === "refaire" ? "💬 Ce que Noureddine demande de changer" : "Raison de Noureddine", p.raison);
+  if (p.trs) h += '<div class="hmwhy">Trésorerie : décision notée <b>' + (p.trs === "ign" ? "Ignorer" : "Fait") + '</b>' + (p.verdict !== "oui" ? " + mémo pour Noureddine SMART AI" : "") + '</div>';
+  if (HM){
+    if (p.statut === "attente" || p.statut === "refaire")
+      h += '<div class="hmcol"><button type="button" data-hmfedit="' + esc(p.id) + '">✏️ Modifier la carte' + (p.statut === "refaire" ? " (elle repart à Noureddine)" : "") + '</button>' +
+        '<button type="button" data-hmcancel="' + esc(p.id) + '">Annuler ma carte</button></div>';
+    return h;
+  }
+  if (p.statut === "attente") h += hrmBoutons(p);
+  if (hrmAFaire(p)) h += '<div class="hmbtns"><button type="button" class="hmok" data-hmfait="' + esc(p.id) + '">✔ C\'est fait</button></div>';
+  return h;
+}
+/* les 4 boutons de Noureddine, sur chaque carte */
+function hrmBoutons(p){
+  if (HRM_MOD === p.id)
+    return '<textarea class="hmta" id="hmModT" data-hmmodt="1" placeholder="Ce qu\'Hermes doit changer (il refait la même carte)">' + esc(HRM_MODTXT) + '</textarea>' +
+      '<div class="hmbtns"><button type="button" class="hmok" data-hmmodgo="' + esc(p.id) + '">💬 Envoyer à Hermes</button><button type="button" data-hmmodback="1">Retour</button></div>';
+  if (HRM_REF === p.id)
+    return '<textarea class="hmta" id="hmRaison" placeholder="Pourquoi tu refuses ? (Hermes la lira)"></textarea>' +
+      '<div class="hmbtns"><button type="button" data-hmnogo="' + esc(p.id) + '">❌ Refuser la proposition</button><button type="button" data-hmnoback="1">Retour</button></div>';
+  if (HRM_COR === p.id && p.kind === "devis") return hrmCorrHtml(p);
+  if (HRM_CORN === p.id)
+    return '<div class="hmcorr"><b>✏️ Ta version</b><span class="hmmut">Elle remplace l\'action d\'Hermes, puis la carte est confirmée.</span>' +
+      '<textarea class="hmta" id="hmCornT" data-hmcornt="1">' + esc(HRM_CORNTXT) + '</textarea></div>' +
+      '<div class="hmbtns"><button type="button" class="hmok" data-hmcornok="' + esc(p.id) + '">✅ Confirmer ma version</button><button type="button" data-hmcorback="1">Retour</button></div>';
+  const cor = p.kind === "devis" ? 'data-hmcor="' : p.kind === "achat" ? 'data-hmcorach="' : 'data-hmcorn="';
+  return '<div class="hmbtns"><button type="button" class="hmok" data-hmok="' + esc(p.id) + '">✅ Confirmer</button>' +
+    '<button type="button" data-hmno="' + esc(p.id) + '">❌ Refuser</button></div>' +
+    '<div class="hmcol"><button type="button" ' + cor + esc(p.id) + '">' + (p.kind === "achat" ? "✏️ Confirmer puis ouvrir le bon pour corriger" : "✏️ Corriger puis confirmer") + '</button>' +
+    '<button type="button" data-hmmod="' + esc(p.id) + '">💬 Demander une modif à Hermes</button></div>';
 }
 function hrmDetail(p){
+  if (p.kind === "decision" || p.kind === "avis") return hrmDetailNote(p);
   let h = '<div style="margin-bottom:8px">' + hrmKind(p) + hrmStatut(p) + '<small class="hmmut" style="display:inline">' + hrmIl(p.at) + '</small></div>' +
     '<h3 style="margin:4px 0 6px">' + esc((p.numFinal || p.num || "") + " · " + (p.nom || "")) + '</h3>';
   if (p.kind === "devis" && p.statut === "attente"){
@@ -22890,6 +23353,9 @@ function hrmDetail(p){
     h += '<details class="hmdet"><summary>Voir le devis complet (version Hermes)</summary><div class="hmwhy">' +
       esc(p.apres && p.apres.nom || "") + ' · total ' + hrmTot(p.apres) + hrmLignes(p.apres) + '</div></details>';
   }
+  if (p.consigne) h += '<div class="hmwhy">Ta dernière demande de modif : ' + esc(p.consigne) + '</div>';
+  if (HM && p.statut === "refaire")
+    h += '<div class="hmwarn">À refaire. ' + (p.kind === "achat" ? "Ouvre ce bon d'achat dans Achats" : "Ouvre ce devis") + ', corrige-le et enregistre : la même carte repart à Noureddine (version ' + ((p.v || 1) + 1) + ').</div>';
   if (HM && p.statut === "attente"){
     h += '<label class="hmmut" for="hmPourquoi" style="margin-top:10px">Pourquoi (pour Noureddine)</label>' +
       '<textarea class="hmta" id="hmPourquoi" data-hmwhy="' + esc(p.id) + '">' + esc(p.note || "") + '</textarea>' +
@@ -22899,7 +23365,7 @@ function hrmDetail(p){
   } else if (p.note){
     h += '<div class="hmwhy">💬 Pourquoi : ' + esc(p.note) + '</div>';
   }
-  if (p.raison) h += '<div class="hmwhy">Raison de Noureddine : ' + esc(p.raison) + '</div>';
+  if (p.raison) h += '<div class="hmwhy">' + (p.statut === "refaire" ? "💬 Ce que Noureddine demande de changer : " : "Raison de Noureddine : ") + esc(p.raison) + '</div>';
   if (p.corr && p.corr.length) h += '<div class="hmwhy">✏️ Corrigé par Noureddine : ' + esc(hrmCorrTxt(p)) + '</div>';
   if (p.statut !== "attente" && p.msgFinal)
     h += '<div class="hmwhy">📩 ' + (p.statut === "confirmee" ? "Message validé par Noureddine, à envoyer tel quel" : "Message de Noureddine pour le client") + ' :<br><b>' + esc(p.msgFinal) + '</b></div>';
@@ -22910,15 +23376,8 @@ function hrmDetail(p){
     if (conflit){
       h += '<div class="hmcol"><button type="button" data-hmredo="' + esc(p.id) + '">🔄 Demander à Hermes de refaire</button>' +
         '<button type="button" data-hmkeep="' + esc(p.id) + '">Garder la version actuelle</button></div>';
-    } else if (HRM_REF === p.id){
-      h += '<textarea class="hmta" id="hmRaison" placeholder="Pourquoi tu refuses ? (Hermes la lira)"></textarea>' +
-        '<div class="hmbtns"><button type="button" data-hmnogo="' + esc(p.id) + '">❌ Refuser la proposition</button><button type="button" data-hmnoback="1">Retour</button></div>';
-    } else if (HRM_COR === p.id){
-      h += hrmCorrHtml(p);
     } else {
-      h += '<div class="hmbtns"><button type="button" class="hmok" data-hmok="' + esc(p.id) + '">✅ Confirmer</button>' +
-        '<button type="button" data-hmno="' + esc(p.id) + '">❌ Refuser</button></div>' +
-        (p.kind === "devis" ? '<div class="hmcol"><button type="button" data-hmcor="' + esc(p.id) + '">✏️ Corriger puis confirmer</button></div>' : '');
+      h += hrmBoutons(p);
     }
   }
   if (!HM && p.statut === "confirmee" && !p.restaure && (p.kind === "achat" || p.ancienne))
@@ -22929,15 +23388,17 @@ function hrmOuvrir(id){
   const p = hrmTrouve(id);
   if (!p || !hrmAllowed()) return;
   const m = $("hkModal"); if (m) m.hidden = true;
-  HRM_OUV = id; HRM_REF = ""; HRM_COR = ""; HRM_CORV = {};
-  HRM_TAB = p.statut === "attente" ? "attente" : p.statut === "confirmee" ? "confirmee" : "refusee";
+  HRM_OUV = id; HRM_REF = ""; HRM_COR = ""; HRM_CORV = {}; HRM_MOD = ""; HRM_CORN = "";
+  HRM_TAB = p.statut === "attente" ? "attente" : p.statut === "refaire" ? "refaire" : hrmAFaire(p) ? "afaire" : p.statut === "confirmee" ? "confirmee" : "refusee";
   nav("hmSheet"); renderHrm();
   $("hmSheet").querySelector(".sheet-body").scrollTop = 0;
 }
 $("tileHrm").addEventListener("click", () => {
-  if (!hrmAllowed()) return;
+  if (!hclAllowed()) return;
   HRM_OUV = ""; HRM_REF = "";
   nav("hmSheet"); renderHrm();
+  pullHcl().then(b => { if (b){ renderHrm(); renderHrmTile(); } });   /* v15.05 */
+  if (!hrmAllowed()) return;
   pullHrm().then(b => { if (b){ renderHrm(); renderHrmTile(); } });
   try { if (coutAllowed()) pullNom().then(ok => { if (ok) renderHrm(); }); } catch(e){}   /* v15.04 : prix d'achat pour la marge */
 });
@@ -22953,20 +23414,74 @@ $("hmBody").addEventListener("click", e => {
   const ds = t.dataset;
   if (ds.hmtab){ HRM_TAB = ds.hmtab; renderHrm(); return; }
   if (ds.hmopen){ hrmOuvrir(ds.hmopen); return; }
+  if (ds.hmtemp !== undefined){ HCL_TEMP = ds.hmtemp; renderHrm(); return; }          /* v15.05 */
+  if (!hrmAllowed()) return;
+  if (ds.hmcat !== undefined){ HRM_VUE = "cartes"; HRM_CAT = ds.hmcat; renderHrm(); return; }
+  if (ds.hmvue){ HRM_VUE = HRM_VUE === ds.hmvue ? "cartes" : ds.hmvue; HRM_CAT = ""; renderHrm(); return; }
   if (HM){
     if (ds.hmcancel){
       const p = hrmTrouve(ds.hmcancel);
-      if (p && p.statut === "attente" && confirm("Annuler cette proposition ?")){ p.statut = "annulee"; p.decideAt = Date.now(); p.maj = Date.now(); HRM_OUV = ""; hrmSave(); }
+      if (p && (p.statut === "attente" || p.statut === "refaire") && confirm("Annuler cette proposition ?")){ p.statut = "annulee"; p.decideAt = Date.now(); p.maj = Date.now(); HRM_OUV = ""; hrmSave(); }
+    }
+    if (ds.hmform){ HRM_FORM = ds.hmform; HRM_FORM_ID = ""; HRM_FV = ds.hmform === "avis" ? {verdict:"oui", urgence:"sem", conf:"probable"} : ds.hmform === "decision" ? {urgence:"sem", conf:"probable"} : ds.hmform === "client" ? {langue:"fr", temp:"tiede"} : {}; HRM_LOTRES = ""; renderHrm(); return; }
+    if (ds.hmfedit){
+      const p = hrmTrouve(ds.hmfedit);
+      if (!p) return;
+      HRM_FORM = p.kind; HRM_FORM_ID = p.id; HRM_OUV = "";
+      HRM_FV = {titre:p.titre || "", note:p.note || "", impact:p.impact === undefined ? "" : String(p.impact), urgence:p.urgence || "sem", conf:p.conf || "probable",
+                sources:p.sources || "", action:p.action || "", verdict:p.verdict || "oui", cible:p.cible || (p.src === "atelier" ? "atelier" : ""), ref:p.ref || ""};
+      renderHrm(); $("hmSheet").querySelector(".sheet-body").scrollTop = 0; return;
+    }
+    if (ds.hmfback){ HRM_FORM = ""; HRM_FORM_ID = ""; HRM_FV = {}; HRM_LOTRES = ""; renderHrm(); return; }
+    if (ds.hmfsave){ hrmFormSave(); return; }
+    if (ds.hmlot){ HRM_LOTRES = hrmLot(HRM_FV.lot); if (/^✅/.test(HRM_LOTRES) && !/❌/.test(HRM_LOTRES)) HRM_FV.lot = ""; renderHrm(); return; }
+    if (ds.hmnewdv){ $("tileNew").click(); return; }
+    if (ds.hmnewba){
+      if (!achAllowed()){ toast("Achats non disponibles sur ce compte"); return; }
+      ACH_VUE = "liste"; ACH_FOUR_ED = null; nav("achSheet"); achNouveau([]);
+      toast("Nouveau bon d'achat : choisis le fournisseur et les lignes, il arrive dans l'Espace Hermes. Puis écris le « Pourquoi » dans la carte.");
+      pullAch().then(ch => { if (ch && ACH_VUE !== "ba") renderAch(); });
+      return;
     }
     return;
   }
+  if (ds.hmmod){ HRM_MOD = ds.hmmod; HRM_MODTXT = ""; HRM_REF = ""; HRM_COR = ""; HRM_CORN = ""; renderHrm(); const r = $("hmModT"); if (r) r.focus(); return; }
+  if (ds.hmmodback){ HRM_MOD = ""; renderHrm(); return; }
+  if (ds.hmmodgo){
+    const p = hrmTrouve(ds.hmmodgo), txt = String(HRM_MODTXT || "").trim();
+    if (!txt){ toast("Écris ce qu'Hermes doit changer"); return; }
+    if (p && p.statut === "attente"){ HRM_MOD = ""; HRM_MODTXT = ""; hrmMsgPrend(p, false); delete HRM_MSGTMP[p.id]; hrmDecide(p, "refaire", txt); toast("Envoyé : Hermes refera la même carte"); }
+    return;
+  }
+  if (ds.hmfait){
+    const p = hrmTrouve(ds.hmfait);
+    if (p && hrmAFaire(p)){ p.fait = Date.now(); p.maj = Date.now(); hrmSave(); toast("Noté comme fait"); }
+    return;
+  }
+  if (ds.hmcorn){ const p = hrmTrouve(ds.hmcorn); HRM_CORN = ds.hmcorn; HRM_CORNTXT = (p && (p.actionFinale || p.action)) || ""; HRM_MOD = ""; HRM_REF = ""; renderHrm(); const r = $("hmCornT"); if (r) r.focus(); return; }
+  if (ds.hmcornok){
+    const txt = String(HRM_CORNTXT || "").trim();
+    if (!txt){ toast("Écris ta version"); return; }
+    t.disabled = true; HRM_CORN = "";
+    hrmConfirmerNote(ds.hmcornok, txt).finally(() => renderHrm());
+    return;
+  }
+  if (ds.hmcorach){
+    const id = ds.hmcorach, p = hrmTrouve(id); t.disabled = true;
+    hrmConfirmer(id).finally(() => {
+      renderHrm();
+      if (p && p.statut === "confirmee"){ ACH_FOUR_ED = null; nav("achSheet"); achOuvre("ba", p.cible); toast("Bon d'achat confirmé : corrige-le ici"); }
+    });
+    return;
+  }
+  if (ds.hmok && (hrmTrouve(ds.hmok) || {}).kind in {decision:1, avis:1}){ t.disabled = true; hrmConfirmerNote(ds.hmok).finally(() => renderHrm()); return; }   /* v15.05 */
   if (ds.hmok){
     const p = hrmTrouve(ds.hmok); hrmMsgPrend(p, true); t.disabled = true;
     hrmConfirmer(ds.hmok).finally(() => { if (p && p.statut === "attente") delete p.msgFinal; else delete HRM_MSGTMP[ds.hmok]; renderHrm(); });
     return;
   }
   if (ds.hmcor){ HRM_COR = ds.hmcor; HRM_CORV = {}; HRM_REF = ""; renderHrm(); const i = document.querySelector("[data-hmcv]"); if (i) i.focus(); return; }
-  if (ds.hmcorback){ HRM_COR = ""; HRM_CORV = {}; renderHrm(); return; }
+  if (ds.hmcorback){ HRM_COR = ""; HRM_CORV = {}; HRM_CORN = ""; renderHrm(); return; }
   if (ds.hmcorok){ t.disabled = true; hrmConfirmerCorrige(ds.hmcorok).finally(() => { renderHrm(); }); return; }
   if (ds.hmreg){
     const m = parseFloat(String($("hmRegM").value).replace(",", ".")), r = parseFloat(String($("hmRegR").value).replace(",", "."));
@@ -22974,7 +23489,7 @@ $("hmBody").addEventListener("click", e => {
     HRM.reg = {margeMin:m, remiseMax:r, maj:Date.now()}; hrmSave(); toast("Seuils enregistrés");
     return;
   }
-  if (ds.hmno){ HRM_REF = ds.hmno; renderHrm(); const r = $("hmRaison"); if (r) r.focus(); return; }
+  if (ds.hmno){ HRM_REF = ds.hmno; HRM_MOD = ""; HRM_CORN = ""; renderHrm(); const r = $("hmRaison"); if (r) r.focus(); return; }
   if (ds.hmnoback){ HRM_REF = ""; renderHrm(); return; }
   if (ds.hmnogo){
     const p = hrmTrouve(ds.hmnogo), r = $("hmRaison");
@@ -22998,7 +23513,20 @@ $("hmBody").addEventListener("click", e => {
 $("hmBody").addEventListener("input", e => {   /* v15.04 : garde la saisie entre deux affichages */
   const t = e.target;
   if (t.dataset.hmmsgn) HRM_MSGTMP[t.dataset.hmmsgn] = t.value;
+  if (t.dataset.hf) HRM_FV[t.dataset.hf] = t.value;          /* v15.05 */
+  if (t.dataset.hmmodt) HRM_MODTXT = t.value;
+  if (t.dataset.hmcornt) HRM_CORNTXT = t.value;
   if (t.dataset.hmcv){ HRM_CORV[t.dataset.hmcv] = t.value; const p = hrmTrouve(HRM_COR), r = $("hmCorRes"); if (p && r) r.innerHTML = hrmCorRes(p); }
+});
+$("hmBody").addEventListener("change", e => {   /* v15.05 : un select du formulaire d'Hermes */
+  const t = e.target;
+  if (!t.dataset || !t.dataset.hf || !HM) return;
+  HRM_FV[t.dataset.hf] = t.value;
+  if (t.dataset.hf === "cible"){
+    const x = hrmDecListe().find(d => d[0] === t.value);
+    HRM_FV.ref = x ? x[2] : "";
+    renderHrm();
+  }
 });
 $("hmBody").addEventListener("change", e => {   /* v15.04 : Hermes corrige son message */
   const w = e.target.closest("[data-hmmsg]");
