@@ -7100,6 +7100,7 @@ async function doLogin(){
     renderArt();
     renderHome();
     syncAll();
+    setTimeout(lienDemarre, 300);   /* v15.07 : lien direct après connexion */
     if (artAllowed() && !ARTICLES.length) syncStock(true).then(() => { renderArt(); renderHome(); });
   } catch(e){
     msg.className = "login-msg";
@@ -7239,6 +7240,68 @@ async function bootAuth(){
   if (SB && USER && navigator.onLine !== false){ setTimeout(sessionExpiree, 0); return false; }
   return !!USER;   /* session connue : on laisse travailler hors ligne */
 }
+
+/* ============ v15.07 : liens directs (boutons Telegram d'Hermes) ============
+   https://nounu90.github.io/#bon=D2026063   ouvre ce bon (devis modifié, nouveau devis…)
+   #cout=D2026063   la page Coût de revient de ce bon
+   #page=hermes | hist | pay | tri | ach | cli | mes | atl | stock | dep | tres
+   #page=retard | paiements | notes | contacts | forms   (les lignes de « À faire aujourd'hui »)
+   Le lien attend la connexion et la liste des bons, puis s'efface de l'adresse. */
+const LIEN_PAGES = {hermes:"tileHrm", hist:"tileHist", pay:"tilePay", tri:"tileTri", ach:"tileAch",
+  cli:"tileCli", mes:"tileMes", atl:"tileAtl", stock:"tileStock", dep:"tileDep", doc:"tileDoc",
+  cut:"tileCut", gros:"tileGros", tva:"tileTva", inv:"tileInv", log:"tileLog"};
+let LIEN_ATTENTE = "";
+function lienLu(){
+  const h = decodeURIComponent(String(location.hash || "").replace(/^#/, ""));
+  const m = /^(bon|cout|page)=(.+)$/.exec(h.trim());
+  return m ? {k:m[1], v:m[2].trim()} : null;
+}
+function lienEfface(){ try { history.replaceState(null, "", location.pathname + location.search); } catch(e){} }
+function lienBon(v){
+  const n = String(v).toLowerCase();
+  return (ORDERS || []).find(o => String(o.num || "").toLowerCase() === n || String(o.id || "") === v) || null;
+}
+function lienOuvre(apresSync){
+  const l = lienLu();
+  if (!l || !USER) return false;
+  if (l.k === "page"){
+    lienEfface();
+    /* les raccourcis de « À faire aujourd'hui » : retard, paiements, notes, contacts, formulaires */
+    const TODO = {retard:"hist", paiements:"pay", notes:"note", contacts:"pros", forms:"forms"};
+    if (TODO[l.v]){
+      const x = document.createElement("button");
+      x.type = "button"; x.hidden = true; x.dataset.hgo = TODO[l.v];
+      $("homeTodo").appendChild(x); x.click(); x.remove();
+      return true;
+    }
+    const t = $(LIEN_PAGES[l.v] || ("tile" + l.v));
+    if (t){ t.click(); return true; }
+    toast("Page introuvable : " + l.v); return false;
+  }
+  const o = lienBon(l.v);
+  if (!o){
+    if (!apresSync) return false;                 /* la liste arrive peut être encore */
+    lienEfface(); toast("Bon " + l.v + " introuvable (supprimé ou renommé ?)"); return false;
+  }
+  lienEfface();
+  if (l.k === "cout"){
+    coutOrderId = o.id; COUT_RETOUR = null;
+    try { coutTab("bons"); } catch(e){}
+    renderCout(); nav("coutSheet");
+    $("coutSheet").querySelector(".sheet-body").scrollTop = 0;
+    toast("Coût de revient · " + o.num);
+  } else {
+    formVenu = ""; loadOrder(o); toast("Bon " + o.num + " ouvert");
+  }
+  return true;
+}
+/* à l'ouverture : tout de suite avec les bons du téléphone, sinon après la synchronisation */
+function lienDemarre(){
+  if (!lienLu()) return;
+  if (lienOuvre(false)) return;
+  Promise.resolve(syncAll()).catch(() => {}).then(() => lienOuvre(true));
+}
+window.addEventListener("hashchange", () => { if (USER) lienDemarre(); });
 
 /* ============ Navigation ============ */
 let COUT_RETOUR = null;       /* v14.63 : page d'où l'estimation a été ouverte (mesSheet) */
@@ -9166,7 +9229,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "15.07";   /* v15.07 : devis numérotés D2026063, D2026064… ; un numéro de devis supprimé est repris */
+const APP_VERSION = "15.08";   /* v15.08 : liens directs Telegram (#bon= #cout= #page= + raccourcis À faire) ; v15.07 : devis numérotés D2026063, D2026064… ; un numéro de devis supprimé est repris ; liens directs #bon= #cout= #page= */
 /* v15.06 : Devis PDF comme SAGE (A4), version du devis, boutons Devis PDF / Partager, lecture pour Hermes */
 
 /* Onglets du tableau de production */
@@ -25289,6 +25352,7 @@ $("tresBody").addEventListener("keydown", e => {
     if (!okAuth){ showLogin(true); return; }
     renderHome();
     syncAll();
+    setTimeout(lienDemarre, 300);   /* v15.07 : lien direct */
     setTimeout(() => { try { waEnvoiReprise(); } catch(e){} }, 600);
     setTimeout(() => { try { formsCharge(); } catch(e){} }, 1500);
     horlogeVerif();
