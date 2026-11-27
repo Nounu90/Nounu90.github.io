@@ -736,6 +736,7 @@ select{appearance:none; -webkit-appearance:none}
 .dkr.gros span{font-family:"Archivo",sans-serif; font-weight:600; color:var(--ink); font-size:13px}
 .dkr.gros b{font-size:14.5px}
 .dkfam{margin-bottom:10px}
+.dkfam > .dkr:nth-child(even){background:rgba(234,179,8,.28); color:var(--ink); margin:0 -6px; padding:4px 6px; border-radius:4px}   /* v15.11 : 1 ligne sur 2 surlignée */
 .dkfam:last-child{margin-bottom:0}
 .dkfam > span{display:block; font-family:"Archivo",sans-serif; font-size:12px; font-weight:600;
   color:var(--accent); margin-bottom:5px}
@@ -1057,6 +1058,11 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .rmline .v.nul{color:var(--muted)}
 .rmline .s{grid-column:1 / -1; font-size:11.5px; color:var(--muted); line-height:1.45}
 .rmwarn{color:var(--warn)}
+.rmline.rmx{opacity:.75} .rmline .rmck{grid-column:1 / -1; display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; cursor:pointer} .rmline .rmck input{width:18px; height:18px; accent-color:#16A34A; margin:0} .rmline .rmbt{grid-column:1 / -1; justify-self:start; font-size:12px; font-weight:600; padding:4px 10px; border-radius:99px;
+  border:1px solid var(--line); background:transparent; color:var(--ink); cursor:pointer}
+.rmline .rmbt.out{color:#DC2626; border-color:rgba(220,38,38,.4)} .rmline .rmbt.in{color:#16A34A; border-color:rgba(22,163,74,.4)}
+details.rmhors{border-top:1px solid var(--line)} details.rmhors>summary{list-style:none; cursor:pointer; padding:11px 14px; font-size:13px; font-weight:700; color:#B45309}
+details.rmhors>summary::-webkit-details-marker{display:none} details.rmhors>summary::after{content:" ▸"} details.rmhors[open]>summary::after{content:" ▾"}
 .rmvide{padding:14px; font-size:12.5px; color:var(--muted); border-top:1px solid var(--line)}
 .rmregles{border:1px solid var(--line); border-radius:12px; background:var(--card2);
   padding:12px 14px; font-size:12px; color:var(--muted); line-height:1.6}
@@ -2020,7 +2026,8 @@ input.pyd:focus{outline:none; border-color:var(--accent); background:var(--card)
 .htodo button i{flex:none; width:9px; height:9px; border-radius:50%}
 .htodo button span{flex:1; min-width:0}
 .htodo button em{flex:none; font-style:normal; font-size:12px; color:var(--muted)}
-.hk3{display:flex; gap:8px; margin-bottom:11px}
+.hk3{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:11px}
+.hk3 > :first-child:nth-last-child(4), .hk3 > :first-child:nth-last-child(4) ~ *{flex:1 1 40% !important}   /* v15.09 : 4 cases = 2 par ligne */
 .hk3 div{flex:1; min-width:0; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:9px 10px;
   font-family:"Archivo",sans-serif; font-size:10.5px; font-weight:600; color:var(--muted)}
 .hk3 b{display:block; font-family:"IBM Plex Mono",monospace; font-size:16px; font-weight:600; color:var(--ink); margin-top:2px}
@@ -2319,6 +2326,8 @@ button.wa.full{width:100%}
 .waform.neuf{border-color:#D6207E; box-shadow:0 0 0 3px rgba(214,32,126,.12)}
 .waform .h{display:flex; align-items:baseline; gap:8px} .waform .h b{flex:1; font-family:"Archivo",sans-serif; font-size:14px}
 .waform .h span{font-size:11px; color:var(--muted)} .waform .nv{font-style:normal; font-size:10.5px; font-weight:700; color:#fff; background:#D6207E; border-radius:99px; padding:1px 7px}
+.waform.flag{border-color:#DC2626; background:rgba(220,38,38,.08)} .waform .fl{font-style:normal; font-size:10.5px; font-weight:700; color:#fff; background:#DC2626; border-radius:99px; padding:1px 7px}
+.waform .flr{display:block; font-size:12.5px; color:#B91C1C; margin-top:6px; font-weight:600}
 .waform small{display:block; font-size:12px; color:var(--muted); margin-top:3px}
 .waform .wabtn{flex:1; display:flex; align-items:center; justify-content:center; padding:11px 12px; border-radius:11px; background:#1FA855; color:#fff; font-family:"Archivo",sans-serif; font-size:13px; font-weight:600; text-decoration:none}
 .wadel label{display:flex; flex-direction:column} .wadel small{font-size:10.5px; color:var(--muted); font-weight:400}
@@ -2366,6 +2375,13 @@ button.wa.full{width:100%}
 .wastsplit span{display:flex; align-items:center; justify-content:center; padding:4px 6px; color:#fff; font-size:11.5px; font-weight:700; text-align:center}
 .wasttip{font-size:12.5px; color:var(--ink); background:var(--card2); border-radius:10px; padding:9px 11px; margin:9px 0 0}
 .wasttip b{color:#127A3D}
+.waimk{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:6px 0 10px}   /* v15.09 */
+.waimk div{background:rgba(217,119,6,.14); border:1px solid rgba(217,119,6,.35); border-radius:12px; padding:8px 10px}
+.waimk span{display:block; font-size:11px; color:var(--muted)}
+.waimk b{font-family:"IBM Plex Mono",monospace; font-size:22px; color:#D97706}
+.waimt td.bar{width:40%} .waimt td.bar i{display:block; height:8px; border-radius:4px; background:#D97706; min-width:2px}
+.waimt tr.auj td{font-weight:700; background:rgba(217,119,6,.14)}
+.waimplus{margin-top:8px; width:100%; height:34px; border-radius:10px; border:1px solid var(--line); background:transparent; color:inherit; font-size:12.5px; cursor:pointer}
 .wasttbl{width:100%; border-collapse:collapse; font-size:12.5px; color:var(--ink)}
 .wasttbl td{padding:7px 4px; border-bottom:1px solid var(--line)}
 .wasttbl td:not(:first-child){text-align:right; font-family:"IBM Plex Mono",monospace}
@@ -2881,9 +2897,33 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
 .hmk.avo{background:var(--ok-soft); color:var(--ok)}
 .hmk.avn{background:var(--accent-soft); color:var(--accent)}
 .hmk.ava{background:var(--warn-soft); color:var(--warn)}
+.hmk.regl{background:var(--ok-soft); color:var(--ok)}   /* v15.10 */
+.hmc small.hmpreuve{color:var(--ok)}
+.hmregl s{opacity:.6} .hmregl em{font-style:normal; font-size:12px; color:var(--ok); font-weight:600}
+.hmreglb{border-left:3px solid var(--ok); padding-left:8px}
 .hmk.urg{background:var(--accent); color:#fff}
 .hmk.ver{background:var(--card2); color:var(--hm-ink)}
 .hmrap{border:2px solid var(--hm); border-radius:16px; padding:12px 13px; margin:0 0 12px; background:var(--card)}
+/* v15.15 : rapport en cartes */
+.hmrap .hmrh{display:flex; align-items:center; gap:8px; flex-wrap:wrap} .hmrap .hmrh h3{flex:1; margin:0}
+.hmrap .hmpill{font-size:11.5px; font-weight:700; border-radius:99px; padding:2px 9px; background:rgba(127,127,127,.12); color:var(--muted)}
+.hmrap .hmsec{margin-top:10px; border-radius:12px; padding:9px 11px; background:rgba(127,127,127,.06); border-left:4px solid var(--c, var(--hm))}
+.hmrap .hmsec>summary{list-style:none; cursor:pointer} .hmrap .hmsec>summary::-webkit-details-marker{display:none}
+.hmrap .hmsec>summary>b::after{content:"▸"; margin-left:6px; font-size:13px} .hmrap .hmsec[open]>summary>b::after{content:"▾"}
+.hmrap .hmsec>summary small{display:block; font-size:12.5px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.hmrap .hmsec[open]>summary small{display:none}
+.hmrap .hmsub{padding:3px 0} .hmrap .hmsub+.hmsub{border-top:1px dashed rgba(127,127,127,.15)}
+.hmrap .hmlab{display:inline-block; font-weight:700; color:var(--c, var(--hm-ink)); margin-right:4px}
+.hmrap .hmsec>summary>b, .hmrap .hmsec>b{display:flex; align-items:center; gap:6px; font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--c, var(--hm-ink)); margin-bottom:4px}
+.hmrap .hmsec>summary>b i, .hmrap .hmsec>b i{font-style:normal; margin-left:auto; font-size:11px; font-weight:700; background:var(--c, var(--hm)); color:#fff; border-radius:99px; padding:0 7px}
+.hmrap .hmit{display:flex; gap:8px; padding:6px 0; font-size:13.5px; line-height:1.45; border-top:1px solid rgba(127,127,127,.12)}
+.hmrap .hmit:first-of-type{border-top:0} .hmrap .hmit>span.n{flex:0 0 20px; height:20px; border-radius:99px; background:var(--c, var(--hm)); color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px}
+.hmrap .hmit>div{flex:1; min-width:0}
+.hmrap .hmhead{font-size:14px; font-weight:400; line-height:1.45}
+.hmbc{display:inline-flex; align-items:center; gap:4px; font:inherit; font-size:12.5px; font-weight:700; padding:1px 7px; margin:1px 0; border-radius:8px; border:1px solid var(--hm); background:rgba(127,127,127,.06); color:var(--hm-ink); cursor:pointer}
+.hmbced{margin:6px 0 2px; padding:9px; border-radius:10px; border:1px dashed var(--hm); background:var(--card); display:grid; gap:6px}
+.hmbced label{font-size:11.5px; color:var(--muted)} .hmbced input{width:100%; height:36px; font-size:14px}
+.hmbced .r{display:flex; gap:6px} .hmbced .r button{flex:1; height:36px}
 .hmrap h3{margin:0 0 4px; font-size:15.5px}
 .hmrap .hms{margin-top:8px; font-size:13.5px; line-height:1.5; white-space:pre-line}
 .hmrap .hms b{display:block; color:var(--hm-ink); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em}
@@ -2927,6 +2967,7 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
   </div>
 
   <main>
+    <div id="formDvp" class="hcdvr" style="padding:0 0 12px; margin:0" hidden></div>
     <!-- CLIENT -->
     <section class="card">
       <div class="card-head"><div class="label">Client</div><div class="badge" id="numBadge">BC</div></div>
@@ -3290,6 +3331,11 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
         <button class="tile" id="tileRemu" type="button">
           <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M16 6H10a3 3 0 000 6h4a3 3 0 010 6H8"/></svg></span>
           <span class="tt"><b>Rémuné&shy;ration</b><small id="tileRemuSub">Salaires et primes du mois</small></span>
+          <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </button>
+        <button class="tile" id="tileCorb" type="button" hidden>
+          <span class="ti"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></span>
+          <span class="tt"><b>Corbeille</b><small id="tileCorbSub">Bons supprimés, à restaurer</small></span>
           <span class="tc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
         </button>
         <button class="tile" id="tileNom" type="button">
@@ -4231,6 +4277,16 @@ button.wagoal{width:100%; text-align:left; cursor:pointer}
 </div>
 
 <!-- RÉMUNÉRATION : SALAIRES ET PRIMES DU MOIS -->
+<div class="sheet" id="corbSheet">
+  <div class="sheet-top">
+    <button class="icon-btn" data-close="corbSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <h2>Corbeille</h2>
+  </div>
+  <div class="sheet-body">
+    <div id="corbBody"></div>
+    <p class="hint">Un bon supprimé arrive ici en entier (client, mesures, paiements). « Restaurer » le remet comme avant, partout. « Supprimer définitivement » l'efface aussi de la feuille Google.</p>
+  </div>
+</div>
 <div class="sheet" id="remuSheet">
   <div class="sheet-top">
     <button class="icon-btn" data-close="remuSheet" aria-label="Retour"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -5245,6 +5301,19 @@ function renderProgress(){
     ? "Bon déjà enregistré"
     : (dern ? "Dernier bon de l'année : " + dern : "Premier bon de l'année");
   $("formTitle").textContent = known ? "Modifier le bon" : "Nouveau bon de commande";
+  /* v15.14 : le Devis PDF du bon enregistré, au-dessus de Client */
+  try {
+    const fd = $("formDvp"), o = known ? ORDERS.find(x => x.id === S.id) : null, t = o ? orderTotals(o) : null;
+    const ok = o && o.status === "sent" && etatDe(o) === "devis" && t && (t.prix || t.pose);
+    fd.hidden = !ok; fd.style.display = ok ? "" : "none";
+    fd.innerHTML = ok ? '<button class="hcdv" type="button" data-dvp="' + o.id + '">📄 Devis PDF' +
+        ((parseInt(o.devisPdfVer, 10) || 1) >= 2 ? '<small>· version ' + parseInt(o.devisPdfVer, 10) + '</small>' : '') + '</button>' +
+      '<button class="hcdv s" type="button" data-dvp="' + o.id + '" data-dvm="s">↗ Partager</button>' : '';
+    if (!fd.dataset.on){ fd.dataset.on = 1; fd.addEventListener("click", e => {
+      const b = e.target.closest("button[data-dvp]"); if (!b) return;
+      const x = ORDERS.find(y => y.id === b.dataset.dvp); if (x) devisPdfAction(x, b.dataset.dvm === "s");
+    }); }
+  } catch(e){}
 }
 
 function renderAll(){
@@ -6531,14 +6600,82 @@ function markPending(id, v){
 
 let TOMBS = LS.get("mst_deleted", []);   /* bons supprimés, tant que la base ne l'a pas confirmé */
 
-function removeOrder(id){
+function removeOrder(id, garderFeuille){
   const gone = ORDERS.find(o => o.id === id);
   ORDERS = ORDERS.filter(o => o.id !== id);
   if (TOMBS.indexOf(id) < 0){ TOMBS.push(id); LS.set("mst_deleted", TOMBS.slice(-100)); }
   persistOrders();
   deleteBon(id);
-  if (gone && gone.num) sheetDelete(gone.num);
+  if (gone && gone.num && !garderFeuille) sheetDelete(gone.num);
 }
+/* v15.22 : Corbeille. Avant d'effacer un bon, on le range en entier dans sa propre rangée
+   cfg-trash-<id> (ignorée comme bon). Restaurer = le remettre ; définitif = effacer la rangée + la feuille. */
+const CORB_PRE = "cfg-trash-";
+let CORB = LS.get("mst_corb", []);
+if (!Array.isArray(CORB)) CORB = [];
+function corbSave(){ LS.set("mst_corb", CORB); try { renderHome(); } catch(e){} }
+async function pullCorb(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("id,data").like("id", CORB_PRE + "%");
+    if (error) throw error;
+    CORB = (data || []).map(r => r.data).filter(d => d && d.o && d.o.id).sort((a, b) => (b.at || 0) - (a.at || 0));
+    corbSave(); return true;
+  } catch(e){ return false; }
+}
+async function corbMettre(o){
+  if (!SB || !USER){ toast("Hors ligne : impossible de supprimer maintenant"); return false; }
+  const d = {v:1, o:JSON.parse(JSON.stringify(o)), at:Date.now(), par:(USER && USER.login) || ""};
+  try {
+    const {error} = await SB.from("bons").upsert({id: CORB_PRE + o.id, num: "__TRASH__", author: USER.login, data: d, updated_at: new Date().toISOString()});
+    if (error) throw error;
+  } catch(e){ toast("Suppression annulée : la corbeille n'a pas pu être enregistrée"); return false; }
+  CORB = [d].concat(CORB.filter(x => x.o.id !== o.id)); corbSave();
+  removeOrder(o.id, true);
+  return true;
+}
+async function corbOter(id){
+  try { const {error} = await SB.from("bons").delete().eq("id", CORB_PRE + id); if (error) throw error; }
+  catch(e){ toast("Erreur réseau, réessaie"); return false; }
+  CORB = CORB.filter(x => x.o.id !== id); corbSave(); return true;
+}
+async function corbRestaurer(id){
+  const d = CORB.find(x => x.o.id === id); if (!d) return;
+  const o = d.o;
+  TOMBS = TOMBS.filter(x => x !== id); LS.set("mst_deleted", TOMBS);
+  (o.log = o.log || []).push({kind:"edit", at:Date.now(), by:(USER && USER.login) || "", txt:"restauré depuis la corbeille"});
+  setOrder(o); persistOrders();
+  const ok = await pushBon(o);
+  if (ok === false){ toast("Pas restauré : erreur réseau"); return; }
+  await corbOter(id);
+  renderCorb(); try { renderHist(); } catch(e){}
+  toast("Bon " + (o.num || "") + " restauré");
+}
+function renderCorb(){
+  const jj = t => new Date(t).toLocaleString("fr-FR", {day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit"});
+  $("corbBody").innerHTML = CORB.length ? CORB.map(d => { const o = d.o, t = (() => { try { return orderTotals(o); } catch(e){ return null; } })();
+    return '<div class="rmline" style="border:1px solid var(--line); border-radius:12px; margin-bottom:10px">' +
+      '<span class="n">' + esc(o.num || "") + '  ·  ' + esc(o.nom || "Client sans nom") + '</span>' +
+      '<span class="v nul">' + (t ? fr((t.prix || 0) + (t.pose || 0), 2) : "") + '</span>' +
+      '<span class="s">' + (o.tel ? esc(o.tel) + '  ·  ' : '') + (etatDe(o) === "devis" ? "devis" : etatLabel(etatDe(o))) + '  ·  supprimé le ' + jj(d.at) + ' par ' + esc(nomDe(d.par) || "?") + '</span>' +
+      '<div style="grid-column:1 / -1; display:flex; gap:8px; margin-top:6px">' +
+        '<button type="button" class="rmbt in" data-corbr="' + esc(o.id) + '">↩ Restaurer</button>' +
+        '<button type="button" class="rmbt out" data-corbd="' + esc(o.id) + '">Supprimer définitivement</button></div></div>'; }).join("")
+    : '<div class="rmvide">La corbeille est vide.</div>';
+}
+$("corbBody").addEventListener("click", e => {
+  const r = e.target.closest("[data-corbr]"), d = e.target.closest("[data-corbd]");
+  if (r){ corbRestaurer(r.dataset.corbr); return; }
+  if (d){ const x = CORB.find(y => y.o.id === d.dataset.corbd); if (!x) return;
+    ask("Supprimer définitivement ?", "Le bon " + (x.o.num || "") + " de " + (x.o.nom || "client sans nom") + " sera effacé pour toujours, aussi de la feuille Google. Impossible de revenir en arrière.", async () => {
+      if (await corbOter(x.o.id)){ if (x.o.num) sheetDelete(x.o.num); renderCorb(); toast("Effacé pour toujours"); }
+    }); }
+});
+$("tileCorb").addEventListener("click", () => {
+  if (!fflEstNou()) return;
+  renderCorb(); nav("corbSheet");
+  pullCorb().then(() => renderCorb());
+});
 
 /* v14.2 : bons de test à effacer pour de bon. Un téléphone qui en garde une
    copie la renvoyait à la base : le bon revenait partout. Tant qu'il est dans
@@ -6961,6 +7098,8 @@ async function pullBonsVrai(){
       }
       if (String(r.id).indexOf("pimg-") === 0) return;
       if (r.id === WA_ID){ fusionWa(r.data); return; }     /* v14.8 : messages et campagnes WhatsApp */
+      if (r.id === RMX_ID){ fusionRmx(r.data); try { if ($("remuSheet").classList.contains("open")) renderRemu(); } catch(e){} return; }
+      if (r.id === FFL_ID){ fusionFfl(r.data); try { if (WA_TAB === "forms") renderWaForms(); renderHome(); } catch(e){} return; }
       if (r.id === PROMO_ID){
         if (r.data) fusionPromo(r.data);
         return;
@@ -7309,7 +7448,7 @@ function nav(where){
   armBack();
   if (where !== "coutSheet") COUT_RETOUR = null;
   const home = $("home");
-  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","tvaSheet","cliSheet","cliOneSheet","docSheet","remuSheet","atlSheet","prosSheet","noteSheet","persoSheet","promoSheet","invSheet","invRollSheet","achSheet","mesSheet","depSheet","rsSheet","tresSheet","hmSheet"].forEach(id => $(id).classList.remove("open"));
+  ["refSheet","shotSheet","histSheet","stockSheet","artSheet","cutSheet","cutPickSheet","nomSheet","nomPickSheet","coutSheet","logSheet","paySheet","triSheet","tvaSheet","cliSheet","cliOneSheet","docSheet","remuSheet","corbSheet","atlSheet","prosSheet","noteSheet","persoSheet","promoSheet","invSheet","invRollSheet","achSheet","mesSheet","depSheet","rsSheet","tresSheet","hmSheet"].forEach(id => $(id).classList.remove("open"));
   if (where === "home"){
     home.classList.add("open");
     document.body.style.overflow = "hidden";
@@ -7402,6 +7541,12 @@ function homeTodoLignes(){
       }
     }
   }
+  if (fflEstNou()){
+    try {
+      const nf = fflOuverts().length;
+      if (nf) L.push({c:"var(--danger, #DC2626)", t: "🔴 " + nf + (nf > 1 ? " formulaires signalés par Imane à revoir" : " formulaire signalé par Imane à revoir"), lien:"Formulaires", go:"forms"});
+    } catch(e){}
+  }
   if (noteAllowed()){
     try {
       const n = notesVivantes().filter(x => notePourMoi(x) && !x.fait).length;
@@ -7476,7 +7621,9 @@ function renderHomeK3(){
     }));
     const reste = (ORDERS || []).filter(o => o && o.status === "sent" && etatDe(o) !== "devis")
       .reduce((t, o) => t + soldeDe(o), 0);
-    h = cell("Facturé ce mois", frm(fact, 0), "", "fact") + cell("Encaissé ce mois", frm(enc, 0), "ok", "enc") +
+    /* v15.09 : bénéfice HT du mois = HT des bons moins leur coût (tissu, pièces, pose) ; 45 % de coût si le coût d'un bon manque */
+    const benef = duMois.reduce((t, o) => { const ht = htDe(o); let C = null; try { C = nouCout(o); } catch(e){} return t + (C ? ht - C.cout : ht * 0.55); }, 0);
+    h = cell("Facturé ce mois", frm(fact, 0), "", "fact") + cell("Bénéfice ce mois", frm(benef, 0), benef >= 0 ? "ok" : "att", "") + cell("Encaissé ce mois", frm(enc, 0), "ok", "enc") +
         cell("Reste à encaisser", frm(reste, 0), "att", "reste");
   } else {
     const mes = (ORDERS || []).filter(o => o && o.status === "sent" && ceMois(o) && (!USER || o.author === USER.login)).length;
@@ -7698,6 +7845,7 @@ function renderHome(){
   $("tileTri").hidden = !adminAllowed();
   $("tileTva").hidden = !adminAllowed();
   $("tileRemu").hidden = !adminAllowed();
+  try { $("tileCorb").hidden = !fflEstNou(); $("tileCorbSub").textContent = CORB.length ? CORB.length + " bon" + (CORB.length > 1 ? "s" : "") + " supprimé" + (CORB.length > 1 ? "s" : "") : "Vide"; } catch(e){}
   $("tileAtl").hidden = !adminAllowed();
   try { renderPersoHome(); } catch(e){}
   const tn = $("tileNote");
@@ -7865,10 +8013,12 @@ function renderSide(){
   const logo = document.querySelector("#home .hhead img");
   let h = '<div class="wsb">' + (logo ? '<img src="' + logo.getAttribute("src") + '" alt="">' : '') + '<b>MSTORECASA</b></div>';
   h += '<button type="button" data-sgo="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/></svg><span>Accueil</span></button>';
+  const th = $("tileHrm");      /* v15.17 : Espace Hermes juste sous Accueil */
+  if (th && !th.hidden) h += '<button type="button" data-sgo="tileHrm" style="--gc:var(--hm)">' + ico(th) + '<span>' + esc(nom(th) || "Espace Hermes") + '</span>' + bd(th) + '</button>';
   const tn = $("tileNew");
   if (tn && !tn.hidden) h += '<button type="button" class="wnew" data-sgo="tileNew">' + ico(tn) + '<span>Créer un bon</span></button>';
   document.querySelectorAll("#home .hgrp").forEach(g => {
-    const tiles = [...g.querySelectorAll(".tile")].filter(t => !t.hidden);
+    const tiles = [...g.querySelectorAll(".tile")].filter(t => !t.hidden && t.id !== "tileHrm");
     if (!tiles.length) return;
     const gc = getComputedStyle(g).getPropertyValue("--gc").trim();
     h += '<h5>' + esc(g.querySelector("h4").textContent) + '</h5>';
@@ -9103,11 +9253,11 @@ $("histBody").addEventListener("click", e => {
     const o = ORDERS.find(x => x.id === del.dataset.del);
     if (!o) return;
     ask("Supprimer ce bon ?", "Le bon " + o.num + " de " + (o.nom || "client sans nom") +
-        " sera effacé pour toute l'équipe, sur tous les téléphones.", () => {
-      removeOrder(o.id);
+        " part dans la Corbeille, pour toute l'équipe. Noureddine peut le restaurer.", async () => {
+      if (!(await corbMettre(o))) return;
       if (S.id === o.id) newOrder();
       renderHist(); renderHome();
-      toast("Bon " + o.num + " supprimé");
+      toast("Bon " + o.num + " mis à la corbeille");
     });
   }
 });
@@ -9229,7 +9379,7 @@ function bonChutes(){
 const FABDROP = {ENR:3, JN:2};
 function fabW(x){ return x.l - (x.t === "JN" ? FABDROP.JN : FABDROP.ENR); }
 
-const APP_VERSION = "15.08";   /* v15.08 : liens directs Telegram (#bon= #cout= #page= + raccourcis À faire) ; v15.07 : devis numérotés D2026063, D2026064… ; un numéro de devis supprimé est repris ; liens directs #bon= #cout= #page= */
+const APP_VERSION = "15.22";   /* v15.22 : Corbeille : un bon supprimé se restaure */ //   /* v15.21 : Rémunération : case à cocher Compté / Pas compté */ //   /* v15.20 : « Ne pas compter » s'applique au clic, sans fenêtre de raison */ //   /* v15.19 : Imane 4 % jusqu'à 25 000, 6 % au-delà */ //   /* v15.18 : Rémunération : exclure / compter un paiement ou une pose, listes « non comptés » */ //   /* v15.17 : Espace Hermes dans le panneau de gauche, sous Accueil */ //   /* v15.16 : rapport du directeur : une idée par ligne, sections repliables */ //   /* v15.15 : Espace Hermes : téléphone devant chaque bon, correction sur place, rapport redessiné */ //   /* v15.14 : Devis PDF au-dessus de Client dans « Modifier le bon » */ //   /* v15.13 : achats de tissu décidés d'abord sur le nombre de commandes (min 3) */ //   /* v15.12 : Imane signale les formulaires à supprimer, Noureddine les revoit */ //   /* v15.11 : prix unitaire du bon (sans « HT ») dans Résumé et Mesures, lignes surlignées 1 sur 2 */
 /* v15.06 : Devis PDF comme SAGE (A4), version du devis, boutons Devis PDF / Partager, lecture pour Hermes */
 
 /* Onglets du tableau de production */
@@ -12791,7 +12941,7 @@ function docCarte(o){
       r(o.pose === "Livraison" ? "Livraison" : "Pose", t.pose ? frm(t.pose, 2) + " MAD" : "oui · sans prix ajouté") +
       r("Stores", t.nb + "  ·  " + fr(t.m2 || 0, 2) + " m²") +
       puLignes(o).map(p => r("Prix unitaire" + (puLignes(o).length > 1 ? " " + p.lab.toLowerCase() : ""),
-                             frm(p.pu, 2) + " MAD/m² HT")).join("") +
+                             frm(p.pu, 2) + " MAD/m²")).join("") +   /* v15.11 : le prix saisi dans le bon */
       (t.prix ? r("Stores HT", frm(t.prix, 2)) : "") +
       (rem > 0 ? r("Remise " + String(fr(remisePct(o), 2)).replace(",00", "") + " %", "− " + frm(rem, 2), "acc") : "") +
       ((facture(o) || rem > 0) ? r("Total HT", frm(ht, 2)) : "") +
@@ -12845,6 +12995,8 @@ function docCarte(o){
                                        (pe.manque.length > 1 ? "s" : "")) : "") + '</h4>' +
          (pe.tot && !pe.ok ? '<ul class="dkmanque">' +
             pe.manque.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>' : '');
+    /* v15.11 : le prix unitaire saisi dans le bon, au-dessus du tableau de production */
+    { const P = puLignes(o); h += P.map(p => r("Prix unitaire" + (P.length > 1 ? " " + p.lab.toLowerCase() : ""), frm(p.pu, 2) + " MAD/m²")).join(""); }
     /* v14.30 : quand la fiche est partie au tableau de production */
     if (et !== "devis"){
       const ds = o.sheetAt ? new Date(o.sheetAt) : null;
@@ -18054,6 +18206,10 @@ $("prosSheet").addEventListener("click", e => {
   if (e.target.closest("[data-waformmaj]")){ FORM_LU = 0; formsCharge().then(() => renderWaForms()); toast("Lecture des formulaires…"); return; }
   const fa = e.target.closest("[data-waformadd]");
   if (fa){ const o = FORMS[+fa.dataset.waformadd]; if (o) formVersContact(o); return; }
+  const fsg = e.target.closest("[data-fflsig],[data-fflmod]");
+  if (fsg){ const o = FORMS[+(fsg.dataset.fflsig || fsg.dataset.fflmod)]; if (o) fflSignale(o, !!fsg.dataset.fflmod); return; }
+  const ffn = e.target.closest("[data-fflfin]");
+  if (ffn){ fflFin(ffn.dataset.fflk, ffn.dataset.fflfin); return; }
   if (e.target.closest("[data-wanotif]")){
     try { Notification.requestPermission().then(() => renderWaForms()); } catch(err){ toast("Notifications non disponibles sur ce téléphone"); }
     return;
@@ -18484,6 +18640,25 @@ function renderWaStats(){
     '<div><span>Devis faits</span><b>' + R.devis + '</b>' + waStDelta(R.devis, Rp.devis) + '</div>' +
     '<div><span>Nouveaux clients</span><b>' + R.clients + '</b>' + waStDelta(R.clients, Rp.clients) + '</div>' +
     '<div class="big"><span>Encaissé sur la période (acomptes et soldes des contacts)</span><b>' + frm(Math.round(R.encaisse), 0) + ' DH</b>' + waStDelta(R.encaisse, Rp.encaisse) + '</div></div>';
+  /* v15.09 : les contacts ajoutés par Imane, jour par jour (même ceux supprimés ensuite) */
+  {
+    const tous = (PROS || []).filter(p => p && p.at);
+    const jk = t => { const x = new Date(t); return x.getFullYear() * 10000 + (x.getMonth() + 1) * 100 + x.getDate(); };
+    const parJ = {};
+    tous.forEach(p => { const k = jk(p.at); parJ[k] = parJ[k] || {i:0, t:0}; parJ[k].t++; if (p.by === IMANE) parJ[k].i++; });
+    const d0 = new Date(); d0.setHours(0, 0, 0, 0);
+    const nj = WA_ST.histo ? 90 : 14, L = [];
+    for (let i = 0; i < nj; i++){ const d = new Date(d0); d.setDate(d0.getDate() - i); const v = parJ[jk(d)] || {i:0, t:0}; L.push({d:d, i:v.i, t:v.t}); }
+    const auj2 = L[0].i, hier = L[1].i, sem = L.slice(0, 7).reduce((x, y) => x + y.i, 0);
+    const mxi = Math.max(1, ...L.map(x => x.i));
+    const jn = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"];
+    h += '<div class="wacard"><div class="walab">Nouveaux contacts ajoutés par Imane</div>' +
+      '<div class="waimk"><div><span>Aujourd\'hui</span><b>' + auj2 + '</b></div><div><span>Hier</span><b>' + hier + '</b></div><div><span>7 derniers jours</span><b>' + sem + '</b></div></div>' +
+      '<table class="wasttbl waimt"><tr><td>Jour</td><td>Imane</td><td></td><td>Tous</td></tr>' +
+      L.map((x, k) => '<tr' + (k === 0 ? ' class="auj"' : '') + '><td>' + jn[x.d.getDay()] + ' ' + pad(x.d.getDate()) + '/' + pad(x.d.getMonth() + 1) + '</td><td><b>' + x.i + '</b></td>' +
+        '<td class="bar"><i style="width:' + (x.i / mxi * 100) + '%"></i></td><td>' + x.t + '</td></tr>').join("") + '</table>' +
+      '<button type="button" class="waimplus" data-waimh="1">' + (WA_ST.histo ? 'Voir moins' : 'Historique : 90 jours') + '</button></div>';
+  }
   /* le graphique */
   const K = waStCases(P.a, P.b).map(k => ({l:k.l, n:C.filter(c => c.at >= k.a && c.at < k.b).length,
                                             c:C.filter(c => c.client && c.clientAt >= k.a && c.clientAt < k.b).length}));
@@ -18541,6 +18716,10 @@ function renderWaStats(){
   }
   box.innerHTML = h;
 }
+$("prosSheet").addEventListener("click", e => {   /* v15.09 */
+  if (!e.target.closest("[data-waimh]")) return;
+  WA_ST.histo = !WA_ST.histo; renderWaStats();
+});
 $("prosSheet").addEventListener("change", e => {
   const d = e.target.closest("[data-wastd]");
   if (!d) return;
@@ -18593,6 +18772,7 @@ async function formsCharge(){
       const o = {}; Object.keys(C).forEach(k => o[k] = v(x, k)); o.at = formDate(o.date); return o;
     }).filter(o => o.nom || o.tel).sort((a, b) => b.at - a.at);
     FORMS = rows; LS.set("mst_forms", FORMS);
+    try { await pullFfl(); } catch(e){}
     if (FORM_VU === null){ FORM_VU = FORMS.map(formCle); LS.set("mst_formvu", FORM_VU); }   /* les anciennes ne sonnent pas */
     const neuves = FORMS.filter(o => FORM_VU.indexOf(formCle(o)) < 0 && !formNotifie(o));
     neuves.forEach(o => formNotif(o));
@@ -18626,6 +18806,50 @@ function formsVus(){
   if (FORM_VU.length !== avant){ LS.set("mst_formvu", FORM_VU); setTimeout(() => { formBadge(); try { renderHome(); } catch(e){} }, 4000); }
 }
 function formContact(o){ const n = waNum(o.tel); return n ? prosVivants().find(p => waNum(p.tel) === n) : null; }
+/* v15.12 : formulaires signalés « à supprimer » par Imane, revus par Noureddine. Rangée cfg-formflags.
+   L'app ne supprime rien dans la feuille Google : Noureddine le fait à la main, puis marque « Traité ». */
+const FFL_ID = "cfg-formflags";
+let FFL = LS.get("mst_ffl", {});
+if (!FFL || typeof FFL !== "object") FFL = {};
+function fflSave(){ LS.set("mst_ffl", FFL); pushFfl(); }
+async function pushFfl(){
+  if (!SB || !USER) return false;
+  try {
+    const {error} = await SB.from("bons").upsert({id: FFL_ID, num: "__FORMFLAGS__", author: USER.login,
+      data: {v:1, flags: FFL}, updated_at: new Date().toISOString()});
+    if (error) throw error; return true;
+  } catch(e){ return false; }
+}
+function fusionFfl(d){
+  if (!d || !d.flags) return false;
+  Object.keys(d.flags).forEach(k => { const f = d.flags[k]; if (f && (!FFL[k] || (f.maj || 0) > (FFL[k].maj || 0))) FFL[k] = f; });
+  LS.set("mst_ffl", FFL); return true;
+}
+async function pullFfl(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", FFL_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data; if (d) fusionFfl(d); return true;
+  } catch(e){ return false; }
+}
+function fflOuverts(){ return Object.keys(FFL).map(k => FFL[k]).filter(f => f && f.statut === "ouvert"); }
+function fflEstNou(){ return !!(USER && USER.login === "noureddine"); }
+function fflSignale(o, modifier){
+  const k = formCle(o), f = FFL[k];
+  const r = prompt("Pourquoi supprimer ce formulaire ? (remarque pour Noureddine)", modifier && f ? f.remarque || "" : "");
+  if (r === null) return;
+  FFL[k] = {cle:k, nom:o.nom || "", tel:o.tel || "", date:o.date || "", remarque:r.trim(), par:(USER && USER.login) || "",
+            at:(f && modifier && f.at) || Date.now(), maj:Date.now(), statut:"ouvert"};
+  fflSave(); renderWaForms(); try { renderHome(); } catch(e){}
+  toast("Signalé à Noureddine");
+}
+function fflFin(k, statut){
+  const f = FFL[k]; if (!f) return;
+  f.statut = statut; f.maj = Date.now(); f.fin = (USER && USER.login) || ""; f.finAt = Date.now();
+  fflSave(); renderWaForms(); try { renderHome(); } catch(e){}
+  toast(statut === "traite" ? "Marqué traité" : statut === "garde" ? "Formulaire gardé" : "Signalement annulé");
+}
 function renderWaForms(){
   const box = $("waForms"); if (!box) return;
   const nonVus = formsNonVus().map(formCle);
@@ -18637,14 +18861,24 @@ function renderWaForms(){
       '<button type="button" class="waplus" data-waformmaj>↻ Actualiser</button></div>' +
     (FORMS.length ? FORMS.map((o, i) => {
       const c = formContact(o), neuf = nonVus.indexOf(formCle(o)) >= 0;
-      return '<div class="waform' + (neuf ? ' neuf' : '') + '"><div class="h"><b>' + esc(o.nom || "Sans nom") + '</b>' +
-          (neuf ? '<em class="nv">Nouveau</em>' : '') + '<span>' + esc(o.date) + '</span></div>' +
+      const fk = formCle(o), fl = FFL[fk] && FFL[fk].statut === "ouvert" ? FFL[fk] : null;
+      if (FFL[fk] && FFL[fk].statut === "traite") return '';
+      return '<div class="waform' + (fl ? ' flag' : neuf ? ' neuf' : '') + '"><div class="h"><b>' + esc(o.nom || "Sans nom") + '</b>' +
+          (fl ? '<em class="fl">🚩 à supprimer</em>' : neuf ? '<em class="nv">Nouveau</em>' : '') + '<span>' + esc(o.date) + '</span></div>' +
         '<small>' + [o.tel ? telAffiche(o.tel) : "", o.type, o.nb ? o.nb + " fenêtre" + (+o.nb > 1 ? "s" : "") : "", o.ville, o.couleur].filter(Boolean).map(esc).join(" · ") + '</small>' +
         ((o.inst || o.tarif || o.notes || o.source) ? '<small>' + [o.source ? "Source : " + o.source : "", o.inst ? "Installation : " + o.inst : "", o.tarif ? "Tarif affiché : " + o.tarif : "", o.notes].filter(Boolean).map(esc).join(" · ") + '</small>' : '') +
+        (fl ? '<span class="flr">Remarque de ' + esc(nomDe(fl.par) || "Imane") + ' : « ' + esc(fl.remarque || "sans remarque") + ' » · ' +
+              new Date(fl.at).toLocaleString("fr-FR", {day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit"}) + '</span>' +
+              (fflEstNou() ? '<small>Supprime-le ou corrige-le toi-même dans la feuille Google (onglet Form), puis :</small>' +
+                '<div class="waduo" style="margin-top:8px"><a class="wabtn" href="https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit" target="_blank" rel="noopener">📄 Ouvrir la feuille</a>' +
+                '<button type="button" data-fflfin="traite" data-fflk="' + esc(fk) + '">✔ Traité</button><button type="button" data-fflfin="garde" data-fflk="' + esc(fk) + '">Garder</button></div>'
+              : '<div class="waduo" style="margin-top:8px"><button type="button" data-fflmod="' + i + '">✏️ Changer la remarque</button>' +
+                '<button type="button" data-fflfin="annule" data-fflk="' + esc(fk) + '">↩ Annuler</button></div>') : '') +
         '<div class="waduo" style="margin-top:8px">' +
           (o.tel && waLien(o.tel) ? '<a class="wabtn" href="' + waLien(o.tel) + '" target="_blank" rel="noopener">WhatsApp</a>' : '') +
           (c ? '<button type="button" data-predit="' + c.id + '">Déjà dans les contacts ›</button>'
              : '<button type="button" class="wa" data-waformadd="' + i + '">Ajouter aux contacts</button>') +
+          (fl ? '' : '<button type="button" style="color:#DC2626;flex:0 0 auto" data-fflsig="' + i + '">🚩 À supprimer</button>') +
         '</div></div>';
     }).join("") : '<p class="wahint">Aucun formulaire pour l\'instant.</p>') + '</div>' +
     '<p class="wahint">Lu dans l\'onglet « Form » de la feuille Google, toutes les 2 minutes quand l\'app est ouverte. Une notification s\'affiche à chaque nouveau formulaire.</p>';
@@ -18686,8 +18920,8 @@ function renderWaChamps(){
    de fenêtres. Tout se lit ici, mois par mois, bon par bon. */
 const REMU = {
   imaneBase: 500,          /* fixe mensuel */
-  imanePct1: 5,            /* v14.40 : % sur les ventes HT encaissées du mois jusqu'au seuil */
-  imanePct2: 7,            /* % sur la seule partie au-delà du seuil */
+  imanePct1: 4,            /* v14.40 : % sur les ventes HT encaissées du mois jusqu'au seuil */
+  imanePct2: 6,            /* % sur la seule partie au-delà du seuil */
   imaneSeuil: 25000,       /* seuil mensuel, remis à zéro le 1er du mois */
   soufBase:  3200,         /* salaire net */
   parFenetre: 40,          /* à partir de 4 fenêtres, la société paie à la fenêtre */
@@ -18840,18 +19074,64 @@ function partProduitsHT(o, montant){
   if (!(du > 0) || !(prod > 0)) return 0;
   return Math.min(prod, montant * prod / du);
 }
+/* v15.18 : Noureddine exclut un paiement de la commission d'Imane (ex. bon pas pris par elle),
+   ou en ajoute un ; idem pour une pose de Soufiane. Rangée synchronisée cfg-remu. */
+const RMX_ID = "cfg-remu";
+let RMX = LS.get("mst_rmx", {});
+if (!RMX || typeof RMX !== "object") RMX = {};
+async function pushRmx(){
+  if (!SB || !USER) return false;
+  try {
+    const {error} = await SB.from("bons").upsert({id: RMX_ID, num: "__REMU__", author: USER.login,
+      data: {v:1, x: RMX}, updated_at: new Date().toISOString()});
+    if (error) throw error; return true;
+  } catch(e){ return false; }
+}
+function fusionRmx(d){
+  if (!d || !d.x) return false;
+  Object.keys(d.x).forEach(k => { const f = d.x[k]; if (f && (!RMX[k] || (f.maj || 0) > (RMX[k].maj || 0))) RMX[k] = f; });
+  LS.set("mst_rmx", RMX); return true;
+}
+async function pullRmx(){
+  if (!SB || !USER) return false;
+  try {
+    const {data, error} = await SB.from("bons").select("data").eq("id", RMX_ID).limit(1);
+    if (error) throw error;
+    const d = data && data[0] && data[0].data; if (d) fusionRmx(d); return true;
+  } catch(e){ return false; }
+}
+function rmxPk(o, p){ return "I|" + o.id + "|" + (p.at || (String(p.date || "") + "|" + (parseFloat(p.montant) || 0))); }
+function rmxV(k){ const x = RMX[k]; return x && x.v ? x.v : ""; }
+function rmxSet(k, v){
+  let raison = "";
+  /* v15.20 : plus de fenêtre « prompt » (bloquée dans l'app installée) : le clic s'applique tout de suite */
+  RMX[k] = {v:v, raison:raison, par:(USER && USER.login) || "", maj:Date.now()};
+  LS.set("mst_rmx", RMX); pushRmx(); renderRemu();
+  toast(v === "out" ? "Retiré du calcul" : v === "in" ? "Ajouté au calcul" : "Remis comme avant");
+}
 function remuImane(iso){
   /* Un devis n'est pas une commande prise : il n'ouvre pas de commission. */
   const siens = (ORDERS || []).filter(o => o && o.status === "sent" &&
     String(o.author || "").toLowerCase() === IMANE && etatDe(o) !== "devis");
-  const lignes = [];
-  siens.forEach(o => paiements(o).forEach(p => {
-    if (payStatut(p) === "preuve") return;                            /* v14.68 : une simple preuve ne paie pas encore de commission */
+  const lignes = [], hors = [];
+  /* v15.18 : on regarde tous les paiements du mois ; ceux qui ne comptent pas vont dans « hors » avec la raison */
+  (ORDERS || []).filter(o => o && o.status === "sent").forEach(o => paiements(o).forEach(p => {
     if (payJourCredit(p).slice(0, 7) !== iso) return;               /* le mois où Imane l'a marqué crédité */
     const m = parseFloat(p.montant) || 0;
     if (!(m > 0)) return;
-    lignes.push({o:o, p:p, date:payJourCredit(p), montant:m, ht:partProduitsHT(o, m), recu:!!p.recu});
+    const k = rmxPk(o, p), v = rmxV(k), ht = partProduitsHT(o, m);
+    const auteur = String(o.author || "").toLowerCase();
+    const L = {o:o, p:p, k:k, date:payJourCredit(p), montant:m, ht:ht, recu:!!p.recu, x:RMX[k]};
+    let pourquoi = "";
+    if (payStatut(p) === "preuve") pourquoi = "simple preuve, pas encore crédité";   /* v14.68 */
+    else if (!(ht > 0)) pourquoi = "part produits 0 (pose seule)";
+    else if (v === "out") pourquoi = "retiré par Noureddine" + (RMX[k].raison ? " : « " + RMX[k].raison + " »" : "");
+    else if (v !== "in" && auteur !== IMANE) pourquoi = "bon pris par " + (nomDe(auteur) || "personne");
+    else if (v !== "in" && etatDe(o) === "devis") pourquoi = "encore un devis";
+    if (pourquoi){ L.pourquoi = pourquoi; L.peut = payStatut(p) !== "preuve" && ht > 0; hors.push(L); return; }
+    L.ajoute = v === "in"; lignes.push(L);
   }));
+  hors.sort((x, y) => x.date.localeCompare(y.date));
   lignes.sort((x, y) => x.date.localeCompare(y.date) || ((x.p.at || 0) - (y.p.at || 0)));
   /* la commission de chaque paiement suit le cumul : la tranche 7 % ne s'ouvre qu'au-delà de 25 000 */
   let cumul = 0;
@@ -18859,7 +19139,7 @@ function remuImane(iso){
   const ventes = r2(cumul), c = imaneCom(ventes);
   const restes = siens.filter(o => soldeDe(o) > 0.01).map(o => ({o:o, reste:soldeDe(o), ht:partProduitsHT(o, soldeDe(o))}))
     .sort((x, y) => y.reste - x.reste);
-  return {lignes:lignes, ventes:ventes, p1:c.p1, p2:c.p2, com:c.com, total:c.total, restes:restes};
+  return {lignes:lignes, hors:hors, ventes:ventes, p1:c.p1, p2:c.p2, com:c.com, total:c.total, restes:restes};
 }
 /* les cas de contrôle demandés par Noureddine (console : remuTests()) */
 function remuTests(){
@@ -18881,19 +19161,26 @@ function livreLe(o){
   return L.length ? L[L.length - 1].at : 0;
 }
 function remuSoufiane(iso){
-  const lignes = (ORDERS || [])
-    .filter(o => o && o.status === "sent" && o.pose !== "Livraison" && livreLe(o) && moisISO(livreLe(o)) === iso)
-    .sort((a, b) => livreLe(a) - livreLe(b))
-    .map(o => {
-      const p = posePrime(o);
-      return {o:o, p:p, facture: poseFacturee(o), livre:livreLe(o)};
-    })
-    .filter(l => l.p.n > 0);
+  /* v15.18 : tous les bons livrés du mois ; ceux qui ne comptent pas vont dans « hors » avec la raison */
+  const lignes = [], hors = [];
+  (ORDERS || []).filter(o => o && o.status === "sent" && livreLe(o) && moisISO(livreLe(o)) === iso)
+    .sort((a, b) => livreLe(a) - livreLe(b)).forEach(o => {
+      const k = "S|" + o.id, v = rmxV(k);
+      let p = posePrime(o);
+      const L = {o:o, k:k, facture: poseFacturee(o), livre:livreLe(o), x:RMX[k]};
+      if (!(p.n > 0)){ L.p = p; L.pourquoi = "aucune fenêtre sur le bon"; L.peut = false; hors.push(L); return; }
+      if (o.pose === "Livraison" && v === "in")
+        p = p.n > REMU.seuilFen ? {n:p.n, montant:p.n * REMU.parFenetre, mode:"societe", hors:false} : {n:p.n, montant:poseFacturee(o), mode:"client", hors:false};
+      L.p = p;
+      if (o.pose === "Livraison" && v !== "in"){ L.pourquoi = "livraison sans pose"; L.peut = true; hors.push(L); return; }
+      if (v === "out"){ L.pourquoi = "retiré par Noureddine" + (RMX[k].raison ? " : « " + RMX[k].raison + " »" : ""); L.peut = true; hors.push(L); return; }
+      L.ajoute = v === "in"; lignes.push(L);
+    });
   const client  = lignes.filter(l => l.p.mode === "client").reduce((t,l) => t + l.p.montant, 0);
   const societe = lignes.filter(l => l.p.mode === "societe").reduce((t,l) => t + l.p.montant, 0);
   const fenetres = lignes.reduce((t,l) => t + l.p.n, 0);
   /* v14.40 : à partir de 4 fenêtres, 40 MAD par fenêtre posée, comptés automatiquement */
-  return {lignes:lignes, client:client, societe:societe, prime: client + societe,
+  return {lignes:lignes, hors:hors, client:client, societe:societe, prime: client + societe,
           fenetres:fenetres, total: REMU.soufBase + client + societe};
 }
 
@@ -18924,6 +19211,11 @@ function renderRemu(){
   /* --- Imane (v14.40) --- */
   const pc = Math.min(100, I.ventes / REMU.imaneSeuil * 100);
   const jj = d => String(d || "").split("-").reverse().join("/");
+  const nou = fflEstNou();   /* v15.18 : seul Noureddine retire / ajoute */
+  /* v15.21 : une case à cocher : cochée = compté, décochée = pas compté */
+  const bt = (k, v, lab) => { if (!nou) return ''; const on = v === "out" || lab.indexOf("Retirer") >= 0;
+    return '<label class="rmck"><input type="checkbox" data-rmk="' + esc(k) + '" data-rmv="' + v + '"' + (on ? ' checked' : '') + '> ' + (on ? 'Compté' : 'Pas compté') + '</label>'; };
+  const note = x => x && x.v === "in" ? '  ·  <b style="color:#16A34A">ajouté par Noureddine' + (x.raison ? " : « " + esc(x.raison) + " »" : "") + '</b>' : '';
   let ci = r("Ventes HT encaissées du mois", fr(I.ventes, 2)) +
     '<div class="rmbar"><i style="width:' + pc.toFixed(1) + '%"></i></div>' +
     '<div class="rmbarlab">' + (I.ventes >= REMU.imaneSeuil
@@ -18939,9 +19231,18 @@ function renderRemu(){
         '<span class="n">' + jj(l.date) + '  ·  ' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") + '</span>' +
         '<span class="v">' + fr(l.com, 2) + '</span>' +
         '<span class="s">Encaissé ' + fr(l.montant, 2) + (facture(l.o) ? " TTC" : " HT") + '  ·  part produits HT ' + fr(l.ht, 2) +
-          (l.recu ? "" : '  ·  <b class="rmwarn">à confirmer</b>') + '</span>' +
+          (l.recu ? "" : '  ·  <b class="rmwarn">à confirmer</b>') + note(l.x) + '</span>' +
+        (l.ajoute ? bt(l.k, "", "↩ Retirer l'ajout") : bt(l.k, "out", "✖ Ne pas compter")) +
       '</div>').join("")
     : '<div class="rmvide">Aucun paiement encaissé ce mois-ci sur ses commandes.</div>';
+  ci += '<details class="rmhors"' + (RMX_OPEN.I ? ' open' : '') + ' ontoggle="RMX_OPEN.I=this.open"><summary>🔍 Encaissements non comptés ce mois · ' + I.hors.length + '</summary>' +
+    (I.hors.length ? I.hors.map(l =>
+      '<div class="rmline rmx">' +
+        '<span class="n">' + jj(l.date) + '  ·  ' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") + '</span>' +
+        '<span class="v nul">' + fr(l.montant, 2) + '</span>' +
+        '<span class="s"><b class="rmwarn">' + esc(l.pourquoi) + '</b>  ·  part produits HT ' + fr(l.ht, 2) + '</span>' +
+        (l.peut ? (l.x && l.x.v === "out" ? bt(l.k, "", "↩ Recompter") : bt(l.k, "in", "➕ Compter pour Imane")) : '') +
+      '</div>').join("") : '<div class="rmvide">Tout l\'argent encaissé ce mois compte pour Imane.</div>') + '</details>';
   ci += '<div class="rmsub">Reste à payer sur ses commandes · ' + I.restes.length + ' bon' + (I.restes.length > 1 ? "s" : "") + ' à relancer</div>';
   ci += I.restes.length ? I.restes.map(x =>
       '<div class="rmline">' +
@@ -18969,10 +19270,20 @@ function renderRemu(){
             ? l.p.n + " × " + REMU.parFenetre + " MAD, compté automatiquement"
             : (l.p.montant > 0.01
                 ? "prix de pose du bon, encaissé du client"
-                : '<b class="rmwarn">aucun prix de pose sur le bon</b>')) +
+                : '<b class="rmwarn">aucun prix de pose sur le bon</b>')) + note(l.x) +
         '</span>' +
+        (l.ajoute ? bt(l.k, "", "↩ Retirer l'ajout") : bt(l.k, "out", "✖ Ne pas compter")) +
       '</div>').join("")
     : '<div class="rmvide">Aucune pose ce mois ci.</div>';
+  cs += '<details class="rmhors"' + (RMX_OPEN.S ? ' open' : '') + ' ontoggle="RMX_OPEN.S=this.open"><summary>🔍 Bons livrés non comptés pour la pose · ' + S2.hors.length + '</summary>' +
+    (S2.hors.length ? S2.hors.map(l =>
+      '<div class="rmline rmx">' +
+        '<span class="n">' + esc(l.o.num || "") + '  ·  ' + esc(l.o.nom || "Client sans nom") +
+          '  ·  livré le ' + pad(new Date(l.livre).getDate()) + '/' + pad(new Date(l.livre).getMonth() + 1) + '</span>' +
+        '<span class="v nul">' + fr(l.p.montant || 0, 2) + '</span>' +
+        '<span class="s"><b class="rmwarn">' + esc(l.pourquoi) + '</b>  ·  ' + (l.p.n || 0) + ' fenêtre' + ((l.p.n || 0) > 1 ? "s" : "") + '</span>' +
+        (l.peut ? (l.x && l.x.v === "out" ? bt(l.k, "", "↩ Recompter") : bt(l.k, "in", "➕ Compter pour Soufiane")) : '') +
+      '</div>').join("") : '<div class="rmvide">Toutes les livraisons du mois comptent.</div>') + '</details>';
 
   $("remuBody").innerHTML =
     carte("I", "Imane", "Prise de commandes  ·  payée hors société", I.total, ci) +
@@ -18998,12 +19309,17 @@ $("remuMois").addEventListener("change", e => {
   renderRemu();
 });
 $("remuNow").addEventListener("click", () => { remuMois = moisISO(new Date()); renderRemu(); });
+var RMX_OPEN = {};
+$("remuBody").addEventListener("click", e => {
+  const b = e.target.closest("input[data-rmk]"); if (!b || !fflEstNou()) return;
+  rmxSet(b.dataset.rmk, b.dataset.rmv);
+});
 
 $("tileRemu").addEventListener("click", () => {
   if (!adminAllowed()) return;
   renderRemu();
   nav("remuSheet");
-  pullBons().then(() => renderRemu());
+  Promise.all([pullBons(), pullRmx()]).then(() => renderRemu());
 });
 
 /* ============ Logs : journal de fabrication ============ */
@@ -23200,10 +23516,11 @@ function hrmKind(p){
 }
 function hrmVer(p){ return (p.v || 1) > 1 ? '<span class="hmk ver">modifiée ' + ((p.v || 1) - 1) + ' fois</span>' : ''; }
 function hrmImpact(v){ const n = typeof v === "number" ? v : NaN; return isFinite(n) ? frm(n, 0) + " DH" : String(v || ""); }
-function hrmTitre(x){ return x.kind === "decision" || x.kind === "avis" ? (x.titre || x.ref || "") : (x.numFinal || x.num || "") + " · " + (x.nom || ""); }
+function hrmTitre(x){ return hrmAvecTel(x.kind === "decision" || x.kind === "avis" ? (x.titre || x.ref || "") : (x.numFinal || x.num || "") + " · " + (x.nom || "")); }
 function hrmStatut(p){
   const L = {confirmee:"confirmée", refusee:"refusée", refaire:"à refaire", annulee:"annulée par Hermes"};
   if (hrmAFaire(p)) return '<span class="hmk avo">à faire</span>';
+  if (p.statut === "reglee" || p.faitPar === "hermes") return '<span class="hmk regl">✅ réglé · vérifié par Hermes ' + hrmIl(p.regleAt || p.decideAt) + '</span>';   /* v15.10 */
   if (p.statut === "confirmee" && p.fait) return '<span class="hmk st">fait ' + hrmIl(p.fait) + '</span>';
   return p.statut === "attente" ? "" : '<span class="hmk st">' + (L[p.statut] || p.statut) +
     (p.decideAt ? " " + hrmIl(p.decideAt) : "") + (p.restaure ? " · ancienne version remise" : "") + '</span>';
@@ -23368,18 +23685,20 @@ function renderHrm(){
   const att = hrmAttente().filter(cat), afa = HRM.liste.filter(x => cat(x) && hrmAFaire(x)),
         rfa = HRM.liste.filter(x => cat(x) && x.statut === "refaire"),
         conf = HRM.liste.filter(x => cat(x) && x.statut === "confirmee"),
-        ref = HRM.liste.filter(x => cat(x) && (x.statut === "refusee" || x.statut === "annulee"));
-  const L = (HRM_TAB === "confirmee" ? conf : HRM_TAB === "refusee" ? ref : HRM_TAB === "refaire" ? rfa : HRM_TAB === "afaire" ? afa : att)
+        ref = HRM.liste.filter(x => cat(x) && (x.statut === "refusee" || x.statut === "annulee")),
+        reg = HRM.liste.filter(x => cat(x) && (x.statut === "reglee" || (x.faitPar === "hermes" && x.regleAt > Date.now() - 7 * 86400000)));   /* v15.10 */
+  const L = (HRM_TAB === "reglee" ? reg : HRM_TAB === "confirmee" ? conf : HRM_TAB === "refusee" ? ref : HRM_TAB === "refaire" ? rfa : HRM_TAB === "afaire" ? afa : att)
     .slice().sort((a, b) => (b.maj || 0) - (a.maj || 0));
   const tab = (k, lab, n) => '<button type="button" data-hmtab="' + k + '" aria-pressed="' + (HRM_TAB === k) + '">' + lab + ' ' + n + '</button>';
   body.innerHTML = h +
-    '<div class="hmtabs">' + tab("attente", "À valider", att.length) + tab("refaire", "À refaire", rfa.length) + tab("afaire", "À faire", afa.length) +
+    '<div class="hmtabs">' + tab("attente", "À valider", att.length) + tab("refaire", "À refaire", rfa.length) + tab("afaire", "À faire", afa.length) + tab("reglee", "✅ Réglés", reg.length) +
       tab("confirmee", "Confirmées", conf.length) + tab("refusee", "Refusées", ref.length) + '</div>' +
     (L.length ? L.map(x => '<button type="button" class="hmc" data-hmopen="' + esc(x.id) + '">' + hrmKind(x) + hrmStatut(x) +
         (x.urgence === "auj" && x.statut === "attente" ? '<span class="hmk urg">urgent</span>' : '') +
         '<small style="display:inline">' + hrmIl(x.at) + '</small><br>' +
         '<b>' + esc(hrmTitre(x)) + '</b>' +
-        '<small>' + esc(hrmResume(x)) + '</small>' + hrmCarteAlerte(x) +
+        '<small>' + esc(hrmAvecTel(hrmResume(x))) + '</small>' + hrmCarteAlerte(x) +
+        (x.preuve ? '<small class="hmpreuve">✅ Preuve vue par Hermes : ' + esc(String(x.preuve).slice(0, 200)) + '</small>' : '') +
         (x.note ? '<small>💬 ' + esc(String(x.note).slice(0, 140)) + '</small>' : '') +
         (x.raison ? '<small>Raison de Noureddine : ' + esc(String(x.raison).slice(0, 140)) + '</small>' : '') +
         (x.corr && x.corr.length ? '<small>✏️ Corrigé par Noureddine : ' + esc(hrmCorrTxt(x)) + '</small>' : '') +
@@ -23389,17 +23708,94 @@ function renderHrm(){
 }
 /* ---------- v15.05 : rapport du directeur, tuiles, ajouts d'Hermes ---------- */
 function hrmJour(iso){ const a = jourISO(new Date()); return iso === a ? "aujourd'hui" : iso === jourISO(new Date(Date.now() - 86400000)) ? "hier" : "le " + depDateFr(iso); }
+/* v15.15 : le téléphone du client devant chaque numéro de bon, et correction sur place */
+var HRM_BCED = "";
+const HRM_BCRE = /\b(BC-\d{4}-\d{2,4}|BA-\d{4}-\d{2,4}|D\d{7})\b/g;
+function hrmBcOrd(num){ const n = String(num || "").toUpperCase(); return (ORDERS || []).find(o => o && !o.sup && String(o.num || "").toUpperCase() === n) || null; }
+function hrmBcTel(o){ return o && o.tel ? String(o.tel).replace(/[\s.\-]/g, "") : ""; }
+/* texte simple : « 0661400036 - BC-2026-056 » */
+function hrmAvecTel(t){
+  t = String(t || "");
+  return t.replace(HRM_BCRE, (m, num, i) => { const o = hrmBcOrd(num), tel = hrmBcTel(o);
+    return tel && t.slice(Math.max(0, i - 18), i).replace(/\D/g, "").indexOf(waNum(o.tel).slice(-8)) < 0 ? tel + " - " + num : num; });
+}
+/* html : le numéro devient une pastille cliquable (corriger nom et téléphone) */
+function hrmBcHtml(l){
+  let ed = "";
+  const h = esc(l).replace(HRM_BCRE, (m, num) => { const o = hrmBcOrd(num); if (!o) return m;
+    if (HRM_BCED === num) ed = hrmBcEditeur(o);
+    return '<button type="button" class="hmbc" data-hmbc="' + esc(num) + '">' + (hrmBcTel(o) ? esc(hrmBcTel(o)) + ' - ' : '📞 ? - ') + esc(num) + ' ✏️</button>'; });
+  return h + ed;
+}
+function hrmBcEditeur(o){
+  return '<div class="hmbced"><b style="font-size:12.5px">Corriger ' + esc(o.num) + ' (le vrai bon)</b>' +
+    '<label>Nom du client<input id="hmbcNom" value="' + esc(o.nom || "") + '"></label>' +
+    '<label>Téléphone<input id="hmbcTel" inputmode="tel" value="' + esc(o.tel || "") + '"></label>' +
+    '<div class="r"><button type="button" class="primary" data-hmbcsave="' + esc(o.num) + '">Enregistrer</button><button type="button" data-hmbcx="1">Fermer</button></div></div>';
+}
+function hrmBcSave(num){
+  const cur = hrmBcOrd(num); if (!cur) return;
+  const nom = ($("hmbcNom").value || "").trim(), tel = ($("hmbcTel").value || "").trim();
+  if (nom === (cur.nom || "") && tel === (cur.tel || "")){ HRM_BCED = ""; renderHrm(); return; }
+  const rec = JSON.parse(JSON.stringify(cur)), qui = (USER && USER.login) || "";
+  const ch = [];
+  if (nom !== (cur.nom || "")) ch.push({lab:"Client", av:cur.nom || "", ap:nom});
+  if (tel !== (cur.tel || "")) ch.push({lab:"Téléphone", av:cur.tel || "", ap:tel});
+  rec.nom = nom; rec.tel = tel;
+  if (!Array.isArray(rec.log)) rec.log = [];
+  rec.log.push({kind:"edit", at:Date.now(), by:qui, on:true, k:"edit:" + Date.now(), champs:[{lab:"Espace Hermes", av:"", ap:"corrigé par " + nomDe(qui)}].concat(ch)});
+  setOrder(rec); persistOrders(); pushBon(rec);
+  HRM_BCED = ""; renderHrm(); toast(num + " corrigé");
+}
+/* v15.16 : une idée par ligne : on coupe aux « . » suivis d'une majuscule et aux « ; » */
+var HRM_SECOPEN = {};
+function hrmMorceaux(t){
+  t = String(t || ""); const out = []; let d = 0, cur = "";   /* jamais à l'intérieur d'une parenthèse */
+  for (let i = 0; i < t.length; i++){
+    const c = t[i]; if (c === "(") d++; else if (c === ")") d = Math.max(0, d - 1);
+    if (!d && (c === ";" || (c === "—" && t[i - 1] === " ") || (/[.!?]/.test(c) && t[i + 1] === " " && /[A-ZÀ-ÝÉ]/.test(t[i + 2] || "")))){
+      if (/[.!?]/.test(c)) cur += c; out.push(cur); cur = ""; continue; }
+    cur += c;
+  }
+  out.push(cur);
+  return out.map(x => x.trim()).filter(Boolean);
+}
+function hrmMorceauHtml(m, ligne){
+  const k = m.match(/^([A-ZÀ-ÝÉ][^:]{1,28}?)\s:\s+(.*)$/);   /* « Stock : … » → étiquette en gras */
+  return k && k[1].split(" ").length <= 4 ? '<span class="hmlab">' + esc(k[1]) + '</span>' + ligne(k[2]) : ligne(m);
+}
 function hrmRapportCorps(r){
-  const sec = (t, v) => v ? '<div class="hms"><b>' + t + '</b>' + esc(v) + '</div>' : '';
-  return sec("Situation", r.situation) + sec("Mes 3 décisions clés", r.decisions) + sec("Risques", r.risques) + sec("Ce que j'attends de toi", r.attentes);
+  const F = (r.faits || []).filter(f => f && f.t);
+  const items = v => String(v || "").split("\n").map(x => x.replace(/^\s*(?:[•\-*–]|\d+[.)])\s*/, "").trim()).filter(Boolean);
+  const ligne = l => { const f = F.find(x => l.toUpperCase().indexOf(hrmCle(x.t).toUpperCase()) >= 0);
+    return f ? '<span class="hmregl"><s>' + esc(hrmAvecTel(l)) + '</s> <em>✅ réglé · vérifié par Hermes ' + hrmIl(f.at) + ' : ' + esc(f.preuve) + '</em></span>' : hrmBcHtml(l); };
+  const bloc = (ico, t, c, n, apercu, corps) => '<details class="hmsec" style="--c:' + c + '" data-k="' + esc(t) + '"' + (HRM_SECOPEN[t] ? ' open' : '') +
+      ' ontoggle="HRM_SECOPEN[this.dataset.k]=this.open"><summary><b>' + ico + ' ' + t + '<i>' + n + '</i></b><small>' + esc(hrmAvecTel(apercu)) + '</small></summary>' + corps + '</details>';
+  const sec = (ico, t, v, c, num) => {
+    const L = items(v); if (!L.length) return '';
+    let corps, n;
+    if (num){
+      n = L.length;
+      corps = L.map((l, i) => '<div class="hmit"><span class="n">' + (i + 1) + '</span><div>' +
+        hrmMorceaux(l).map(m => '<div class="hmsub">' + hrmMorceauHtml(m, ligne) + '</div>').join("") + '</div></div>').join("");
+    } else {
+      const M = [].concat.apply([], L.map(hrmMorceaux)); n = M.length;
+      corps = M.map(m => '<div class="hmit"><span class="n" style="background:none;color:var(--c)">•</span><div>' + hrmMorceauHtml(m, ligne) + '</div></div>').join("");
+    }
+    return bloc(ico, t, c, n, hrmMorceaux(L[0])[0] || "", corps);
+  };
+  return (F.length ? bloc("✅", "Déjà réglé (vérifié par Hermes)", "#16A34A", F.length, F[0].t,
+      F.map(f => '<div class="hmit"><span class="n" style="background:none;color:#16A34A">✓</span><div><s>' + esc(hrmAvecTel(f.t)) + '</s><br><small class="hmmut">' + esc(f.preuve) + '</small></div></div>').join("")) : '') +
+    sec("📊", "Situation", r.situation, "#2563EB", false) + sec("🎯", "Mes décisions clés", r.decisions, "#7C3AED", true) +
+    sec("⚠️", "Risques", r.risques, "#DC2626", false) + sec("👉", "Ce que j'attends de toi", r.attentes, "#D97706", true);
 }
 function hrmRapportHtml(){
   const R = (HRM.rapports || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
   const r = R[0];
   if (!r) return '<div class="hmrap"><h3>📋 Rapport du directeur</h3><span class="hmmut">Pas encore de rapport. Hermes l\'écrit chaque matin à 10 h.</span></div>';
   const vieux = r.date !== jourISO(new Date());
-  return '<div class="hmrap"><h3>📋 Rapport du directeur · ' + hrmJour(r.date) + '</h3>' +
-    (vieux ? '<span class="hmrouge2" style="font-size:12.5px">Pas de rapport aujourd\'hui : voici le dernier.</span>' : '<span class="hmmut">écrit ' + hrmIl(r.at || r.maj) + '</span>') +
+  return '<div class="hmrap"><div class="hmrh"><h3>📋 Rapport du directeur</h3><span class="hmpill">' + hrmJour(r.date) + ' · ' + hrmIl(r.at || r.maj) + '</span></div>' +
+    (vieux ? '<span class="hmrouge2" style="font-size:12.5px">Pas de rapport aujourd\'hui : voici le dernier.</span>' : '') +
     hrmRapportCorps(r) + '</div>';
 }
 function hrmRapportsHtml(){
@@ -23544,6 +23940,34 @@ function hrmAjouteRapport(raw){
   HRM.rapports = (HRM.rapports || []).filter(x => x && x.id !== r.id).concat([r]);
   return {r:r};
 }
+/* v15.10 : Hermes revérifie ses remarques. Si c'est déjà fait dans l'app, il le marque réglé avec la preuve.
+   {id ou sujet} = une carte ; {texte} = une ligne de son rapport. Noureddine voit « ✅ réglé · vérifié par Hermes ». */
+function hrmRegle(raw){
+  if (!raw || typeof raw !== "object") return {err:"illisible"};
+  const preuve = hrmTxt(raw.preuve, 400);
+  if (!preuve) return {err:"il manque « preuve » (ce que tu as vu dans l'app : qui, quoi, quand)"};
+  const now = Date.now();
+  let p = raw.id ? hrmTrouve(String(raw.id)) : null;
+  if (!p && raw.sujet) p = HRM.liste.find(x => x && x.sujet === String(raw.sujet) && (x.statut === "attente" || x.statut === "refaire" || hrmAFaire(x))) || null;
+  if (p){
+    if (p.statut === "attente" || p.statut === "refaire"){ p.statut = "reglee"; p.decideAt = now; p.par = "hermes"; }
+    else if (hrmAFaire(p)){ p.fait = now; p.faitPar = "hermes"; }
+    else return {err:"cette carte est déjà décidée"};
+    p.preuve = preuve; p.regleAt = now; p.maj = now;
+    return {t:hrmTitre(p) || "carte"};
+  }
+  if (raw.id || raw.sujet) return {err:"carte introuvable (" + (raw.id || raw.sujet) + ")"};
+  const t = hrmTxt(raw.texte || raw.ligne, 300);
+  if (!t) return {err:"il manque « id », « sujet » ou « texte »"};
+  const R = (HRM.rapports || []).slice().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const r = R.find(x => [x.situation, x.risques, x.attentes, x.decisions].join("\n").indexOf(hrmCle(t)) >= 0) || R[0];
+  if (!r) return {err:"aucun rapport où mettre ce point"};
+  r.faits = (r.faits || []).filter(f => f && hrmCle(f.t) !== hrmCle(t)).concat([{t:t, preuve:preuve, at:now}]);
+  r.maj = now;
+  return {t:t};
+}
+/* la clé d'une ligne : le n° de bon s'il y en a un, sinon le début du texte */
+function hrmCle(t){ const m = String(t || "").match(/\b(BC-\d{4}-\d+|D\d{7}|BA-\d{4}-\d+)\b/i); return m ? m[1].toUpperCase() : String(t || "").trim().slice(0, 40); }
 function hclAjoute(raw){
   if (!raw || typeof raw !== "object") return {err:"fiche illisible"};
   const k = hclK(raw.tel || raw.telephone);
@@ -23581,6 +24005,11 @@ function hrmLot(txt){
     const v = hclAjoute(x);
     if (v.err){ ko.push("client " + (i + 1) + " : " + v.err); return; }
     hcl = true; ok.push("fiche " + (v.c.nom || v.c.tel));
+  });
+  (Array.isArray(j.faits) ? j.faits : []).forEach((x, i) => {   /* v15.10 */
+    const r = hrmRegle(x);
+    if (r.err){ ko.push("fait " + (i + 1) + " : " + r.err); return; }
+    hrm = true; ok.push("réglé « " + r.t.slice(0, 50) + " »");
   });
   if (hrm) hrmSave();
   if (hcl) hclSave();
@@ -23776,6 +24205,9 @@ $("hmBody").addEventListener("click", e => {
   const ds = t.dataset;
   if (ds.hmtab){ HRM_TAB = ds.hmtab; renderHrm(); return; }
   if (ds.hmopen){ hrmOuvrir(ds.hmopen); return; }
+  if (ds.hmbc){ HRM_BCED = HRM_BCED === ds.hmbc ? "" : ds.hmbc; renderHrm(); setTimeout(() => { try { $("hmbcTel").focus(); } catch(err){} }, 50); return; }
+  if (ds.hmbcsave){ hrmBcSave(ds.hmbcsave); return; }
+  if (ds.hmbcx){ HRM_BCED = ""; renderHrm(); return; }
   if (ds.hmtemp !== undefined){ HCL_TEMP = ds.hmtemp; renderHrm(); return; }          /* v15.05 */
   if (!hrmAllowed()) return;
   if (ds.hmcat !== undefined){ HRM_VUE = "cartes"; HRM_CAT = ds.hmcat; renderHrm(); return; }
@@ -24558,7 +24990,8 @@ function nouCalc(){
    Les relances, chèques, devis et saisies restent dans À faire : Noureddine ne les répète plus. */
 var NOU_GRP = {ach:"🛒 Achats", ch:"✂️ Charges et marges", arg:"💰 Argent"};
 var NOU_IMP = {lead:149, secu:45, px:40.29, fixe:22060, porte:0.20, roul:104};  /* import Turquie (import n°1) */
-var NOU_LOC = {lead:7, secu:15, cover:60};                                     /* achats au Maroc */
+var NOU_LOC = {lead:7, secu:15, cover:60};
+var NOU_MIN_CMD = 3;   /* v15.13 (Nou, 25/11/2026) : un tissu s'achète s'il est sorti dans au moins 3 commandes différentes en 6 mois */                                     /* achats au Maroc */
 function nouTurquie(ref){ return /SOFT/i.test(String(ref || "")); }
 /* ce qu'un bon consomme : pièces (code du stock, ml ou u) et tissu (m²) */
 function nouConsoBon(o){
@@ -24605,13 +25038,13 @@ function nouArrondi(q, it){
 function nouAchats(N){
   const auj = N.auj, J = 730;
   /* 1. combien chaque article consomme pour 10 000 DH vendus (bons des 6 derniers mois) */
-  const lim = nouPlus(auj, -180), tot = {};
+  const lim = nouPlus(auj, -180), tot = {}, nbB = {}, moisB = {};
   let ht = 0, n = 0;
   nouVendus().forEach(o => {
     const j = nouVenteJour(o), h = htDe(o);
     if (!j || j < lim || !(h > 0)) return;
     const c = nouConsoBon(o); if (!Object.keys(c).length) return;
-    ht += h; n++; Object.keys(c).forEach(k => tot[k] = (tot[k] || 0) + c[k]);
+    ht += h; n++; Object.keys(c).forEach(k => { tot[k] = (tot[k] || 0) + c[k]; nbB[k] = (nbB[k] || 0) + 1; (moisB[k] = moisB[k] || {})[String(j).slice(0, 7)] = 1; });
   });
   if (n < 5 || !(ht > 0)) return {items:[], n:n};
   /* 2. ventes HT prévues jour par jour (scénario normal), plus les devis selon leurs chances */
@@ -24643,6 +25076,7 @@ function nouAchats(N){
     const r = (tot[it.k] || 0) / ht;                 /* par DH vendu */
     if (!(r > 0)) return;
     const enCmd = it.t ? (cmd[it.k] || 0) * (it.jn ? it.lz : 1) : (cmd[it.k] || 0);
+    it.nb = nbB[it.k] || 0; it.nbMois = Object.keys(moisB[it.k] || {}).length;   /* v15.13 : commandes différentes, mois différents */
     it.r = r; it.res = res[it.k] || 0; it.dv = dv[it.k] || 0; it.cmd = enCmd;
     it.dispo = it.stock + enCmd - it.res - it.dv;    /* ce qui reste pour les nouvelles ventes */
     it.mois = r * (N.attendu(N.ym) || N.base);       /* consommation d'un mois normal */
@@ -24661,7 +25095,7 @@ function nouAchats(N){
 }
 /* import Turquie : quantité économique (frais fixes ≈ 22 000 DH par envoi contre le coût de garder du stock) */
 function nouImport(A){
-  const T = A.items.filter(x => x.tr && x.t);
+  const T = A.items.filter(x => x.tr && x.t && x.nb >= NOU_MIN_CMD);   /* v15.13 : seulement les tissus demandés régulièrement */
   if (!T.length) return null;
   const an = T.reduce((t, x) => t + x.r * A.venteJusqua(365) / x.lz, 0);      /* ml par an */
   if (!(an > 0)) return null;
@@ -24780,7 +25214,15 @@ function nouDecisions(N){
   /* 🛒 achats : les plus urgents d'abord, dans la limite de la trésorerie */
   const A = N.A, I = N.I;
   let libre = (N.E ? P.low.v : N.start) - N.reserve;
-  A.items.filter(x => !x.tr && x.q > 0 && x.cmdAvant <= 21).sort((a, b) => a.cmdAvant - b.cmdAvant).forEach(x => {
+  /* v15.13 : le tissu se décide d'abord sur le nombre de commandes, pas sur la quantité */
+  const cand = A.items.filter(x => !x.tr && x.q > 0 && x.cmdAvant <= 21);
+  cand.filter(x => x.t && x.nb < NOU_MIN_CMD && x.res <= x.stock).forEach(x => {
+    add({g:"ach", p:6, k:"surv:" + x.ref + ":" + auj.slice(0, 7), ico:"👀",
+      t:"À surveiller : " + x.ref + " · utilisé dans " + x.nb + " seule" + (x.nb > 1 ? "s commandes" : " commande") + " en 6 mois",
+      d:"Le calcul voyait une rupture, mais c'est surtout " + (x.nb > 1 ? "quelques grosses commandes" : "une grosse commande") + ". Pas d'achat tant qu'il n'est pas sorti dans au moins " + NOU_MIN_CMD + " commandes différentes."});
+  });
+  cand.filter(x => !x.t || x.nb >= NOU_MIN_CMD || x.res > x.stock)
+    .sort((a, b) => (b.t ? b.nb : 0) - (a.t ? a.nb : 0) || a.cmdAvant - b.cmdAvant).forEach(x => {
     const cle = "achat:" + x.ref + ":" + auj.slice(0, 7), mo = nouMod(cle);
     /* v14.97 : le tissu s'achète par rouleau entier de 90 m² (Nou, 10/11/2026) : on arrondit au rouleau supérieur */
     const qm2 = x.t ? Math.max(1, Math.ceil(x.q / NOU_ROULEAU_M2 - 1e-9)) * NOU_ROULEAU_M2 : x.q, nbRoul = x.t ? qm2 / NOU_ROULEAU_M2 : 0;
@@ -24799,6 +25241,7 @@ function nouDecisions(N){
         (x.t && qAff === q0 ? " (" + nbRoul + " rouleau" + (nbRoul > 1 ? "x" : "") + " de " + NOU_ROULEAU_M2 + " m²)" : "") + " de " + nom + (urg ? " maintenant" : " avant le " + dd(nouPlus(auj, Math.max(0, x.cmdAvant)))),
       d:"Stock " + frm(x.t && x.jn ? x.stock / x.lz : x.stock, 1) + " " + u + (x.res > 0 ? ", dont " + frm(x.t && x.jn ? x.res / x.lz : x.res, 1) + " pour des bons confirmés" : "") +
         (x.cmd > 0 ? ", " + frm(x.t && x.jn ? x.cmd / x.lz : x.cmd, 1) + " déjà commandés" : "") +
+        (x.t ? ". Utilisé dans " + x.nb + " commande" + (x.nb > 1 ? "s" : "") + " sur " + x.nbMois + " mois différent" + (x.nbMois > 1 ? "s" : "") + " (6 derniers mois)" : "") +
         ". Tu en utilises ≈ " + frm(x.t && x.jn ? x.mois / x.lz : x.mois, 1) + " " + u + " par mois : " + etat + (x.dv > 0 ? " (devis en cours comptés selon leurs chances)" : "") +
         ". " + (qAff !== q0 ? "Ta quantité (le calcul proposait " + frm(q0, 0) + " " + u + ")" : x.t ? "Couvre au moins 2 mois, arrondi au rouleau entier de " + NOU_ROULEAU_M2 + " m²" : "Couvre 2 mois") + " ≈ " + frm(ttc, 0) + " DH TTC. " + (passe ? "✅ La trésorerie le permet (scénario prudent, réserve gardée)." :
         "⏳ Trésorerie juste : achète seulement ce qui bloque des bons confirmés, le reste au plus tard le " + dd(nouPlus(auj, Math.max(0, x.rup - x.lead))) + "."),
